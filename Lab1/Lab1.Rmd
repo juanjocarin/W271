@@ -25,23 +25,101 @@ header-includes:
 
 ## Question 1
 
-In a team of data scientists, 36 are expert in machine learning, 28 are expert in statistics, and 18 are awesome. 22 are expert in both machine learning and statistics, 12 are expert in machine learning and are awesome, 9 are expert in statistics and are awesome , and 48 are expert in either machine learning or statistics or are awesome. Suppose you are in a cocktail party with this group of data scientists and you have an equal probability of meeting any one of them.
+**In a team of data scientists, 36 are expert in machine learning, 28 are expert in statistics, and 18 are awesome. 22 are expert in both machine learning and statistics, 12 are expert in machine learning and are awesome, 9 are expert in statistics and are awesome, and 48 are expert in either machine learning or statistics or are awesome. Suppose you are in a cocktail party with this group of data scientists and you have an equal probability of meeting any one of them.**
 
-1. What is the probability of meeting a data scientist who is an expert in both machine learning and statistics and is awesome?
+### 1. What is the probability of meeting a data scientist who is an expert in both machine learning and statistics and is awesome?
 
-2. Suppose you meet a data scientist who is an expert in machine learning. Given this information, what is the probability that s/he is not awesome?
+Let $N$ be the size of the team of data scientists (i.e., the sample size), and $M, S, A$ the event that a data scientist is either a machine learning expert, a statistics expert, or awesome.
 
-3. Suppose the you meet a data scientist who is awesome. Given this information, what is the probability that s/he is an expert in either machine learning or statistics?
+$\mathbf{\textcolor{red}{\Pr(M \cap S \cap A)}} = \Pr(M) + \Pr(S \cap A) - \Pr(M \cup (S \cap A))$
+
+$\ \ \ \ \ \ = \Pr(M) + \Pr(S \cap A) - \Pr((M \cup S) \cap (M \cup A))$
+
+$\ \ \ \ \ \ = \Pr(M) + \Pr(S \cap A) - ((\Pr(M \cup S) + \Pr(M \cup A) - \Pr((M \cup S) \cup (M \cup A))))$
+
+$\ \ \ \ \ \ = \Pr(M) + \Pr(S \cap A) - (\Pr(M) - \Pr(S) + \Pr(M \cap S)) - (\Pr(M) - \Pr(A) + \Pr(M \cap A)) + \Pr(M \cup S \cup A)$
+
+$\ \ \ \ \ \ = \Pr(M \cap S) + \Pr(M \cap A) + \Pr(M \cap A) - \Pr(M) - \Pr(S) - \Pr(A) + \Pr(M \cup S \cup A)$
+
+$\ \ \ \ \ \ = \cfrac{22}{N} + \cfrac{12}{N} + \cfrac{9}{N} - \cfrac{36}{N} - \cfrac{28}{N} - \cfrac{18}{N} + \cfrac{48}{N}  = \cfrac{(22+12+9)-(36-28-18)+48}{N} = \cfrac{43-82+48}{N}$
+
+$\ \ \ \ \ \ = \mathbf{\textcolor{red}{\cfrac{9}{N}}}$
+
+### 2. Suppose you meet a data scientist who is an expert in machine learning. Given this information, what is the probability that s/he is not awesome?
+
+$\mathbf{\textcolor{red}{\Pr(A^c|M)}} = 1 - \Pr(A|M) = 1 - \cfrac{\Pr(A \cap M)}{\Pr(M)} = 1 - \cfrac{\cfrac{12}{N}}{\cfrac{36}{N}} = 1 - \cfrac{12}{36} = 1 - \cfrac{1}{3} = \mathbf{\textcolor{red}{\cfrac{2}{3} = `r formatC(2/3, format = "f", digits = 4, big.mark=",", drop0trailing = FALSE)`}}$
+
+### 3. Suppose the you meet a data scientist who is awesome. Given this information, what is the probability that s/he is an expert in either machine learning or statistics?
+
+$\mathbf{\textcolor{red}{\Pr(M \cup S | A)}} = \cfrac{\Pr((M \cup S) \cap A)}{\Pr(A)} = \cfrac{\Pr((M \cap A) \cup (S \cap A))}{\Pr(A)}$
+
+$\ \ \ \ \ \ = \cfrac{\Pr(M \cap A) + \Pr(S \cap A) - \Pr((M \cap A) \cap (S \cap A)}{\Pr(S)} = \cfrac{\Pr(M \cap A) + \Pr(S \cap A) - \Pr(M \cap S \cap A)}{\Pr(S)}$
+
+$\ \ \ \ \ \ = \cfrac{\cfrac{12}{N} + \cfrac{9}{N} - \cfrac{9}{N}}{\cfrac{18}{N}} = \cfrac{12+9-9}{18} = \cfrac{12}{18}$
+
+$\ \ \ \ \ \ = \mathbf{\textcolor{red}{\cfrac{2}{3} = `r formatC(2/3, format = "f", digits = 4, big.mark=",", drop0trailing = FALSE)`}}$
 
 
-```{r}
-summary(cars)
-```
+## Question 2
 
-You can also embed plots, for example:
+**Suppose for events $A$ and $B$, $\Pr(A) = p \leq \frac{1}{2}, \Pr(B) = q$, where $\frac{1}{4} < q < \frac{1}{2}$. These are the only information we have about the events.**
 
-```{r, include=TRUE, message = FALSE, warning = FALSE, fig.cap = "Some plot", fig.width = 6, fig.height = 4.5}
+### 1. What are the maximum and minimum possible values for $\Pr(A \cup B)$?
+
+$$\Pr(A \cup B) = \Pr(A) + \Pr(B) - \Pr(A \cap B)$$
+
+The maximum value of $\Pr(A \cup B)$ occurs when $A \cap B$ is the smallest set possible. In this case, since $\Pr(A) \leq \frac{1}{2}$ and $\Pr(B) < \frac{1}{2}$, it would be $A \cap B = \varnothing$ (if $A$ and $B$ were disjoint sets, which might be the case), so:
+
+$\ \ \ \ \ \ \Pr(A \cup B) = \Pr(A) + \Pr(B) - \Pr(A \cap B) = \Pr(A) + \Pr(B) - \Pr(\varnothing) = p + q - 0 = p + q$
+
+which could have a maximum value close to $1$ (i.e., $A \cup B \approx \Omega$), in case $\Pr(A) = \frac{1}{2}$ and $\Pr(B) \approx \frac{1}{2}$.
+
+The minimum value of $\Pr(A \cup B)$ occurs when $A \cup B$ is the largest set possible, $A$ or $B$. In this case, since $\Pr(A)$ does not have a lower bound, that would happen when $A \subseteq B$ and (consequently) $A \cap B = A$, which would lead to:
+
+$\ \ \ \ \ \ \Pr(A \cup B) = \Pr(A) + \Pr(B) - \Pr(A) = \Pr(B) = q$
+
+whose minimum value is greater than $\frac{1}{4}$.
+
+In summary,
+
+$\mathbf{\textcolor{red}{\ \ \ \ \ \ \cfrac{1}{4} < \Pr(A \cup B) < 1}}$
+
+
+### 2. What are the maximum and minimum possible values for $\Pr(A | B)$?
+
+$$\Pr(A|B) = \cfrac{\Pr(A \cap B)}{\Pr(B)}$$
+
+If $B \subseteq A$ (which would imply that the lower bound for $p$ is also $\frac{1}{4})$, then:
+
+$\ \ \ \ \ \ \Pr(A|B) = \cfrac{\Pr(B)}{\Pr(B)} = 1$
+
+As seen in the previous part, since $\Pr(A) \leq \frac{1}{2}$ and $Pr(B) < \frac{1}{2}$, it might occur that $A \cap B = \varnothing$, and hence:
+
+$\ \ \ \ \ \ \Pr(A|B) = \cfrac{\Pr(\varnothing)}{\Pr(B)} = \cfrac{0}{q} = 0$
+
+irrespective of the value of $q$.
+
+In summary,
+
+$\mathbf{\textcolor{red}{\ \ \ \ \ \ 0 \leq \Pr(A | B) \leq 1}}$
+
+
+# Part II: Random Variables, Expectation, Conditional Exp.
+
+## Question 3
+
+**Suppose the life span of a particular server is a continuous random variable, $t$, with a uniform probability distribution between $0$ and $k$ year, where $k \leq 10$ is a positive integer.**
+
+**The server comes with a contract that guarantees a full or partial refund, depending on how long it lasts. Specifically, if the server fails in the first year, it gives a full refund denoted by $\theta$. If it lasts more than $1$ year but fails before $\frac{k}{2}$ years, the manufacturer will pay $x = \$A(k - t)^{1/2}$, where $A$ is some positive constant equal to $2$ if $t \leq \frac{k}{2}$ . If it lasts between $\frac{k}{2}$ and $\frac{3k}{4}$ years, it pays $\frac{\theta}{10}$.**
+
+### 1. Given that the server lasts for $\frac{k}{4}$ years without failing, what is the probability that it will last another year?
+
+### 2. Compute the expected payout from the contract, $E(x)$.
+
+### 3. Compute the variance of the payout from the contract.
+
+
+```{r, include=FALSE, message = FALSE, warning = FALSE, fig.cap = "Some plot", fig.width = 6, fig.height = 4.5}
 plot(cars)
 ```
 
-Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
