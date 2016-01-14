@@ -119,7 +119,9 @@ $\mathbf{\textcolor{red}{\ \ \ \ \ \ 0 \leq \Pr(A | B) \leq 1}}$
 ### 3. Compute the variance of the payout from the contract.
 
 
-```{r, include=FALSE, message = FALSE, warning = FALSE, fig.cap = "Some plot", fig.width = 6, fig.height = 4.5}
+
+```{r, include=TRUE, message = FALSE, warning = FALSE, fig.cap = "Some plot", fig.width = 6, fig.height = 4.5}
 plot(cars)
 ```
+
 
