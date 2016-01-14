@@ -1,0 +1,47 @@
+---
+title: "**W271**-2 -- Spring 2016 -- **Lab 1**"
+author: "***Juanjo Carin, Kevin Davies, Ashley Levato, Minghu Song***"
+date: "*January 14, 2016*"
+output:
+   pdf_document:
+      toc: true
+      fig_caption: yes
+      toc_depth: 6
+numbersections: false
+geometry: margin=1in
+header-includes:
+- \usepackage{fancyhdr}
+- \pagestyle{fancy}
+- \fancyhead[LO,LE]{Carin, Davis, Levato, Song}
+- \fancyfoot[LO,LE]{UC Berkeley -- MIDS -- W271 -- Spring semester 2016}
+- \fancyfoot[CO,CE]{}
+- \fancyfoot[RE,RO]{\thepage}
+- \renewcommand{\headrulewidth}{0.5pt}
+- \renewcommand{\footrulewidth}{0.5pt}
+
+---
+
+# Part I: Marginal, Joint, and Conditional Probabilities
+
+## Question 1
+
+In a team of data scientists, 36 are expert in machine learning, 28 are expert in statistics, and 18 are awesome. 22 are expert in both machine learning and statistics, 12 are expert in machine learning and are awesome, 9 are expert in statistics and are awesome , and 48 are expert in either machine learning or statistics or are awesome. Suppose you are in a cocktail party with this group of data scientists and you have an equal probability of meeting any one of them.
+
+1. What is the probability of meeting a data scientist who is an expert in both machine learning and statistics and is awesome?
+
+2. Suppose you meet a data scientist who is an expert in machine learning. Given this information, what is the probability that s/he is not awesome?
+
+3. Suppose the you meet a data scientist who is awesome. Given this information, what is the probability that s/he is an expert in either machine learning or statistics?
+
+
+```{r}
+summary(cars)
+```
+
+You can also embed plots, for example:
+
+```{r, include=TRUE, message = FALSE, warning = FALSE, fig.cap = "Some plot", fig.width = 6, fig.height = 4.5}
+plot(cars)
+```
+
+Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
