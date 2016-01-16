@@ -9,6 +9,7 @@ output:
       toc_depth: 2
 numbersections: false
 geometry: margin=1in
+fontsize: 10pt
 header-includes:
 - \usepackage{fancyhdr}
 - \pagestyle{fancy}
@@ -179,7 +180,7 @@ $E(Y) = \displaystyle\int \left(a+b(X-x)^2 \right) f(X)dX$
 
 $\ \ \ \ \ \ = \displaystyle\int \left( a + b(X^2 +x^2 -2xX\right)f(X)dX$
 
-$\ \ \ \ \ \ = (a+bX^2)\displaystyle\int f(X)dX -2bx \displaystyle\int Xf(X)dX + b \displaystyle\int X^2f(X)dX$
+$\ \ \ \ \ \ = (a+bx^2)\displaystyle\int f(X)dX -2bx \displaystyle\int Xf(X)dX + b \displaystyle\int X^2f(X)dX$
 
 $\ \ \ \ \ \ = (a+bx^2)1 -2bx\mu +b(\sigma^2-\mu^2)$
 
@@ -191,12 +192,10 @@ $\cfrac{dE(Y)}{dx} = 2bx-2b\mu = 2b(x-\mu) = 2b\left(x-E(X)\right)$
 
 And consequently:
 
-$\cfrac{dE(Y)}{dx} = \Rightarrow \mathbf{\textcolor{red}{x=E(X)}}$
+$\cfrac{dE(Y)}{dx} = 0 \Rightarrow \mathbf{\textcolor{red}{x=E(X)}}$
 
 
-2. **Find the value of $E(Y)$ for the choice of $t$ you found in (1)?**
-
-> N.B.: We assume this is typo and it really means $x$, not $t$.
+2. **Find the value of $E(Y)$ for the choice of $x$ you found in (1)?**
 
 We just have to substitute in the last expression of $E(Y)
 
@@ -206,15 +205,13 @@ $\ \ \ \ \ \ = b\mu^2-2b\mu^2+ \left( a+b(\sigma^2+\mu^2)\right) = -b\mu^2+a+b\s
 
 $\ \ \ \ \ \ = \mathbf{\textcolor{red}{a+b\sigma^2}}$
 
-3. **Suppose $Y = at+b(X-x)^2$. Find the values of $x$ that minimizes $E(Y)$. Show that your result is really the minimum.**
-
-> N.B.: Another typo? If $Y = at+b(X-x)^2$ the answer is the same than in (1). Let's use $Y = ax+b(X-x)^2$ instead.
+3. **Suppose $Y = ax+b(X-x)^2$. Find the values of $x$ that minimizes $E(Y)$. Show that your result is really the minimum.**
 
 $E(Y) = \displaystyle\int \left(ax+b(X-x)^2 \right) f(X)dX$
 
 $\ \ \ \ \ \ = \displaystyle\int \left( ax + b(X^2 +x^2 -2xX\right)f(X)dX$
 
-$\ \ \ \ \ \ = (ax+bX^2)\displaystyle\int f(X)dX -2bx \displaystyle\int Xf(X)dX + b \displaystyle\int X^2f(X)dX$
+$\ \ \ \ \ \ = (ax+bx^2)\displaystyle\int f(X)dX -2bx \displaystyle\int Xf(X)dX + b \displaystyle\int X^2f(X)dX$
 
 $\ \ \ \ \ \ = (ax+bx^2)1 -2bx\mu +b(\sigma^2-\mu^2)$
 
@@ -226,7 +223,7 @@ $\cfrac{dE(Y)}{dx} = 2bx + (a-2b\mu) = 2b(x-\mu) + a = 2b\left(x-E(X)\right) + a
 
 And consequently:
 
-$\cfrac{dE(Y)}{dx} = \Rightarrow \mathbf{\textcolor{red}{x=E(X) - \cfrac{a}{2b}}}$
+$\cfrac{dE(Y)}{dx} = 0 \Rightarrow \mathbf{\textcolor{red}{x=E(X) - \cfrac{a}{2b}}}$
 
 
 ## Question 6
