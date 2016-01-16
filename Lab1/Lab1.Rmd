@@ -104,6 +104,7 @@ In summary,
 $\mathbf{\textcolor{red}{\ \ \ \ \ \ 0 \leq \Pr(A | B) \leq 1}}$
 
 
+
 # Part II: Random Variables, Expectation, Conditional Exp.
 
 ## Question 3
@@ -119,9 +120,115 @@ $\mathbf{\textcolor{red}{\ \ \ \ \ \ 0 \leq \Pr(A | B) \leq 1}}$
 ### 3. Compute the variance of the payout from the contract.
 
 
+## Question 4
 
-```{r, include=TRUE, message = FALSE, warning = FALSE, fig.cap = "Some plot", fig.width = 6, fig.height = 4.5}
-plot(cars)
-```
+**Continuous random variables $X$ and $Y$ have a joint distribution with probability density function $f(x, y) = 2e^{-x}e^{-2y}$ for $0<x<\infty, 0<y<\infty$ and $0$ otherwise.**
+
+### 1. Compute $\Pr(X > a, Y < b)$, where $a, b$ are positive constants and $a < b$.
+
+$\Pr(X > a, Y < b) = \displaystyle\int_{x=a}^\infty \displaystyle\int_{y=0}^bf(x,y)dxdy$
+
+$\ \ \ \ \ \ = \displaystyle\int_{x=a}^\infty \displaystyle\int_{y=0}^b2e^{-x}e^{-2y}dxdy = 2\left(\displaystyle\int_{x=a}^\infty e^{-x}dx \right)\left( \displaystyle\int_{y=0}^b e^{-2y}dy\right )$
+
+$\ \ \ \ \ \ = 2 \left[-e^{-x} \right]_{x=a}^\infty \left[-\cfrac{e^{-2y}}{2}\right]_{y=0}^b = \left[ e^{-x} \right]_{x=a}^\infty \left[ e^{-2y} \right]_{y=0}^b = \left( 0-e^{-a}\right) \left(e^{-2b}-1 \right)$
+
+$\ \ \ \ \ \ = \mathbf{\textcolor{red}{e^{-a}\left(1-e^{-2b} \right) = e^{-a}-e^{-a-2b}}}$
+
+### 2. Compute $\Pr(X < Y)$.
+
+$\Pr(X < Y) = \displaystyle\int_{x=0}^y \displaystyle\int_{y=0}^\infty f(x,y)dxdy$
+
+$\ \ \ \ \ \ = \displaystyle\int_{x=0}^y \displaystyle\int_{y=0}^\infty 2e^{-x}e^{-2y}dxdy = 2 \displaystyle\int_{y=0}^\infty \left( \displaystyle\int_{x=0}^y e^{-x}dx \right) e^{-2y}dy$
+
+$\ \ \ \ \ \ = 2 \displaystyle\int_{y=o}^\infty \left[-e^{-x} \right]_{x=0}^y e^{-2y}dy = 2 \displaystyle\int_{y=0}^\infty \left(1-e^{-y}\right)e^{-2y}dy = 2 \displaystyle\int_{y=0}^\infty \left( e^{-2y} - e^{-3y} \right)dy$
+
+$\ \ \ \ \ \ = 2 \left[ -\cfrac{e^{-2y}}{2}+\cfrac{e^{-3y}}{3}\right]_{y=0}^\infty = 2 \left[ 0-\left( -\cfrac{1}{2}+\cfrac{1}{3} \right)\right] = 2 \left( \cfrac{1}{2} - \cfrac{1}{3}\right) = 1 - \cfrac{2}{3}$
+
+$\ \ \ \ \ \ = \mathbf{\textcolor{red}{\cfrac{1}{3}}}$
+
+### 3. Compute $\Pr(X < a)$.
+
+$\Pr(X < a) = \displaystyle\int_{x=0}^a \displaystyle\int_{y=0}^\infty f(x,y)dxdy$
+
+$\ \ \ \ \ \ = \displaystyle\int_{x=0}^a \displaystyle\int_{y=0}^\infty 2e^{-x}e^{-2y}dxdy = 2\left(\displaystyle\int_{x=0}^a e^{-x}dx \right)\left( \displaystyle\int_{y=0}^\infty e^{-2y}dy \right)$
+
+$\ \ \ \ \ \ = 2 \left[-e^{-x} \right]_{x=0}^a \left[-\cfrac{e^{-2y}}{2}\right]_{y=0}^\infty = \left[ e^{-x} \right]_{x=0}^a \left[ e^{-2y} \right]_{y=0}^\infty= \left(e^{-a}-1\right) \left(0-1 \right)$
+
+$\ \ \ \ \ \ = \mathbf{\textcolor{red}{1-e^{-a}}}$
+
+
+## Question 5
+
+**Let $X$ be a random variable and $x$ be a real number. A linear function of the squared deviation from $x$ is another random variable, $Y = a+b(X - x)^2$, where $a$ and $b$ are some positive constant.**
+
+### 1. Find the value of $x$ that minimizes $E(Y)$. Show that your result is really the minimum.
+
+The *Law of the unconscious statistician* states that:
+
+$$E\left[g(X)\right] = \int g(x)f_X(x)dx$$
+
+So, if we call $\mu=E(X)$ and $\sigma^2=Var(X)$ (and knowing that $Var(X)=E\left(X^2\right) - \left(E(X)\right)^2=E\left(X^2\right)-\mu^2$):
+
+$E(Y) = \displaystyle\int \left(a+b(X-x)^2 \right) f(X)dX$
+
+$\ \ \ \ \ \ = \displaystyle\int \left( a + b(X^2 +x^2 -2xX\right)f(X)dX$
+
+$\ \ \ \ \ \ = (a+bX^2)\displaystyle\int f(X)dX -2bx \displaystyle\int Xf(X)dX + b \displaystyle\int X^2f(X)dX$
+
+$\ \ \ \ \ \ = (a+bx^2)1 -2bx\mu +b(\sigma^2-\mu^2)$
+
+$\ \ \ \ \ \ = bx^2-2b\mu x + \left( a+b(\sigma^2+\mu^2)\right)$
+
+Hence:
+
+$\cfrac{dE(Y)}{dx} = 2bx-2b\mu = 2b(x-\mu) = 2b\left(x-E(X)\right)$
+
+And consequently:
+
+$\cfrac{dE(Y)}{dx} = \Rightarrow \mathbf{\textcolor{red}{x=E(X)}}$
+
+
+### 2. Find the value of $E(Y)$ for the choice of $t$ you found in (1)?
+
+> N.B.: We assume this is typo and it really means $x$, not $t$.
+
+We just have to substitute in the last expression of $E(Y)
+
+$\mathbf{\textcolor{red}{E(Y)}} = \displaystyle\int \left(a+b(X-\mu)^2 \right) f(X)dX$
+
+$\ \ \ \ \ \ = b\mu^2-2b\mu^2+ \left( a+b(\sigma^2+\mu^2)\right) = -b\mu^2+a+b\sigma^2+b\mu^2$
+
+$\ \ \ \ \ \ = \mathbf{\textcolor{red}{a+b\sigma^2}}$
+
+### 3. Suppose $Y = at+b(X-x)^2$. Find the values of $x$ that minimizes $E(Y)$. Show that your result is really the minimum.
+
+> N.B.: Another typo? If $Y = at+b(X-x)^2$ the answer is the same than in (1). Let's use $Y = ax+b(X-x)^2$ instead.
+
+$E(Y) = \displaystyle\int \left(ax+b(X-x)^2 \right) f(X)dX$
+
+$\ \ \ \ \ \ = \displaystyle\int \left( ax + b(X^2 +x^2 -2xX\right)f(X)dX$
+
+$\ \ \ \ \ \ = (ax+bX^2)\displaystyle\int f(X)dX -2bx \displaystyle\int Xf(X)dX + b \displaystyle\int X^2f(X)dX$
+
+$\ \ \ \ \ \ = (ax+bx^2)1 -2bx\mu +b(\sigma^2-\mu^2)$
+
+$\ \ \ \ \ \ = bx^2 + (a-2b\mu) x + b(\sigma^2+\mu^2)$
+
+Hence:
+
+$\cfrac{dE(Y)}{dx} = 2bx + (a-2b\mu) = 2b(x-\mu) + a = 2b\left(x-E(X)\right) + a$
+
+And consequently:
+
+$\cfrac{dE(Y)}{dx} = \Rightarrow \mathbf{\textcolor{red}{x=E(X) - \cfrac{a}{2b}}}$
+
+
+## Question 6
+
+**Suppose $X$ and $Y$ are independent continuous random variables, where both of which are uniformly distributed between $0$ and $1$. Let random variable $Z = X + Y$.**
+
+### 1. Choose a value of $z$ between $0$ and $2$, and draw a graph depicting the region of the $X-Y$ plane for which $Z$ is less than $z$.
+
+### 2. Derive the probability density function, $f(z)$.
 
 
