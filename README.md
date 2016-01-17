@@ -1,3 +1,3 @@
 # W271 Assignments
 
-## Juanjo Carin, Kevin Davies, Ashley Levato, Minghu Song
+## Juanjo Carin, Kevin Davis, Ashley Levato, Minghu Song
