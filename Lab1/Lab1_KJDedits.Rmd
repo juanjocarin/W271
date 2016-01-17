@@ -1,0 +1,403 @@
+---
+title: "**W271**-2 -- Spring 2016 -- **Lab 1**"
+author: "***Juanjo Carin, Kevin Davis, Ashley Levato, Minghu Song***"
+date: "*January 14, 2016*"
+output:
+   pdf_document:
+      toc: true
+      fig_caption: yes
+      toc_depth: 2
+numbersections: false
+geometry: margin=1in
+fontsize: 10pt
+header-includes:
+- \usepackage{fancyhdr}
+- \usepackage{amsmath}
+- \pagestyle{fancy}
+- \fancyhead[LO,LE]{Carin, Davis, Levato, Song}
+- \fancyfoot[LO,LE]{UC Berkeley -- MIDS -- W271 -- Spring semester 2016}
+- \fancyfoot[CO,CE]{}
+- \fancyfoot[RE,RO]{\thepage}
+- \renewcommand{\headrulewidth}{0.5pt}
+- \renewcommand{\footrulewidth}{0.5pt}
+
+---
+
+**********
+
+\pagebreak
+
+# Part I: Marginal, Joint, and Conditional Probabilities
+
+## Question 1
+
+**In a team of data scientists, 36 are expert in machine learning, 28 are expert in statistics, and 18 are awesome. 22 are expert in both machine learning and statistics, 12 are expert in machine learning and are awesome, 9 are expert in statistics and are awesome, and 48 are expert in either machine learning or statistics or are awesome. Suppose you are in a cocktail party with this group of data scientists and you have an equal probability of meeting any one of them.**
+
+1. **What is the probability of meeting a data scientist who is an expert in both machine learning and statistics and is awesome?**
+
+Let $N$ be the size of the team of data scientists (i.e., the sample size), and $M, S, A$ the event that a data scientist is either a machine learning expert, a statistics expert, or awesome.
+
+$\mathbf{\textcolor{red}{\Pr(M \cap S \cap A)}} = \Pr(M) + \Pr(S \cap A) - \Pr(M \cup (S \cap A))$
+
+$\ \ \ \ \ \ = \Pr(M) + \Pr(S \cap A) - \Pr((M \cup S) \cap (M \cup A))$
+
+$\ \ \ \ \ \ = \Pr(M) + \Pr(S \cap A) - ((\Pr(M \cup S) + \Pr(M \cup A) - \Pr((M \cup S) \cup (M \cup A))))$
+
+$\ \ \ \ \ \ = \Pr(M) + \Pr(S \cap A) - (\Pr(M) - \Pr(S) + \Pr(M \cap S)) - (\Pr(M) - \Pr(A) + \Pr(M \cap A)) + \Pr(M \cup S \cup A)$
+
+$\ \ \ \ \ \ = \Pr(M \cap S) + \Pr(M \cap A) + \Pr(M \cap A) - \Pr(M) - \Pr(S) - \Pr(A) + \Pr(M \cup S \cup A)$
+
+$\ \ \ \ \ \ = \cfrac{22}{N} + \cfrac{12}{N} + \cfrac{9}{N} - \cfrac{36}{N} - \cfrac{28}{N} - \cfrac{18}{N} + \cfrac{48}{N}  = \cfrac{(22+12+9)-(36-28-18)+48}{N} = \cfrac{43-82+48}{N}$
+
+$\ \ \ \ \ \ = \mathbf{\textcolor{red}{\cfrac{9}{N}}}$
+
+2. **Suppose you meet a data scientist who is an expert in machine learning. Given this information, what is the probability that s/he is not awesome?**
+
+$\mathbf{\textcolor{red}{\Pr(A^c|M)}} = 1 - \Pr(A|M) = 1 - \cfrac{\Pr(A \cap M)}{\Pr(M)} = 1 - \cfrac{\cfrac{12}{N}}{\cfrac{36}{N}} = 1 - \cfrac{12}{36} = 1 - \cfrac{1}{3} = \mathbf{\textcolor{red}{\cfrac{2}{3} = `r formatC(2/3, format = "f", digits = 4, big.mark=",", drop0trailing = FALSE)`}}$
+
+3. **Suppose the you meet a data scientist who is awesome. Given this information, what is the probability that s/he is an expert in either machine learning or statistics?**
+
+$\mathbf{\textcolor{red}{\Pr(M \cup S | A)}} = \cfrac{\Pr((M \cup S) \cap A)}{\Pr(A)} = \cfrac{\Pr((M \cap A) \cup (S \cap A))}{\Pr(A)}$
+
+$\ \ \ \ \ \ = \cfrac{\Pr(M \cap A) + \Pr(S \cap A) - \Pr((M \cap A) \cap (S \cap A)}{\Pr(S)} = \cfrac{\Pr(M \cap A) + \Pr(S \cap A) - \Pr(M \cap S \cap A)}{\Pr(S)}$
+
+$\ \ \ \ \ \ = \cfrac{\cfrac{12}{N} + \cfrac{9}{N} - \cfrac{9}{N}}{\cfrac{18}{N}} = \cfrac{12+9-9}{18} = \cfrac{12}{18}$
+
+$\ \ \ \ \ \ = \mathbf{\textcolor{red}{\cfrac{2}{3} = `r formatC(2/3, format = "f", digits = 4, big.mark=",", drop0trailing = FALSE)`}}$
+
+
+## Question 2
+
+**Suppose for events $A$ and $B$, $\Pr(A) = p \leq \frac{1}{2}, \Pr(B) = q$, where $\frac{1}{4} < q < \frac{1}{2}$. These are the only information we have about the events.**
+
+1. **What are the maximum and minimum possible values for $\Pr(A \cup B)$?**
+
+$$\Pr(A \cup B) = \Pr(A) + \Pr(B) - \Pr(A \cap B)$$
+
+The maximum value of $\Pr(A \cup B)$ occurs when $A \cap B$ is the smallest set possible. In this case, since $\Pr(A) \leq \frac{1}{2}$ and $\Pr(B) < \frac{1}{2}$, it would be $A \cap B = \varnothing$ (if $A$ and $B$ were disjoint sets, which might be the case), so:
+
+$\ \ \ \ \ \ \Pr(A \cup B) = \Pr(A) + \Pr(B) - \Pr(A \cap B) = \Pr(A) + \Pr(B) - \Pr(\varnothing) = p + q - 0 = p + q$
+
+which could have a maximum value close to $1$ (i.e., $A \cup B \approx \Omega$), in case $\Pr(A) = \frac{1}{2}$ and $\Pr(B) \approx \frac{1}{2}$.
+
+The minimum value of $\Pr(A \cup B)$ occurs when $A \cup B$ is the largest set possible, $A$ or $B$. In this case, since $\Pr(A)$ does not have a lower bound, that would happen when $A \subseteq B$ and (consequently) $A \cap B = A$, which would lead to:
+
+$\ \ \ \ \ \ \Pr(A \cup B) = \Pr(A) + \Pr(B) - \Pr(A) = \Pr(B) = q$
+
+whose minimum value is greater than $\frac{1}{4}$.
+
+In summary,
+
+$\mathbf{\textcolor{red}{\ \ \ \ \ \ \cfrac{1}{4} < \Pr(A \cup B) < 1}}$
+
+
+2. **What are the maximum and minimum possible values for $\Pr(A | B)$?**
+
+$$\Pr(A|B) = \cfrac{\Pr(A \cap B)}{\Pr(B)}$$
+
+If $B \subseteq A$ (which would imply that the lower bound for $p$ is also $\frac{1}{4})$, then:
+
+$\ \ \ \ \ \ \Pr(A|B) = \cfrac{\Pr(B)}{\Pr(B)} = 1$
+
+As seen in the previous part, since $\Pr(A) \leq \frac{1}{2}$ and $Pr(B) < \frac{1}{2}$, it might occur that $A \cap B = \varnothing$, and hence:
+
+$\ \ \ \ \ \ \Pr(A|B) = \cfrac{\Pr(\varnothing)}{\Pr(B)} = \cfrac{0}{q} = 0$
+
+irrespective of the value of $q$.
+
+In summary,
+
+$\mathbf{\textcolor{red}{\ \ \ \ \ \ 0 \leq \Pr(A | B) \leq 1}}$
+
+**********
+
+\pagebreak
+
+# Part II: Random Variables, Expectation, Conditional Exp.
+
+## Question 3
+
+**Suppose the life span of a particular server is a continuous random variable, $t$, with a uniform probability distribution between $0$ and $k$ year, where $k \leq 10$ is a positive integer.**
+
+**The server comes with a contract that guarantees a full or partial refund, depending on how long it lasts. Specifically, if the server fails in the first year, it gives a full refund denoted by $\theta$. If it lasts more than $1$ year but fails before $\frac{k}{2}$ years, the manufacturer will pay $x = \$A(k - t)^{1/2}$, where $A$ is some positive constant equal to $2$ if $t \leq \frac{k}{2}$ . If it lasts between $\frac{k}{2}$ and $\frac{3k}{4}$ years, it pays $\frac{\theta}{10}$.**
+
+1. **Given that the server lasts for $\frac{k}{4}$ years without failing, what is the probability that it will last another year?**
+
+2. **Compute the expected payout from the contract, $E(x)$.**
+
+3. **Compute the variance of the payout from the contract.**
+
+
+## Question 4
+
+**Continuous random variables $X$ and $Y$ have a joint distribution with probability density function $f(x, y) = 2e^{-x}e^{-2y}$ for $0<x<\infty, 0<y<\infty$ and $0$ otherwise.**
+
+1. **Compute $\Pr(X > a, Y < b)$, where $a, b$ are positive constants and $a < b$.**
+
+$\Pr(X > a, Y < b) = \displaystyle\int_{x=a}^\infty \displaystyle\int_{y=0}^bf(x,y)dxdy$
+
+$\ \ \ \ \ \ = \displaystyle\int_{x=a}^\infty \displaystyle\int_{y=0}^b2e^{-x}e^{-2y}dxdy = 2\left(\displaystyle\int_{x=a}^\infty e^{-x}dx \right)\left( \displaystyle\int_{y=0}^b e^{-2y}dy\right )$
+
+$\ \ \ \ \ \ = 2 \left[-e^{-x} \right]_{x=a}^\infty \left[-\cfrac{e^{-2y}}{2}\right]_{y=0}^b = \left[ e^{-x} \right]_{x=a}^\infty \left[ e^{-2y} \right]_{y=0}^b = \left( 0-e^{-a}\right) \left(e^{-2b}-1 \right)$
+
+$\ \ \ \ \ \ = \mathbf{\textcolor{red}{e^{-a}\left(1-e^{-2b} \right) = e^{-a}-e^{-a-2b}}}$
+
+2. **Compute $\Pr(X < Y)$.**
+
+$\Pr(X < Y) = \displaystyle\int_{x=0}^y \displaystyle\int_{y=0}^\infty f(x,y)dxdy$
+
+$\ \ \ \ \ \ = \displaystyle\int_{x=0}^y \displaystyle\int_{y=0}^\infty 2e^{-x}e^{-2y}dxdy = 2 \displaystyle\int_{y=0}^\infty \left( \displaystyle\int_{x=0}^y e^{-x}dx \right) e^{-2y}dy$
+
+$\ \ \ \ \ \ = 2 \displaystyle\int_{y=o}^\infty \left[-e^{-x} \right]_{x=0}^y e^{-2y}dy = 2 \displaystyle\int_{y=0}^\infty \left(1-e^{-y}\right)e^{-2y}dy = 2 \displaystyle\int_{y=0}^\infty \left( e^{-2y} - e^{-3y} \right)dy$
+
+$\ \ \ \ \ \ = 2 \left[ -\cfrac{e^{-2y}}{2}+\cfrac{e^{-3y}}{3}\right]_{y=0}^\infty = 2 \left[ 0-\left( -\cfrac{1}{2}+\cfrac{1}{3} \right)\right] = 2 \left( \cfrac{1}{2} - \cfrac{1}{3}\right) = 1 - \cfrac{2}{3}$
+
+$\ \ \ \ \ \ = \mathbf{\textcolor{red}{\cfrac{1}{3}}}$
+
+3. **Compute $\Pr(X < a)$.**
+
+$\Pr(X < a) = \displaystyle\int_{x=0}^a \displaystyle\int_{y=0}^\infty f(x,y)dxdy$
+
+$\ \ \ \ \ \ = \displaystyle\int_{x=0}^a \displaystyle\int_{y=0}^\infty 2e^{-x}e^{-2y}dxdy = 2\left(\displaystyle\int_{x=0}^a e^{-x}dx \right)\left( \displaystyle\int_{y=0}^\infty e^{-2y}dy \right)$
+
+$\ \ \ \ \ \ = 2 \left[-e^{-x} \right]_{x=0}^a \left[-\cfrac{e^{-2y}}{2}\right]_{y=0}^\infty = \left[ e^{-x} \right]_{x=0}^a \left[ e^{-2y} \right]_{y=0}^\infty= \left(e^{-a}-1\right) \left(0-1 \right)$
+
+$\ \ \ \ \ \ = \mathbf{\textcolor{red}{1-e^{-a}}}$
+
+
+## Question 5
+
+**Let $X$ be a random variable and $x$ be a real number. A linear function of the squared deviation from $x$ is another random variable, $Y = a+b(X - x)^2$, where $a$ and $b$ are some positive constant.**
+
+1. **Find the value of $x$ that minimizes $E(Y)$. Show that your result is really the minimum.**
+
+The *Law of the unconscious statistician* states that:
+
+$$E\left[g(X)\right] = \int g(x)f_X(x)dx$$
+
+So, if we call $\mu=E(X)$ and $\sigma^2=Var(X)$ (and knowing that $Var(X)=E\left(X^2\right) - \left(E(X)\right)^2=E\left(X^2\right)-\mu^2$):
+
+$E(Y) = \displaystyle\int \left(a+b(X-x)^2 \right) f(X)dX$
+
+$\ \ \ \ \ \ = \displaystyle\int \left( a + b(X^2 +x^2 -2xX\right)f(X)dX$
+
+$\ \ \ \ \ \ = (a+bx^2)\displaystyle\int f(X)dX -2bx \displaystyle\int Xf(X)dX + b \displaystyle\int X^2f(X)dX$
+
+$\ \ \ \ \ \ = (a+bx^2)1 -2bx\mu +b(\sigma^2-\mu^2)$
+
+$\ \ \ \ \ \ = bx^2-2b\mu x + \left( a+b(\sigma^2+\mu^2)\right)$
+
+Hence:
+
+$\cfrac{dE(Y)}{dx} = 2bx-2b\mu = 2b(x-\mu) = 2b\left(x-E(X)\right)$
+
+And consequently:
+
+$\cfrac{dE(Y)}{dx} = 0 \Rightarrow \mathbf{\textcolor{red}{x=E(X)}}$
+
+
+2. **Find the value of $E(Y)$ for the choice of $x$ you found in (1)?**
+
+We just have to substitute in the last expression of $E(Y)
+
+$\mathbf{\textcolor{red}{E(Y)}} = \displaystyle\int \left(a+b(X-\mu)^2 \right) f(X)dX$
+
+$\ \ \ \ \ \ = b\mu^2-2b\mu^2+ \left( a+b(\sigma^2+\mu^2)\right) = -b\mu^2+a+b\sigma^2+b\mu^2$
+
+$\ \ \ \ \ \ = \mathbf{\textcolor{red}{a+b\sigma^2}}$
+
+3. **Suppose $Y = ax+b(X-x)^2$. Find the values of $x$ that minimizes $E(Y)$. Show that your result is really the minimum.**
+
+$E(Y) = \displaystyle\int \left(ax+b(X-x)^2 \right) f(X)dX$
+
+$\ \ \ \ \ \ = \displaystyle\int \left( ax + b(X^2 +x^2 -2xX\right)f(X)dX$
+
+$\ \ \ \ \ \ = (ax+bx^2)\displaystyle\int f(X)dX -2bx \displaystyle\int Xf(X)dX + b \displaystyle\int X^2f(X)dX$
+
+$\ \ \ \ \ \ = (ax+bx^2)1 -2bx\mu +b(\sigma^2-\mu^2)$
+
+$\ \ \ \ \ \ = bx^2 + (a-2b\mu) x + b(\sigma^2+\mu^2)$
+
+Hence:
+
+$\cfrac{dE(Y)}{dx} = 2bx + (a-2b\mu) = 2b(x-\mu) + a = 2b\left(x-E(X)\right) + a$
+
+And consequently:
+
+$\cfrac{dE(Y)}{dx} = 0 \Rightarrow \mathbf{\textcolor{red}{x=E(X) - \cfrac{a}{2b}}}$
+
+
+## Question 6
+
+**Suppose $X$ and $Y$ are independent continuous random variables, where both of which are uniformly distributed between $0$ and $1$. Let random variable $Z = X + Y$.**
+
+1. **Choose a value of $z$ between $0$ and $2$, and draw a graph depicting the region of the $X-Y$ plane for which $Z$ is less than $z$.**
+
+2. **Derive the probability density function, $f(z)$.**
+
+Note that 
+
+$$f_{X}(x) = f_{Y}(y) = \begin{cases}
+  1 & 0\leq x\leq\ 1 \\
+  0 & Otherwise
+  \end{cases}$$
+
+Because X and Y are independent, the probability density function of the sum of X and Y is equal to the convolution of $f_{X}(x)$ and $f_{Y}(y)$ described by
+
+$$f_{Z}(z) =  \displaystyle\int_{0}^1 f_{X}(z-y)f_{Y}(y)dy$$
+
+If $0\leq z\leq 1$
+
+$$f_{Z}(z) =  \displaystyle\int_{0}^z dy = z$$
+
+And if $1\textless z\leq 2$
+
+$$f_{Z}(z) =  \displaystyle\int_{z-1}^1 dy = 2 - z$$
+
+This give us
+
+$$f_{Z}(z) = \begin{cases}
+  z & 0\leq z\leq 1 \\
+  2 - z & 1\textless z\leq 2 \\
+  0 & Otherwise
+  \end{cases}$$
+  
+  
+## Question 7
+
+**In a casino, you pay the following game. A pair of fair, ordinary 6-faced dice are rolled. If the sum of the dice is $2$, $3$, or $12$, the house wins. If it is $7$ or $11$, you win. If it is any other number $x$, the house rolls the dice again until the sum is either $7$ or $x$. If it is $7$, the house wins. If it is $x$, you win. A game ends if one of the two players wins. Let $Y$ be the number of rolls needed until the game ends.**
+
+1. **Is the expected number of rolls given that you win more than, equal to, or less than the expected number of rolls given that house wins (in a game)? The steps to arrive at your answer numerically need to be clearly shown.**
+
+On the first roll, the house wins 4 games, so their are 36-4 = 32 games.
+
+$$ E(\text{Rolls}|\text{Win 1st Roll}) = \frac{8}{32} + \frac{24}{32}(E + 1) \\
+= 4 $$
+
+On subsequent rolls, we have 
+
+$$ P(X) = \begin{pmatrix}
+  4 & 5 & 6 & 8 & 9 & 10 \\
+  \frac{3}{36} & \frac{4}{36} & \frac{5}{36} & \frac{5}{36} & \frac{4}{36} & \frac{3}{36}
+  \end{pmatrix}$$
+
+giving 3 unique scenarios. Similarly to roll one we have
+
+$$ E(\text{Rolls}|\text{Win 2nd Roll}) = \frac{3}{30} + \frac{27}{30}(E + 1) \\
+= 10 $$
+$$ E(\text{Rolls}|\text{Win 2nd Roll}) = \frac{4}{30} + \frac{26}{30}(E + 1) \\
+= 7.5 $$
+$$ E(\text{Rolls}|\text{Win 2nd Roll}) = \frac{5}{30} + \frac{25}{30}(E + 1) \\
+= 6 $$
+
+And
+
+$$ E(\text{Rolls}|\text{You Win}) = frac{4(12) + 10(6) + 7.5(8) + 6(10)}{36} = 6.\overline{3}$$
+
+For the house we have
+$$ E(\text{Rolls}|\text{Win 1st Roll}) = \frac{4}{28} + \frac{24}{28}(E + 1) \\
+= 7 $$
+$$ E(\text{Rolls}|\text{Win 2nd Roll}) = \frac{6}{33} + \frac{27}{33}(E + 1) \\
+= 5.5 $$
+$$ E(\text{Rolls}|\text{Win 2nd Roll}) = \frac{6}{32} + \frac{26}{32}(E + 1) \\
+= 5.\overline(3) $$
+$$ E(\text{Rolls}|\text{Win 2nd Roll}) = \frac{6}{31} + \frac{25}{31}(E + 1) \\
+= 5.1\overline(6) $$
+
+And
+
+$$ E(\text{Rolls}|\text{House Win}) = frac{7(12) + 5.5(6) + 5.\overline(3)(8) + 5.1\overline(6)(10)}{36} = 5.87$$
+
+Thus the expected rolls given you win is greater than the expected rolls given the house wins. 
+
+2. **Suppose it takes $\$20$ to play, and the payoff is $\$100$, $\$80$, $\$60$, $\$40$, $\$0$ if you win in the 1st, 2nd, 3rd, 4th, 5th round, respectively. That is, if you win in the 1st round, you are paid $\$100$ (so your net profit is $\$80$), if you win in the 2nd round, you are paid $\$80$, etc. Derive the expected payoff function of a game.**
+
+
+
+**********
+
+# Part III: Statistical Estimation and Statistical Inference
+
+**In classical statistics, parameters are unknown constants whereas estimators are functions of samples and are random variables. The questions in this section are designed to clarify the relationship between parameters and estimators, and explore the properties that different estimators may have.**
+
+## Question 8
+
+**Let $Y1, \dots, Yn$ be $n$ random variables, such that any two of them are uncorrelated, and all share the same mean $\mu$ and variance $\sigma^2$. Let $Y$ be the average $Y_i$, which is also a random variable.**
+
+**Define the class of linear estimators of $\mu$ by**
+
+$$W = \sum_{i=1}^n a_iY_i$$
+
+**where the $a_i$ are constants.**
+
+1. **What restriction on the $a_i$ is needed for $W$ to be an unbiased estimator of $\mu$?**
+
+2. **Find $Var(W)$.**
+
+3. **Given a set of numbes $a_1,\dots,a_n$, the following inequality holds:**
+
+    $$\frac{1}{n}\left(\sum_{i=1}^na_i\right)^2 \leq \sum_{i=1}^na_i^2$$
+
+    **Use this inequality, along with the previous parts of this question, tho show that $Var(W) \geq Var(\bar{Y})$ whenever $W$ is unbiased. We say that $\bar{Y}$ is the best linear unbiased estimator (BLUE).**
+
+
+## Question 9
+
+**Let $\bar{Y}$ denote the average of $n$ independent draws from a population distribution with mean $\mu$ and variance $\sigma^2$. Consider two alternative estimators of $\mu$: $W_1 = \frac{n-1}{n}\bar{Y}$ and $W_2=k\bar{Y}$, where $0<k<1$.**
+
+1. **Compute the biases of both $W_1$ and $W_2$. Which estimator is consistent?**
+
+2. **Compute $Var(W_1)$ and $Var(W_2)$. Which estimator has lower variance?**
+
+
+## Question 10
+
+**Given a random sample $Y_1, Y_2, \dots, Y_n$ from some distribution $F(\cdot )$ with mean $\mu$ and variance $\sigma^2$, where both $\mu$ and $\sigma^2$ are unknown parameters.**
+
+**Let $\bar{Y}$ be the average of the sample. Consider the following estimator for $\sigma^2$:**
+
+$$\widehat{\sigma^2} = \frac{1}{n}\sum_{i=1}^n \left(Y - \bar{Y} \right)^2$$
+
+1. **Show that $E(\bar{Y}) = E(Y_i) \ \forall i \in 1,2,\dots,n$**
+
+2. **Show that $Var(\bar{Y}) = \frac{1}{n}Var(Y_i) \ \forall i \in 1,2,\dots,n$**
+
+3. **Compute the expectation of $\widehat{\sigma^2}$ in terms of $n$ and $\sigma^2$. In your derivation, make sure make use of the *i.i.d.* property and identify where you use it.**
+
+4. **Is this an unbiased estimator for $\sigma^2$?**
+
+5. **If not, what function of $\widehat{\sigma^2}$ produce an unbiased estimator?**
+
+
+## Question 11
+
+**Wooldridge's textbook: Appendix C, Question 4*i*, *ii*, *iii*.**
+
+
+## Question 12
+
+**Wooldridge's textbook: Appendix C, Question 6.**
+
+
+## Question 13
+
+**Wooldridge's textbook: Appendix C, Question 8. In addition, answer the following questions:**
+
+1. **Define Type I error.**
+
+2. **What is the probability of Type I error of this test?**
+
+3. **Define Type II error.**
+
+4. **What is the probability of Type II error when using this decision rule, assuming the "true" population proportion is $\theta^*= 0.45$.**
+
+5. **Define the power of the test (in general terms).**
+
+6. **Calculate the power of this test, again assuming the "true" population proportion is $\theta^*= 0.45$.**
+
+
+\pagebreak
+
+```{r, include=TRUE, message = FALSE, warning = FALSE, fig.cap = "Some plot", fig.width = 6, fig.height = 4.5}
+plot(cars)
+```
