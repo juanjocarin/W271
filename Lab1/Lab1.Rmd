@@ -122,9 +122,189 @@ $\mathbf{\textcolor{red}{\ \ \ \ \ \ 0 \leq \Pr(A | B) \leq 1}}$
 
 1. **Given that the server lasts for $\frac{k}{4}$ years without failing, what is the probability that it will last another year?**
 
+$\mathbf{\textcolor{red}{\Pr\left(t \leq 1+\cfrac{k}{4} \bigg| t \geq \cfrac{k}{4} \right)}} = \cfrac{\Pr \left(\left( t \leq 1+\cfrac{k}{4} \right) \bigcap \left( t \geq \cfrac{k}{4} \right) \right)}{\Pr \left(t \geq \cfrac{k}{4}\right)} = \cfrac{\Pr \left(\cfrac{k}{4} \leq t \leq 1+\cfrac{k}{4} \right )}{Pr \left(t \geq \cfrac{k}{4}\right)}$
+
+$\ \ \ \ \ \ = \cfrac{\Pr \left(t \leq 1 +\cfrac{k}{4}\right) - \Pr \left(t \leq \cfrac{k}{4}\right)}{1-\Pr \left(t \leq \cfrac{k}{4}\right)} = \cfrac{\cfrac{1}{k}\left(1+\cfrac{k}{4} - \cfrac{k}{4} \right )}{1-\cfrac{1}{k}\cfrac{k}{4}} = \cfrac{\cfrac{1}{k}}{\cfrac{3}{4}}$
+
+$\ \ \ \ \ \ = \mathbf{\textcolor{red}{\cfrac{4}{3k}}}$
+
 2. **Compute the expected payout from the contract, $E(x)$.**
 
+I tried 3 different approaches, all leading to the same result.
+
+The first one is based on https://www.probabilitycourse.com/chapter4/4_3_1_mixed.php. Before computing the expected value of $X$, we need to compute its *cdf*.
+
+$t$ (the life span of the server) is a continuous variable with the following *pdf*:
+
+$$f_t(t) = \begin{cases}
+\cfrac{1}{k} & 0\leq t\leq\ k \\
+0 & \text{otherwise}
+\end{cases}$$
+
+But $X$ (the payout or refund) is not continuous:
+
+$$X = g(t) = \begin{cases}
+\theta & 0\leq t\leq\ 1 \\
+A\sqrt{k-t} & 1\leq t\leq\ \cfrac{k}{2} \\
+\cfrac{\theta}{10} & \cfrac{k}{2}\leq t\leq\ \cfrac{3k}{4} \\
+0 & \text{otherwise}
+\end{cases}$$
+
+(The value of $X$ for $t=1$ is $A\sqrt{k-1}$, which is not necessarily equal to $\theta$; the value of $X$ for $t=k/2$ is $A\sqrt{k/2}$, which again is not necessarily equal to $\theta/10$.)
+
+First we compute the probability that $X$ takes its possible discrete values:
+
+$\Pr(X = 0) = \Pr\left(t \geq \cfrac{3k}{4}\right) = 1 - F_t\left(\cfrac{3k}{4}\right) = 1 - \cfrac{1}{k}\cfrac{3k}{4} = 1 - \cfrac{3}{4} = \cfrac{1}{4}$
+
+$\Pr\left(X = \cfrac{\theta}{10}\right) = \Pr\left(\cfrac{k}{2} \leq t \leq \cfrac{3k}{4}\right) = F_t\left(\cfrac{3k}{4}\right) - F_t\left(\cfrac{k}{2}\right) = \cfrac{1}{k}\cfrac{3k}{4} - \cfrac{1}{k}\cfrac{k}{2} = \cfrac{3}{4} - \cfrac{1}{2} = \cfrac{3-2}{4} = \cfrac{1}{4}$
+
+$\Pr(X = \theta) = \Pr(0 \leq t \leq 1) = F_t(1) - F_t(0) = \cfrac{1}{k} - \cfrac{0}{k} = \cfrac{1}{k}$
+
+For $A\sqrt{\cfrac{k}{2}} \leq X \leq A\sqrt{k-1}$, we can compute the *cdf* of $X$ as follows:
+
+$F_X(x) = \Pr(X \leq x)= \Pr\left(A\sqrt{k-t} \leq x\right)$
+
+$\ \ \ \ \ \ = \Pr\left(k-t \leq \left(\frac{x}{A}\right)^2\right) = \Pr\left(t \geq k - \left(\frac{x}{A}\right)^2 \right) = 1 - \Pr\left(t \leq k - \left(\frac{x}{A}\right)^2 \right)$
+
+$\ \ \ \ \ \ = 1 - \displaystyle\int_{t=0}^{k - \left(\frac{x}{A}\right)^2}\cfrac{1}{k}dt = 1 - \cfrac{1}{k}\left(k - \left(\frac{x}{A}\right)^2\right) = \cfrac{x^2}{kA^2}$
+
+So the overall expression for $F_X(x)$ is:
+
+$$F_X(x) = \begin{cases}
+0 & x < 0 \\
+\cfrac{1}{4} & 0 \leq x < \cfrac{\theta}{10} \\
+\cfrac{1}{2} & \cfrac{\theta}{10}\leq x \leq\ A\sqrt{\cfrac{k}{2}} \\
+\cfrac{x^2}{kA^2} & A\sqrt{\cfrac{k}{2}} \leq x \leq\ A\sqrt{k-1} \\
+1-\cfrac{1}{k} & A\sqrt{k-1} \leq x < \theta \\
+1 & x \geq \theta
+\end{cases}$$
+
+Let's check that:
+
+$$\int_{x=A\sqrt{k/2}}^{A\sqrt{k-1}}\frac{dF_X(x)}{dx}dx + \sum_{x_k}\Pr(X=x_k) =1$$
+
+$\displaystyle\int_{x=A\sqrt{k/2}}^{A\sqrt{k-1}}\cfrac{2x}{kA^2}dx + \Pr(X=0) + \Pr\left(X=\cfrac{\theta}{10}\right) + \Pr(X=\theta) = \left[ \cfrac{x^2}{kA^2}\right]_{x=A\sqrt{k/2}}^{A\sqrt{k-1}} + \cfrac{1}{4} + \cfrac{1}{4} + \cfrac{1}{k}$
+
+$\ \ \ \ \ \ = \cfrac{(k-1)-\cfrac{k}{2}}{k} + \cfrac{1}{2} + \cfrac{1}{k} = \cfrac{\cfrac{k}{2}-1}{k} + \cfrac{1}{2} + \cfrac{1}{k} = \cfrac{1}{2} - \cfrac{1}{k} + \cfrac{1}{2} + \cfrac{1}{k} = 1$
+
+Now we can compute the expected value of $X$ as:
+
+$\mathbf{\textcolor{red}{E(X)}} = \displaystyle\int_{x=A\sqrt{k/2}}^{A\sqrt{k-1}}x\frac{dF_X(x)}{dx}dx + \displaystyle\sum_{x_k}x_k\Pr(X=x_k)$
+
+$\ \ \ \ \ \ = \displaystyle\int_{x=A\sqrt{k/2}}^{A\sqrt{k-1}}\cfrac{2x^2}{kA^2}dx + 0\cdot\Pr(X=0) + \cfrac{\theta}{10}\cdot \Pr\left(X=\cfrac{\theta}{10}\right) + \theta\cdot\Pr(X=\theta)$
+
+$\ \ \ \ \ \ = \left[ \cfrac{2x^2}{3kA^2}\right]_{x=A\sqrt{k/2}}^{A\sqrt{k-1}} + 0\cdot\cfrac{1}{4} + \cfrac{\theta}{10}\cdot\cfrac{1}{4} + \theta\cdot\cfrac{1}{k} = \mathbf{\textcolor{red}{\cfrac{2A}{3k}\left((k-1)^{\frac{3}{2}}-\left(\cfrac{k}{2}\right)^{\frac{3}{2}}\right) + \cfrac{\theta}{40} + \cfrac{\theta}{k}}}$
+
+```{r, echo=FALSE, message = FALSE, warning = FALSE, fig.cap = "Approximate aspect of $F_X(x)$ (for $A=2, k=8, \\theta=30$)", fig.width = 4, fig.height = 4}
+F <- function(x) {
+    ifelse(x<0, 0, 
+           ifelse(x < 3, 1/4, 
+                  ifelse(x < 4, 1/2, 
+                         ifelse(x < 2*sqrt(7), x^2/32, 
+                                ifelse(x < 30, 1-1/8, 1)))))
+    }
+x=seq(-5, 35, by = 0.01)
+plot(x, F(x), type='l', xaxt='n', yaxt='n')
+axis(side = 2, at = seq(0, 1, .25))
+axis(side = 1, at = seq(0, 30, 5))
+# library(ggplot2)
+# ggplot(data.frame(x), aes(x)) + stat_function(fun=eq, geom = 'step')
+```
+
+
+Another way would be just applying the *law of the unconscious statistician* (https://en.wikipedia.org/wiki/Law_of_the_unconscious_statistician):
+
+$$E\left[g(t)\right] = \int g(t)f_t(t)dt$$
+
+$\mathbf{\textcolor{red}{E(X)}} = \displaystyle\int_{t=0}^kg(t)f_t(t)dt$
+
+$\ \ \ \ \ \ = \displaystyle\int_{t=0}^1\cfrac{g(x)}{k}dt + \displaystyle\int_{t=1}^{k/2}\cfrac{g(x)}{k}dt + \displaystyle\int_{t=k/2}^{3k/4}\cfrac{g(x)}{k}dt + \displaystyle\int_{t=3k/4}^k\cfrac{g(x)}{k}dt$
+
+$\ \ \ \ \ \ = \cfrac{\theta}{k}\left[t\right]_{t=0}^1 + \cfrac{A}{k}\left[\left(-\cfrac{2}{3}\right)(k-t)^{\frac{3}{2}}\right]_{t=1}^{k/2} + \cfrac{\theta/10}{k}\left[t\right]_{t=k/2}^{3k/4} + \cfrac{0}{k}\left[t\right]_{t=3k/4}^k$
+
+$\ \ \ \ \ \ = \cfrac{\theta}{k} + \cfrac{2A}{3k}\left((k-1)^{\frac{3}{2}}-\left(\cfrac{k}{2}\right)^{\frac{3}{2}}\right) + \cfrac{\theta}{10k}\cfrac{k}{4} + 0 = \mathbf{\textcolor{red}{\cfrac{2A}{3k}\left((k-1)^{\frac{3}{2}}-\left(\cfrac{k}{2}\right)^{\frac{3}{2}}\right) + \cfrac{\theta}{40} + \cfrac{\theta}{k}}}$
+
+The last approach is based on http://homepage.stat.uiowa.edu/~nshyamal/22S175/DI.pdf. A *mixed distribution* can be decomposed into a continuous distribution and a discrete one:
+
+$$\mathbf{F(x) = F_C(x) + F_D(x)}$$
+
+each with weights $p_C$ and $p_D$, respectively.
+
+$p_D$ is the sum of the heights of the jumps:
+
+$F(0)-F(0^-) = \cfrac{1}{4}$
+
+$F\left(\cfrac{\theta}{10}\right) - F\left(\cfrac{\theta^-}{10}\right) = \cfrac{1}{4}$
+
+$F(\theta) - F(\theta^-) = \cfrac{1}{k}$
+
+$\ \ \ \ \ \ \Rightarrow p_D = \cfrac{1}{2} + \cfrac{1}{k} = \cfrac{k+2}{2k} \Rightarrow \mathbf{p_C = 1 - p_D} = \cfrac{k-2}{2k}$
+
+$$\Pr(X_D=x) = \begin{cases}
+\cfrac{\cfrac{1}{4}}{\cfrac{k+2}{2k}} = \cfrac{1}{4}\cfrac{2k}{k+2} = \cfrac{k}{2(k+2)} & x=0 \\
+\cfrac{\cfrac{1}{4}}{\cfrac{k+2}{2k}} = \cfrac{1}{4}\cfrac{2k}{k+2} = \cfrac{k}{2(k+2)} & x=\cfrac{\theta}{10} \\
+\cfrac{\cfrac{1}{k}}{\cfrac{k+2}{2k}} = \cfrac{1}{k}\cfrac{2k}{k+2} = \cfrac{2}{k+2} & x=\theta
+\end{cases}$$
+
+$$\mathbf{F_C(x) = \frac{F(x) + p_D \cdot F_D(x)}{p_C}}$$
+
+$$\Rightarrow F_C(X_C=x) = \begin{cases}
+0 & x < A\sqrt{\cfrac{k}{2}} \\
+\cfrac{2x^2-kA^2}{A^2(k-2)} & A\sqrt{\cfrac{k}{2}} \leq x < A\sqrt{k-1} \\
+1 & x \geq A\sqrt{k-1}
+\end{cases}$$
+
+$$\Rightarrow f_C(X_C=x) = \begin{cases}
+0 & x < A\sqrt{\cfrac{k}{2}} \\
+\cfrac{4x}{A^2(k-2)} & A\sqrt{\cfrac{k}{2}} \leq x < A\sqrt{k-1} \\
+0 & x \geq A\sqrt{k-1}
+\end{cases}$$
+
+$E(X_D) = \displaystyle\sum_{x_k} x_k\Pr(X_D=x_k) = 0\cdot\cfrac{k}{2(k+2)} + \cfrac{\theta}{10}\cdot\cfrac{k}{2(k+2)} + \theta\cdot\cfrac{2}{k+2}$
+
+$\ \ \ \ \ \ = \cfrac{k\theta}{20(k+2)} + \cfrac{2\theta}{k+2} = \cfrac{(k+40)\theta}{20(k+2)}$
+
+$E(X_C) = \displaystyle\int_{x=-\infty}^\infty xf_C(x)dx = \displaystyle\int_{x=A\sqrt{k/2}}^{A\sqrt{k-1}} \cfrac{4x^2}{A^2(k-2)}dx = \left[\cfrac{4x^3}{3A^2(k-2)}\right]_{x=A\sqrt{k/2}}^{A\sqrt{k-1}} = \cfrac{4A}{3(k-2)}\left((k-1)^{\frac{3}{2}} - \left(\cfrac{k}{2}\right)^{\frac{3}{2}}\right)$
+
+$$\mathbf{E(X) = p_D \cdot E(X_D) + p_C \cdot E(X_C)}$$
+
+$\mathbf{\textcolor{red}{E(X)}} = \cfrac{k+2}{2k}\cdot\cfrac{(k+40)\theta}{20(k+2)}+\cfrac{k-2}{2k}\cdot\cfrac{4A}{3(k-2)}\left((k-1)^{\frac{3}{2}} - \left(\cfrac{k}{2}\right)^{\frac{3}{2}}\right)$
+
+$\ \ \ \ \ \ = \mathbf{\textcolor{red}{\cfrac{2A}{3k}\left((k-1)^{\frac{3}{2}}-\left(\cfrac{k}{2}\right)^{\frac{3}{2}}\right) + \cfrac{\theta}{40} + \cfrac{\theta}{k}}}$
+
 3. **Compute the variance of the payout from the contract.**
+
+The 3rd link in (2) mentions the expression for the variance of a mixed random variable:
+
+$$\mathbf{\textcolor{red}{Var(X) = \left(p_D \cdot Var(X_D) + p_C \cdot Var(X_C) \right) + p_D \cdot p_C \cdot \left(E(X_D) - E(X_C) \right)^2}}$$
+
+We already computed $p_D, p_C, E(X_D)$, and $E(X_C)$. We'll compute now the variances of both components of $X$, omitting the final expression of $Var(X)$ (which is really complex and with a lot of terms):
+
+$Var(X_D) = \displaystyle\sum_{x_k} \left(x_k-E(X_D)\right)^2 \Pr(x_k)$
+
+$\ \ \ \ \ \ = \left(0 - \cfrac{(k+40)\theta}{20(k+2)} \right)^2 \cfrac{k}{2(k+2)} + \left(\cfrac{\theta}{10} - \cfrac{(k+40)\theta}{20(k+2)} \right)^2 \cfrac{k}{2(k+2)} + \left(\theta - \cfrac{(k+40)\theta}{20(k+2)} \right)^2 \cfrac{2}{k+2}$
+
+$\ \ \ \ \ \ = \cfrac{(k+40)^2\theta^2}{400(k+2)^2} \cdot \cfrac{k}{2(k+2)} + \left(\cfrac{2\theta(k+2)-\theta(k+40)}{20(k+2)}\right)^2 \cdot \cfrac{k}{2(k+2)} + \left(\cfrac{20\theta(k+2)-\theta(k+40)}{20(k+2)}\right)^2 \cdot \cfrac{2}{k+2}$
+
+$\ \ \ \ \ \ = \cfrac{k\theta^2(k+40)^2}{800(k+2)} + \cfrac{4k\theta^2(k+2)^2+k\theta^2(k+40)^2-4k\theta^2(k+2)(k+40)}{800(k+2)^2}$
+
+$\ \ \ \ \ \ \ \ \ + \cfrac{1600\theta^2(k+2)^^2+4\theta^2(k+40)^2-80\theta^2(k+2)(k+40)}{800(k+2)^3}$
+
+$\ \ \ \ \ \ = \cfrac{2\theta^2(k+2)(k+40)^2 + 4\theta^2(k+400)(k+2)^2-4\theta^2(k+20)(k+2)(k+40)}{800(k+2)^3}$
+
+$\ \ \ \ \ \ = \cfrac{\theta^2(k+40)((k+40) - 2(k+20))}{400(k+2)^2} + \cfrac{\theta^2(k+400)}{200(k+2)}$
+
+$\ \ \ \ \ \ = \cfrac{\theta^2(k+400)}{200(k+2)} - \cfrac{k\theta^2(k+40)}{400(k+2)^2} = \cfrac{\theta^2((k+400)(k+2) - k (k+40))}{400(k+2)^2}$
+
+$\ \ \ \ \ \ = \cfrac{\theta^2(k^2+2k+400k+800-k^2-40k)}{400(k+2)^2} = \cfrac{\theta^2(362k+800)}{400(k+2)^2} = \cfrac{\theta^2(181k+400)}{200(k+2)^2}$
+
+$Var(X_C) = \displaystyle\int_{x=-\infty}^\infty x^2 f_C(x)dx - \left(E(X_C)\right)^2$
+
+$\ \ \ \ \ \ = \displaystyle\int_{x=A\sqrt{k/2}}^{A\sqrt{k-1}} \cfrac{4x^3}{A^2(k-2)}dx - \left(E(X_C)\right)^2 = \left[ \cfrac{x^4}{A^2(k-2)}\right]_{x=A\sqrt{k/2}}^{A\sqrt{k-1}} - \left(E(X_C)\right)^2$
+
+$\ \ \ \ \ \ = \cfrac{A^4(k-1)^2 - A^4 \cfrac{k^2}{4}}{A^2(k-2)} - \left(E(X_C)\right)^2 = \cfrac{A^2(k^2 + 1 - 2k - \cfrac{k^2}{4}}{k-2} - \left(E(X_C)\right)^2$
+
+$\ \ \ \ \ \ = \cfrac{A^2(3k^2 + 4 - 8k)}{4(k-2)} - \cfrac{16A^2}{9(k-2)^2} \left((k-1)^3 + \cfrac{k}{2} - 2 \left(\cfrac{k}{2}\right)^{\frac{3}{2}} (k-1)^{\frac{3}{2}}\right)$
 
 
 ## Question 4
@@ -163,6 +343,8 @@ $\ \ \ \ \ \ = 2 \left[-e^{-x} \right]_{x=0}^a \left[-\cfrac{e^{-2y}}{2}\right]_
 
 $\ \ \ \ \ \ = \mathbf{\textcolor{red}{1-e^{-a}}}$
 
+
+\pagebreak
 
 ## Question 5
 
@@ -231,6 +413,16 @@ $\cfrac{dE(Y)}{dx} = 0 \Rightarrow \mathbf{\textcolor{red}{x=E(X) - \cfrac{a}{2b
 **Suppose $X$ and $Y$ are independent continuous random variables, where both of which are uniformly distributed between $0$ and $1$. Let random variable $Z = X + Y$.**
 
 1. **Choose a value of $z$ between $0$ and $2$, and draw a graph depicting the region of the $X-Y$ plane for which $Z$ is less than $z$.**
+
+```{r, echo=FALSE, message = FALSE, warning = FALSE, fig.cap = "Some plot", fig.width = 6, fig.height = 4.5}
+library(plot3D)
+x <- y <- seq(0, 1, by = 0.01)
+grid <- mesh(x, y)
+z <- with(grid, x + y)
+par(mfrow = c(1, 2))
+contour(x, y, z, asp=1)
+persp3D(z = z, x = x, y = y, theta = 0)
+```
 
 2. **Derive the probability density function, $f(z)$.**
 
@@ -326,9 +518,3 @@ $$\widehat{\sigma^2} = \frac{1}{n}\sum_{i=1}^n \left(Y - \bar{Y} \right)^2$$
 
 6. **Calculate the power of this test, again assuming the "true" population proportion is $\theta^*= 0.45$.**
 
-
-\pagebreak
-
-```{r, include=TRUE, message = FALSE, warning = FALSE, fig.cap = "Some plot", fig.width = 6, fig.height = 4.5}
-plot(cars)
-```
