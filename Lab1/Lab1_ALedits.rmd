@@ -286,10 +286,12 @@ $$ E(\text{Rolls}|\text{Win 1st Roll}) = \frac{8}{32} + \frac{24}{32}(E + 1) \\
 
 On subsequent rolls, we have 
 
-$$ P(X) = \begin{pmatrix}
-  4 & 5 & 6 & 8 & 9 & 10 \\
-  \frac{3}{36} & \frac{4}{36} & \frac{5}{36} & \frac{5}{36} & \frac{4}{36} & \frac{3}{36}
-  \end{pmatrix}$$
+$$p(x) = 
+ \begin{cases}
+   \frac{3}{36}, & \text{if } x=4, 10 \\
+   \frac{4}{36}, & \text{if }  x=5, 9 \\
+	 \frac{5}{36}, & \text{if } x=6, 8 \\
+\end{cases}$$
 
 giving 3 unique scenarios. Similarly to roll one we have
 
@@ -302,7 +304,7 @@ $$ E(\text{Rolls}|\text{Win 2nd Roll}) = \frac{5}{30} + \frac{25}{30}(E + 1) \\
 
 And
 
-$$ E(\text{Rolls}|\text{You Win}) = frac{4(12) + 10(6) + 7.5(8) + 6(10)}{36} = 6.\overline{3}$$
+$$ E(\text{Rolls}|\text{You Win}) = \dfrac{4(12) + 10(6) + 7.5(8) + 6(10)}{36} = 6.\overline{3}$$
 
 For the house we have
 $$ E(\text{Rolls}|\text{Win 1st Roll}) = \frac{4}{28} + \frac{24}{28}(E + 1) \\
@@ -310,18 +312,35 @@ $$ E(\text{Rolls}|\text{Win 1st Roll}) = \frac{4}{28} + \frac{24}{28}(E + 1) \\
 $$ E(\text{Rolls}|\text{Win 2nd Roll}) = \frac{6}{33} + \frac{27}{33}(E + 1) \\
 = 5.5 $$
 $$ E(\text{Rolls}|\text{Win 2nd Roll}) = \frac{6}{32} + \frac{26}{32}(E + 1) \\
-= 5.\overline(3) $$
+= 5.\overline{3} $$
 $$ E(\text{Rolls}|\text{Win 2nd Roll}) = \frac{6}{31} + \frac{25}{31}(E + 1) \\
-= 5.1\overline(6) $$
+= 5.1\overline{6} $$
 
 And
 
-$$ E(\text{Rolls}|\text{House Win}) = frac{7(12) + 5.5(6) + 5.\overline(3)(8) + 5.1\overline(6)(10)}{36} = 5.87$$
+$$ E(\text{Rolls}|\text{House Win}) = \dfrac{7(12) + 5.5(6) + 5.\overline{3}(8) + 5.1\overline{6}(10)}{36} = 5.87$$
 
 Thus the expected rolls given you win is greater than the expected rolls given the house wins. 
 
 2. **Suppose it takes $\$20$ to play, and the payoff is $\$100$, $\$80$, $\$60$, $\$40$, $\$0$ if you win in the 1st, 2nd, 3rd, 4th, 5th round, respectively. That is, if you win in the 1st round, you are paid $\$100$ (so your net profit is $\$80$), if you win in the 2nd round, you are paid $\$80$, etc. Derive the expected payoff function of a game.**
 
+M: Monetary payoff
+$$E[M]=E[Y=1](100)+E[Y=2](80)+E[Y=3](60)+E[Y=4](40)+E[Y=5](0)$$
+$$=\frac{8}{36}\cdot 100 + \frac{24}{36} \cdot p(x) \cdot 80 +  \frac{24}{36} \cdot p(x) \cdot p(7^cx^c)\cdot 60 +  \frac{24}{36} \cdot p(x) \cdot p(7^cx^c)^2 \cdot 40 -20$$
+where: 
+$$p(x) = 
+ \begin{cases}
+   \frac{3}{36}, & \text{if } x=4, 10 \\
+	 \frac{4}{36}, & \text{if }  x=5, 9 \\
+	 \frac{5}{36}, & \text{if } x=6, 8 \\
+\end{cases}$$
+
+$$p(7^c x^c) = 
+ \begin{cases}
+	 \frac{27}{36}, & \text{if } x=4, 10 \\
+	 \frac{26}{36}, & \text{if }  x=5, 9 \\
+	 \frac{25}{36}, & \text{if } x=6, 8 \\
+\end{cases}$$
 
 
 **********
@@ -360,6 +379,7 @@ $$W = \sum_{i=1}^n a_iY_i$$
 $W_1=\frac{n-1}{n} \bar{Y} ; W_2=k \bar{Y}, where 0<k<1$
 
 $Bias(W) = E[W]-\theta$
+
 $Bias(W_1)=E[\frac{n-1}{n} \bar{Y}]-\bar{Y}$
 $=\frac{n-1}{n} E[\bar{Y}] - \bar{Y}=\mathbf{\textcolor{red}{\bar{Y} (\frac{n-1}{n}-1)}}$
 
@@ -375,7 +395,7 @@ $Var(W_1)=Var(\Sigma{\frac{n-1}{n} \bar{Y}}=Var(\frac{n-1}{n}) Var(\Sigma{\bar{Y
 $=\Sigma{Var(\frac{n-1}{n})} \Sigma{Var(\bar{Y}}=n\sigma^2\Sigma{Var(\frac{n-1}{n})}=n\sigma^2\frac{(n-1)^2}{n^2}$
 $\ \ \ \mathbf{\textcolor{red}{=\frac{\sigma^2 (n-1)^2}{n}}}$
 
-$Var(W_2)=Var(\Sigma{k\bar{Y}}=Var(k\Sigma{\bar{Y}})=kVar(\Sigma{/bar{Y}})=k\Sigma{Var{\bar{Y}}}=k\Sigma{\sigma^2}$
+$Var(W_2)=Var(\Sigma{k\bar{Y}}=Var(k\Sigma{\bar{Y}})=kVar(\Sigma{\bar{Y}})=k\Sigma{Var{\bar{Y}}}=k\Sigma{\sigma^2}$
 $\ \ \ \mathbf{\textcolor{red}{=kn\sigma^2}}$
 
 ## Question 10
