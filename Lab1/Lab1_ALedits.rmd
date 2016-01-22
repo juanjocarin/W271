@@ -324,9 +324,12 @@ Thus the expected rolls given you win is greater than the expected rolls given t
 
 2. **Suppose it takes $\$20$ to play, and the payoff is $\$100$, $\$80$, $\$60$, $\$40$, $\$0$ if you win in the 1st, 2nd, 3rd, 4th, 5th round, respectively. That is, if you win in the 1st round, you are paid $\$100$ (so your net profit is $\$80$), if you win in the 2nd round, you are paid $\$80$, etc. Derive the expected payoff function of a game.**
 
+
 M: Monetary payoff
-$$E[M]=E[Y=1](100)+E[Y=2](80)+E[Y=3](60)+E[Y=4](40)+E[Y=5](0)$$
-$$=\frac{8}{36}\cdot 100 + \frac{24}{36} \cdot p(x) \cdot 80 +  \frac{24}{36} \cdot p(x) \cdot p(7^cx^c)\cdot 60 +  \frac{24}{36} \cdot p(x) \cdot p(7^cx^c)^2 \cdot 40 -20$$
+$E[M]=E[Y=1](100)+E[Y=2](80)+E[Y=3](60)+E[Y=4](40)+E[Y=5](0)$
+
+$=\frac{8}{36}\cdot 100 + \frac{24}{36} \cdot p(x) \cdot 80 +  \frac{24}{36} \cdot p(x) \cdot p(7^cx^c)\cdot 60 +  \frac{24}{36} \cdot p(x) \cdot p(7^cx^c)^2 \cdot 40 -20$
+
 where: 
 $$p(x) = 
  \begin{cases}
@@ -341,6 +344,20 @@ $$p(7^c x^c) =
 	 \frac{26}{36}, & \text{if }  x=5, 9 \\
 	 \frac{25}{36}, & \text{if } x=6, 8 \\
 \end{cases}$$
+
+$E[M|x=2,3,12]=0$
+
+$E[M|x=7, 11]=100-20=80$
+
+$E[M|x=4,10]=\frac{8}{36}\cdot 100 + \frac{24}{36} \cdot \frac{3}{36} \cdot 80 +  \frac{24}{36} \cdot \frac{3}{36} \cdot \frac{27}{36}\cdot 60 +  \frac{24}{36} \cdot \frac{3}{36} \cdot \frac{27}{36}^2 \cdot 40 -20 = 10.4167$
+
+$E[M|x=5,9]=\frac{8}{36}\cdot 100 + \frac{24}{36} \cdot \frac{4}{36} \cdot 80 +  \frac{24}{36} \cdot \frac{4}{36} \cdot \frac{26}{36}\cdot 60 +  \frac{24}{36} \cdot \frac{4}{36} \cdot \frac{26}{36}^2 \cdot 40 -20 = 12.9035$
+
+$E[M|x=6,8]=\frac{8}{36}\cdot 100 + \frac{24}{36} \cdot \frac{5}{36} \cdot 80 +  \frac{24}{36} \cdot \frac{5}{36} \cdot \frac{25}{36}\cdot 60 +  \frac{24}{36} \cdot \frac{5}{36} \cdot \frac{25}{36}^2 \cdot 40 -20 = 15.2738$
+
+$E[M]=E[M|x=4,10]\cdot p(x=4,10)+E[M|x=5,9]\cdotp(x=5,9)+E[M|x=6,8]\cdot p(x=6,8)+E[M|x=2,3,12]\cdot p(x=2,3,12)+E[M|x=7,11]\cdot p(x=7,11)$
+
+$=10.4167\frac{6}{36} + 12.9035\frac{8}{36} + 15.2738 \frac{10}{36} + 0\frac{4}{36} + 80\frac{8}{36}=\mathbf{\textcolor{red}{26.624}}$
 
 
 **********
