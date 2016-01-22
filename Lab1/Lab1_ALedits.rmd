@@ -324,7 +324,6 @@ Thus the expected rolls given you win is greater than the expected rolls given t
 
 2. **Suppose it takes $\$20$ to play, and the payoff is $\$100$, $\$80$, $\$60$, $\$40$, $\$0$ if you win in the 1st, 2nd, 3rd, 4th, 5th round, respectively. That is, if you win in the 1st round, you are paid $\$100$ (so your net profit is $\$80$), if you win in the 2nd round, you are paid $\$80$, etc. Derive the expected payoff function of a game.**
 
-
 M: Monetary payoff
 $E[M]=E[Y=1](100)+E[Y=2](80)+E[Y=3](60)+E[Y=4](40)+E[Y=5](0)$
 
@@ -415,6 +414,8 @@ $\ \ \ \mathbf{\textcolor{red}{=\frac{\sigma^2 (n-1)^2}{n}}}$
 $Var(W_2)=Var(\Sigma{k\bar{Y}}=Var(k\Sigma{\bar{Y}})=kVar(\Sigma{\bar{Y}})=k\Sigma{Var{\bar{Y}}}=k\Sigma{\sigma^2}$
 $\ \ \ \mathbf{\textcolor{red}{=kn\sigma^2}}$
 
+$W_2$ has a lower variance because $\frac{(n-1)^2}{n} > kn$ for $0<k<1$. 
+
 ## Question 10
 
 **Given a random sample $Y_1, Y_2, \dots, Y_n$ from some distribution $F(\cdot )$ with mean $\mu$ and variance $\sigma^2$, where both $\mu$ and $\sigma^2$ are unknown parameters.**
@@ -438,6 +439,22 @@ $$\widehat{\sigma^2} = \frac{1}{n}\sum_{i=1}^n \left(Y - \bar{Y} \right)^2$$
 
 **Wooldridge's textbook: Appendix C, Question 4*i*, *ii*, *iii*.**
 
+4. **For positive random variables X and Y, suppose the expected value of Y given X is $E[Y|X]=\theta X$. The unknown parameter $\theta$ shows how the expected value of Y changes with X.**
+
+**(i) Define the random variable $Z=Y/X$. Show that $E(z)=\theta$. [Hint: Use Property CE.2 along with the law of iterated expectations, Property CE.4. In particular, first show that $E[Z|X]=\theta$ and then use CE.4.]**
+
+$E[Z|X]=E[\frac{Y}{X}|X]=E[\frac{1}{X}Y|X]=\frac{1}{X}E[Y|X]=\frac{1}{X} \cdot \theta X=\mathbf{\textcolor{red}{\theta}}$
+
+**(ii) Use part (i) to prove that the estimator $W_1=n^{-1} \Sigma_{i=1}^{n}{\frac{Y_i}{X_i}}$ is unbiased for $\theta$, where ${(X_i, Y_i): i=1,2,...n}$ is a random sample.**
+
+$bias(W)=E[W_1] -\theta$
+
+$E[W_1]=E[\frac{1}{n} \Sigma{\frac{Y_i}{X_i}}] = \frac{1}{n} \Sigma{E[\frac{Y_i}{X_i}]} = \frac{1}{n} \Sigma{E[Z_i]} = \frac{1}{n} \Sigma{\theta} = \frac{\theta}{n}$
+
+$\mathbf{\textcolor{red}{bias(W_1) = E[W_1]-\theta = \frac{\theta}{n} - \theta}}$
+
+**(iii) Explain why the estimator $W_2=\frac{\bar(Y)}{\bar{X}}$, where the overbars denote sample averages, is not the same as $W_1$. Nevertheless, show that $W_2$ is also unbiased for $\theta$.**
+
 
 ## Question 12
 
@@ -457,7 +474,9 @@ The alternative hypothesis is also stated as $\mathbf{\textcolor{red}{\mu_A < \m
 
 $t=\frac{\sqrt{n}\bar{y}}{s}=\frac{\sqrt{900}-32.8}{466.4}=-2.10977$
 
+
 $\mathbf{\textcolor{red}{p(.0179)<.05}}$ The null hypothesis can be rejected at the 5% level.
+
 $\mathbf{\textcolor{red}{p(.0179)>.01}}$ The null hypothesis cannot be rejected at the 1% level. 
 
 **(iv) Would you say that the estimated fall in consumption is large in magnitude? Comment on the practical versus statistical significance of this estimate.**
