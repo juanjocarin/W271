@@ -28,6 +28,8 @@ header-includes:
 
 # Part I: Marginal, Joint, and Conditional Probabilities
 
+![Venn Diagram](..\images\foto.jpg)
+
 ## Question 1
 
 **In a team of data scientists, 36 are expert in machine learning, 28 are expert in statistics, and 18 are awesome. 22 are expert in both machine learning and statistics, 12 are expert in machine learning and are awesome, 9 are expert in statistics and are awesome, and 48 are expert in either machine learning or statistics or are awesome. Suppose you are in a cocktail party with this group of data scientists and you have an equal probability of meeting any one of them.**
