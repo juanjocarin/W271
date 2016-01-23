@@ -426,7 +426,7 @@ contour(x, y, z, asp=1)
 persp3D(z = z, x = x, y = y, theta = 0)
 ```
 
-As shown above (especially in the contour plot on the left), $0 \leq Z \leq 1$, and for a given value of $z$ (let's use z = 0.8$) the region of the $X-Y$ plane for which $Z<z$ will be a triangle with vertices $(0,0), (z,0)$, and $(0,z)$.
+As shown above (especially in the contour plot on the left), $0 \leq Z \leq 1$, and for a given value of $z$ (let's use $z = 0.8$) the region of the $X-Y$ plane for which $Z<z$ will be a triangle with vertices $(0,0), (z,0)$, and $(0,z)$.
 
 \pagebreak
 
@@ -486,9 +486,6 @@ hist(Z, freq = FALSE)
 plot(density(Z), main = 'Density distribution of Z')
 ```
 
-|First die|Second die=2|Second die=3|
-|:---|:---|:---|
-|1|2|3|
 
 \pagebreak
 
@@ -513,8 +510,8 @@ kable(games, align = 'c', caption = 'Possible games')
 ```
 
 $$\Pr(X=x) =\begin{cases}
-\frac{x-1}{36} & x \in \{2,\dots,7\} \\
-\frac{13-x}{36} & x \in \{8,\dots,12\} \\
+\cfrac{x-1}{36} & x \in \{2,\dots,7\} \\
+\cfrac{13-x}{36} & x \in \{8,\dots,12\} \\
 \end{cases}$$
 
 $\Pr(X=2)=\Pr(X=12)=\cfrac{1}{36}$
@@ -617,20 +614,28 @@ $$\mathbf{\textcolor{red}{E[Y|Z]<E[Y|\bar{Z}]}}$$
 Let's prove it with a simulation:
 
 ```{r, echo=TRUE, message = FALSE, warning = FALSE}
-N <- 100e3
-Y <- rep(0, N)
-Z <- rep(0, N)
+N <- 100e3 # number of simulations
+Y <- rep(0, N) # value of Y (number of rolls for every simulation)
+Z <- rep(0, N) # value of Z (0: house wins; 1: I win)
 for (i in 1:N) {
-    y <- 0
-    x <- sample(seq(6), 1) + sample(seq(6), 1)
-    first_x <- x
-    y <- y+1
-    z <- ifelse(x==2 | x==3 | x==12, 0, ifelse(x==7 | x==11, 1, first_x))
+    y <- 0 # initialize number of rolls
+    x <- sample(seq(6), 1) + sample(seq(6), 1) # simulate two dice
+    y <- y+1 # update number of rolls
+    first_x <- x # store x (will be used if it's 4, 5, 6, 8, 9, 10)
+    # House wins if 2, 3, 12
+    # I win if 7, 11
+    # Otherwise, keep that value of x (and insert in z)
+    z <- ifelse(x==2 | x==3 | x==12, 0, 
+                ifelse(x==7 | x==11, 1, first_x))
+    # While z > 1 (i.e., if nobody wins)
     while (z>1) {
-        x <- sample(seq(6), 1) + sample(seq(6), 1)
-        y <- y+1
+        x <- sample(seq(6), 1) + sample(seq(6), 1) # simulate other roll
+        y <- y+1 # update number of rolls
+        # House wins if 7
+        # I win if same value of 1st roll
         z <- ifelse(x==7, 0, ifelse(x==first_x , 1, first_x))
     }
+    # When finished, store values for that simulation
     Y[i] <- y
     Z[i] <- z
 }
