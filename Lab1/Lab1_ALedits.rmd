@@ -1,15 +1,14 @@
 ---
-title: "**W271**-2 -- Spring 2016 -- **Lab 1**"
-author: "***Juanjo Carin, Kevin Davis, Ashley Levato, Minghu Song***"
-date: "*January 14, 2016*"
+title: '**W271**-2 -- Spring 2016 -- **Lab 1**'
+author: '***Juanjo Carin, Kevin Davis, Ashley Levato, Minghu Song***'
+date: '*January 14, 2016*'
 output:
-   pdf_document:
-      toc: true
-      fig_caption: yes
-      toc_depth: 2
-numbersections: false
-geometry: margin=1in
-fontsize: 10pt
+  pdf_document:
+    fig_caption: yes
+    toc: yes
+    toc_depth: 2
+  html_document:
+    toc: yes
 header-includes:
 - \usepackage{fancyhdr}
 - \usepackage{amsmath}
@@ -20,7 +19,9 @@ header-includes:
 - \fancyfoot[RE,RO]{\thepage}
 - \renewcommand{\headrulewidth}{0.5pt}
 - \renewcommand{\footrulewidth}{0.5pt}
-
+numbersections: no
+geometry: margin=1in
+fontsize: 10pt
 ---
 
 **********
@@ -426,13 +427,42 @@ $$\widehat{\sigma^2} = \frac{1}{n}\sum_{i=1}^n \left(Y - \bar{Y} \right)^2$$
 
 1. **Show that $E(\bar{Y}) = E(Y_i) \ \forall i \in 1,2,\dots,n$**
 
+$$E(\bar{Y}) = E\left(\cfrac{1}{n}\sum_{i=1}^nY_i\right)=\cfrac{1}{n} \cdot E\left(\sum_{i=1}^nY_i\right)=\cfrac{1}{n} \cdot \sum_{i=1}^nE(Y_i)=\cfrac{1}{n} \cdot \sum_{i=1}^n\mu=\cfrac{1}{n} \cdot (n\mu)=\mu$$
+
+Since $Y_1, Y_2, \dots, Y_n$ are iid random variables, $Y_i for all i \in 1,2,\dots,n$  have the same mean $\mu$. In other words, $E(Y_i) \ \forall i \in 1,2,\dots,n=\mu$. Therefore, $E(\bar{Y}) = E(Y_i) \ \forall i \in 1,2,\dots,n$.
+
 2. **Show that $Var(\bar{Y}) = \frac{1}{n}Var(Y_i) \ \forall i \in 1,2,\dots,n$**
+
+$$Var(\bar{Y}) = Var\left(\cfrac{1}{n}\sum_{i=1}^nY_i\right)=\cfrac{1}{n^2} \cdot Var\left(\sum_{i=1}^nY_i\right)= \cfrac{1}{n^2} \cdot \left(\sum_{i=1}^nVar(Y_i)\right)= \cfrac{1}{n^2} \cdot \left(\sum_{i=1}^n\sigma^2\right) = \cfrac{1}{n^2} \cdot (n\sigma^2) = \cfrac{\sigma^2}{n} $$ 
+
+Since $Y_1, Y_2, \dots, Y_n$ are iid random variables, $Y_i for all i \in 1,2,\dots,n$  have the same variance $\sigma^2$. In other words, $Var(Y_i) \ \forall i \in 1,2,\dots,n =\sigma^2$.  Therefore, $Var(\bar{Y}) = \frac{1}{n}Var(Y_i) \ \forall i \in 1,2,\dots,n$.
 
 3. **Compute the expectation of $\widehat{\sigma^2}$ in terms of $n$ and $\sigma^2$. In your derivation, make sure make use of the *i.i.d.* property and identify where you use it.**
 
+$E(\widehat{\sigma^2})=E\left(\cfrac{1}{n} \cdot \sum_{i=1}^n(Y-\bar{Y})^2 \right) = \cfrac{1}{n} \cdot E\left(\sum_{i=1}^n(Y-\bar{Y})^2 \right)= \cfrac{1}{n} \cdot E\left( \sum_{i=1}^n(Y_i^2 - 2Y_i^2\bar{Y} +\bar{Y}^2 ) \right)$
+
+$\ \ \ \ \ \ = \cfrac{1}{n} \cdot \left[E\left(\sum_{i=1}^nY_i^2\right) - E\left(\sum_{i=1}^n2\bar{Y}(Y_i)\right) + E\left(\sum_{i=1}^n \bar{Y}^2\right) \right]$
+
+Since $Var(X)=E\left[ (X-E(X)^2)\right]=E(X^2)-E(X)^2$,  $E(X^2)$ can be represented as $Var(X) + E(X)^2$. Given a random sample $Y_1, Y_2, \dots, Y_n$ from some distribution $F(\cdot )$ with mean $\mu$ and variance $\sigma^2$,  $$E\left(\sum_{i=1}^nY_i^2\right) = \sum_{i=1}^n E(Y_i^2)=\sum_{i=1}^n\left(Var(Y_i)+E(Y_i)^2\right)=\sum_{i=1}^n(\sigma^2+\mu^2)=n\sigma^2+n\mu^2$$
+
+Similarly, $E(\bar{Y}^2) =  Var(\bar{Y}) + E(\bar{Y})^2 =\cfrac{\sigma^2}{n} + \mu^2$
+
+In addition, 
+$$E\left(\sum_{i=1}^n2\bar{Y}(Y_i)\right) = E\left(2\bar{Y}\sum_{i=1}^nY_i\right)=E\left(2\bar{Y}\sum_{i=1}^nY_i\right)=E(2\bar{Y} \cdot n\bar{Y} )=2nE(\bar{Y}^2)$$
+
+Therefore, the above $E(\widehat{\sigma^2})$ can be further derived as:
+$$E(\widehat{\sigma^2})=\cfrac{1}{n} \cdot \left[n\sigma^2+n\mu^2 -2nE(\bar{Y}^2) + nE(\bar{Y}^2) \right]=\cfrac{1}{n} \cdot \left[ n\sigma^2+n\mu^2-nE(\bar{Y}^2)\right]=\cfrac{1}{n} \cdot \left[n\sigma^2+n\mu^2-n(\cfrac{\sigma^2}{n} + \mu^2) \right]$$
+$\ \ \ \ \ \ = \cfrac{1}{n} \cdot \left[n\sigma^2- \sigma^2 \right]= \mathbf{\textcolor{red}{\cfrac{n-1}{n}\sigma^2}}$
+
 4. **Is this an unbiased estimator for $\sigma^2$?**
 
+$\mathbf{\textcolor{red}{No}}$.  As shown above, since its expected value is equal to $\sigma^2$, it is not an unbiased estimator of the parameter $\sigma^2$. 
+
 5. **If not, what function of $\widehat{\sigma^2}$ produce an unbiased estimator?**
+
+In order to produce an unbiased estimator, the above $\widehat{\sigma^2}$ need to be modified to as below:
+
+$$s^2= \widehat{\sigma^2} \cdot (\cfrac{n}{n-1})=\frac{1}{n}\sum_{i=1}^n \left(Y - \bar{Y} \right)^2\cdot (\cfrac{n}{n-1})=\mathbf{\textcolor{red}{\cfrac{1}{n-1}\sum_{i=1}^n \left(Y - \bar{Y} \right)^2}}$$
 
 
 ## Question 11
