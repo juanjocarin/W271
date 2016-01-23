@@ -34,7 +34,7 @@ fontsize: 10pt
 
 **In a team of data scientists, 36 are expert in machine learning, 28 are expert in statistics, and 18 are awesome. 22 are expert in both machine learning and statistics, 12 are expert in machine learning and are awesome, 9 are expert in statistics and are awesome, and 48 are expert in either machine learning or statistics or are awesome. Suppose you are in a cocktail party with this group of data scientists and you have an equal probability of meeting any one of them.**
 
-![Venn Diagram](C:\Users\Batman\Pictures\Q1_VD.jpg)
+![Venn Diagram](images/Q1_VennDiagram.png)
 
 1. **What is the probability of meeting a data scientist who is an expert in both machine learning and statistics and is awesome?**
 
@@ -276,7 +276,27 @@ $$f_{Z}(z) = \begin{cases}
 
 **In a casino, you pay the following game. A pair of fair, ordinary 6-faced dice are rolled. If the sum of the dice is $2$, $3$, or $12$, the house wins. If it is $7$ or $11$, you win. If it is any other number $x$, the house rolls the dice again until the sum is either $7$ or $x$. If it is $7$, the house wins. If it is $x$, you win. A game ends if one of the two players wins. Let $Y$ be the number of rolls needed until the game ends.**
 
-![Table for dice game](C:\Users\Batman\Pictures\TableDiceGame.jpg)
+\begin{table}[h]
+\caption{Dice Game Rolls and Outcomes}
+\centering
+\begin{tabular}{c c c c}
+\hline\hline
+Sum & Rolls & \# of Rolls & Win Outcome \\ [0.5ex] 
+\hline
+2& (1,1)& 1 & H\\
+3& (1,2)* & 2 & H\\
+4& (2,2),(3,1)*  & 3&\\
+5& (4,1)*,(3,2)* & 4&\\
+6&(5,1)*,(5,2)*,(3,3) & 5&\\
+7&(6,1)*,(5,2)*,(4,3)* & 6 & P\\
+8&(6,2)*,(5,3)*,(4,4) & 5&\\
+9&(6,3)*,(5,4)* & 4&\\
+10&(6,4)*,(5,5) & 3&\\
+11&(6,5)* & 2 & P\\
+12&(6,6) & 1 & H\\
+\hline
+\end{tabular}
+\end{table}
 
 1. **Is the expected number of rolls given that you win more than, equal to, or less than the expected number of rolls given that house wins (in a game)? The steps to arrive at your answer numerically need to be clearly shown.**
 
