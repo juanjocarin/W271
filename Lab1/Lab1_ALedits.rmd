@@ -483,8 +483,20 @@ $E[W_1]=E[\frac{1}{n} \Sigma{\frac{Y_i}{X_i}}] = \frac{1}{n} \Sigma{E[\frac{Y_i}
 
 $\mathbf{\textcolor{red}{bias(W_1) = E[W_1]-\theta = \frac{\theta}{n} - \theta}}$
 
+$$E(W_1)=E\left[ \cfrac{1}{n}\sum_{i=1}^n(\cfrac{Y_i}{X_i}) \right]=\cfrac{1}{n}E\left[\sum_{i=1}^n(\cfrac{Y_i}{X_i})\right]=\cfrac{1}{n} \cdot n \cdot E(Z)= \mathbf{\textcolor{red}{\theta}}$$
+Therefore, the estimator W1 is unbiased for $\theta$.
+
+
 **(iii) Explain why the estimator $W_2=\frac{\bar(Y)}{\bar{X}}$, where the overbars denote sample averages, is not the same as $W_1$. Nevertheless, show that $W_2$ is also unbiased for $\theta$.**
 
+$E(W_2)=E\left(\cfrac{\bar{Y}}{\bar{X}}\right)=E\left( \cfrac{\cfrac{1}{n} \cdot \sum_{i=1}^n Y_i}{\cfrac{1}{n} \cdot \sum_{i=1}^n X_i} \right)=E\left( \cfrac{\sum_{i=1}^n Y_i}{\sum_{i=1}^n X_i}\right)=E(\sum_{i=1}^n Y_i) \cdot E\left( \cfrac{1}{\sum_{i=1}^n X_i} \right)$
+
+$\ \ \ \ \ \ =\sum_{i=1}^n (E(Y_i)) \cdot \left( \cfrac{1}{\sum_{i=1}^n E(X_i)}\right) = \sum_{i=1}^n (E(E(Y_i|X_i))) \cdot \left( \cfrac{1}{\sum_{i=1}^n E(X_i)}\right)$ 
+
+$\ \ \ \ \ \ = \sum_{i=1}^n (E(\theta \cdot X_i)) \cdot \left( \cfrac{1}{\sum_{i=1}^n E(X_i)}\right)=\theta \cdot \sum_{i=1}^n(E(X_i)) \cdot \left( \cfrac{1}{\sum_{i=1}^n E(X_i)}\right) = \mathbf{\textcolor{red}{\theta}}$ 
+
+
+Therefore, $W_2$ is also unbiased for $\theta$. Although $E(W_1)$ and $E(W_2)$ are all equal to $\theta$, $W_1=\cfrac{1}{n}\sum_{i=1}^n\left(\cfrac{Y_i}{X_i}\right)$ and $W_2= \cfrac{\sum_{i=1}^n Y_i}{\sum_{i=1}^n X_i}$ ,respectively. 
 
 ## Question 12
 
