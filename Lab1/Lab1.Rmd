@@ -24,7 +24,7 @@ header-includes:
 
 **********
 
-![UCB logo](/images/ucbseal_139_540.png)
+![UCB logo](images/ucbseal_139_540.png)
 
 \pagebreak
 
