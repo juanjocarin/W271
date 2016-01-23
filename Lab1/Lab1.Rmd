@@ -28,7 +28,7 @@ header-includes:
 
 # Part I: Marginal, Joint, and Conditional Probabilities
 
-![Venn Diagram](..\images\foto.jpg)
+![Venn Diagram](../images/foto.jpg)
 
 ## Question 1
 
