@@ -292,7 +292,7 @@ $$ E(\text{Rolls}|\text{Win 2nd Roll}) = \frac{5}{30} + \frac{25}{30}(E + 1) \\
 
 And
 
-$$ E(\text{Rolls}|\text{You Win}) = frac{4(12) + 10(6) + 7.5(8) + 6(10)}{36} = 6.\overline{3}$$
+$$ E(\text{Rolls}|\text{You Win}) = \frac{4(12) + 10(6) + 7.5(8) + 6(10)}{36} = 6.\overline{3}$$
 
 For the house we have
 $$ E(\text{Rolls}|\text{Win 1st Roll}) = \frac{4}{28} + \frac{24}{28}(E + 1) \\
@@ -306,7 +306,7 @@ $$ E(\text{Rolls}|\text{Win 2nd Roll}) = \frac{6}{31} + \frac{25}{31}(E + 1) \\
 
 And
 
-$$ E(\text{Rolls}|\text{House Win}) = frac{7(12) + 5.5(6) + 5.\overline(3)(8) + 5.1\overline(6)(10)}{36} = 5.87$$
+$$ E(\text{Rolls}|\text{House Win}) = \frac{7(12) + 5.5(6) + 5.\overline(3)(8) + 5.1\overline(6)(10)}{36} = 5.87$$
 
 Thus the expected rolls given you win is greater than the expected rolls given the house wins. 
 
@@ -332,22 +332,76 @@ $$W = \sum_{i=1}^n a_iY_i$$
 
 1. **What restriction on the $a_i$ is needed for $W$ to be an unbiased estimator of $\mu$?**
 
+$$W = a_{1}E(Y_{1}) + a_{2}E(Y_{2}) + ... + a_{n}E(Y_{n})$$
+
+And $Y_{i}$ = $\mu$ $\forall$ i $\in$ n.
+
+Therefore
+
+$$W = (a_{1} + a_{2} + ... + a_{n})\mu $$
+
+For W to be an unbiased estimator of $\mu$, $a_{1} + a_{2} + ... a_{3} = 1$
+
 2. **Find $Var(W)$.**
 
-3. **Given a set of numbes $a_1,\dots,a_n$, the following inequality holds:**
+$$Var(W) = a_{1}^2Var(Y_{1}) + a_{2}^2Var(Y_{2}) + ... + a_{n}^2Var(Y_{n})$$
+
+and Var($Y_{i}$) = $\sigma^2 \forall \in$ n. Therefore
+
+$$Var(W) = (a_{1}^2 + a_{2}^2 + ... + a_{n}^2)\sigma^2$$
+
+
+3. **Given a set of numbers $a_1,\dots,a_n$, the following inequality holds:**
 
     $$\frac{1}{n}\left(\sum_{i=1}^na_i\right)^2 \leq \sum_{i=1}^na_i^2$$
 
     **Use this inequality, along with the previous parts of this question, tho show that $Var(W) \geq Var(\bar{Y})$ whenever $W$ is unbiased. We say that $\bar{Y}$ is the best linear unbiased estimator (BLUE).**
 
+When W is unbiased (ie $(a_{1} + a_{2} + ... + a_{n}) = 1$), the expression becomes
+
+$$\frac{1}{n} \leq a_{1}^2 + a_{2}^2 + ... + a_{n}^2$$
+
+Multiplying by $\sigma$ we have
+
+$$Var(\bar{Y}) \leq \frac{\sigma}{n} = \sigma^2(a_{1}^2 + a_{2}^2 + ... + a_{n}^2) = Var(W)$$
+or
+$$Var(W) \geq Var(\bar(Y))$$
 
 ## Question 9
 
 **Let $\bar{Y}$ denote the average of $n$ independent draws from a population distribution with mean $\mu$ and variance $\sigma^2$. Consider two alternative estimators of $\mu$: $W_1 = \frac{n-1}{n}\bar{Y}$ and $W_2=k\bar{Y}$, where $0<k<1$.**
 
 1. **Compute the biases of both $W_1$ and $W_2$. Which estimator is consistent?**
+$$W_{1} = (\frac{n - 1}{n})\bar{Y}$$
+$$E(W_{1}) = \frac{n-1}{n}E(\bar{Y}) \\$$
+$$  = \frac{n-1}{n}\mu$$
+Therefore 
+$$Bias(W_{1}) = \frac{n-1}{n}\mu - \mu$$
+$$nBias(W_{1}) = -\mu$$
+$$Bias(W_{1}) = \frac{-\mu}{n}$$
+
+Note that as $n \to \infty$, Bias($W_{1}$) $\to$ 0. 
+
+
+
+$$W_2=k\bar{Y}$$
+$$E(W_2) = kE(\bar{Y})$$
+$$E(W_2) = k\mu$$
+And
+$$Bias(W_2) = k\mu - \mu$$
+$$Bias(W_2) = \mu(k - 1)$$
+Given that 0 < k < 1, -$\mu$ < Bias($W_2$) < 0.    
+Note that $W_1$ is consistent, as E($W_1$) converges to $\mu$ as $n \to \infty$.
 
 2. **Compute $Var(W_1)$ and $Var(W_2)$. Which estimator has lower variance?**
+$$Var(W_1) = (\frac{n-1}{2})^2Var(\bar(Y))$$
+$$Var(W_1) = \frac{n-1}{n}\frac{n-1}{n}\frac{\sigma^2}{n}$$
+$$Var(W_1) = \Big(\frac{(n-1)^2}{n^3}\Big)\sigma^2$$
+
+$$Var(W_2) = k^2Var(\bar(Y))$$
+$$Var(W_2) = \frac{k^2}{n}\sigma^2$$
+
+Note that by choosing k sufficiently close to 0, the variance of $W_2$ can be made arbitrarily small. Thus $W_2$ has the lower variance.
 
 
 ## Question 10
@@ -356,22 +410,120 @@ $$W = \sum_{i=1}^n a_iY_i$$
 
 **Let $\bar{Y}$ be the average of the sample. Consider the following estimator for $\sigma^2$:**
 
-$$\widehat{\sigma^2} = \frac{1}{n}\sum_{i=1}^n \left(Y - \bar{Y} \right)^2$$
+$$\widehat{\sigma^2} = \frac{1}{n}\sum_{i=1}^n \left(Y_i - \bar{Y} \right)^2$$
 
 1. **Show that $E(\bar{Y}) = E(Y_i) \ \forall i \in 1,2,\dots,n$**
 
+$$
+\begin{aligned}
+ E(\hat{Y}) &= \frac{1}{n}\sum_{i=1}^nE(Y_i) \\
+ &= \frac{1}{n}[E(Y_1) + E(Y_2) + ... + E(Y_n)]
+\end{aligned}
+$$
+
+Because $Y_1$ ... $Y_n$ are from the same distribution with mean $\mu$,
+
+$$E(\hat{Y}) = \frac{1}{n}[\mu + \mu  + ... + \mu ]$$
+
+Thus 
+
+$$E(Y_1) = E(Y_2) = \dots = E(Y_n) = E(\hat{Y})$$
+
 2. **Show that $Var(\bar{Y}) = \frac{1}{n}Var(Y_i) \ \forall i \in 1,2,\dots,n$**
+
+$$
+\begin{aligned}
+ Var(\hat{Y}) &= \sum_{i=1}^nVar(\frac{Y_i}{n}) \\
+ &= Var\bigg(\frac{1}{n}Y_1 + \frac{1}{n}Y_2 + \dots + \frac{1}{n}Y_n\bigg) \\
+ &= \frac{1}{n^2}Var(Y_1) + \frac{1}{n^2}Var(Y_2) + \dots + \frac{1}{n^2}Var(Y_n)
+\end{aligned}
+$$
+
+Since $Y_1$ $\dots$ $Y_n$ are from the same distribution with variance $\sigma^2$
+
+$$
+\begin{aligned}
+ &= \frac{1}{n^2}[\sigma^2 + \sigma^2 + ... + \sigma^2]
+\end{aligned}
+$$
+
+Note that $\sigma^2$ occurs n times
+
+$$
+\begin{aligned}
+ &= \frac{1}{n^2}[n\sigma^2]
+\end{aligned}
+$$
+
+
+Thus
+
+$$
+\begin{aligned}
+ Var(\hat{Y}) &= \frac{1}{n}Var(Y_i) \forall i \in 1,2 ,\dots, n
+\end{aligned}
+$$
 
 3. **Compute the expectation of $\widehat{\sigma^2}$ in terms of $n$ and $\sigma^2$. In your derivation, make sure make use of the *i.i.d.* property and identify where you use it.**
 
+$$
+\begin{aligned}
+ E(\widehat{\sigma^2}) &= E\bigg(\frac{(Y_i - \bar{Y})^2}{n}\bigg) \\
+ nE(\widehat{\sigma^2}) &= E\big(\sum_{i=1}^nY_i^2 - 2Y_i\bar{Y} + \bar{Y}^2\big) \\
+ &= E\bigg[\sum_{i=1}^nY_i^2\bigg] - E\bigg[2\bar{Y}\sum_{i=1}^nY_i\bigg] + E\bigg[\bar{Y}^2\sum_{i=1}^n1\bigg] \\
+\end{aligned}
+$$
+
+Note that $\sum_{i=1}^nY_i$ = n$\bar{Y}$
+
+$$
+\begin{aligned}
+ nE(\widehat{\sigma^2}) &= E\bigg[\sum_{i=1}^nY_i^2\bigg] - nE\bigg[\bar{Y}^2\bigg] \\
+ &= nE[Y_i^2] - nE[\bar{Y}^2] \\
+ E(\widehat{\sigma^2}) &= E[Y_i^2] - E[\bar{Y}^2]
+\end{aligned}
+$$
+
+Note that for indenpendent and indentically distributed random variables $Y_i \dots Y_n$ with sample mean $\bar{Y}$
+
+$$ E[Y^2] = E[\bar{Y^2}] = \frac{1}{n}\sigma^2 - \mu^2 $$
+
+Substituting into our equation gives
+
+$$
+\begin{aligned}
+ E(\widehat{\sigma^2}) &= \big[\sigma^2 + \mu^2\big] - \big[\frac{1}{n}\sigma^2 + \mu^2\big] \\
+ &= \frac{(n - 1)}{n} \sigma^2
+\end{aligned}
+$$
+
 4. **Is this an unbiased estimator for $\sigma^2$?**
+
+Since $E(\widehat{\sigma^2}) \neq \sigma^2$, this is a biased estimator.
+
 
 5. **If not, what function of $\widehat{\sigma^2}$ produce an unbiased estimator?**
 
+$$ E(\widehat{\sigma^2}) = \frac{1}{n - 1}\sum_{i=1}^n \left(Y_i - \bar{Y} \right)^2$$
 
 ## Question 11
 
 **Wooldridge's textbook: Appendix C, Question 4*i*, *ii*, *iii*.**
+
+4i. We have random variable Z = $\frac{Y}{X}$
+
+$$E(Z|X) = E(\frac{Y}{X}|X)$$
+
+Using property CE.2
+
+$$
+\begin{aligned} 
+ E(Z|X) &= \frac{1}{X}E({Y|X}) \\
+ &= \theta X/X \\
+ &= \theta
+\end{aligned}
+$$
+
 
 
 ## Question 12
