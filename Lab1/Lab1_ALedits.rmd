@@ -52,7 +52,7 @@ $\ \ \ \ \ \ = \Pr(M \cap S) + \Pr(M \cap A) + \Pr(M \cap A) - \Pr(M) - \Pr(S) -
 
 $\ \ \ \ \ \ = \cfrac{22}{N} + \cfrac{12}{N} + \cfrac{9}{N} - \cfrac{36}{N} - \cfrac{28}{N} - \cfrac{18}{N} + \cfrac{48}{N}  = \cfrac{(22+12+9)-(36-28-18)+48}{N} = \cfrac{43-82+48}{N}$
 
-$\ \ \ \ \ \ = \mathbf{\textcolor{red}{\cfrac{9}{N}}}$
+$\ \ \ \ \ \ = \mathbf{\textcolor{red}{\cfrac{9}{N}=\cfrac{9}{48}}}$
 
 2. **Suppose you meet a data scientist who is an expert in machine learning. Given this information, what is the probability that s/he is not awesome?**
 
@@ -67,6 +67,8 @@ $\ \ \ \ \ \ = \cfrac{\Pr(M \cap A) + \Pr(S \cap A) - \Pr((M \cap A) \cap (S \ca
 $\ \ \ \ \ \ = \cfrac{\cfrac{12}{N} + \cfrac{9}{N} - \cfrac{9}{N}}{\cfrac{18}{N}} = \cfrac{12+9-9}{18} = \cfrac{12}{18}$
 
 $\ \ \ \ \ \ = \mathbf{\textcolor{red}{\cfrac{2}{3} = `r formatC(2/3, format = "f", digits = 4, big.mark=",", drop0trailing = FALSE)`}}$
+
+Alternatively, if the ambiguity in the question is intending to mean the individual can not be experts in both machine learning and statisitcs given that s/he is awesome then the probability would be $= \mathbf{\textcolor{red}{\cfrac{3}{18}}}$.
 
 
 ## Question 2
@@ -127,14 +129,197 @@ $\mathbf{\textcolor{red}{\ \ \ \ \ \ 0 \leq \Pr(A | B) \leq 1}}$
 $$x= \begin{cases}
   \theta, & \text{if } t \leq 1 \\
   2(k-t)^{1/2}, & \text{if }  1 < t \leq k/2 \\
-	\theta / 10,& \text{if } k/2 < t \leq 3k/4 \\
+  \theta / 10,& \text{if } k/2 < t \leq 3k/4 \\
+  0 & \text{otherwise}\\
   \end{cases}$$
 
 1. **Given that the server lasts for $\frac{k}{4}$ years without failing, what is the probability that it will last another year?**
 
+$\mathbf{\textcolor{red}{\Pr\left(t \leq 1+\cfrac{k}{4} \bigg| t \geq \cfrac{k}{4} \right)}} = \cfrac{\Pr \left(\left( t \leq 1+\cfrac{k}{4} \right) \bigcap \left( t \geq \cfrac{k}{4} \right) \right)}{\Pr \left(t \geq \cfrac{k}{4}\right)} = \cfrac{\Pr \left(\cfrac{k}{4} \leq t \leq 1+\cfrac{k}{4} \right )}{Pr \left(t \geq \cfrac{k}{4}\right)}$
+
+$\ \ \ \ \ \ = \cfrac{\Pr \left(t \leq 1 +\cfrac{k}{4}\right) - \Pr \left(t \leq \cfrac{k}{4}\right)}{1-\Pr \left(t \leq \cfrac{k}{4}\right)} = \cfrac{\cfrac{1}{k}\left(1+\cfrac{k}{4} - \cfrac{k}{4} \right )}{1-\cfrac{1}{k}\cfrac{k}{4}} = \cfrac{\cfrac{1}{k}}{\cfrac{3}{4}}$
+
+$\ \ \ \ \ \ = \mathbf{\textcolor{red}{\cfrac{4}{3k}}}$
+
 2. **Compute the expected payout from the contract, $E(x)$.**
 
+Below are 3 different approaches, all leading to the same result.
+
+The first one is based on https://www.probabilitycourse.com/chapter4/4_3_1_mixed.php. Before computing the expected value of $X$, we need to compute its *cdf*.
+
+$t$ (the life span of the server) is a continuous variable with the following *pdf*:
+
+$$f_t(t) = \begin{cases}
+\cfrac{1}{k} & 0\leq t\leq\ k \\
+0 & \text{otherwise}
+\end{cases}$$
+
+But $X$ (the payout or refund) is not continuous:
+
+$$X = g(t) = \begin{cases}
+\theta & 0\leq t\leq\ 1 \\
+A\sqrt{k-t} & 1\leq t\leq\ \cfrac{k}{2} \\
+\cfrac{\theta}{10} & \cfrac{k}{2}\leq t\leq\ \cfrac{3k}{4} \\
+0 & \text{otherwise}
+\end{cases}$$
+
+(The value of $X$ for $t=1$ is $A\sqrt{k-1}$, which is not necessarily equal to $\theta$; the value of $X$ for $t=k/2$ is $A\sqrt{k/2}$, which again is not necessarily equal to $\theta/10$.)
+
+First we compute the probability that $X$ takes its possible discrete values:
+
+$\Pr(X = 0) = \Pr\left(t \geq \cfrac{3k}{4}\right) = 1 - F_t\left(\cfrac{3k}{4}\right) = 1 - \cfrac{1}{k}\cfrac{3k}{4} = 1 - \cfrac{3}{4} = \cfrac{1}{4}$
+
+$\Pr\left(X = \cfrac{\theta}{10}\right) = \Pr\left(\cfrac{k}{2} \leq t \leq \cfrac{3k}{4}\right) = F_t\left(\cfrac{3k}{4}\right) - F_t\left(\cfrac{k}{2}\right) = \cfrac{1}{k}\cfrac{3k}{4} - \cfrac{1}{k}\cfrac{k}{2} = \cfrac{3}{4} - \cfrac{1}{2} = \cfrac{3-2}{4} = \cfrac{1}{4}$
+
+$\Pr(X = \theta) = \Pr(0 \leq t \leq 1) = F_t(1) - F_t(0) = \cfrac{1}{k} - \cfrac{0}{k} = \cfrac{1}{k}$
+
+For $A\sqrt{\cfrac{k}{2}} \leq X \leq A\sqrt{k-1}$, we can compute the *cdf* of $X$ as follows:
+
+$F_X(x) = \Pr(X \leq x)= \Pr\left(A\sqrt{k-t} \leq x\right)$
+
+$\ \ \ \ \ \ = \Pr\left(k-t \leq \left(\frac{x}{A}\right)^2\right) = \Pr\left(t \geq k - \left(\frac{x}{A}\right)^2 \right) = 1 - \Pr\left(t \leq k - \left(\frac{x}{A}\right)^2 \right)$
+
+$\ \ \ \ \ \ = 1 - \displaystyle\int_{t=0}^{k - \left(\frac{x}{A}\right)^2}\cfrac{1}{k}dt = 1 - \cfrac{1}{k}\left(k - \left(\frac{x}{A}\right)^2\right) = \cfrac{x^2}{kA^2}$
+
+So the overall expression for $F_X(x)$ is:
+
+$$F_X(x) = \begin{cases}
+0 & x < 0 \\
+\cfrac{1}{4} & 0 \leq x < \cfrac{\theta}{10} \\
+\cfrac{1}{2} & \cfrac{\theta}{10}\leq x \leq\ A\sqrt{\cfrac{k}{2}} \\
+\cfrac{x^2}{kA^2} & A\sqrt{\cfrac{k}{2}} \leq x \leq\ A\sqrt{k-1} \\
+1-\cfrac{1}{k} & A\sqrt{k-1} \leq x < \theta \\
+1 & x \geq \theta
+\end{cases}$$
+
+Let's check that:
+
+$$\int_{x=A\sqrt{k/2}}^{A\sqrt{k-1}}\frac{dF_X(x)}{dx}dx + \sum_{x_k}\Pr(X=x_k) =1$$
+
+$\displaystyle\int_{x=A\sqrt{k/2}}^{A\sqrt{k-1}}\cfrac{2x}{kA^2}dx + \Pr(X=0) + \Pr\left(X=\cfrac{\theta}{10}\right) + \Pr(X=\theta) = \left[ \cfrac{x^2}{kA^2}\right]_{x=A\sqrt{k/2}}^{A\sqrt{k-1}} + \cfrac{1}{4} + \cfrac{1}{4} + \cfrac{1}{k}$
+
+$\ \ \ \ \ \ = \cfrac{(k-1)-\cfrac{k}{2}}{k} + \cfrac{1}{2} + \cfrac{1}{k} = \cfrac{\cfrac{k}{2}-1}{k} + \cfrac{1}{2} + \cfrac{1}{k} = \cfrac{1}{2} - \cfrac{1}{k} + \cfrac{1}{2} + \cfrac{1}{k} = 1$
+
+Now we can compute the expected value of $X$ as:
+
+$\mathbf{\textcolor{red}{E(X)}} = \displaystyle\int_{x=A\sqrt{k/2}}^{A\sqrt{k-1}}x\frac{dF_X(x)}{dx}dx + \displaystyle\sum_{x_k}x_k\Pr(X=x_k)$
+
+$\ \ \ \ \ \ = \displaystyle\int_{x=A\sqrt{k/2}}^{A\sqrt{k-1}}\cfrac{2x^2}{kA^2}dx + 0\cdot\Pr(X=0) + \cfrac{\theta}{10}\cdot \Pr\left(X=\cfrac{\theta}{10}\right) + \theta\cdot\Pr(X=\theta)$
+
+$\ \ \ \ \ \ = \left[ \cfrac{2x^2}{3kA^2}\right]_{x=A\sqrt{k/2}}^{A\sqrt{k-1}} + 0\cdot\cfrac{1}{4} + \cfrac{\theta}{10}\cdot\cfrac{1}{4} + \theta\cdot\cfrac{1}{k} = \mathbf{\textcolor{red}{\cfrac{2A}{3k}\left((k-1)^{\frac{3}{2}}-\left(\cfrac{k}{2}\right)^{\frac{3}{2}}\right) + \cfrac{\theta}{40} + \cfrac{\theta}{k}}}$
+
+```{r, echo=FALSE, message = FALSE, warning = FALSE, fig.cap = "Approximate aspect of $F_X(x)$ (for $A=2, k=8, \\theta=30$)", fig.width = 4, fig.height = 4}
+F <- function(x) {
+    ifelse(x<0, 0, 
+           ifelse(x < 3, 1/4, 
+                  ifelse(x < 4, 1/2, 
+                         ifelse(x < 2*sqrt(7), x^2/32, 
+                                ifelse(x < 30, 1-1/8, 1)))))
+    }
+x=seq(-5, 35, by = 0.01)
+plot(x, F(x), type='l', xaxt='n', yaxt='n')
+axis(side = 2, at = seq(0, 1, .25))
+axis(side = 1, at = seq(0, 30, 5))
+# library(ggplot2)
+# ggplot(data.frame(x), aes(x)) + stat_function(fun=eq, geom = 'step')
+```
+
+
+Another way would be just applying the *law of the unconscious statistician* (https://en.wikipedia.org/wiki/Law_of_the_unconscious_statistician):
+
+$$E\left[g(t)\right] = \int g(t)f_t(t)dt$$
+
+$\mathbf{\textcolor{red}{E(X)}} = \displaystyle\int_{t=0}^kg(t)f_t(t)dt$
+
+$\ \ \ \ \ \ = \displaystyle\int_{t=0}^1\cfrac{g(x)}{k}dt + \displaystyle\int_{t=1}^{k/2}\cfrac{g(x)}{k}dt + \displaystyle\int_{t=k/2}^{3k/4}\cfrac{g(x)}{k}dt + \displaystyle\int_{t=3k/4}^k\cfrac{g(x)}{k}dt$
+
+$\ \ \ \ \ \ = \cfrac{\theta}{k}\left[t\right]_{t=0}^1 + \cfrac{A}{k}\left[\left(-\cfrac{2}{3}\right)(k-t)^{\frac{3}{2}}\right]_{t=1}^{k/2} + \cfrac{\theta/10}{k}\left[t\right]_{t=k/2}^{3k/4} + \cfrac{0}{k}\left[t\right]_{t=3k/4}^k$
+
+$\ \ \ \ \ \ = \cfrac{\theta}{k} + \cfrac{2A}{3k}\left((k-1)^{\frac{3}{2}}-\left(\cfrac{k}{2}\right)^{\frac{3}{2}}\right) + \cfrac{\theta}{10k}\cfrac{k}{4} + 0 = \mathbf{\textcolor{red}{\cfrac{2A}{3k}\left((k-1)^{\frac{3}{2}}-\left(\cfrac{k}{2}\right)^{\frac{3}{2}}\right) + \cfrac{\theta}{40} + \cfrac{\theta}{k}}}$
+
+The last approach is based on http://homepage.stat.uiowa.edu/~nshyamal/22S175/DI.pdf. A *mixed distribution* can be decomposed into a continuous distribution and a discrete one:
+
+$$\mathbf{F(x) = F_C(x) + F_D(x)}$$
+
+each with weights $p_C$ and $p_D$, respectively.
+
+$p_D$ is the sum of the heights of the jumps:
+
+$F(0)-F(0^-) = \cfrac{1}{4}$
+
+$F\left(\cfrac{\theta}{10}\right) - F\left(\cfrac{\theta^-}{10}\right) = \cfrac{1}{4}$
+
+$F(\theta) - F(\theta^-) = \cfrac{1}{k}$
+
+$\ \ \ \ \ \ \Rightarrow p_D = \cfrac{1}{2} + \cfrac{1}{k} = \cfrac{k+2}{2k} \Rightarrow \mathbf{p_C = 1 - p_D} = \cfrac{k-2}{2k}$
+
+$$\Pr(X_D=x) = \begin{cases}
+\cfrac{\cfrac{1}{4}}{\cfrac{k+2}{2k}} = \cfrac{1}{4}\cfrac{2k}{k+2} = \cfrac{k}{2(k+2)} & x=0 \\
+\cfrac{\cfrac{1}{4}}{\cfrac{k+2}{2k}} = \cfrac{1}{4}\cfrac{2k}{k+2} = \cfrac{k}{2(k+2)} & x=\cfrac{\theta}{10} \\
+\cfrac{\cfrac{1}{k}}{\cfrac{k+2}{2k}} = \cfrac{1}{k}\cfrac{2k}{k+2} = \cfrac{2}{k+2} & x=\theta
+\end{cases}$$
+
+$$\mathbf{F_C(x) = \frac{F(x) + p_D \cdot F_D(x)}{p_C}}$$
+
+$$\Rightarrow F_C(X_C=x) = \begin{cases}
+0 & x < A\sqrt{\cfrac{k}{2}} \\
+\cfrac{2x^2-kA^2}{A^2(k-2)} & A\sqrt{\cfrac{k}{2}} \leq x < A\sqrt{k-1} \\
+1 & x \geq A\sqrt{k-1}
+\end{cases}$$
+
+$$\Rightarrow f_C(X_C=x) = \begin{cases}
+0 & x < A\sqrt{\cfrac{k}{2}} \\
+\cfrac{4x}{A^2(k-2)} & A\sqrt{\cfrac{k}{2}} \leq x < A\sqrt{k-1} \\
+0 & x \geq A\sqrt{k-1}
+\end{cases}$$
+
+$E(X_D) = \displaystyle\sum_{x_k} x_k\Pr(X_D=x_k) = 0\cdot\cfrac{k}{2(k+2)} + \cfrac{\theta}{10}\cdot\cfrac{k}{2(k+2)} + \theta\cdot\cfrac{2}{k+2}$
+
+$\ \ \ \ \ \ = \cfrac{k\theta}{20(k+2)} + \cfrac{2\theta}{k+2} = \cfrac{(k+40)\theta}{20(k+2)}$
+
+$E(X_C) = \displaystyle\int_{x=-\infty}^\infty xf_C(x)dx = \displaystyle\int_{x=A\sqrt{k/2}}^{A\sqrt{k-1}} \cfrac{4x^2}{A^2(k-2)}dx = \left[\cfrac{4x^3}{3A^2(k-2)}\right]_{x=A\sqrt{k/2}}^{A\sqrt{k-1}} = \cfrac{4A}{3(k-2)}\left((k-1)^{\frac{3}{2}} - \left(\cfrac{k}{2}\right)^{\frac{3}{2}}\right)$
+
+$$\mathbf{E(X) = p_D \cdot E(X_D) + p_C \cdot E(X_C)}$$
+
+$\mathbf{\textcolor{red}{E(X)}} = \cfrac{k+2}{2k}\cdot\cfrac{(k+40)\theta}{20(k+2)}+\cfrac{k-2}{2k}\cdot\cfrac{4A}{3(k-2)}\left((k-1)^{\frac{3}{2}} - \left(\cfrac{k}{2}\right)^{\frac{3}{2}}\right)$
+
+$\ \ \ \ \ \ = \mathbf{\textcolor{red}{\cfrac{2A}{3k}\left((k-1)^{\frac{3}{2}}-\left(\cfrac{k}{2}\right)^{\frac{3}{2}}\right) + \cfrac{\theta}{40} + \cfrac{\theta}{k}}}$
+
+
 3. **Compute the variance of the payout from the contract.**
+
+The 3rd link in (2) mentions the expression for the variance of a mixed random variable:
+
+$$\mathbf{\textcolor{red}{Var(X) = \left(p_D \cdot Var(X_D) + p_C \cdot Var(X_C) \right) + p_D \cdot p_C \cdot \left(E(X_D) - E(X_C) \right)^2}}$$
+
+We already computed $p_D, p_C, E(X_D)$, and $E(X_C)$. We'll compute now the variances of both components of $X$, omitting the final expression of $Var(X)$ (which is really complex and with a lot of terms):
+
+$Var(X_D) = \displaystyle\sum_{x_k} \left(x_k-E(X_D)\right)^2 \Pr(x_k)$
+
+$\ \ \ \ \ \ = \left(0 - \cfrac{(k+40)\theta}{20(k+2)} \right)^2 \cfrac{k}{2(k+2)} + \left(\cfrac{\theta}{10} - \cfrac{(k+40)\theta}{20(k+2)} \right)^2 \cfrac{k}{2(k+2)} + \left(\theta - \cfrac{(k+40)\theta}{20(k+2)} \right)^2 \cfrac{2}{k+2}$
+
+$\ \ \ \ \ \ = \cfrac{(k+40)^2\theta^2}{400(k+2)^2} \cdot \cfrac{k}{2(k+2)} + \left(\cfrac{2\theta(k+2)-\theta(k+40)}{20(k+2)}\right)^2 \cdot \cfrac{k}{2(k+2)} + \left(\cfrac{20\theta(k+2)-\theta(k+40)}{20(k+2)}\right)^2 \cdot \cfrac{2}{k+2}$
+
+$\ \ \ \ \ \ = \cfrac{k\theta^2(k+40)^2}{800(k+2)} + \cfrac{4k\theta^2(k+2)^2+k\theta^2(k+40)^2-4k\theta^2(k+2)(k+40)}{800(k+2)^2}$
+
+$\ \ \ \ \ \ \ \ \ + \cfrac{1600\theta^2(k+2)^^2+4\theta^2(k+40)^2-80\theta^2(k+2)(k+40)}{800(k+2)^3}$
+
+$\ \ \ \ \ \ = \cfrac{2\theta^2(k+2)(k+40)^2 + 4\theta^2(k+400)(k+2)^2-4\theta^2(k+20)(k+2)(k+40)}{800(k+2)^3}$
+
+$\ \ \ \ \ \ = \cfrac{\theta^2(k+40)((k+40) - 2(k+20))}{400(k+2)^2} + \cfrac{\theta^2(k+400)}{200(k+2)}$
+
+$\ \ \ \ \ \ = \cfrac{\theta^2(k+400)}{200(k+2)} - \cfrac{k\theta^2(k+40)}{400(k+2)^2} = \cfrac{\theta^2((k+400)(k+2) - k (k+40))}{400(k+2)^2}$
+
+$\ \ \ \ \ \ = \cfrac{\theta^2(k^2+2k+400k+800-k^2-40k)}{400(k+2)^2} = \cfrac{\theta^2(362k+800)}{400(k+2)^2} = \cfrac{\theta^2(181k+400)}{200(k+2)^2}$
+
+$Var(X_C) = \displaystyle\int_{x=-\infty}^\infty x^2 f_C(x)dx - \left(E(X_C)\right)^2$
+
+$\ \ \ \ \ \ = \displaystyle\int_{x=A\sqrt{k/2}}^{A\sqrt{k-1}} \cfrac{4x^3}{A^2(k-2)}dx - \left(E(X_C)\right)^2 = \left[ \cfrac{x^4}{A^2(k-2)}\right]_{x=A\sqrt{k/2}}^{A\sqrt{k-1}} - \left(E(X_C)\right)^2$
+
+$\ \ \ \ \ \ = \cfrac{A^4(k-1)^2 - A^4 \cfrac{k^2}{4}}{A^2(k-2)} - \left(E(X_C)\right)^2 = \cfrac{A^2(k^2 + 1 - 2k - \cfrac{k^2}{4}}{k-2} - \left(E(X_C)\right)^2$
+
+$\ \ \ \ \ \ = \cfrac{A^2(3k^2 + 4 - 8k)}{4(k-2)} - \cfrac{16A^2}{9(k-2)^2} \left((k-1)^3 + \cfrac{k}{2} - 2 \left(\cfrac{k}{2}\right)^{\frac{3}{2}} (k-1)^{\frac{3}{2}}\right)$
+
 
 
 ## Question 4
@@ -207,7 +392,7 @@ $\cfrac{dE(Y)}{dx} = 0 \Rightarrow \mathbf{\textcolor{red}{x=E(X)}}$
 
 2. **Find the value of $E(Y)$ for the choice of $x$ you found in (1)?**
 
-We just have to substitute in the last expression of $E(Y)
+We just have to substitute in the last expression of $E(Y)$
 
 $\mathbf{\textcolor{red}{E(Y)}} = \displaystyle\int \left(a+b(X-\mu)^2 \right) f(X)dX$
 
@@ -242,6 +427,36 @@ $\cfrac{dE(Y)}{dx} = 0 \Rightarrow \mathbf{\textcolor{red}{x=E(X) - \cfrac{a}{2b
 
 1. **Choose a value of $z$ between $0$ and $2$, and draw a graph depicting the region of the $X-Y$ plane for which $Z$ is less than $z$.**
 
+First let's plot the thre variables:
+
+```{r, echo=FALSE, message = FALSE, warning = FALSE, fig.cap = "Contour plot and 3D plot of $X, Y, Z$", fig.width = 6, fig.height = 4.5}
+library(plot3D)
+x <- y <- seq(0, 1, by = 0.01)
+grid <- mesh(x, y)
+z <- with(grid, x + y)
+par(mfrow = c(1, 2))
+contour(x, y, z, asp=1)
+persp3D(z = z, x = x, y = y, theta = 0)
+```
+
+As shown above (especially in the contour plot on the left), $0 \leq Z \leq 1$, and for a given value of $z$ (let's use $z = 0.8$) the region of the $X-Y$ plane for which $Z<z$ will be a triangle with vertices $(0,0), (z,0)$, and $(0,z)$.
+
+\pagebreak
+
+```{r, echo=FALSE, message = FALSE, warning = FALSE, fig.cap = "Region of the $X-Y$ plane for which $Z<z$ where $z=0.8$", fig.width = 6, fig.height = 4.5}
+simulations <- 100e3
+X <- runif(simulations, min=0, max=1)
+Y <- runif(simulations, min=0, max=1)
+Z <- X+Y
+
+z = 0.8
+
+plot(X[Z<z], Y[Z<z], col='red', asp = 1)
+polygon(x=c(0,z,0), y=c(0,0,z))
+# abline(a=z, b=-1); abline(h=0); abline(v=0)
+```
+
+
 2. **Derive the probability density function, $f(z)$.**
 
 Note that 
@@ -272,21 +487,90 @@ $$f_{Z}(z) = \begin{cases}
   \end{cases}$$
   
   
+  
+ALT
+
+There is a theorem that states:
+
+> Let $X$ and $Y$ be two independent random variables with density functions $f_X(x)$ and $f_Y(y)$. Then the sum $Z = X + Y$ is a random variable with density function $f_Z(z)$, where $f_Z$ is the convolution of $f_X$ and $f_Y$.
+
+$$(f*g)(z) = \int_{x=-\infty}^{+\infty}f_Y(z-x)f_X(x)dx = \int_{y=-\infty}^{+\infty}f_X(z-y)f_Y(y)dy$$
+
+In our case:
+
+$$f_X(x) = f_Y(y) = \begin{cases}
+1 & 0\leq x\leq\ 1 \\
+0 & Otherwise
+\end{cases}$$
+
+So: 
+
+$f_Z(z) = \displaystyle\int_{x=0}^1 f_Y(z-x)dx$
+
+$f_Y(z-x) \neq 0 \Leftrightarrow 0 \leq z-x \leq 1 \Leftrightarrow z-1 \leq x \leq z$
+
+So for $0 \leq z \leq 1$
+
+$\ \ \ \ \ \ f_Z(z) = \displaystyle\int_{x=0}^z dx = z$
+
+While for $1 \leq z \leq 2$
+
+$\ \ \ \ \ \ f_Z(z) = \displaystyle\int_{x=z-1}^1 dx = 1-(z-1)=2-z$
+
+In summary:
+
+$$\mathbf{\textcolor{red}{f_Z(z) = \begin{cases}
+z & 0\leq z\leq 1 \\
+2 - z & 1\textless z\leq 2 \\
+0 & Otherwise
+\end{cases}}}$$
+
+```{r, echo=FALSE, message = FALSE, warning = FALSE, fig.cap = "Histogram and (approximate) density distribution plot of $Z$", fig.width = 6, fig.height = 4.5}
+par(mfrow = c(1, 2))
+hist(Z, freq = FALSE)
+plot(density(Z), main = 'Density distribution of Z')
+```
+
+
+\pagebreak
+
+  
 ## Question 7
 
 **In a casino, you pay the following game. A pair of fair, ordinary 6-faced dice are rolled. If the sum of the dice is $2$, $3$, or $12$, the house wins. If it is $7$ or $11$, you win. If it is any other number $x$, the house rolls the dice again until the sum is either $7$ or $x$. If it is $7$, the house wins. If it is $x$, you win. A game ends if one of the two players wins. Let $Y$ be the number of rolls needed until the game ends.**
 
-![Table for dice game](C:\Users\Batman\Pictures\TableDiceGame.jpg)
+\begin{table}[h]
+\caption{Dice Game Rolls and Outcomes}
+\centering
+\begin{tabular}{c c c c}
+\hline\hline
+Sum & Rolls & \# of Rolls & Win Outcome \\ [0.5ex] 
+\hline
+2& (1,1)& 1 & H\\
+3& (1,2)* & 2 & H\\
+4& (2,2),(3,1)*  & 3&\\
+5& (4,1)*,(3,2)* & 4&\\
+6&(5,1)*,(5,2)*,(3,3) & 5&\\
+7&(6,1)*,(5,2)*,(4,3)* & 6 & P\\
+8&(6,2)*,(5,3)*,(4,4) & 5&\\
+9&(6,3)*,(5,4)* & 4&\\
+10&(6,4)*,(5,5) & 3&\\
+11&(6,5)* & 2 & P\\
+12&(6,6) & 1 & H\\
+\hline
+\end{tabular}
+\end{table}
 
 1. **Is the expected number of rolls given that you win more than, equal to, or less than the expected number of rolls given that house wins (in a game)? The steps to arrive at your answer numerically need to be clearly shown.**
 
-On the first roll, the house wins 4 games, so their are 36-4 = 32 games.
+Y: number of rolls, H: the house wins, P: the player wins, x: sum of dice rolled that does not equal 2, 3, 12, 7, 11
+$E[Y|H] = \Sigma{y_i\cdot f_{Y|H}(y_i|H)}$
+$=\frac{4}{36} + \Sigma_{i=2}^{n}{y_i \cdot \frac{24}{36} \cdot \frac{6}{36}\cdot p(7^cx^c)^{i-1}}$
 
-$$ E(\text{Rolls}|\text{Win 1st Roll}) = \frac{8}{32} + \frac{24}{32}(E + 1) \\
-= 4 $$
+$E[Y|P] = \Sigma{y_i\cdot f_{Y|H}(y_i|H)}$
+$=\frac{8}{36} + \Sigma_{i=2}^{n}{y_i \cdot \frac{24}{36} \cdot p(x)^i\cdot p(7^cx^c)^{i-1}}$
 
-On subsequent rolls, we have 
-
+where: 
 $$p(x) = 
  \begin{cases}
    \frac{3}{36}, & \text{if } x=4, 10 \\
@@ -294,34 +578,22 @@ $$p(x) =
 	 \frac{5}{36}, & \text{if } x=6, 8 \\
 \end{cases}$$
 
-giving 3 unique scenarios. Similarly to roll one we have
+$$p(7^c x^c) = 
+ \begin{cases}
+	 \frac{27}{36}, & \text{if } x=4, 10 \\
+	 \frac{26}{36}, & \text{if }  x=5, 9 \\
+	 \frac{25}{36}, & \text{if } x=6, 8 \\
+\end{cases}$$
 
-$$ E(\text{Rolls}|\text{Win 2nd Roll}) = \frac{3}{30} + \frac{27}{30}(E + 1) \\
-= 10 $$
-$$ E(\text{Rolls}|\text{Win 2nd Roll}) = \frac{4}{30} + \frac{26}{30}(E + 1) \\
-= 7.5 $$
-$$ E(\text{Rolls}|\text{Win 2nd Roll}) = \frac{5}{30} + \frac{25}{30}(E + 1) \\
-= 6 $$
+To determine if $E[Y|P]$ is more than, less than, or equal to $E[Y|H]$, we can take the difference and see if it is >, <, or = to zero. 
 
-And
+$E[Y|P]-E[Y|H]$
+$=\frac{8}{36} + \Sigma_{i=2}^{n}{y_i \cdot \frac{24}{36} \cdot p(x)^i\cdot p(7^cx^c)^{i-1}} - \frac{4}{36} + \Sigma_{i=2}^{n}{y_i \cdot \frac{24}{36} \cdot \frac{6}{36}\cdot p(7^cx^c)^{i-1}}$
 
-$$ E(\text{Rolls}|\text{You Win}) = \dfrac{4(12) + 10(6) + 7.5(8) + 6(10)}{36} = 6.\overline{3}$$
+$=\frac{4}{36}-\frac{24}{36}\Sigma_{i=2}^{n}{ y_i\cdot p(7^cx^c)^{i-1} (p(x)^i- \frac{6}{36})}$
 
-For the house we have
-$$ E(\text{Rolls}|\text{Win 1st Roll}) = \frac{4}{28} + \frac{24}{28}(E + 1) \\
-= 7 $$
-$$ E(\text{Rolls}|\text{Win 2nd Roll}) = \frac{6}{33} + \frac{27}{33}(E + 1) \\
-= 5.5 $$
-$$ E(\text{Rolls}|\text{Win 2nd Roll}) = \frac{6}{32} + \frac{26}{32}(E + 1) \\
-= 5.\overline{3} $$
-$$ E(\text{Rolls}|\text{Win 2nd Roll}) = \frac{6}{31} + \frac{25}{31}(E + 1) \\
-= 5.1\overline{6} $$
+Based on the above equation it will be based on the portion of the equation $(p(x)^i- \frac{6}{36})$ and for all $i=2,....n$ it will be less than zero. Therefore, $\mathbf{\textcolor{red}{E[Y|P] < E[Y|H]}}$
 
-And
-
-$$ E(\text{Rolls}|\text{House Win}) = \dfrac{7(12) + 5.5(6) + 5.\overline{3}(8) + 5.1\overline{6}(10)}{36} = 5.87$$
-
-Thus the expected rolls given you win is greater than the expected rolls given the house wins. 
 
 2. **Suppose it takes $\$20$ to play, and the payoff is $\$100$, $\$80$, $\$60$, $\$40$, $\$0$ if you win in the 1st, 2nd, 3rd, 4th, 5th round, respectively. That is, if you win in the 1st round, you are paid $\$100$ (so your net profit is $\$80$), if you win in the 2nd round, you are paid $\$80$, etc. Derive the expected payoff function of a game.**
 
@@ -402,7 +674,7 @@ $=\frac{n-1}{n} E[\bar{Y}] - \bar{Y}=\mathbf{\textcolor{red}{\bar{Y} (\frac{n-1}
 
 $Bias(W_2)=E[k\bar{Y}]-\bar{Y}=kE[\bar{Y}]-\bar{Y}=\mathbf{\textcolor{red}{\bar{Y}(k-1)}}$
 
-The $W_2$ estimator is consistent because it does not depend on n. 
+The $W_2$ estimator is consistent because it does not depend on n.
 
 2. **Compute $Var(W_1)$ and $Var(W_2)$. Which estimator has lower variance?**
 
@@ -429,13 +701,13 @@ $$\widehat{\sigma^2} = \frac{1}{n}\sum_{i=1}^n \left(Y - \bar{Y} \right)^2$$
 
 $$E(\bar{Y}) = E\left(\cfrac{1}{n}\sum_{i=1}^nY_i\right)=\cfrac{1}{n} \cdot E\left(\sum_{i=1}^nY_i\right)=\cfrac{1}{n} \cdot \sum_{i=1}^nE(Y_i)=\cfrac{1}{n} \cdot \sum_{i=1}^n\mu=\cfrac{1}{n} \cdot (n\mu)=\mu$$
 
-Since $Y_1, Y_2, \dots, Y_n$ are iid random variables, $Y_i for all i \in 1,2,\dots,n$  have the same mean $\mu$. In other words, $E(Y_i) \ \forall i \in 1,2,\dots,n=\mu$. Therefore, $E(\bar{Y}) = E(Y_i) \ \forall i \in 1,2,\dots,n$.
+Since $Y_1, Y_2, \dots, Y_n$ are iid random variables, $Y_i$ for all $i \in 1,2,\dots,n$  have the same mean $\mu$. In other words, $E(Y_i) \ \forall i \in 1,2,\dots,n=\mu$. Therefore, $E(\bar{Y}) = E(Y_i) \ \forall i \in 1,2,\dots,n$.
 
 2. **Show that $Var(\bar{Y}) = \frac{1}{n}Var(Y_i) \ \forall i \in 1,2,\dots,n$**
 
 $$Var(\bar{Y}) = Var\left(\cfrac{1}{n}\sum_{i=1}^nY_i\right)=\cfrac{1}{n^2} \cdot Var\left(\sum_{i=1}^nY_i\right)= \cfrac{1}{n^2} \cdot \left(\sum_{i=1}^nVar(Y_i)\right)= \cfrac{1}{n^2} \cdot \left(\sum_{i=1}^n\sigma^2\right) = \cfrac{1}{n^2} \cdot (n\sigma^2) = \cfrac{\sigma^2}{n} $$ 
 
-Since $Y_1, Y_2, \dots, Y_n$ are iid random variables, $Y_i for all i \in 1,2,\dots,n$  have the same variance $\sigma^2$. In other words, $Var(Y_i) \ \forall i \in 1,2,\dots,n =\sigma^2$.  Therefore, $Var(\bar{Y}) = \frac{1}{n}Var(Y_i) \ \forall i \in 1,2,\dots,n$.
+Since $Y_1, Y_2, \dots, Y_n$ are iid random variables, $Y_i$ for all $i \in 1,2,\dots,n$  have the same variance $\sigma^2$. In other words, $Var(Y_i) \ \forall i \in 1,2,\dots,n =\sigma^2$.  Therefore, $Var(\bar{Y}) = \frac{1}{n}Var(Y_i) \ \forall i \in 1,2,\dots,n$.
 
 3. **Compute the expectation of $\widehat{\sigma^2}$ in terms of $n$ and $\sigma^2$. In your derivation, make sure make use of the *i.i.d.* property and identify where you use it.**
 
@@ -483,9 +755,9 @@ $E[W_1]=E[\frac{1}{n} \Sigma{\frac{Y_i}{X_i}}] = \frac{1}{n} \Sigma{E[\frac{Y_i}
 
 $\mathbf{\textcolor{red}{bias(W_1) = E[W_1]-\theta = \frac{\theta}{n} - \theta}}$
 
-$$E(W_1)=E\left[ \cfrac{1}{n}\sum_{i=1}^n(\cfrac{Y_i}{X_i}) \right]=\cfrac{1}{n}E\left[\sum_{i=1}^n(\cfrac{Y_i}{X_i})\right]=\cfrac{1}{n} \cdot n \cdot E(Z)= \mathbf{\textcolor{red}{\theta}}$$
-Therefore, the estimator W1 is unbiased for $\theta$.
+$E(W_1)=E\left[ \cfrac{1}{n}\sum_{i=1}^n(\cfrac{Y_i}{X_i}) \right]=\cfrac{1}{n}E\left[\sum_{i=1}^n(\cfrac{Y_i}{X_i})\right]=\cfrac{1}{n} \cdot n \cdot E(Z)= \mathbf{\textcolor{red}{\theta}}$
 
+Therefore, the estimator W1 is unbiased for $\theta$.
 
 **(iii) Explain why the estimator $W_2=\frac{\bar(Y)}{\bar{X}}$, where the overbars denote sample averages, is not the same as $W_1$. Nevertheless, show that $W_2$ is also unbiased for $\theta$.**
 
@@ -504,7 +776,7 @@ Therefore, $W_2$ is also unbiased for $\theta$. Although $E(W_1)$ and $E(W_2)$ a
 
 6. **You are hired by the governor to study whether a tax on liquor has decreased average liquor consumption in your state. You are able to obtain, for a sample of individuals selected at random, the difference in liquor consumption (in ounce) for the years before and after the tax. For person $i$ who is sampled randomly from the population. $Y_i$ denotes the change in liquor consumption. Treat these as a random sample from a Normal($\mu$, $|sigma^2$) distribution.**
 
-**(i) The null hypothesis is that there was no change in average liquor consumption; state the alternative in terms of $\mu$**
+**(i) The null hypothesis is that there was no change in average liquor consumption; state this formally in terms of $\mu$**
 
 The null hypothesis is also stated as $\mathbf{\textcolor{red}{\mu_0 = \mu_A}}$.
 
@@ -523,11 +795,51 @@ $\mathbf{\textcolor{red}{p(.0179)>.01}}$ The null hypothesis cannot be rejected 
 
 **(iv) Would you say that the estimated fall in consumption is large in magnitude? Comment on the practical versus statistical significance of this estimate.**
 
+The estimated fall is unlikely to be large in magnitide since the p-values are hovering right around the significance values. Addtionally, as n gets larger you can achieve a statistical significance without any practical significance. In this study since n=900 and the p-values are near the significance values, there is likely very little practical significance. 
+
 **(v) What has been implicity assumed in your analysis about other determinats of liquor consumption over the two-year period in order to infer causality from the tax change to liquor consumption?**
+
+This study is assuming that there are no other correlates or factors that changed over the two year period or that would contribute to a change in liquor sales.
 
 ## Question 13
 
 **Wooldridge's textbook: Appendix C, Question 8. In addition, answer the following questions:**
+
+**The New York Times (2/5/90) reported three-point shooting performace for the top 10 three-point shooters in the NBA. The following table summarizes these data:**
+
+\begin{table}[h]
+\caption{Appendix C, Question 8 Table}
+\centering
+\begin{tabular}{c c}
+\hline\hline
+Player & FGA-FGM \\ [0.5ex] 
+\hline
+Mark Price & 429-188\\
+Trent Tucker & 833-345\\
+Dale Ellis & 1149-472\\
+Craig Hodges & 1016-396\\
+Danny Ainge & 1051-406\\
+Byron Scott & 676-260\\
+Reggie Miller & 416-159\\
+Larry Bird & 1206-455\\
+Jon Sundvold & 440-166\\
+Brian Taylor  & 417-157\\
+\hline
+FGA = field goals attempted & FGM = field goals made\\
+\hline
+\end{tabular}
+\end{table}
+
+**For a given player, the outcome of a particular shot can be modeled as a Bernoulli (zero-one) variable: if $Y_i$ is the outcome of shot i, the $Y_i=1$ if the shot is made, and $Y_i=0$ if the shot is missed. Let $\theta$ denote the probability of making any particular three-point shot attempt. The natural estimator of $\theta$ is $\bar{Y} = \cfrac{FGM}{FGA}$.**
+
+**(i) Estimate $\theta$ for Mark Price.**
+
+$\theta=\cfrac{188}{429}$
+
+**(ii) Find the statnd deviation of the estimator $\bar{Y}$ in terms of $\theta$ and the number of shot attempts n.**
+
+**(iii) The asymptotic distribution of $\cfrac{(\bar{Y} - \theta)}{se(\bar{Y})}$ is a standard normal, where $se(\bar{Y}) = \sqrt{\bar{Y} \cdot (1-\bar{Y})/n}$. Use this fact to test $H_0: \theta=.5$ against $H_1: \theta < .5$ for Mark Price. Use a $1 \%$ significance level.**
+
 
 1. **Define Type I error.**
 
@@ -550,6 +862,3 @@ The power of the test is 1- type II error rate.
 
 \pagebreak
 
-```{r, include=TRUE, message = FALSE, warning = FALSE, fig.cap = "Some plot", fig.width = 6, fig.height = 4.5}
-plot(cars)
-```
