@@ -539,7 +539,7 @@ $$t = \frac{\bar(y) - \mu}{s/\sqrt{n}} = \frac{-32.8}{466.4/\sqrt{900}} \approx 
 
 p = Pr(z $\leq$ -2.11) = .017
 
-Because 0.1 < p < 0.5, we can reject $H_0$ at the 5% level but not at the 1% level.
+Because 0.01 < p < 0.05, we can reject $H_0$ at the 5% level but not at the 1% level.
 
 iv. Given our estimate of $\mu$, we are estimating the tax was associated with a 32.8 oz decrease in alcohol consumption. From a health perspective, this is less than a 1 oz decrease in consumption of liquor per week, a fairly insignificant difference. 
 v. This analysis assumes that other factors that influence alcohol consumption over the period of interest have remained constant. 
