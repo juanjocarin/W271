@@ -300,13 +300,14 @@ Sum & Rolls & \# of Rolls & Win Outcome \\ [0.5ex]
 
 1. **Is the expected number of rolls given that you win more than, equal to, or less than the expected number of rolls given that house wins (in a game)? The steps to arrive at your answer numerically need to be clearly shown.**
 
-On the first roll, the house wins 4 games, so their are 36-4 = 32 games.
+Y: number of rolls, H: the house wins, P: the player wins, x: sum of dice rolled that does not equal 2, 3, 12, 7, 11
+$E[Y|H] = \Sigma{y_i\cdot f_{Y|H}(y_i|H)}$
+$=\frac{4}{36} + \Sigma_{i=2}^{n}{y_i \cdot \frac{24}{36} \cdot \frac{6}{36}\cdot p(7^cx^c)^{i-1}}$
 
-$$ E(\text{Rolls}|\text{Win 1st Roll}) = \frac{8}{32} + \frac{24}{32}(E + 1) \\
-= 4 $$
+$E[Y|P] = \Sigma{y_i\cdot f_{Y|H}(y_i|H)}$
+$=\frac{8}{36} + \Sigma_{i=2}^{n}{y_i \cdot \frac{24}{36} \cdot p(x)^i\cdot p(7^cx^c)^{i-1}}$
 
-On subsequent rolls, we have 
-
+where: 
 $$p(x) = 
  \begin{cases}
    \frac{3}{36}, & \text{if } x=4, 10 \\
@@ -314,34 +315,21 @@ $$p(x) =
 	 \frac{5}{36}, & \text{if } x=6, 8 \\
 \end{cases}$$
 
-giving 3 unique scenarios. Similarly to roll one we have
+$$p(7^c x^c) = 
+ \begin{cases}
+	 \frac{27}{36}, & \text{if } x=4, 10 \\
+	 \frac{26}{36}, & \text{if }  x=5, 9 \\
+	 \frac{25}{36}, & \text{if } x=6, 8 \\
+\end{cases}$$
 
-$$ E(\text{Rolls}|\text{Win 2nd Roll}) = \frac{3}{30} + \frac{27}{30}(E + 1) \\
-= 10 $$
-$$ E(\text{Rolls}|\text{Win 2nd Roll}) = \frac{4}{30} + \frac{26}{30}(E + 1) \\
-= 7.5 $$
-$$ E(\text{Rolls}|\text{Win 2nd Roll}) = \frac{5}{30} + \frac{25}{30}(E + 1) \\
-= 6 $$
+To determine if $E[Y|P]$ is more than, less than, or equal to $E[Y|H]$, we can take the difference and see if it is >, <, or = to zero. 
 
-And
+$E[Y|P]-E[Y|H]$
+$=\frac{8}{36} + \Sigma_{i=2}^{n}{y_i \cdot \frac{24}{36} \cdot p(x)^i\cdot p(7^cx^c)^{i-1}} - \frac{4}{36} + \Sigma_{i=2}^{n}{y_i \cdot \frac{24}{36} \cdot \frac{6}{36}\cdot p(7^cx^c)^{i-1}}$
 
-$$ E(\text{Rolls}|\text{You Win}) = \dfrac{4(12) + 10(6) + 7.5(8) + 6(10)}{36} = 6.\overline{3}$$
+$=\frac{4}{36}-\frac{24}{36}\Sigma_{i=2}^{n}{ y_i\cdot p(7^cx^c)^{i-1} (p(x)^i- \frac{6}{36})}$
 
-For the house we have
-$$ E(\text{Rolls}|\text{Win 1st Roll}) = \frac{4}{28} + \frac{24}{28}(E + 1) \\
-= 7 $$
-$$ E(\text{Rolls}|\text{Win 2nd Roll}) = \frac{6}{33} + \frac{27}{33}(E + 1) \\
-= 5.5 $$
-$$ E(\text{Rolls}|\text{Win 2nd Roll}) = \frac{6}{32} + \frac{26}{32}(E + 1) \\
-= 5.\overline{3} $$
-$$ E(\text{Rolls}|\text{Win 2nd Roll}) = \frac{6}{31} + \frac{25}{31}(E + 1) \\
-= 5.1\overline{6} $$
-
-And
-
-$$ E(\text{Rolls}|\text{House Win}) = \dfrac{7(12) + 5.5(6) + 5.\overline{3}(8) + 5.1\overline{6}(10)}{36} = 5.87$$
-
-Thus the expected rolls given you win is greater than the expected rolls given the house wins. 
+Based on the above equation it will be based on the portion of the equation $(p(x)^i- \frac{6}{36})$ and for all $i=2,....n$ it will be less than zero. Therefore, $\mathbf{\textcolor{red}{E[Y|P] < E[Y|H]}}$
 
 2. **Suppose it takes $\$20$ to play, and the payoff is $\$100$, $\$80$, $\$60$, $\$40$, $\$0$ if you win in the 1st, 2nd, 3rd, 4th, 5th round, respectively. That is, if you win in the 1st round, you are paid $\$100$ (so your net profit is $\$80$), if you win in the 2nd round, you are paid $\$80$, etc. Derive the expected payoff function of a game.**
 
