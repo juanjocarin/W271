@@ -12,6 +12,7 @@ geometry: margin=1in
 fontsize: 10pt
 header-includes:
 - \usepackage{fancyhdr}
+- \usepackage{amsmath}
 - \pagestyle{fancy}
 - \fancyhead[LO,LE]{Carin, Davis, Levato, Song}
 - \fancyfoot[LO,LE]{UC Berkeley -- MIDS -- W271 -- Spring semester 2016}
@@ -122,189 +123,9 @@ $\mathbf{\textcolor{red}{\ \ \ \ \ \ 0 \leq \Pr(A | B) \leq 1}}$
 
 1. **Given that the server lasts for $\frac{k}{4}$ years without failing, what is the probability that it will last another year?**
 
-$\mathbf{\textcolor{red}{\Pr\left(t \leq 1+\cfrac{k}{4} \bigg| t \geq \cfrac{k}{4} \right)}} = \cfrac{\Pr \left(\left( t \leq 1+\cfrac{k}{4} \right) \bigcap \left( t \geq \cfrac{k}{4} \right) \right)}{\Pr \left(t \geq \cfrac{k}{4}\right)} = \cfrac{\Pr \left(\cfrac{k}{4} \leq t \leq 1+\cfrac{k}{4} \right )}{Pr \left(t \geq \cfrac{k}{4}\right)}$
-
-$\ \ \ \ \ \ = \cfrac{\Pr \left(t \leq 1 +\cfrac{k}{4}\right) - \Pr \left(t \leq \cfrac{k}{4}\right)}{1-\Pr \left(t \leq \cfrac{k}{4}\right)} = \cfrac{\cfrac{1}{k}\left(1+\cfrac{k}{4} - \cfrac{k}{4} \right )}{1-\cfrac{1}{k}\cfrac{k}{4}} = \cfrac{\cfrac{1}{k}}{\cfrac{3}{4}}$
-
-$\ \ \ \ \ \ = \mathbf{\textcolor{red}{\cfrac{4}{3k}}}$
-
 2. **Compute the expected payout from the contract, $E(x)$.**
 
-I tried 3 different approaches, all leading to the same result.
-
-The first one is based on https://www.probabilitycourse.com/chapter4/4_3_1_mixed.php. Before computing the expected value of $X$, we need to compute its *cdf*.
-
-$t$ (the life span of the server) is a continuous variable with the following *pdf*:
-
-$$f_t(t) = \begin{cases}
-\cfrac{1}{k} & 0\leq t\leq\ k \\
-0 & \text{otherwise}
-\end{cases}$$
-
-But $X$ (the payout or refund) is not continuous:
-
-$$X = g(t) = \begin{cases}
-\theta & 0\leq t\leq\ 1 \\
-A\sqrt{k-t} & 1\leq t\leq\ \cfrac{k}{2} \\
-\cfrac{\theta}{10} & \cfrac{k}{2}\leq t\leq\ \cfrac{3k}{4} \\
-0 & \text{otherwise}
-\end{cases}$$
-
-(The value of $X$ for $t=1$ is $A\sqrt{k-1}$, which is not necessarily equal to $\theta$; the value of $X$ for $t=k/2$ is $A\sqrt{k/2}$, which again is not necessarily equal to $\theta/10$.)
-
-First we compute the probability that $X$ takes its possible discrete values:
-
-$\Pr(X = 0) = \Pr\left(t \geq \cfrac{3k}{4}\right) = 1 - F_t\left(\cfrac{3k}{4}\right) = 1 - \cfrac{1}{k}\cfrac{3k}{4} = 1 - \cfrac{3}{4} = \cfrac{1}{4}$
-
-$\Pr\left(X = \cfrac{\theta}{10}\right) = \Pr\left(\cfrac{k}{2} \leq t \leq \cfrac{3k}{4}\right) = F_t\left(\cfrac{3k}{4}\right) - F_t\left(\cfrac{k}{2}\right) = \cfrac{1}{k}\cfrac{3k}{4} - \cfrac{1}{k}\cfrac{k}{2} = \cfrac{3}{4} - \cfrac{1}{2} = \cfrac{3-2}{4} = \cfrac{1}{4}$
-
-$\Pr(X = \theta) = \Pr(0 \leq t \leq 1) = F_t(1) - F_t(0) = \cfrac{1}{k} - \cfrac{0}{k} = \cfrac{1}{k}$
-
-For $A\sqrt{\cfrac{k}{2}} \leq X \leq A\sqrt{k-1}$, we can compute the *cdf* of $X$ as follows:
-
-$F_X(x) = \Pr(X \leq x)= \Pr\left(A\sqrt{k-t} \leq x\right)$
-
-$\ \ \ \ \ \ = \Pr\left(k-t \leq \left(\frac{x}{A}\right)^2\right) = \Pr\left(t \geq k - \left(\frac{x}{A}\right)^2 \right) = 1 - \Pr\left(t \leq k - \left(\frac{x}{A}\right)^2 \right)$
-
-$\ \ \ \ \ \ = 1 - \displaystyle\int_{t=0}^{k - \left(\frac{x}{A}\right)^2}\cfrac{1}{k}dt = 1 - \cfrac{1}{k}\left(k - \left(\frac{x}{A}\right)^2\right) = \cfrac{x^2}{kA^2}$
-
-So the overall expression for $F_X(x)$ is:
-
-$$F_X(x) = \begin{cases}
-0 & x < 0 \\
-\cfrac{1}{4} & 0 \leq x < \cfrac{\theta}{10} \\
-\cfrac{1}{2} & \cfrac{\theta}{10}\leq x \leq\ A\sqrt{\cfrac{k}{2}} \\
-\cfrac{x^2}{kA^2} & A\sqrt{\cfrac{k}{2}} \leq x \leq\ A\sqrt{k-1} \\
-1-\cfrac{1}{k} & A\sqrt{k-1} \leq x < \theta \\
-1 & x \geq \theta
-\end{cases}$$
-
-Let's check that:
-
-$$\int_{x=A\sqrt{k/2}}^{A\sqrt{k-1}}\frac{dF_X(x)}{dx}dx + \sum_{x_k}\Pr(X=x_k) =1$$
-
-$\displaystyle\int_{x=A\sqrt{k/2}}^{A\sqrt{k-1}}\cfrac{2x}{kA^2}dx + \Pr(X=0) + \Pr\left(X=\cfrac{\theta}{10}\right) + \Pr(X=\theta) = \left[ \cfrac{x^2}{kA^2}\right]_{x=A\sqrt{k/2}}^{A\sqrt{k-1}} + \cfrac{1}{4} + \cfrac{1}{4} + \cfrac{1}{k}$
-
-$\ \ \ \ \ \ = \cfrac{(k-1)-\cfrac{k}{2}}{k} + \cfrac{1}{2} + \cfrac{1}{k} = \cfrac{\cfrac{k}{2}-1}{k} + \cfrac{1}{2} + \cfrac{1}{k} = \cfrac{1}{2} - \cfrac{1}{k} + \cfrac{1}{2} + \cfrac{1}{k} = 1$
-
-Now we can compute the expected value of $X$ as:
-
-$\mathbf{\textcolor{red}{E(X)}} = \displaystyle\int_{x=A\sqrt{k/2}}^{A\sqrt{k-1}}x\frac{dF_X(x)}{dx}dx + \displaystyle\sum_{x_k}x_k\Pr(X=x_k)$
-
-$\ \ \ \ \ \ = \displaystyle\int_{x=A\sqrt{k/2}}^{A\sqrt{k-1}}\cfrac{2x^2}{kA^2}dx + 0\cdot\Pr(X=0) + \cfrac{\theta}{10}\cdot \Pr\left(X=\cfrac{\theta}{10}\right) + \theta\cdot\Pr(X=\theta)$
-
-$\ \ \ \ \ \ = \left[ \cfrac{2x^2}{3kA^2}\right]_{x=A\sqrt{k/2}}^{A\sqrt{k-1}} + 0\cdot\cfrac{1}{4} + \cfrac{\theta}{10}\cdot\cfrac{1}{4} + \theta\cdot\cfrac{1}{k} = \mathbf{\textcolor{red}{\cfrac{2A}{3k}\left((k-1)^{\frac{3}{2}}-\left(\cfrac{k}{2}\right)^{\frac{3}{2}}\right) + \cfrac{\theta}{40} + \cfrac{\theta}{k}}}$
-
-```{r, echo=FALSE, message = FALSE, warning = FALSE, fig.cap = "Approximate aspect of $F_X(x)$ (for $A=2, k=8, \\theta=30$)", fig.width = 4, fig.height = 4}
-F <- function(x) {
-    ifelse(x<0, 0, 
-           ifelse(x < 3, 1/4, 
-                  ifelse(x < 4, 1/2, 
-                         ifelse(x < 2*sqrt(7), x^2/32, 
-                                ifelse(x < 30, 1-1/8, 1)))))
-    }
-x=seq(-5, 35, by = 0.01)
-plot(x, F(x), type='l', xaxt='n', yaxt='n')
-axis(side = 2, at = seq(0, 1, .25))
-axis(side = 1, at = seq(0, 30, 5))
-# library(ggplot2)
-# ggplot(data.frame(x), aes(x)) + stat_function(fun=eq, geom = 'step')
-```
-
-
-Another way would be just applying the *law of the unconscious statistician* (https://en.wikipedia.org/wiki/Law_of_the_unconscious_statistician):
-
-$$E\left[g(t)\right] = \int g(t)f_t(t)dt$$
-
-$\mathbf{\textcolor{red}{E(X)}} = \displaystyle\int_{t=0}^kg(t)f_t(t)dt$
-
-$\ \ \ \ \ \ = \displaystyle\int_{t=0}^1\cfrac{g(x)}{k}dt + \displaystyle\int_{t=1}^{k/2}\cfrac{g(x)}{k}dt + \displaystyle\int_{t=k/2}^{3k/4}\cfrac{g(x)}{k}dt + \displaystyle\int_{t=3k/4}^k\cfrac{g(x)}{k}dt$
-
-$\ \ \ \ \ \ = \cfrac{\theta}{k}\left[t\right]_{t=0}^1 + \cfrac{A}{k}\left[\left(-\cfrac{2}{3}\right)(k-t)^{\frac{3}{2}}\right]_{t=1}^{k/2} + \cfrac{\theta/10}{k}\left[t\right]_{t=k/2}^{3k/4} + \cfrac{0}{k}\left[t\right]_{t=3k/4}^k$
-
-$\ \ \ \ \ \ = \cfrac{\theta}{k} + \cfrac{2A}{3k}\left((k-1)^{\frac{3}{2}}-\left(\cfrac{k}{2}\right)^{\frac{3}{2}}\right) + \cfrac{\theta}{10k}\cfrac{k}{4} + 0 = \mathbf{\textcolor{red}{\cfrac{2A}{3k}\left((k-1)^{\frac{3}{2}}-\left(\cfrac{k}{2}\right)^{\frac{3}{2}}\right) + \cfrac{\theta}{40} + \cfrac{\theta}{k}}}$
-
-The last approach is based on http://homepage.stat.uiowa.edu/~nshyamal/22S175/DI.pdf. A *mixed distribution* can be decomposed into a continuous distribution and a discrete one:
-
-$$\mathbf{F(x) = F_C(x) + F_D(x)}$$
-
-each with weights $p_C$ and $p_D$, respectively.
-
-$p_D$ is the sum of the heights of the jumps:
-
-$F(0)-F(0^-) = \cfrac{1}{4}$
-
-$F\left(\cfrac{\theta}{10}\right) - F\left(\cfrac{\theta^-}{10}\right) = \cfrac{1}{4}$
-
-$F(\theta) - F(\theta^-) = \cfrac{1}{k}$
-
-$\ \ \ \ \ \ \Rightarrow p_D = \cfrac{1}{2} + \cfrac{1}{k} = \cfrac{k+2}{2k} \Rightarrow \mathbf{p_C = 1 - p_D} = \cfrac{k-2}{2k}$
-
-$$\Pr(X_D=x) = \begin{cases}
-\cfrac{\cfrac{1}{4}}{\cfrac{k+2}{2k}} = \cfrac{1}{4}\cfrac{2k}{k+2} = \cfrac{k}{2(k+2)} & x=0 \\
-\cfrac{\cfrac{1}{4}}{\cfrac{k+2}{2k}} = \cfrac{1}{4}\cfrac{2k}{k+2} = \cfrac{k}{2(k+2)} & x=\cfrac{\theta}{10} \\
-\cfrac{\cfrac{1}{k}}{\cfrac{k+2}{2k}} = \cfrac{1}{k}\cfrac{2k}{k+2} = \cfrac{2}{k+2} & x=\theta
-\end{cases}$$
-
-$$\mathbf{F_C(x) = \frac{F(x) + p_D \cdot F_D(x)}{p_C}}$$
-
-$$\Rightarrow F_C(X_C=x) = \begin{cases}
-0 & x < A\sqrt{\cfrac{k}{2}} \\
-\cfrac{2x^2-kA^2}{A^2(k-2)} & A\sqrt{\cfrac{k}{2}} \leq x < A\sqrt{k-1} \\
-1 & x \geq A\sqrt{k-1}
-\end{cases}$$
-
-$$\Rightarrow f_C(X_C=x) = \begin{cases}
-0 & x < A\sqrt{\cfrac{k}{2}} \\
-\cfrac{4x}{A^2(k-2)} & A\sqrt{\cfrac{k}{2}} \leq x < A\sqrt{k-1} \\
-0 & x \geq A\sqrt{k-1}
-\end{cases}$$
-
-$E(X_D) = \displaystyle\sum_{x_k} x_k\Pr(X_D=x_k) = 0\cdot\cfrac{k}{2(k+2)} + \cfrac{\theta}{10}\cdot\cfrac{k}{2(k+2)} + \theta\cdot\cfrac{2}{k+2}$
-
-$\ \ \ \ \ \ = \cfrac{k\theta}{20(k+2)} + \cfrac{2\theta}{k+2} = \cfrac{(k+40)\theta}{20(k+2)}$
-
-$E(X_C) = \displaystyle\int_{x=-\infty}^\infty xf_C(x)dx = \displaystyle\int_{x=A\sqrt{k/2}}^{A\sqrt{k-1}} \cfrac{4x^2}{A^2(k-2)}dx = \left[\cfrac{4x^3}{3A^2(k-2)}\right]_{x=A\sqrt{k/2}}^{A\sqrt{k-1}} = \cfrac{4A}{3(k-2)}\left((k-1)^{\frac{3}{2}} - \left(\cfrac{k}{2}\right)^{\frac{3}{2}}\right)$
-
-$$\mathbf{E(X) = p_D \cdot E(X_D) + p_C \cdot E(X_C)}$$
-
-$\mathbf{\textcolor{red}{E(X)}} = \cfrac{k+2}{2k}\cdot\cfrac{(k+40)\theta}{20(k+2)}+\cfrac{k-2}{2k}\cdot\cfrac{4A}{3(k-2)}\left((k-1)^{\frac{3}{2}} - \left(\cfrac{k}{2}\right)^{\frac{3}{2}}\right)$
-
-$\ \ \ \ \ \ = \mathbf{\textcolor{red}{\cfrac{2A}{3k}\left((k-1)^{\frac{3}{2}}-\left(\cfrac{k}{2}\right)^{\frac{3}{2}}\right) + \cfrac{\theta}{40} + \cfrac{\theta}{k}}}$
-
 3. **Compute the variance of the payout from the contract.**
-
-The 3rd link in (2) mentions the expression for the variance of a mixed random variable:
-
-$$\mathbf{\textcolor{red}{Var(X) = \left(p_D \cdot Var(X_D) + p_C \cdot Var(X_C) \right) + p_D \cdot p_C \cdot \left(E(X_D) - E(X_C) \right)^2}}$$
-
-We already computed $p_D, p_C, E(X_D)$, and $E(X_C)$. We'll compute now the variances of both components of $X$, omitting the final expression of $Var(X)$ (which is really complex and with a lot of terms):
-
-$Var(X_D) = \displaystyle\sum_{x_k} \left(x_k-E(X_D)\right)^2 \Pr(x_k)$
-
-$\ \ \ \ \ \ = \left(0 - \cfrac{(k+40)\theta}{20(k+2)} \right)^2 \cfrac{k}{2(k+2)} + \left(\cfrac{\theta}{10} - \cfrac{(k+40)\theta}{20(k+2)} \right)^2 \cfrac{k}{2(k+2)} + \left(\theta - \cfrac{(k+40)\theta}{20(k+2)} \right)^2 \cfrac{2}{k+2}$
-
-$\ \ \ \ \ \ = \cfrac{(k+40)^2\theta^2}{400(k+2)^2} \cdot \cfrac{k}{2(k+2)} + \left(\cfrac{2\theta(k+2)-\theta(k+40)}{20(k+2)}\right)^2 \cdot \cfrac{k}{2(k+2)} + \left(\cfrac{20\theta(k+2)-\theta(k+40)}{20(k+2)}\right)^2 \cdot \cfrac{2}{k+2}$
-
-$\ \ \ \ \ \ = \cfrac{k\theta^2(k+40)^2}{800(k+2)} + \cfrac{4k\theta^2(k+2)^2+k\theta^2(k+40)^2-4k\theta^2(k+2)(k+40)}{800(k+2)^2}$
-
-$\ \ \ \ \ \ \ \ \ + \cfrac{1600\theta^2(k+2)^^2+4\theta^2(k+40)^2-80\theta^2(k+2)(k+40)}{800(k+2)^3}$
-
-$\ \ \ \ \ \ = \cfrac{2\theta^2(k+2)(k+40)^2 + 4\theta^2(k+400)(k+2)^2-4\theta^2(k+20)(k+2)(k+40)}{800(k+2)^3}$
-
-$\ \ \ \ \ \ = \cfrac{\theta^2(k+40)((k+40) - 2(k+20))}{400(k+2)^2} + \cfrac{\theta^2(k+400)}{200(k+2)}$
-
-$\ \ \ \ \ \ = \cfrac{\theta^2(k+400)}{200(k+2)} - \cfrac{k\theta^2(k+40)}{400(k+2)^2} = \cfrac{\theta^2((k+400)(k+2) - k (k+40))}{400(k+2)^2}$
-
-$\ \ \ \ \ \ = \cfrac{\theta^2(k^2+2k+400k+800-k^2-40k)}{400(k+2)^2} = \cfrac{\theta^2(362k+800)}{400(k+2)^2} = \cfrac{\theta^2(181k+400)}{200(k+2)^2}$
-
-$Var(X_C) = \displaystyle\int_{x=-\infty}^\infty x^2 f_C(x)dx - \left(E(X_C)\right)^2$
-
-$\ \ \ \ \ \ = \displaystyle\int_{x=A\sqrt{k/2}}^{A\sqrt{k-1}} \cfrac{4x^3}{A^2(k-2)}dx - \left(E(X_C)\right)^2 = \left[ \cfrac{x^4}{A^2(k-2)}\right]_{x=A\sqrt{k/2}}^{A\sqrt{k-1}} - \left(E(X_C)\right)^2$
-
-$\ \ \ \ \ \ = \cfrac{A^4(k-1)^2 - A^4 \cfrac{k^2}{4}}{A^2(k-2)} - \left(E(X_C)\right)^2 = \cfrac{A^2(k^2 + 1 - 2k - \cfrac{k^2}{4}}{k-2} - \left(E(X_C)\right)^2$
-
-$\ \ \ \ \ \ = \cfrac{A^2(3k^2 + 4 - 8k)}{4(k-2)} - \cfrac{16A^2}{9(k-2)^2} \left((k-1)^3 + \cfrac{k}{2} - 2 \left(\cfrac{k}{2}\right)^{\frac{3}{2}} (k-1)^{\frac{3}{2}}\right)$
 
 
 ## Question 4
@@ -343,8 +164,6 @@ $\ \ \ \ \ \ = 2 \left[-e^{-x} \right]_{x=0}^a \left[-\cfrac{e^{-2y}}{2}\right]_
 
 $\ \ \ \ \ \ = \mathbf{\textcolor{red}{1-e^{-a}}}$
 
-
-\pagebreak
 
 ## Question 5
 
@@ -414,241 +233,84 @@ $\cfrac{dE(Y)}{dx} = 0 \Rightarrow \mathbf{\textcolor{red}{x=E(X) - \cfrac{a}{2b
 
 1. **Choose a value of $z$ between $0$ and $2$, and draw a graph depicting the region of the $X-Y$ plane for which $Z$ is less than $z$.**
 
-First let's plot the thre variables:
-
-```{r, echo=FALSE, message = FALSE, warning = FALSE, fig.cap = "Contour plot and 3D plot of $X, Y, Z$", fig.width = 6, fig.height = 4.5}
-library(plot3D)
-x <- y <- seq(0, 1, by = 0.01)
-grid <- mesh(x, y)
-z <- with(grid, x + y)
-par(mfrow = c(1, 2))
-contour(x, y, z, asp=1)
-persp3D(z = z, x = x, y = y, theta = 0)
-```
-
-As shown above (especially in the contour plot on the left), $0 \leq Z \leq 1$, and for a given value of $z$ (let's use $z = 0.8$) the region of the $X-Y$ plane for which $Z<z$ will be a triangle with vertices $(0,0), (z,0)$, and $(0,z)$.
-
-\pagebreak
-
-```{r, echo=FALSE, message = FALSE, warning = FALSE, fig.cap = "Region of the $X-Y$ plane for which $Z<z$ where $z=0.8$", fig.width = 6, fig.height = 4.5}
-simulations <- 100e3
-X <- runif(simulations, min=0, max=1)
-Y <- runif(simulations, min=0, max=1)
-Z <- X+Y
-
-z = 0.8
-
-plot(X[Z<z], Y[Z<z], col='red', asp = 1)
-polygon(x=c(0,z,0), y=c(0,0,z))
-# abline(a=z, b=-1); abline(h=0); abline(v=0)
-```
-
 2. **Derive the probability density function, $f(z)$.**
 
-There is a theorem that states:
+Note that 
 
-> Let $X$ and $Y$ be two independent random variables with density functions $f_X(x)$ and $f_Y(y)$. Then the sum $Z = X + Y$ is a random variable with density function $f_Z(z)$, where $f_Z$ is the convolution of $f_X$ and $f_Y$.
+$$f_{X}(x) = f_{Y}(y) = \begin{cases}
+  1 & 0\leq x\leq\ 1 \\
+  0 & Otherwise
+  \end{cases}$$
 
-$$(f*g)(z) = \int_{x=-\infty}^{+\infty}f_Y(z-x)f_X(x)dx = \int_{y=-\infty}^{+\infty}f_X(z-y)f_Y(y)dy$$
+Because X and Y are independent, the probability density function of the sum of X and Y is equal to the convolution of $f_{X}(x)$ and $f_{Y}(y)$ described by
 
-In our case:
+$$f_{Z}(z) =  \displaystyle\int_{0}^1 f_{X}(z-y)f_{Y}(y)dy$$
 
-$$f_X(x) = f_Y(y) = \begin{cases}
-1 & 0\leq x\leq\ 1 \\
-0 & Otherwise
-\end{cases}$$
+If $0\leq z\leq 1$
 
-So: 
+$$f_{Z}(z) =  \displaystyle\int_{0}^z dy = z$$
 
-$f_Z(z) = \displaystyle\int_{x=0}^1 f_Y(z-x)dx$
+And if $1\textless z\leq 2$
 
-$f_Y(z-x) \neq 0 \Leftrightarrow 0 \leq z-x \leq 1 \Leftrightarrow z-1 \leq x \leq z$
+$$f_{Z}(z) =  \displaystyle\int_{z-1}^1 dy = 2 - z$$
 
-So for $0 \leq z \leq 1$
+This give us
 
-$\ \ \ \ \ \ f_Z(z) = \displaystyle\int_{x=0}^z dx = z$
-
-While for $1 \leq z \leq 2$
-
-$\ \ \ \ \ \ f_Z(z) = \displaystyle\int_{x=z-1}^1 dx = 1-(z-1)=2-z$
-
-In summary:
-
-$$\mathbf{\textcolor{red}{f_Z(z) = \begin{cases}
-z & 0\leq z\leq 1 \\
-2 - z & 1\textless z\leq 2 \\
-0 & Otherwise
-\end{cases}}}$$
-
-```{r, echo=FALSE, message = FALSE, warning = FALSE, fig.cap = "Histogram and (approximate) density distribution plot of $Z$", fig.width = 6, fig.height = 4.5}
-par(mfrow = c(1, 2))
-hist(Z, freq = FALSE)
-plot(density(Z), main = 'Density distribution of Z')
-```
-
-
-\pagebreak
-
+$$f_{Z}(z) = \begin{cases}
+  z & 0\leq z\leq 1 \\
+  2 - z & 1\textless z\leq 2 \\
+  0 & Otherwise
+  \end{cases}$$
+  
+  
 ## Question 7
 
-**In a casino, you pay the following game. A pair fair, ordinary 6-faced dices is rolled. If the sum of the dice is $2$, $3$, or $12$, the house wins. If it is $7$ or $11$, you win. If it is any other number $x$, the house rolls the dice again until the sum is either $7$ or $x$. If it is $7$, the house wins. If it is $x$, you win. A game ends if one of the two players wins. Let $Y$ be the number of rolls needed until the game ends.**
+**In a casino, you pay the following game. A pair of fair, ordinary 6-faced dice are rolled. If the sum of the dice is $2$, $3$, or $12$, the house wins. If it is $7$ or $11$, you win. If it is any other number $x$, the house rolls the dice again until the sum is either $7$ or $x$. If it is $7$, the house wins. If it is $x$, you win. A game ends if one of the two players wins. Let $Y$ be the number of rolls needed until the game ends.**
 
 1. **Is the expected number of rolls given that you win more than, equal to, or less than the expected number of rolls given that house wins (in a game)? The steps to arrive at your answer numerically need to be clearly shown.**
 
-http://www.dehn.wustl.edu/~blake/courses/WU-Ed6021-2012-Summer/handouts/Expected_Value.pdf
+On the first roll, the house wins 4 games, so their are 36-4 = 32 games.
 
-```{r, echo=FALSE, message = FALSE, warning = FALSE}
-games <- sapply(seq(1,6), function(x) x+seq(1,6))
-colnames(games) <- sapply(seq(1,6), function(x) paste("**Die 1=", x, '**', sep=""))
-rownames(games) <- sapply(seq(1,6), function(x) paste("**Die 2=", x, '**', sep=""))
-library(knitr)
-kable(games, align = 'c', caption = 'Possible games')
-# library(pander)
-# panderOptions('table.split.table', Inf)
-# set.caption("Possible games")
-# pander(games, style = 'rmarkdown')
-```
+$$ E(\text{Rolls}|\text{Win 1st Roll}) = \frac{8}{32} + \frac{24}{32}(E + 1) \\
+= 4 $$
 
-$$\Pr(X=x) =\begin{cases}
-\cfrac{x-1}{36} & x \in \{2,\dots,7\} \\
-\cfrac{13-x}{36} & x \in \{8,\dots,12\} \\
-\end{cases}$$
+On subsequent rolls, we have 
 
-$\Pr(X=2)=\Pr(X=12)=\cfrac{1}{36}$
+$$ P(X) = \begin{pmatrix}
+  4 & 5 & 6 & 8 & 9 & 10 \\
+  \frac{3}{36} & \frac{4}{36} & \frac{5}{36} & \frac{5}{36} & \frac{4}{36} & \frac{3}{36}
+  \end{pmatrix}$$
 
-$\Pr(X=3)=\Pr(X=11)=\cfrac{1}{18}$
+giving 3 unique scenarios. Similarly to roll one we have
 
-$\Pr(X=4)=\Pr(X=10)=\cfrac{1}{12}$
+$$ E(\text{Rolls}|\text{Win 2nd Roll}) = \frac{3}{30} + \frac{27}{30}(E + 1) \\
+= 10 $$
+$$ E(\text{Rolls}|\text{Win 2nd Roll}) = \frac{4}{30} + \frac{26}{30}(E + 1) \\
+= 7.5 $$
+$$ E(\text{Rolls}|\text{Win 2nd Roll}) = \frac{5}{30} + \frac{25}{30}(E + 1) \\
+= 6 $$
 
-$\Pr(X=5)=\Pr(X=9)=\cfrac{1}{9}$
+And
 
-$\Pr(X=6)=\Pr(X=8)=\cfrac{5}{36}$
+$$ E(\text{Rolls}|\text{You Win}) = \frac{4(12) + 10(6) + 7.5(8) + 6(10)}{36} = 6.\overline{3}$$
 
-$\Pr(X=7)=\cfrac{1}{6}$
+For the house we have
+$$ E(\text{Rolls}|\text{Win 1st Roll}) = \frac{4}{28} + \frac{24}{28}(E + 1) \\
+= 7 $$
+$$ E(\text{Rolls}|\text{Win 2nd Roll}) = \frac{6}{33} + \frac{27}{33}(E + 1) \\
+= 5.5 $$
+$$ E(\text{Rolls}|\text{Win 2nd Roll}) = \frac{6}{32} + \frac{26}{32}(E + 1) \\
+= 5.\overline(3) $$
+$$ E(\text{Rolls}|\text{Win 2nd Roll}) = \frac{6}{31} + \frac{25}{31}(E + 1) \\
+= 5.1\overline(6) $$
 
-Let $Z$ be the event that I win (so $\bar{Z}$ is the event that house wins).
+And
 
-$\Pr(Z, 2 \text{ on roll } 1) = 0, \Pr(\bar{Z}, 2 \text{ on roll } 1) = \cfrac{1}{36}$
+$$ E(\text{Rolls}|\text{House Win}) = \frac{7(12) + 5.5(6) + 5.\overline(3)(8) + 5.1\overline(6)(10)}{36} = 5.87$$
 
-$\Pr(Z, 3 \text{ on roll } 1) = 0, \Pr(\bar{Z}, 3 \text{ on roll } 1) = \cfrac{1}{18}$
+Thus the expected rolls given you win is greater than the expected rolls given the house wins. 
 
-$\Pr(Z, 7 \text{ on roll } 1) = \cfrac{1}{6}, \Pr(\bar{Z}, 7 \text{ on roll } 1) = 0$
-
-$\Pr(Z, 11 \text{ on roll } 1) = \cfrac{1}{18}, \Pr(\bar{Z}, 11 \text{ on roll } 1) = 0$
-
-$\Pr(Z, 12 \text{ on roll } 1) = 0, \Pr(\bar{Z}, 12 \text{ on roll } 1) = \cfrac{1}{36}$
-
-$\Pr(Z, 4 \text{ on roll } 1) = \Pr(4)\Pr(4) + \Pr(4)\Pr(\text{neither 4 nor 7})\Pr(4) + \dots$
-
-$\Pr(\text{neither 4 nor 7}) = 1 - \cfrac{3+6}{36}=1-\cfrac{1}{4}=\cfrac{3}{4}$
-
-$\Pr(Z, 4 \text{ on roll } 1) = \left(\cfrac{1}{12}\right)^2\left(1+\left(\cfrac{3}{4}\right)+\left(\cfrac{3}{4}\right)^2+\dots\right) = \left(\cfrac{1}{12}\right)^2\displaystyle\sum_{y=0}^\infty\left(\cfrac{3}{4}\right)^y=\left(\cfrac{1}{12}\right)^2\cfrac{1}{1-\cfrac{3}{4}}=\cfrac{4}{12^2}=\cfrac{1}{36}$
-
-$\Pr(\bar{Z}, 4 \text{ on roll } 1) = \Pr(4)\Pr(7) + \Pr(4)\Pr(\text{neither 4 nor 7})\Pr(7) + \dots = \cfrac{1}{12}\cfrac{1}{6}\displaystyle\sum_{y=0}^\infty\left(\cfrac{3}{4}\right)^y=\cfrac{1}{12}\cfrac{1}{6}4=\cfrac{1}{18}$
-
-The same applies to $x=10$.
-
-$\Pr(Z, 5 \text{ on roll } 1) = \Pr(5)\Pr(5) + \Pr(5)\Pr(\text{neither 5 nor 7})\Pr(5) + \dots$
-
-$\Pr(\text{neither 5 nor 7}) = 1 - \cfrac{4+6}{36}=\cfrac{26}{36}=\cfrac{13}{18}$
-
-$\Pr(Z, 5 \text{ on roll } 1) = \left(\cfrac{1}{9}\right)^2\cfrac{1}{1-\cfrac{13}{18}}=\left(\cfrac{1}{9}\right)^2 \cfrac{18}{5}=\cfrac{2}{45}$
-
-$\Pr(\bar{Z}, 5 \text{ on roll } 1) = \Pr(5)\Pr(7) + \Pr(5)\Pr(\text{neither 5 nor 7})\Pr(7) + \dots = \cfrac{1}{9}\cfrac{1}{6}\displaystyle\sum_{y=0}^\infty\left(\cfrac{13}{18}\right)^y=\cfrac{1}{9}\cfrac{1}{6}\cfrac{18}{5}=\cfrac{1}{15}$
-
-The same applies to $x=9$.
-
-$\Pr(Z, 6 \text{ on roll } 1) = \Pr(6)\Pr(6) + \Pr(6)\Pr(\text{neither 6 nor 7})\Pr(6) + \dots$
-
-$\Pr(\text{neither 6 nor 7}) = 1 - \cfrac{5+6}{36}=\cfrac{25}{36}$
-
-$\Pr(Z, 6 \text{ on roll } 1) = \left(\cfrac{5}{36}\right)^2\cfrac{1}{1-\cfrac{25}{36}}=\left(\cfrac{5}{36}\right)^2 \cfrac{36}{11}=\cfrac{25}{396}$
-
-$\Pr(\bar{Z}, 6 \text{ on roll } 1) = \Pr(6)\Pr(7) + \Pr(6)\Pr(\text{neither 6 nor 7})\Pr(7) + \dots = \cfrac{5}{36}\cfrac{1}{6}\displaystyle\sum_{y=0}^\infty\left(\cfrac{25}{36}\right)^y=\cfrac{5}{36}\cfrac{1}{6}\cfrac{36}{11}=\cfrac{5}{66}$
-
-The same applies to $x=8$.
-
-$\Pr(Z) = \displaystyle\sum_{x=2}^12 \Pr(Z, \text{x on roll 1}) = 0 + 0 + \cfrac{1}{36} + \cfrac{2}{45} + \cfrac{25}{396} + \cfrac{1}{6} + \cfrac{25}{396} + \cfrac{2}{45} + \cfrac{1}{36} + \cfrac{1}{18} + 0$
-
-$\ \ \ \ \ \ = \cfrac{55+88+125+330+125+88+55+110}{1980} = \cfrac{244}{495} \Rightarrow \Pr(\bar{Z}) = \cfrac{251}{495}$
-
-$$E[Y | Z] = \sum_{y=1}^\infty y \Pr(y | Z)$$
-
-$\Pr(y | Z) = \cfrac{\Pr(y,Z)}{\Pr(Z)}$
-
-$\Pr(Y=1|Z) = \cfrac{\Pr(Y=1,Z)}{\Pr(Z)} = \cfrac{\Pr(Z, X=7)+\Pr(Z,X=11)}{\Pr(Z)} = \cfrac{\cfrac{1}{6} + \cfrac{1}{18}}{\cfrac{244}{495}} = \cfrac{55}{122}$
-
-For $y \geq 2$:
-
-$\Pr(Y=y|Z) = \cfrac{1}{\Pr(Z)} \displaystyle\sum_{x \in \{4,5,6,8,9,10\}} \Pr(x,y,Z) = \cfrac{495}{244}\left(\left(\cfrac{1}{12}\right)^2\left(\cfrac{3}{4}\right)^{y-2} + \left(\cfrac{1}{9}\right)^2\left(\cfrac{13}{18}\right)^{y-2} + \dots\right)$
-
-$\ \ \ \ \ \ = 2\cfrac{495}{244}\left(\left(\cfrac{1}{12}\right)^2\left(\cfrac{3}{4}\right)^{y-2} + \left(\cfrac{1}{9}\right)^2\left(\cfrac{13}{18}\right)^{y-2} + \left(\cfrac{5}{36}\right)^2\left(\cfrac{25}{36}\right)^{y-2} \right)$
-
-It can be proved that:
-
-$$\displaystyle\sum_{y=2}^\infty y\cdot p^{y-2} = \cfrac{2-p}{(1-p)^2}$$
-
-$\mathbf{\textcolor{red}{E[Y|Z]}}=1\cdot\cfrac{55}{122}+\cfrac{495}{122}\left(\left(\cfrac{1}{12}\right)^2\cfrac{2-\cfrac{3}{4}}{\left(1-\cfrac{3}{4}\right)^2} + \left(\cfrac{1}{9}\right)^2\cfrac{2-\cfrac{13}{18}}{\left(1-\cfrac{13}{18}\right)^2} + \left(\cfrac{5}{36}\right)^2\cfrac{2-\cfrac{25}{36}}{\left(1-\cfrac{25}{36}\right)^2} \right)$
-
-$\ \ \ \ \ \ = \cfrac{55}{122}+\cfrac{495}{122}\left(\cfrac{1}{144}\cfrac{5}{4}\cfrac{16}{1}+\cfrac{1}{81}\cfrac{23}{18}\cfrac{18^2}{25}+\cfrac{25}{36^2}\cfrac{47}{36}\cfrac{36^2}{121}\right) = \cfrac{55}{122}+\cfrac{495}{122}\left(\cfrac{5}{36}+\cfrac{46}{225}+\cfrac{1175}{4356}\right) = \cfrac{9858}{3355} \approx \mathbf{\textcolor{red}{2.9383}}$
-
-$$E[Y | \bar{Z}] = \sum_{y=1}^\infty y \Pr(y | \bar{Z})$$
-
-$\Pr(y | \bar{Z}) = \cfrac{\Pr(y,\bar{Z})}{\Pr(\bar{Z})}$
-
-$\Pr(Y=1|\bar{Z}) = \cfrac{\Pr(Y=1,\bar{Z})}{\Pr(\bar{Z})} = \cfrac{\Pr(\bar{Z}, X=2)+\Pr(\bar{Z},X=3) + \Pr(\bar{Z},X=12)}{\Pr(Z)} = \cfrac{\cfrac{1+2+1}{36}}{\cfrac{251}{495}} = \cfrac{55}{251}$
-
-For $y \geq 2$:
-
-$\Pr(Y=y|\bar{Z}) = \cfrac{1}{\Pr(\bar{Z})} \displaystyle\sum_{x \in \{4,5,6,8,9,10\}} \Pr(x,y,\bar{Z}) = \cfrac{495}{251}\left(\cfrac{1}{12}\cfrac{1}{6}\left(\cfrac{3}{4}\right)^{y-2} + \cfrac{1}{9}\cfrac{1}{6}\left(\cfrac{13}{18}\right)^{y-2} + \dots\right)$
-
-$\ \ \ \ \ \ = 2\cfrac{495}{251}\left(\cfrac{1}{12}\cfrac{1}{6}\left(\cfrac{3}{4}\right)^{y-2} + \cfrac{1}{9}\cfrac{1}{6}\left(\cfrac{13}{18}\right)^{y-2} + \cfrac{5}{36}\cfrac{1}{6}\left(\cfrac{25}{36}\right)^{y-2} \right)$
-
-$\mathbf{\textcolor{red}{E[Y|Z]}}=1\cdot\cfrac{55}{251}+\cfrac{990}{251}\left(\cfrac{1}{12}\cfrac{1}{6}\cfrac{2-\cfrac{3}{4}}{\left(1-\cfrac{3}{4}\right)^2} + \cfrac{1}{9}\cfrac{1}{6}\cfrac{2-\cfrac{13}{18}}{\left(1-\cfrac{13}{18}\right)^2} + \cfrac{5}{36}\cfrac{1}{6}\cfrac{2-\cfrac{25}{36}}{\left(1-\cfrac{25}{36}\right)^2} \right)$
-
-$\ \ \ \ \ \ = \cfrac{55}{251}+\cfrac{990}{251}\left(\cfrac{1}{12}\cfrac{1}{6}\cfrac{5}{4}\cfrac{16}{1}+\cfrac{1}{9}\cfrac{1}{6}\cfrac{23}{18}\cfrac{18^2}{25}+\cfrac{5}{36}\cfrac{1}{6}\cfrac{47}{36}\cfrac{36^2}{121}\right) = \cfrac{55}{251}+\cfrac{990}{251}\left(\cfrac{5}{18}+\cfrac{23}{75}+\cfrac{235}{726}\right) = \cfrac{52473}{13805} \approx \mathbf{\textcolor{red}{3.8010}}$
-
-$$\mathbf{\textcolor{red}{E[Y|Z]<E[Y|\bar{Z}]}}$$
-
-
-Let's prove it with a simulation:
-
-```{r, echo=TRUE, message = FALSE, warning = FALSE}
-N <- 100e3 # number of simulations
-Y <- rep(0, N) # value of Y (number of rolls for every simulation)
-Z <- rep(0, N) # value of Z (0: house wins; 1: I win)
-for (i in 1:N) {
-    y <- 0 # initialize number of rolls
-    x <- sample(seq(6), 1) + sample(seq(6), 1) # simulate two dice
-    y <- y+1 # update number of rolls
-    first_x <- x # store x (will be used if it's 4, 5, 6, 8, 9, 10)
-    # House wins if 2, 3, 12
-    # I win if 7, 11
-    # Otherwise, keep that value of x (and insert in z)
-    z <- ifelse(x==2 | x==3 | x==12, 0, 
-                ifelse(x==7 | x==11, 1, first_x))
-    # While z > 1 (i.e., if nobody wins)
-    while (z>1) {
-        x <- sample(seq(6), 1) + sample(seq(6), 1) # simulate other roll
-        y <- y+1 # update number of rolls
-        # House wins if 7
-        # I win if same value of 1st roll
-        z <- ifelse(x==7, 0, ifelse(x==first_x , 1, first_x))
-    }
-    # When finished, store values for that simulation
-    Y[i] <- y
-    Z[i] <- z
-}
-mean(Y[Z==0])
-mean(Y[Z==1])
-```
-
-
-
-
-
-
-2. **Suppose it takes $\$20$ to pay, and the payoff is $\$100$, $\$80$, $\$60$, $\$40$, $\$0$ if you win in the 1st, 2nd, 3rd, 4th, 5th round, respectively. That is, if you win in the 1st round, you are paid $\$100$ (so your net profit is $\$80$), if you win in the 2nd round, you are paid $\$80$, etc. Derive the expected payoff function of a game.**
+2. **Suppose it takes $\$20$ to play, and the payoff is $\$100$, $\$80$, $\$60$, $\$40$, $\$0$ if you win in the 1st, 2nd, 3rd, 4th, 5th round, respectively. That is, if you win in the 1st round, you are paid $\$100$ (so your net profit is $\$80$), if you win in the 2nd round, you are paid $\$80$, etc. Derive the expected payoff function of a game.**
 
 
 
@@ -670,22 +332,76 @@ $$W = \sum_{i=1}^n a_iY_i$$
 
 1. **What restriction on the $a_i$ is needed for $W$ to be an unbiased estimator of $\mu$?**
 
+$$W = a_{1}E(Y_{1}) + a_{2}E(Y_{2}) + ... + a_{n}E(Y_{n})$$
+
+And $Y_{i}$ = $\mu$ $\forall$ i $\in$ n.
+
+Therefore
+
+$$W = (a_{1} + a_{2} + ... + a_{n})\mu $$
+
+For W to be an unbiased estimator of $\mu$, $a_{1} + a_{2} + ... a_{3} = 1$
+
 2. **Find $Var(W)$.**
 
-3. **Given a set of numbes $a_1,\dots,a_n$, the following inequality holds:**
+$$Var(W) = a_{1}^2Var(Y_{1}) + a_{2}^2Var(Y_{2}) + ... + a_{n}^2Var(Y_{n})$$
+
+and Var($Y_{i}$) = $\sigma^2 \forall \in$ n. Therefore
+
+$$Var(W) = (a_{1}^2 + a_{2}^2 + ... + a_{n}^2)\sigma^2$$
+
+
+3. **Given a set of numbers $a_1,\dots,a_n$, the following inequality holds:**
 
     $$\frac{1}{n}\left(\sum_{i=1}^na_i\right)^2 \leq \sum_{i=1}^na_i^2$$
 
     **Use this inequality, along with the previous parts of this question, tho show that $Var(W) \geq Var(\bar{Y})$ whenever $W$ is unbiased. We say that $\bar{Y}$ is the best linear unbiased estimator (BLUE).**
 
+When W is unbiased (ie $(a_{1} + a_{2} + ... + a_{n}) = 1$), the expression becomes
+
+$$\frac{1}{n} \leq a_{1}^2 + a_{2}^2 + ... + a_{n}^2$$
+
+Multiplying by $\sigma$ we have
+
+$$Var(\bar{Y}) \leq \frac{\sigma}{n} = \sigma^2(a_{1}^2 + a_{2}^2 + ... + a_{n}^2) = Var(W)$$
+or
+$$Var(W) \geq Var(\bar(Y))$$
 
 ## Question 9
 
 **Let $\bar{Y}$ denote the average of $n$ independent draws from a population distribution with mean $\mu$ and variance $\sigma^2$. Consider two alternative estimators of $\mu$: $W_1 = \frac{n-1}{n}\bar{Y}$ and $W_2=k\bar{Y}$, where $0<k<1$.**
 
 1. **Compute the biases of both $W_1$ and $W_2$. Which estimator is consistent?**
+$$W_{1} = (\frac{n - 1}{n})\bar{Y}$$
+$$E(W_{1}) = \frac{n-1}{n}E(\bar{Y}) \\$$
+$$  = \frac{n-1}{n}\mu$$
+Therefore 
+$$Bias(W_{1}) = \frac{n-1}{n}\mu - \mu$$
+$$nBias(W_{1}) = -\mu$$
+$$Bias(W_{1}) = \frac{-\mu}{n}$$
+
+Note that as $n \to \infty$, Bias($W_{1}$) $\to$ 0. 
+
+
+
+$$W_2=k\bar{Y}$$
+$$E(W_2) = kE(\bar{Y})$$
+$$E(W_2) = k\mu$$
+And
+$$Bias(W_2) = k\mu - \mu$$
+$$Bias(W_2) = \mu(k - 1)$$
+Given that 0 < k < 1, -$\mu$ < Bias($W_2$) < 0.    
+Note that $W_1$ is consistent, as E($W_1$) converges to $\mu$ as $n \to \infty$.
 
 2. **Compute $Var(W_1)$ and $Var(W_2)$. Which estimator has lower variance?**
+$$Var(W_1) = (\frac{n-1}{2})^2Var(\bar(Y))$$
+$$Var(W_1) = \frac{n-1}{n}\frac{n-1}{n}\frac{\sigma^2}{n}$$
+$$Var(W_1) = \Big(\frac{(n-1)^2}{n^3}\Big)\sigma^2$$
+
+$$Var(W_2) = k^2Var(\bar(Y))$$
+$$Var(W_2) = \frac{k^2}{n}\sigma^2$$
+
+Note that by choosing k sufficiently close to 0, the variance of $W_2$ can be made arbitrarily small. Thus $W_2$ has the lower variance.
 
 
 ## Question 10
@@ -694,42 +410,200 @@ $$W = \sum_{i=1}^n a_iY_i$$
 
 **Let $\bar{Y}$ be the average of the sample. Consider the following estimator for $\sigma^2$:**
 
-$$\widehat{\sigma^2} = \frac{1}{n}\sum_{i=1}^n \left(Y - \bar{Y} \right)^2$$
+$$\widehat{\sigma^2} = \frac{1}{n}\sum_{i=1}^n \left(Y_i - \bar{Y} \right)^2$$
 
 1. **Show that $E(\bar{Y}) = E(Y_i) \ \forall i \in 1,2,\dots,n$**
 
+$$
+\begin{aligned}
+ E(\hat{Y}) &= \frac{1}{n}\sum_{i=1}^nE(Y_i) \\
+ &= \frac{1}{n}[E(Y_1) + E(Y_2) + ... + E(Y_n)]
+\end{aligned}
+$$
+
+Because $Y_1$ ... $Y_n$ are from the same distribution with mean $\mu$,
+
+$$E(\hat{Y}) = \frac{1}{n}[\mu + \mu  + ... + \mu ]$$
+
+Thus 
+
+$$E(Y_1) = E(Y_2) = \dots = E(Y_n) = E(\hat{Y})$$
+
 2. **Show that $Var(\bar{Y}) = \frac{1}{n}Var(Y_i) \ \forall i \in 1,2,\dots,n$**
+
+$$
+\begin{aligned}
+ Var(\hat{Y}) &= \sum_{i=1}^nVar(\frac{Y_i}{n}) \\
+ &= Var\bigg(\frac{1}{n}Y_1 + \frac{1}{n}Y_2 + \dots + \frac{1}{n}Y_n\bigg) \\
+ &= \frac{1}{n^2}Var(Y_1) + \frac{1}{n^2}Var(Y_2) + \dots + \frac{1}{n^2}Var(Y_n)
+\end{aligned}
+$$
+
+Since $Y_1$ $\dots$ $Y_n$ are from the same distribution with variance $\sigma^2$
+
+$$
+\begin{aligned}
+ &= \frac{1}{n^2}[\sigma^2 + \sigma^2 + ... + \sigma^2]
+\end{aligned}
+$$
+
+Note that $\sigma^2$ occurs n times
+
+$$
+\begin{aligned}
+ &= \frac{1}{n^2}[n\sigma^2]
+\end{aligned}
+$$
+
+
+Thus
+
+$$
+\begin{aligned}
+ Var(\hat{Y}) &= \frac{1}{n}Var(Y_i) \forall i \in 1,2 ,\dots, n
+\end{aligned}
+$$
 
 3. **Compute the expectation of $\widehat{\sigma^2}$ in terms of $n$ and $\sigma^2$. In your derivation, make sure make use of the *i.i.d.* property and identify where you use it.**
 
+$$
+\begin{aligned}
+ E(\widehat{\sigma^2}) &= E\bigg(\frac{(Y_i - \bar{Y})^2}{n}\bigg) \\
+ nE(\widehat{\sigma^2}) &= E\big(\sum_{i=1}^nY_i^2 - 2Y_i\bar{Y} + \bar{Y}^2\big) \\
+ &= E\bigg[\sum_{i=1}^nY_i^2\bigg] - E\bigg[2\bar{Y}\sum_{i=1}^nY_i\bigg] + E\bigg[\bar{Y}^2\sum_{i=1}^n1\bigg] \\
+\end{aligned}
+$$
+
+Note that $\sum_{i=1}^nY_i$ = n$\bar{Y}$
+
+$$
+\begin{aligned}
+ nE(\widehat{\sigma^2}) &= E\bigg[\sum_{i=1}^nY_i^2\bigg] - nE\bigg[\bar{Y}^2\bigg] \\
+ &= nE[Y_i^2] - nE[\bar{Y}^2] \\
+ E(\widehat{\sigma^2}) &= E[Y_i^2] - E[\bar{Y}^2]
+\end{aligned}
+$$
+
+Note that for independent and identically distributed random variables $Y_i \dots Y_n$ with sample mean $\bar{Y}$
+
+$$ E[Y^2] = E[\bar{Y^2}] = \frac{1}{n}\sigma^2 - \mu^2 $$
+
+Substituting into our equation gives
+
+$$
+\begin{aligned}
+ E(\widehat{\sigma^2}) &= \big[\sigma^2 + \mu^2\big] - \big[\frac{1}{n}\sigma^2 + \mu^2\big] \\
+ &= \frac{(n - 1)}{n} \sigma^2
+\end{aligned}
+$$
+
 4. **Is this an unbiased estimator for $\sigma^2$?**
+
+Since $E(\widehat{\sigma^2}) \neq \sigma^2$, this is a biased estimator.
+
 
 5. **If not, what function of $\widehat{\sigma^2}$ produce an unbiased estimator?**
 
+$$ E(\widehat{\sigma^2}) = \frac{1}{n - 1}\sum_{i=1}^n \left(Y_i - \bar{Y} \right)^2$$
 
 ## Question 11
 
 **Wooldridge's textbook: Appendix C, Question 4*i*, *ii*, *iii*.**
+
+4i. We have random variable Z = $\frac{Y}{X}$
+
+$$E(Z|X) = E(\frac{Y}{X}|X)$$
+
+Using property CE.2
+
+$$
+\begin{aligned} 
+ E(Z|X) &= \frac{1}{X}E({Y|X}) \\
+ &= \theta X/X \\
+ &= \theta
+\end{aligned}
+$$
+
 
 
 ## Question 12
 
 **Wooldridge's textbook: Appendix C, Question 6.**
 
+6. **You are hired by the governor to study whether a tax on liquor has decreased average liquor consumption in your state. You are able to obtain, for a sample of individuals selected at random, the difference in liquor consumption (in ounces) for the years before and after the tax. For person $i$ who is sampled randomly from the population. $Y_i$ denotes the change in liquor consumption. Treat these as a random sample from a Normal($\mu$, $|sigma^2$) distribution.**
+
+i. $H_0$: $\mu$ = 0.
+ii. $H_a$: $\mu$ < 0.
+iii. 
+$$t = \frac{\bar(y) - \mu}{s/\sqrt{n}} = \frac{-32.8}{466.4/\sqrt{900}} \approx -2.11$$
+
+p = Pr(z $\leq$ -2.11) = .017
+
+Because 0.1 < p < 0.5, we can reject $H_0$ at the 5% level but not at the 1% level.
+
+iv. Given our estimate of $\mu$, we are estimating the tax was associated with a 32.8 oz decrease in alcohol consumption. From a health perspective, this is less than a 1 oz decrease in consumption of liquor per week, a fairly insignificant difference. 
+v. This analysis assumes that other factors that influence alcohol consumption over the period of interest have remained constant. 
+
 
 ## Question 13
 
 **Wooldridge's textbook: Appendix C, Question 8. In addition, answer the following questions:**
 
+8. **For a given player, the outcome of a particular shot can be modeled as a Bernoulli variable: if $Y_i$ is the outcome of shot i, then $Y_i$ = 1 if the shot is made, and $Y_i$ = 0 if the shot is missed. Let $\theta$ denote the probability of making any particular three-point shot attempt. The natural estimator of u is $\bar{Y}$ = FGM/FGA.**
+
+i. $$\theta = 188/429 \approx 0.438$$
+ii. For each trial
+
+$$Var(Y_i) = \theta(1-\theta)$$
+
+Thus for the sample mean we have
+
+$$Var(\bar{Y}) = \frac{\theta(1-\theta)}{n}$$
+$$sd(\bar{Y}) = \sqrt{\frac{\theta(1-\theta)}{n}}$$
+
+iii. For $\theta$ = 0.5, we have $t= (\bar{Y} - 0.5)/se(\bar{Y})$
+
+$$se = \sqrt{0.438(1-.438)/429} \approx 0.024$$
+$$t = (.438 - 0.5)/0.024 \approx -2.58$$
+$$p \approx Pr(Z \leq -2.58) \approx 0.004$$
+
+At the 1% significance level, we reject the null hypotheses that $\theta$ = 0.5
+
+
 1. **Define Type I error.**
+
+Rejecting the null hypothesis when it is true. 
+
 
 2. **What is the probability of Type I error of this test?**
 
+0.01
+
 3. **Define Type II error.**
+
+Accepting the null hypothesis when it is false. 
 
 4. **What is the probability of Type II error when using this decision rule, assuming the "true" population proportion is $\theta^*= 0.45$.**
 
+At the 1% significance level, $Z_{crit}$  = -2.33.  And 
+
+$$-2.33 = (\theta_{crit}^* - 0.5)/0.24$$
+$$\theta_{crit}^* = .444.$$
+$$ P(\theta_{crit}^* \geq .444 | \mu = 0.45 \text{ and } \sigma = 0.024) = Pr(Z \geq -.25)) \approx 0.60.$$
+
+The type II error rate in this scenario is 0.60. 
+
 5. **Define the power of the test (in general terms).**
+
+The power of a test is the probability that we correctly reject the null hypothesis, ie. Pr(Reject | Null is False).
 
 6. **Calculate the power of this test, again assuming the "true" population proportion is $\theta^*= 0.45$.**
 
+The power is 1 - 0.65 = 0.40
+
+
+\pagebreak
+
+```{r, include=TRUE, message = FALSE, warning = FALSE, fig.cap = "Some plot", fig.width = 6, fig.height = 4.5}
+plot(cars)
+```
