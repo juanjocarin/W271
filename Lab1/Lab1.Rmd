@@ -132,7 +132,7 @@ $\ \ \ \ \ \ = \mathbf{\textcolor{red}{\cfrac{4}{3k}}}$
 
 I tried 3 different approaches, all leading to the same result.
 
-The first one is based on https://www.probabilitycourse.com/chapter4/4_3_1_mixed.php. Before computing the expected value of $X$, we need to compute its *cdf*.
+The first one is based on <https://www.probabilitycourse.com/chapter4/4_3_1_mixed.php>. Before computing the expected value of $X$, we need to compute its *cdf*.
 
 $t$ (the life span of the server) is a continuous variable with the following *pdf*:
 
@@ -212,7 +212,7 @@ axis(side = 1, at = seq(0, 30, 5))
 ```
 
 
-Another way would be just applying the *law of the unconscious statistician* (https://en.wikipedia.org/wiki/Law_of_the_unconscious_statistician):
+Another way would be just applying the *law of the unconscious statistician* (<https://en.wikipedia.org/wiki/Law_of_the_unconscious_statistician>):
 
 $$E\left[g(t)\right] = \int g(t)f_t(t)dt$$
 
@@ -224,7 +224,7 @@ $\ \ \ \ \ \ = \cfrac{\theta}{k}\left[t\right]_{t=0}^1 + \cfrac{A}{k}\left[\left
 
 $\ \ \ \ \ \ = \cfrac{\theta}{k} + \cfrac{2A}{3k}\left((k-1)^{\frac{3}{2}}-\left(\cfrac{k}{2}\right)^{\frac{3}{2}}\right) + \cfrac{\theta}{10k}\cfrac{k}{4} + 0 = \mathbf{\textcolor{red}{\cfrac{2A}{3k}\left((k-1)^{\frac{3}{2}}-\left(\cfrac{k}{2}\right)^{\frac{3}{2}}\right) + \cfrac{\theta}{40} + \cfrac{\theta}{k}}}$
 
-The last approach is based on http://homepage.stat.uiowa.edu/~nshyamal/22S175/DI.pdf. A *mixed distribution* can be decomposed into a continuous distribution and a discrete one:
+The last approach is based on <http://homepage.stat.uiowa.edu/~nshyamal/22S175/DI.pdf>. A *mixed distribution* can be decomposed into a continuous distribution and a discrete one:
 
 $$\mathbf{F(x) = F_C(x) + F_D(x)}$$
 
@@ -306,6 +306,11 @@ $\ \ \ \ \ \ = \cfrac{A^4(k-1)^2 - A^4 \cfrac{k^2}{4}}{A^2(k-2)} - \left(E(X_C)\
 
 $\ \ \ \ \ \ = \cfrac{A^2(3k^2 + 4 - 8k)}{4(k-2)} - \cfrac{16A^2}{9(k-2)^2} \left((k-1)^3 + \cfrac{k}{2} - 2 \left(\cfrac{k}{2}\right)^{\frac{3}{2}} (k-1)^{\frac{3}{2}}\right)$
 
+To get the full expression for $Var(X)$ we made use of <http://www.wolframalpha.com> (the function `fractions {MASS}` could also be used):
+
+$\mathbf{\textcolor{red}{Var(X) = \cfrac{\theta^2(181k+400)}{400k(k+2)}-\cfrac{A^2(k(k(37k-32\sqrt{2k(k-1)}-66)+32\sqrt{2k(k-1)}+44)+8)}{72(k-2)k}}}$
+
+$\ \ \ \ \ \ \mathbf{\textcolor{red}{+ \cfrac{9\theta(k-2)^2(k-1)^3(k+40)-80A(k+2)}{720(k-2)(k-1)^3k^2}}}$
 
 ## Question 4
 
@@ -495,7 +500,9 @@ plot(density(Z), main = 'Density distribution of Z')
 
 1. **Is the expected number of rolls given that you win more than, equal to, or less than the expected number of rolls given that house wins (in a game)? The steps to arrive at your answer numerically need to be clearly shown.**
 
-http://www.dehn.wustl.edu/~blake/courses/WU-Ed6021-2012-Summer/handouts/Expected_Value.pdf
+<http://www.dehn.wustl.edu/~blake/courses/WU-Ed6021-2012-Summer/handouts/Expected_Value.pdf>
+
+First we check how many possible games there are, and the probabilities for each outcome:
 
 ```{r, echo=FALSE, message = FALSE, warning = FALSE}
 games <- sapply(seq(1,6), function(x) x+seq(1,6))
@@ -509,22 +516,24 @@ kable(games, align = 'c', caption = 'Possible games')
 # pander(games, style = 'rmarkdown')
 ```
 
+From the table above we can derive the following:
+
 $$\Pr(X=x) =\begin{cases}
 \cfrac{x-1}{36} & x \in \{2,\dots,7\} \\
 \cfrac{13-x}{36} & x \in \{8,\dots,12\} \\
 \end{cases}$$
 
-$\Pr(X=2)=\Pr(X=12)=\cfrac{1}{36}$
+$\ \ \ \ \ \ \Pr(X=2)=\Pr(X=12)=\cfrac{1}{36}$
 
-$\Pr(X=3)=\Pr(X=11)=\cfrac{1}{18}$
+$\ \ \ \ \ \ \Pr(X=3)=\Pr(X=11)=\cfrac{1}{18}$
 
-$\Pr(X=4)=\Pr(X=10)=\cfrac{1}{12}$
+$\ \ \ \ \ \ \Pr(X=4)=\Pr(X=10)=\cfrac{1}{12}$
 
-$\Pr(X=5)=\Pr(X=9)=\cfrac{1}{9}$
+$\ \ \ \ \ \ \Pr(X=5)=\Pr(X=9)=\cfrac{1}{9}$
 
-$\Pr(X=6)=\Pr(X=8)=\cfrac{5}{36}$
+$\ \ \ \ \ \ \Pr(X=6)=\Pr(X=8)=\cfrac{5}{36}$
 
-$\Pr(X=7)=\cfrac{1}{6}$
+$\ \ \ \ \ \ \Pr(X=7)=\cfrac{1}{6}$
 
 Let $Z$ be the event that I win (so $\bar{Z}$ is the event that house wins).
 
@@ -538,9 +547,11 @@ $\Pr(Z, 11 \text{ on roll } 1) = \cfrac{1}{18}, \Pr(\bar{Z}, 11 \text{ on roll }
 
 $\Pr(Z, 12 \text{ on roll } 1) = 0, \Pr(\bar{Z}, 12 \text{ on roll } 1) = \cfrac{1}{36}$
 
+When we roll a $4, 5, 6, 8, 9$, or $10$, we need to roll again, and the final result will depend on what we obtain in subsequent rolls (the same value, $7$, or another):
+
 $\Pr(Z, 4 \text{ on roll } 1) = \Pr(4)\Pr(4) + \Pr(4)\Pr(\text{neither 4 nor 7})\Pr(4) + \dots$
 
-$\Pr(\text{neither 4 nor 7}) = 1 - \cfrac{3+6}{36}=1-\cfrac{1}{4}=\cfrac{3}{4}$
+$\ \ \ \ \ \ \Pr(\text{neither 4 nor 7}) = 1 - \cfrac{3+6}{36}=1-\cfrac{1}{4}=\cfrac{3}{4}$
 
 $\Pr(Z, 4 \text{ on roll } 1) = \left(\cfrac{1}{12}\right)^2\left(1+\left(\cfrac{3}{4}\right)+\left(\cfrac{3}{4}\right)^2+\dots\right) = \left(\cfrac{1}{12}\right)^2\displaystyle\sum_{y=0}^\infty\left(\cfrac{3}{4}\right)^y=\left(\cfrac{1}{12}\right)^2\cfrac{1}{1-\cfrac{3}{4}}=\cfrac{4}{12^2}=\cfrac{1}{36}$
 
@@ -550,7 +561,7 @@ The same applies to $x=10$.
 
 $\Pr(Z, 5 \text{ on roll } 1) = \Pr(5)\Pr(5) + \Pr(5)\Pr(\text{neither 5 nor 7})\Pr(5) + \dots$
 
-$\Pr(\text{neither 5 nor 7}) = 1 - \cfrac{4+6}{36}=\cfrac{26}{36}=\cfrac{13}{18}$
+$\ \ \ \ \ \ \Pr(\text{neither 5 nor 7}) = 1 - \cfrac{4+6}{36}=\cfrac{26}{36}=\cfrac{13}{18}$
 
 $\Pr(Z, 5 \text{ on roll } 1) = \left(\cfrac{1}{9}\right)^2\cfrac{1}{1-\cfrac{13}{18}}=\left(\cfrac{1}{9}\right)^2 \cfrac{18}{5}=\cfrac{2}{45}$
 
@@ -560,7 +571,7 @@ The same applies to $x=9$.
 
 $\Pr(Z, 6 \text{ on roll } 1) = \Pr(6)\Pr(6) + \Pr(6)\Pr(\text{neither 6 nor 7})\Pr(6) + \dots$
 
-$\Pr(\text{neither 6 nor 7}) = 1 - \cfrac{5+6}{36}=\cfrac{25}{36}$
+$\ \ \ \ \ \ \Pr(\text{neither 6 nor 7}) = 1 - \cfrac{5+6}{36}=\cfrac{25}{36}$
 
 $\Pr(Z, 6 \text{ on roll } 1) = \left(\cfrac{5}{36}\right)^2\cfrac{1}{1-\cfrac{25}{36}}=\left(\cfrac{5}{36}\right)^2 \cfrac{36}{11}=\cfrac{25}{396}$
 
@@ -570,11 +581,13 @@ The same applies to $x=8$.
 
 $\Pr(Z) = \displaystyle\sum_{x=2}^12 \Pr(Z, \text{x on roll 1}) = 0 + 0 + \cfrac{1}{36} + \cfrac{2}{45} + \cfrac{25}{396} + \cfrac{1}{6} + \cfrac{25}{396} + \cfrac{2}{45} + \cfrac{1}{36} + \cfrac{1}{18} + 0$
 
-$\ \ \ \ \ \ = \cfrac{55+88+125+330+125+88+55+110}{1980} = \cfrac{244}{495} \Rightarrow \Pr(\bar{Z}) = \cfrac{251}{495}$
+$\ \ \ \ \ \ = \cfrac{55+88+125+330+125+88+55+110}{1980} = \cfrac{244}{495} \approx `r formatC(244/495, format = "f", digits = 4, big.mark=",", drop0trailing = FALSE)`\Rightarrow \Pr(\bar{Z}) = \cfrac{251}{495} \approx `r formatC(251/495, format = "f", digits = 4, big.mark=",", drop0trailing = FALSE)`$
+
+What we are asked for is:
 
 $$E[Y | Z] = \sum_{y=1}^\infty y \Pr(y | Z)$$
 
-$\Pr(y | Z) = \cfrac{\Pr(y,Z)}{\Pr(Z)}$
+In order to compute $\Pr(y | Z) = \cfrac{\Pr(y,Z)}{\Pr(Z)}$ we need to consider the two main sets of cases: $Y=1$ and $Y \geq 2$:
 
 $\Pr(Y=1|Z) = \cfrac{\Pr(Y=1,Z)}{\Pr(Z)} = \cfrac{\Pr(Z, X=7)+\Pr(Z,X=11)}{\Pr(Z)} = \cfrac{\cfrac{1}{6} + \cfrac{1}{18}}{\cfrac{244}{495}} = \cfrac{55}{122}$
 
@@ -588,9 +601,11 @@ It can be proved that:
 
 $$\displaystyle\sum_{y=2}^\infty y\cdot p^{y-2} = \cfrac{2-p}{(1-p)^2}$$
 
+So:
+
 $\mathbf{\textcolor{red}{E[Y|Z]}}=1\cdot\cfrac{55}{122}+\cfrac{495}{122}\left(\left(\cfrac{1}{12}\right)^2\cfrac{2-\cfrac{3}{4}}{\left(1-\cfrac{3}{4}\right)^2} + \left(\cfrac{1}{9}\right)^2\cfrac{2-\cfrac{13}{18}}{\left(1-\cfrac{13}{18}\right)^2} + \left(\cfrac{5}{36}\right)^2\cfrac{2-\cfrac{25}{36}}{\left(1-\cfrac{25}{36}\right)^2} \right)$
 
-$\ \ \ \ \ \ = \cfrac{55}{122}+\cfrac{495}{122}\left(\cfrac{1}{144}\cfrac{5}{4}\cfrac{16}{1}+\cfrac{1}{81}\cfrac{23}{18}\cfrac{18^2}{25}+\cfrac{25}{36^2}\cfrac{47}{36}\cfrac{36^2}{121}\right) = \cfrac{55}{122}+\cfrac{495}{122}\left(\cfrac{5}{36}+\cfrac{46}{225}+\cfrac{1175}{4356}\right) = \cfrac{9858}{3355} \approx \mathbf{\textcolor{red}{2.9383}}$
+$\ \ \ \ \ \ = \cfrac{55}{122}+\cfrac{495}{122}\left(\cfrac{1}{144}\cfrac{5}{4}\cfrac{16}{1}+\cfrac{1}{81}\cfrac{23}{18}\cfrac{18^2}{25}+\cfrac{25}{36^2}\cfrac{47}{36}\cfrac{36^2}{121}\right) = \cfrac{55}{122}+\cfrac{495}{122}\left(\cfrac{5}{36}+\cfrac{46}{225}+\cfrac{1175}{4356}\right) = \cfrac{9858}{3355} \approx \mathbf{\textcolor{red}{`r formatC(9858/3355, format = "f", digits = 4, big.mark=",", drop0trailing = FALSE)`}}$
 
 $$E[Y | \bar{Z}] = \sum_{y=1}^\infty y \Pr(y | \bar{Z})$$
 
@@ -604,9 +619,9 @@ $\Pr(Y=y|\bar{Z}) = \cfrac{1}{\Pr(\bar{Z})} \displaystyle\sum_{x \in \{4,5,6,8,9
 
 $\ \ \ \ \ \ = 2\cfrac{495}{251}\left(\cfrac{1}{12}\cfrac{1}{6}\left(\cfrac{3}{4}\right)^{y-2} + \cfrac{1}{9}\cfrac{1}{6}\left(\cfrac{13}{18}\right)^{y-2} + \cfrac{5}{36}\cfrac{1}{6}\left(\cfrac{25}{36}\right)^{y-2} \right)$
 
-$\mathbf{\textcolor{red}{E[Y|Z]}}=1\cdot\cfrac{55}{251}+\cfrac{990}{251}\left(\cfrac{1}{12}\cfrac{1}{6}\cfrac{2-\cfrac{3}{4}}{\left(1-\cfrac{3}{4}\right)^2} + \cfrac{1}{9}\cfrac{1}{6}\cfrac{2-\cfrac{13}{18}}{\left(1-\cfrac{13}{18}\right)^2} + \cfrac{5}{36}\cfrac{1}{6}\cfrac{2-\cfrac{25}{36}}{\left(1-\cfrac{25}{36}\right)^2} \right)$
+$\mathbf{\textcolor{red}{E[Y|\bar{Z}]}}=1\cdot\cfrac{55}{251}+\cfrac{990}{251}\left(\cfrac{1}{12}\cfrac{1}{6}\cfrac{2-\cfrac{3}{4}}{\left(1-\cfrac{3}{4}\right)^2} + \cfrac{1}{9}\cfrac{1}{6}\cfrac{2-\cfrac{13}{18}}{\left(1-\cfrac{13}{18}\right)^2} + \cfrac{5}{36}\cfrac{1}{6}\cfrac{2-\cfrac{25}{36}}{\left(1-\cfrac{25}{36}\right)^2} \right)$
 
-$\ \ \ \ \ \ = \cfrac{55}{251}+\cfrac{990}{251}\left(\cfrac{1}{12}\cfrac{1}{6}\cfrac{5}{4}\cfrac{16}{1}+\cfrac{1}{9}\cfrac{1}{6}\cfrac{23}{18}\cfrac{18^2}{25}+\cfrac{5}{36}\cfrac{1}{6}\cfrac{47}{36}\cfrac{36^2}{121}\right) = \cfrac{55}{251}+\cfrac{990}{251}\left(\cfrac{5}{18}+\cfrac{23}{75}+\cfrac{235}{726}\right) = \cfrac{52473}{13805} \approx \mathbf{\textcolor{red}{3.8010}}$
+$\ \ \ \ \ \ = \cfrac{55}{251}+\cfrac{990}{251}\left(\cfrac{1}{12}\cfrac{1}{6}\cfrac{5}{4}\cfrac{16}{1}+\cfrac{1}{9}\cfrac{1}{6}\cfrac{23}{18}\cfrac{18^2}{25}+\cfrac{5}{36}\cfrac{1}{6}\cfrac{47}{36}\cfrac{36^2}{121}\right) = \cfrac{55}{251}+\cfrac{990}{251}\left(\cfrac{5}{18}+\cfrac{23}{75}+\cfrac{235}{726}\right) = \cfrac{52473}{13805} \approx \mathbf{\textcolor{red}{`r formatC(52473/13805, format = "f", digits = 4, big.mark=",", drop0trailing = FALSE)`}}$
 
 $$\mathbf{\textcolor{red}{E[Y|Z]<E[Y|\bar{Z}]}}$$
 
@@ -639,20 +654,94 @@ for (i in 1:N) {
     Y[i] <- y
     Z[i] <- z
 }
-mean(Y[Z==0])
-mean(Y[Z==1])
+
+mean(Z) # E[Z] (=Pr(Z=1) since Z is binary); should be close to 0.493 (244/495)
+
+mean(Y[Z==0]) # E[Y|Z]; should be close to 3.8010
+mean(Y[Z==1]) # E[Y|not Z]; should be close to 2.9383
 ```
-
-
-
-
 
 
 2. **Suppose it takes $\$20$ to pay, and the payoff is $\$100$, $\$80$, $\$60$, $\$40$, $\$0$ if you win in the 1st, 2nd, 3rd, 4th, 5th round, respectively. That is, if you win in the 1st round, you are paid $\$100$ (so your net profit is $\$80$), if you win in the 2nd round, you are paid $\$80$, etc. Derive the expected payoff function of a game.**
 
+Let $W$ be the payoff:
+
+$\mathbf{\textcolor{red}{E[W] = \displaystyle\sum_{\substack{w \in \{0,40,\\60,80,100\}}} w \Pr(w) = \sum_{\substack{w \in \{0,40,\\60,80,100\}}} w \Pr(y) = \sum_{\substack{w \in \{0,40,\\60,80,100\}}} w \sum_{Z=0}^1 w \Pr(y,Z) = \sum_{\substack{w \in \{0,40,\\60,80,100\}}} w \sum_{Z=0}^1 w \Pr(y|Z)\Pr(Z)}}$
+
+We can focus on the event $Z=1$ since $\bar{Z} \Rightarrow W=0$:
+
+$E[W] = \mathbf{\textcolor{red}{\displaystyle\sum_{\substack{w \in \{0,40,\\60,80,100\}}} w \Pr(y|Z=1) \Pr(Z=1) = \Pr(Z=1) \sum_{\substack{w \in \{40,60,\\80,100\}}} w \Pr(y|Z=1)}}$
+
+$\ \ \ \ \ \ = \Pr(Z=1) \displaystyle\sum_{y=1}^4 w(y) \Pr(y|Z=1)$
+
+$\ \ \ \ \ \ = \cfrac{244}{495} \left(100 \cdot \Pr(Y=1|Z=1) + \sum_{y=2}^4 w(y) \cfrac{495}{122}\left(\left(\cfrac{1}{12}\right)^2\left(\cfrac{3}{4}\right)^{y-2}\right)\right)$
+
+
+$\ \ \ \ \ \ = \cfrac{244}{495} \left(100 \cdot \cfrac{55}{122} + \displaystyle\sum_{y=2}^4 w(y) \cfrac{495}{122}\left(\left(\cfrac{1}{12}\right)^2\left(\cfrac{3}{4}\right)^{y-2}+ \left(\cfrac{1}{9}\right)^2\left(\cfrac{13}{18}\right)^{y-2} + \left(\cfrac{5}{36}\right)^2\left(\cfrac{25}{36}\right)^{y-2}\right)\right)$
+
+$\ \ \ \ \ \ = 100 \cdot \cfrac{110}{495} + 80 \cdot 2\left(\left(\cfrac{1}{12}\right)^2+ \left(\cfrac{1}{9}\right)^2 + \left(\cfrac{5}{36}\right)^2\right)$
+
+$\ \ \ \ \ \ \ \ \ + 60 \cdot 2\left(\left(\cfrac{1}{12}\right)^2\left(\cfrac{3}{4}\right)+ \left(\cfrac{1}{9}\right)^2\left(\cfrac{13}{18}\right) + \left(\cfrac{5}{36}\right)^2\left(\cfrac{25}{36}\right)\right)$
+
+$\ \ \ \ \ \ \ \ \ + 40 \cdot 2\left(\left(\cfrac{1}{12}\right)^2\left(\cfrac{3}{4}\right)^2+ \left(\cfrac{1}{9}\right)^2\left(\cfrac{13}{18}\right)^2 + \left(\cfrac{5}{36}\right)^2\left(\cfrac{25}{36}\right)^2\right)$
+
+$\ \ \ \ \ \ = 100 \cdot \cfrac{110}{495} + \cfrac{1}{144}\left(160 \cdot 1 + 120 \cdot \cfrac{3}{4} + 80 \cdot \cfrac{9}{16}\right)$
+
+$\ \ \ \ \ \ \ \ \ = + \cfrac{1}{81}\left(160 \cdot 1 + 120 \cdot \cfrac{13}{18} + 80 \cdot \cfrac{25}{36}\right)$
+
+$\ \ \ \ \ \ \ \ \ = + \cfrac{25}{1296}\left(160 \cdot 1 + 120 \cdot \cfrac{25}{36} + 80 \cdot \cfrac{625}{1296}\right)$
+
+$\ \ \ \ \ \ = \mathbf{\textcolor{red}{\cfrac{160658}{4829} \approx `r formatC((100*110/495+1/144*(160+120*3/4+80*9/16)+1/81*(160+120*13/18+80*169/324)+25/1296*(160+120*25/36+80*625/1296)), format = "f", digits = 4, big.mark=",", drop0trailing = FALSE)`}}$
+
+
+```{r, echo=TRUE, message = FALSE, warning = FALSE}
+N <- 100e3 # number of simulations
+Y <- rep(0, N) # value of Y (number of rolls for every simulation)
+Z <- rep(0, N) # value of Z (0: house wins; 1: I win)
+P <- rep(0, N) # payoff
+for (i in 1:N) {
+    y <- 0 # initialize number of rolls
+    x <- sample(seq(6), 1) + sample(seq(6), 1) # simulate two dice
+    y <- y+1 # update number of rolls
+    first_x <- x # store x (will be used if it's 4, 5, 6, 8, 9, 10)
+    # House wins if 2, 3, 12
+    # I win if 7, 11
+    # Otherwise, keep that value of x (and insert in z)
+    z <- ifelse(x==2 | x==3 | x==12, 0, 
+                ifelse(x==7 | x==11, 1, first_x))
+    p <- ifelse(z==1, 100, 0) # if I win 1st time, payoff is 100
+    # While z > 1 (i.e., if nobody wins)
+    j <- 2 # keep count of rolls
+    while (z>1) {
+        x <- sample(seq(6), 1) + sample(seq(6), 1) # simulate other roll
+        y <- y+1 # update number of rolls
+        # House wins if 7
+        # I win if same value of 1st roll
+        z <- ifelse(x==7, 0, ifelse(x==first_x , 1, first_x))
+        # Compute payoff if I win (with less than 5 rolls)
+        p <- ifelse(z==1 & j<5, 100-20*(j-1), 0)
+        j <- j+1 # update count of rolls
+    }
+    # When finished, store values for that simulation
+    Y[i] <- y
+    Z[i] <- z
+    P[i] <- p
+}
+
+mean(P) # E[P]; should be close to 33.2694
+```
+
+To calculate the net profit we would just have to subtract $\$20$ to every game:
+
+$E[\text{net profit}] = E[W-20] = E[W]-20 = `r formatC((100*110/495+1/144*(160+120*3/4+80*9/16)+1/81*(160+120*13/18+80*169/324)+25/1296*(160+120*25/36+80*625/1296)-20), format = "f", digits = 4, big.mark=",", drop0trailing = FALSE)`$
+
+(It's positive, so it does not seem likely that the house would choose payoffs so high: usually they are selected so $E[\text{net profit}] < 0$, so the house always wins on the long term.)
+
 
 
 **********
+
+\pagebreak
 
 # Part III: Statistical Estimation and Statistical Inference
 
