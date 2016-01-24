@@ -484,7 +484,7 @@ $$
 \end{aligned}
 $$
 
-Note that for indenpendent and indentically distributed random variables $Y_i \dots Y_n$ with sample mean $\bar{Y}$
+Note that for independent and identically distributed random variables $Y_i \dots Y_n$ with sample mean $\bar{Y}$
 
 $$ E[Y^2] = E[\bar{Y^2}] = \frac{1}{n}\sigma^2 - \mu^2 $$
 
@@ -530,22 +530,76 @@ $$
 
 **Wooldridge's textbook: Appendix C, Question 6.**
 
+6. **You are hired by the governor to study whether a tax on liquor has decreased average liquor consumption in your state. You are able to obtain, for a sample of individuals selected at random, the difference in liquor consumption (in ounces) for the years before and after the tax. For person $i$ who is sampled randomly from the population. $Y_i$ denotes the change in liquor consumption. Treat these as a random sample from a Normal($\mu$, $|sigma^2$) distribution.**
+
+i. $H_0$: $\mu$ = 0.
+ii. $H_a$: $\mu$ < 0.
+iii. 
+$$t = \frac{\bar(y) - \mu}{s/\sqrt{n}} = \frac{-32.8}{466.4/\sqrt{900}} \approx -2.11$$
+
+p = Pr(z $\leq$ -2.11) = .017
+
+Because 0.1 < p < 0.5, we can reject $H_0$ at the 5% level but not at the 1% level.
+
+iv. Given our estimate of $\mu$, we are estimating the tax was associated with a 32.8 oz decrease in alcohol consumption. From a health perspective, this is less than a 1 oz decrease in consumption of liquor per week, a fairly insignificant difference. 
+v. This analysis assumes that other factors that influence alcohol consumption over the period of interest have remained constant. 
+
 
 ## Question 13
 
 **Wooldridge's textbook: Appendix C, Question 8. In addition, answer the following questions:**
 
+8. **For a given player, the outcome of a particular shot can be modeled as a Bernoulli variable: if $Y_i$ is the outcome of shot i, then $Y_i$ = 1 if the shot is made, and $Y_i$ = 0 if the shot is missed. Let $\theta$ denote the probability of making any particular three-point shot attempt. The natural estimator of u is $\bar{Y}$ = FGM/FGA.**
+
+i. $$\theta = 188/429 \approx 0.438$$
+ii. For each trial
+
+$$Var(Y_i) = \theta(1-\theta)$$
+
+Thus for the sample mean we have
+
+$$Var(\bar{Y}) = \frac{\theta(1-\theta)}{n}$$
+$$sd(\bar{Y}) = \sqrt{\frac{\theta(1-\theta)}{n}}$$
+
+iii. For $\theta$ = 0.5, we have $t= (\bar{Y} - 0.5)/se(\bar{Y})$
+
+$$se = \sqrt{0.438(1-.438)/429} \approx 0.024$$
+$$t = (.438 - 0.5)/0.024 \approx -2.58$$
+$$p \approx Pr(Z \leq -2.58) \approx 0.004$$
+
+At the 1% significance level, we reject the null hypotheses that $\theta$ = 0.5
+
+
 1. **Define Type I error.**
+
+Rejecting the null hypothesis when it is true. 
+
 
 2. **What is the probability of Type I error of this test?**
 
+0.01
+
 3. **Define Type II error.**
+
+Accepting the null hypothesis when it is false. 
 
 4. **What is the probability of Type II error when using this decision rule, assuming the "true" population proportion is $\theta^*= 0.45$.**
 
+At the 1% significance level, $Z_{crit}$  = -2.33.  And 
+
+$$-2.33 = (\theta_{crit}^* - 0.5)/0.24$$
+$$\theta_{crit}^* = .444.$$
+$$ P(\theta_{crit}^* \geq .444 | \mu = 0.45 \text{ and } \sigma = 0.024) = Pr(Z \geq -.25)) \approx 0.60.$$
+
+The type II error rate in this scenario is 0.60. 
+
 5. **Define the power of the test (in general terms).**
 
+The power of a test is the probability that we correctly reject the null hypothesis, ie. Pr(Reject | Null is False).
+
 6. **Calculate the power of this test, again assuming the "true" population proportion is $\theta^*= 0.45$.**
+
+The power is 1 - 0.65 = 0.40
 
 
 \pagebreak
