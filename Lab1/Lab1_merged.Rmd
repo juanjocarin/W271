@@ -32,6 +32,7 @@ header-includes:
 
 **In a team of data scientists, 36 are expert in machine learning, 28 are expert in statistics, and 18 are awesome. 22 are expert in both machine learning and statistics, 12 are expert in machine learning and are awesome, 9 are expert in statistics and are awesome, and 48 are expert in either machine learning or statistics or are awesome. Suppose you are in a cocktail party with this group of data scientists and you have an equal probability of meeting any one of them.**
 
+A venn diagram for the 48 known members of the group shows:
 ![Venn Diagram](images\Q1_VennDiagram.png)
 
 1. **What is the probability of meeting a data scientist who is an expert in both machine learning and statistics and is awesome?**
