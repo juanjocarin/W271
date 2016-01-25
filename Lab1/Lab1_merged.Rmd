@@ -32,6 +32,8 @@ header-includes:
 
 **In a team of data scientists, 36 are expert in machine learning, 28 are expert in statistics, and 18 are awesome. 22 are expert in both machine learning and statistics, 12 are expert in machine learning and are awesome, 9 are expert in statistics and are awesome, and 48 are expert in either machine learning or statistics or are awesome. Suppose you are in a cocktail party with this group of data scientists and you have an equal probability of meeting any one of them.**
 
+![Venn Diagram](images\Q1_VennDiagram.png)
+
 1. **What is the probability of meeting a data scientist who is an expert in both machine learning and statistics and is awesome?**
 
 Let $\mathbf{N \geq 48}$ be the **size of the team of data scientists**, and $M, S, A$ the event that a data scientist is either a machine learning expert, a statistics expert, or awesome.
@@ -63,6 +65,8 @@ $\ \ \ \ \ \ = \cfrac{\Pr(M \cap A) + \Pr(S \cap A) - \Pr((M \cap A) \cap (S \ca
 $\ \ \ \ \ \ = \cfrac{\cfrac{12}{N} + \cfrac{9}{N} - \cfrac{9}{N}}{\cfrac{18}{N}} = \cfrac{12+9-9}{18} = \cfrac{12}{18}$
 
 $\ \ \ \ \ \ = \mathbf{\textcolor{red}{\cfrac{2}{3} = `r formatC(2/3, format = "f", digits = 4, big.mark=",", drop0trailing = FALSE)`}}$
+
+Alternatively, if the ambiguity in the question is intending to mean the individual can not be experts in both machine learning and statisitcs given that s/he is awesome then the probability would be $= \cfrac{3}{18}$.
 
 
 ## Question 2
@@ -130,7 +134,7 @@ $\ \ \ \ \ \ = \mathbf{\textcolor{red}{\cfrac{4}{3k}}}$
 
 2. **Compute the expected payout from the contract, $E(x)$.**
 
-I tried 3 different approaches, all leading to the same result.
+We tried 3 different approaches, all leading to the same result.
 
 The first one is based on <https://www.probabilitycourse.com/chapter4/4_3_1_mixed.php>. Before computing the expected value of $X$, we need to compute its *cdf*.
 
@@ -384,7 +388,7 @@ $\cfrac{dE(Y)}{dx} = 0 \Rightarrow \mathbf{\textcolor{red}{x=E(X)}}$
 
 2. **Find the value of $E(Y)$ for the choice of $x$ you found in (1)?**
 
-We just have to substitute in the last expression of $E(Y)
+We just have to substitute in the last expression of $E(Y)$
 
 $\mathbf{\textcolor{red}{E(Y)}} = \displaystyle\int \left(a+b(X-\mu)^2 \right) f(X)dX$
 
@@ -497,6 +501,28 @@ plot(density(Z), main = 'Density distribution of Z')
 ## Question 7
 
 **In a casino, you pay the following game. A pair fair, ordinary 6-faced dices is rolled. If the sum of the dice is $2$, $3$, or $12$, the house wins. If it is $7$ or $11$, you win. If it is any other number $x$, the house rolls the dice again until the sum is either $7$ or $x$. If it is $7$, the house wins. If it is $x$, you win. A game ends if one of the two players wins. Let $Y$ be the number of rolls needed until the game ends.**
+
+\begin{table}[h]
+\caption{Dice Game Rolls and Outcomes}
+\centering
+\begin{tabular}{c c c c}
+\hline\hline
+Sum & Rolls & \# of Rolls & Win Outcome \\ [0.5ex] 
+\hline
+2& (1,1)& 1 & House\\
+3& (1,2)* & 2 & House\\
+4& (2,2),(3,1)*  & 3&\\
+5& (4,1)*,(3,2)* & 4&\\
+6&(5,1)*,(5,2)*,(3,3) & 5&\\
+7&(6,1)*,(5,2)*,(4,3)* & 6 & Player\\
+8&(6,2)*,(5,3)*,(4,4) & 5&\\
+9&(6,3)*,(5,4)* & 4&\\
+10&(6,4)*,(5,5) & 3&\\
+11&(6,5)* & 2 & Player\\
+12&(6,6) & 1 & House\\
+\hline
+\end{tabular}
+\end{table}
 
 1. **Is the expected number of rolls given that you win more than, equal to, or less than the expected number of rolls given that house wins (in a game)? The steps to arrive at your answer numerically need to be clearly shown.**
 
@@ -768,7 +794,7 @@ $E[W]=\mu$
 
 $E[W] = E\left[\displaystyle\sum_{i=1}^n a_iY_i\right] = \displaystyle\sum_{i=1}^n a_iE[Y_i] = \displaystyle\sum_{i=1}^n a_i\mu = \mu \displaystyle\sum_{i=1}^n a_i$
 
-So the condition is $\mathbf{textcolor{red}{\sum_{i=1}^n a_i=1}}$ (for example---but not necessarily---, $a_i=\cfrac{1}{n} \ \forall i$).
+So the condition is $\mathbf{\textcolor{red}{\sum_{i=1}^n a_i=1}}$ (for example---but not necessarily---, $a_i=\cfrac{1}{n} \ \forall i$).
 
 2. **Find $Var(W)$.**
 
@@ -972,22 +998,57 @@ Therefore, $W_2$ is also unbiased for $\theta$. Although $E(W_1)$ and $E(W_2)$ a
 
 6. **You are hired by the governor to study whether a tax on liquor has decreased average liquor consumption in your state. You are able to obtain, for a sample of individuals selected at random, the difference in liquor consumption (in ounces) for the years before and after the tax. For person $i$ who is sampled randomly from the population. $Y_i$ denotes the change in liquor consumption. Treat these as a random sample from a Normal($\mu$, $|sigma^2$) distribution.**
 
-i. $H_0$: $\mu$ = 0.
-ii. $H_a$: $\mu$ < 0.
-iii. 
-$$t = \frac{\bar(y) - \mu}{s/\sqrt{n}} = \frac{-32.8}{466.4/\sqrt{900}} \approx -2.11$$
+i. **The null hypothesis is that there was no change in average liquor consumption; state this formally in terms of $\mu$**
+
+The null hypothesis is also stated as $\mathbf{\textcolor{red}{H_0: \mu_0 = \mu_A or $\mu$ = 0}}$.
+
+ii **The alternative is that there was a decline in liquor consumption; state the alternative in terms of $\mu$.**
+
+iii. **Now, suppose your sample size is $n=900$ and you obtain the estimates $\bar{y}=-32.8$ and $s=466.4$. Calculate the $t$ statistic for testing $H_0$ against $H_1$; obtain the p-value for the test. (Because of the large sample size, just use the standard normal distribution tabulated in Table G.1) Do you reject $H_0$ at te 5% level? At the 1% level?**
+
+$t=\frac{\sqrt{n}\bar{y}}{s}=\frac{\sqrt{900}-32.8}{466.4}=-2.10977$
 
 p = Pr(z $\leq$ -2.11) = .017
 
 Because 0.01 < p < 0.05, we can reject $H_0$ at the 5% level but not at the 1% level.
 
-iv. Given our estimate of $\mu$, we are estimating the tax was associated with a 32.8 oz decrease in alcohol consumption. From a health perspective, this is less than a 1 oz decrease in consumption of liquor per week, a fairly insignificant difference. 
-v. This analysis assumes that other factors that influence alcohol consumption over the period of interest have remained constant. 
+iv. **Would you say that the estimated fall in consumption is large in magnitude? Comment on the practical versus statistical significance of this estimate.**
+
+Given our estimate of $\mu$, we are estimating the tax was associated with a 32.8 oz decrease in alcohol consumption. From a health perspective, this is less than a 1 oz decrease in consumption of liquor per week, a fairly insignificant difference. 
+
+v. **What has been implicity assumed in your analysis about other determinats of liquor consumption over the two-year period in order to infer causality from the tax change to liquor consumption?**
+
+This analysis assumes that other factors that influence alcohol consumption over the period of interest have remained constant. 
 
 
 ## Question 13
 
 **Wooldridge's textbook: Appendix C, Question 8**
+
+**The New York Times (2/5/90) reported three-point shooting performace for the top 10 three-point shooters in the NBA. The following table summarizes these data:**
+
+\begin{table}[h]
+\caption{Appendix C, Question 8 Table}
+\centering
+\begin{tabular}{c c}
+\hline\hline
+Player & FGA-FGM \\ [0.5ex] 
+\hline
+Mark Price & 429-188\\
+Trent Tucker & 833-345\\
+Dale Ellis & 1149-472\\
+Craig Hodges & 1016-396\\
+Danny Ainge & 1051-406\\
+Byron Scott & 676-260\\
+Reggie Miller & 416-159\\
+Larry Bird & 1206-455\\
+Jon Sundvold & 440-166\\
+Brian Taylor  & 417-157\\
+\hline
+FGA = field goals attempted & FGM = field goals made\\
+\hline
+\end{tabular}
+\end{table}
 
 **For a given player, the outcome of a particular shot can be modeled as a Bernoulli variable: if $Y_i$ is the outcome of shot i, then $Y_i$ = 1 if the shot is made, and $Y_i$ = 0 if the shot is missed. Let $\theta$ denote the probability of making any particular three-point shot attempt. The natural estimator of $\theta$ is $\bar{Y} = FGM/FGA$.**
 
