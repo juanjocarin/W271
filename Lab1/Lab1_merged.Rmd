@@ -1,7 +1,7 @@
 ---
 title: "**W271**-2 -- Spring 2016 -- **Lab 1**"
 author: "***Juanjo Carin, Kevin Davis, Ashley Levato, Minghu Song***"
-date: "*January 14, 2016*"
+date: "*January 27, 2016*"
 output:
    pdf_document:
       toc: true
@@ -34,7 +34,7 @@ header-includes:
 
 1. **What is the probability of meeting a data scientist who is an expert in both machine learning and statistics and is awesome?**
 
-Let $N$ be the size of the team of data scientists (i.e., the sample size), and $M, S, A$ the event that a data scientist is either a machine learning expert, a statistics expert, or awesome.
+Let $\mathbf{N \geq 48}$ be the **size of the team of data scientists**, and $M, S, A$ the event that a data scientist is either a machine learning expert, a statistics expert, or awesome.
 
 $\mathbf{\textcolor{red}{\Pr(M \cap S \cap A)}} = \Pr(M) + \Pr(S \cap A) - \Pr(M \cup (S \cap A))$
 
@@ -48,7 +48,7 @@ $\ \ \ \ \ \ = \Pr(M \cap S) + \Pr(M \cap A) + \Pr(M \cap A) - \Pr(M) - \Pr(S) -
 
 $\ \ \ \ \ \ = \cfrac{22}{N} + \cfrac{12}{N} + \cfrac{9}{N} - \cfrac{36}{N} - \cfrac{28}{N} - \cfrac{18}{N} + \cfrac{48}{N}  = \cfrac{(22+12+9)-(36-28-18)+48}{N} = \cfrac{43-82+48}{N}$
 
-$\ \ \ \ \ \ = \mathbf{\textcolor{red}{\cfrac{9}{N}}}$
+$\ \ \ \ \ \ = \mathbf{\textcolor{red}{\cfrac{9}{N}}} \leq \cfrac{9}{48} = `r formatC(9/48, format = "f", digits = 4, big.mark=",", drop0trailing = FALSE)`$
 
 2. **Suppose you meet a data scientist who is an expert in machine learning. Given this information, what is the probability that s/he is not awesome?**
 
@@ -306,7 +306,7 @@ $\ \ \ \ \ \ = \cfrac{A^4(k-1)^2 - A^4 \cfrac{k^2}{4}}{A^2(k-2)} - \left(E(X_C)\
 
 $\ \ \ \ \ \ = \cfrac{A^2(3k^2 + 4 - 8k)}{4(k-2)} - \cfrac{16A^2}{9(k-2)^2} \left((k-1)^3 + \cfrac{k}{2} - 2 \left(\cfrac{k}{2}\right)^{\frac{3}{2}} (k-1)^{\frac{3}{2}}\right)$
 
-To get the full expression for $Var(X)$ we made use of <http://www.wolframalpha.com> (the function `fractions {MASS}` could also be used):
+> To get the full expression for $Var(X)$ we made use of <http://www.wolframalpha.com>:
 
 $\mathbf{\textcolor{red}{Var(X) = \cfrac{\theta^2(181k+400)}{400k(k+2)}-\cfrac{A^2(k(k(37k-32\sqrt{2k(k-1)}-66)+32\sqrt{2k(k-1)}+44)+8)}{72(k-2)k}}}$
 
@@ -436,9 +436,9 @@ As shown above (especially in the contour plot on the left), $0 \leq Z \leq 1$, 
 \pagebreak
 
 ```{r, echo=FALSE, message = FALSE, warning = FALSE, fig.cap = "Region of the $X-Y$ plane for which $Z<z$ where $z=0.8$", fig.width = 6, fig.height = 4.5}
-simulations <- 100e3
-X <- runif(simulations, min=0, max=1)
-Y <- runif(simulations, min=0, max=1)
+N <- 100e3 # number of simulations
+X <- runif(N, min=0, max=1)
+Y <- runif(N, min=0, max=1)
 Z <- X+Y
 
 z = 0.8
@@ -551,7 +551,7 @@ When we roll a $4, 5, 6, 8, 9$, or $10$, we need to roll again, and the final re
 
 $\Pr(Z, 4 \text{ on roll } 1) = \Pr(4)\Pr(4) + \Pr(4)\Pr(\text{neither 4 nor 7})\Pr(4) + \dots$
 
-$\ \ \ \ \ \ \Pr(\text{neither 4 nor 7}) = 1 - \cfrac{3+6}{36}=1-\cfrac{1}{4}=\cfrac{3}{4}$
+$\Pr(\text{neither 4 nor 7}) = 1 - \cfrac{3+6}{36}=1-\cfrac{1}{4}=\cfrac{3}{4}$
 
 $\Pr(Z, 4 \text{ on roll } 1) = \left(\cfrac{1}{12}\right)^2\left(1+\left(\cfrac{3}{4}\right)+\left(\cfrac{3}{4}\right)^2+\dots\right) = \left(\cfrac{1}{12}\right)^2\displaystyle\sum_{y=0}^\infty\left(\cfrac{3}{4}\right)^y=\left(\cfrac{1}{12}\right)^2\cfrac{1}{1-\cfrac{3}{4}}=\cfrac{4}{12^2}=\cfrac{1}{36}$
 
@@ -561,7 +561,7 @@ The same applies to $x=10$.
 
 $\Pr(Z, 5 \text{ on roll } 1) = \Pr(5)\Pr(5) + \Pr(5)\Pr(\text{neither 5 nor 7})\Pr(5) + \dots$
 
-$\ \ \ \ \ \ \Pr(\text{neither 5 nor 7}) = 1 - \cfrac{4+6}{36}=\cfrac{26}{36}=\cfrac{13}{18}$
+$\Pr(\text{neither 5 nor 7}) = 1 - \cfrac{4+6}{36}=\cfrac{26}{36}=\cfrac{13}{18}$
 
 $\Pr(Z, 5 \text{ on roll } 1) = \left(\cfrac{1}{9}\right)^2\cfrac{1}{1-\cfrac{13}{18}}=\left(\cfrac{1}{9}\right)^2 \cfrac{18}{5}=\cfrac{2}{45}$
 
@@ -571,7 +571,7 @@ The same applies to $x=9$.
 
 $\Pr(Z, 6 \text{ on roll } 1) = \Pr(6)\Pr(6) + \Pr(6)\Pr(\text{neither 6 nor 7})\Pr(6) + \dots$
 
-$\ \ \ \ \ \ \Pr(\text{neither 6 nor 7}) = 1 - \cfrac{5+6}{36}=\cfrac{25}{36}$
+$\Pr(\text{neither 6 nor 7}) = 1 - \cfrac{5+6}{36}=\cfrac{25}{36}$
 
 $\Pr(Z, 6 \text{ on roll } 1) = \left(\cfrac{5}{36}\right)^2\cfrac{1}{1-\cfrac{25}{36}}=\left(\cfrac{5}{36}\right)^2 \cfrac{36}{11}=\cfrac{25}{396}$
 
@@ -623,8 +623,9 @@ $\mathbf{\textcolor{red}{E[Y|\bar{Z}]}}=1\cdot\cfrac{55}{251}+\cfrac{990}{251}\l
 
 $\ \ \ \ \ \ = \cfrac{55}{251}+\cfrac{990}{251}\left(\cfrac{1}{12}\cfrac{1}{6}\cfrac{5}{4}\cfrac{16}{1}+\cfrac{1}{9}\cfrac{1}{6}\cfrac{23}{18}\cfrac{18^2}{25}+\cfrac{5}{36}\cfrac{1}{6}\cfrac{47}{36}\cfrac{36^2}{121}\right) = \cfrac{55}{251}+\cfrac{990}{251}\left(\cfrac{5}{18}+\cfrac{23}{75}+\cfrac{235}{726}\right) = \cfrac{52473}{13805} \approx \mathbf{\textcolor{red}{`r formatC(52473/13805, format = "f", digits = 4, big.mark=",", drop0trailing = FALSE)`}}$
 
-$$\mathbf{\textcolor{red}{E[Y|Z]<E[Y|\bar{Z}]}}$$
+> Again, we used <http://www.wolframalpha.com> (or the R function `fractions {MASS}`) to simplify expressions.
 
+$$\mathbf{\textcolor{red}{E[Y|Z]<E[Y|\bar{Z}]}}$$
 
 Let's prove it with a simulation:
 
@@ -687,12 +688,14 @@ $\ \ \ \ \ \ \ \ \ + 40 \cdot 2\left(\left(\cfrac{1}{12}\right)^2\left(\cfrac{3}
 
 $\ \ \ \ \ \ = 100 \cdot \cfrac{110}{495} + \cfrac{1}{144}\left(160 \cdot 1 + 120 \cdot \cfrac{3}{4} + 80 \cdot \cfrac{9}{16}\right)$
 
-$\ \ \ \ \ \ \ \ \ = + \cfrac{1}{81}\left(160 \cdot 1 + 120 \cdot \cfrac{13}{18} + 80 \cdot \cfrac{25}{36}\right)$
+$\ \ \ \ \ \ \ \ \ + \cfrac{1}{81}\left(160 \cdot 1 + 120 \cdot \cfrac{13}{18} + 80 \cdot \cfrac{25}{36}\right)$
 
-$\ \ \ \ \ \ \ \ \ = + \cfrac{25}{1296}\left(160 \cdot 1 + 120 \cdot \cfrac{25}{36} + 80 \cdot \cfrac{625}{1296}\right)$
+$\ \ \ \ \ \ \ \ \ + \cfrac{25}{1296}\left(160 \cdot 1 + 120 \cdot \cfrac{25}{36} + 80 \cdot \cfrac{625}{1296}\right)$
 
 $\ \ \ \ \ \ = \mathbf{\textcolor{red}{\cfrac{160658}{4829} \approx `r formatC((100*110/495+1/144*(160+120*3/4+80*9/16)+1/81*(160+120*13/18+80*169/324)+25/1296*(160+120*25/36+80*625/1296)), format = "f", digits = 4, big.mark=",", drop0trailing = FALSE)`}}$
 
+
+Again, let's confirm this result with a simulation:
 
 ```{r, echo=TRUE, message = FALSE, warning = FALSE}
 N <- 100e3 # number of simulations
@@ -753,82 +756,76 @@ $E[\text{net profit}] = E[W-20] = E[W]-20 = `r formatC((100*110/495+1/144*(160+1
 
 **Define the class of linear estimators of $\mu$ by**
 
-$$W = \sum_{i=1}^n a_iY_i$$
+$$\mathbf{W = \sum_{i=1}^n a_iY_i}$$
 
 **where the $a_i$ are constants.**
 
 1. **What restriction on the $a_i$ is needed for $W$ to be an unbiased estimator of $\mu$?**
 
-$$W = a_{1}E(Y_{1}) + a_{2}E(Y_{2}) + ... + a_{n}E(Y_{n})$$
+For $W$ to be an unbiased estimator of $\mu$, the following condition has to be met:
 
-And $Y_{i}$ = $\mu$ $\forall$ i $\in$ n.
+$E[W]=\mu$
 
-Therefore
+$E[W] = E\left[\displaystyle\sum_{i=1}^n a_iY_i\right] = \displaystyle\sum_{i=1}^n a_iE[Y_i] = \displaystyle\sum_{i=1}^n a_i\mu = \mu \displaystyle\sum_{i=1}^n a_i$
 
-$$W = (a_{1} + a_{2} + ... + a_{n})\mu $$
-
-For W to be an unbiased estimator of $\mu$, $a_{1} + a_{2} + ... a_{3} = 1$
+So the condition is $\mathbf{textcolor{red}{\sum_{i=1}^n a_i=1}}$ (for example---but not necessarily---, $a_i=\cfrac{1}{n} \ \forall i$).
 
 2. **Find $Var(W)$.**
 
-$$Var(W) = a_{1}^2Var(Y_{1}) + a_{2}^2Var(Y_{2}) + ... + a_{n}^2Var(Y_{n})$$
+$\mathbf{\textcolor{red}{Var(W)}} = Var\left(\displaystyle\sum_{i=1}^n a_iY_i\right) = \displaystyle\sum_{i=1}^n a_i^2Var(Y_i) = \displaystyle\sum_{i=1}^n a_i^2\sigma^2 = \mathbf{\textcolor{red}{\sigma^2\displaystyle\sum_{i=1}^n a_i^2}}$
 
-and Var($Y_{i}$) = $\sigma^2 \forall \in$ n. Therefore
+3. **Given a set of numbes $a_1,\dots,a_n$, the following inequality holds:**
 
-$$Var(W) = (a_{1}^2 + a_{2}^2 + ... + a_{n}^2)\sigma^2$$
-
-
-3. **Given a set of numbers $a_1,\dots,a_n$, the following inequality holds:**
-
-    $$\frac{1}{n}\left(\sum_{i=1}^na_i\right)^2 \leq \sum_{i=1}^na_i^2$$
+    $$\mathbf{\frac{1}{n}\left(\sum_{i=1}^na_i\right)^2 \leq \sum_{i=1}^na_i^2}$$
 
     **Use this inequality, along with the previous parts of this question, tho show that $Var(W) \geq Var(\bar{Y})$ whenever $W$ is unbiased. We say that $\bar{Y}$ is the best linear unbiased estimator (BLUE).**
 
-When W is unbiased (ie $(a_{1} + a_{2} + ... + a_{n}) = 1$), the expression becomes
+As proved in (1), if $W$ is unbiased, $\displaystyle\sum_{i=1}^n a_i = 1$, and hence:
 
-$$\frac{1}{n} \leq a_{1}^2 + a_{2}^2 + ... + a_{n}^2$$
+$\displaystyle\sum_{i=1}^na_i^2 \geq \cfrac{1}{n}$
 
-Multiplying by $\sigma$ we have
+And following the result of (2), we have:
 
-$$Var(\bar{Y}) \leq \frac{\sigma}{n} = \sigma^2(a_{1}^2 + a_{2}^2 + ... + a_{n}^2) = Var(W)$$
-or
-$$Var(W) \geq Var(\bar(Y))$$
+$\mathbf{\textcolor{red}{Var(W) = \sigma^2 \displaystyle\sum_{i=1}^n a_i^2 \geq \sigma^2 = Var(\bar{Y})}}$
 
 ## Question 9
 
 **Let $\bar{Y}$ denote the average of $n$ independent draws from a population distribution with mean $\mu$ and variance $\sigma^2$. Consider two alternative estimators of $\mu$: $W_1 = \frac{n-1}{n}\bar{Y}$ and $W_2=k\bar{Y}$, where $0<k<1$.**
 
 1. **Compute the biases of both $W_1$ and $W_2$. Which estimator is consistent?**
-$$W_{1} = (\frac{n - 1}{n})\bar{Y}$$
-$$E(W_{1}) = \frac{n-1}{n}E(\bar{Y}) \\$$
-$$  = \frac{n-1}{n}\mu$$
-Therefore 
-$$Bias(W_{1}) = \frac{n-1}{n}\mu - \mu$$
-$$nBias(W_{1}) = -\mu$$
-$$Bias(W_{1}) = \frac{-\mu}{n}$$
 
-Note that as $n \to \infty$, Bias($W_{1}$) $\to$ 0. 
+$\mathbf{\textcolor{red}{Bias(W_1)}} = E(W_1)-\mu = E\left(\cfrac{n-1}{n}\bar{Y}\right)-\mu=\cfrac{n-1}{n}E(\bar{Y})-\mu=\left(\cfrac{n-1}{n}-1\right)\mu=\mathbf{\textcolor{red}{-\cfrac{1}{n}}}$
 
+$\mathbf{\textcolor{red}{Bias(W_2)}} = E(W_2)-\mu = E(k\bar{Y})-\mu=kE(\bar{Y})-\mu=(k-1)\mu=\mathbf{\textcolor{red}{-\mu(1-k)}}$
 
+An estimator $W$ is consistent if $\forall \varepsilon>0$
 
-$$W_2=k\bar{Y}$$
-$$E(W_2) = kE(\bar{Y})$$
-$$E(W_2) = k\mu$$
-And
-$$Bias(W_2) = k\mu - \mu$$
-$$Bias(W_2) = \mu(k - 1)$$
-Given that 0 < k < 1, -$\mu$ < Bias($W_2$) < 0.    
-Note that $W_1$ is consistent, as E($W_1$) converges to $\mu$ as $n \to \infty$.
+$$\lim_{n \to \infty}\Pr(|Bias(W)|>\varepsilon) \to 0$$
+
+**\textcolor{red}{$\mathbf{W_1}$ meets this condition (it's consistent), but $\mathbf{W_2}$ does not.}**
 
 2. **Compute $Var(W_1)$ and $Var(W_2)$. Which estimator has lower variance?**
-$$Var(W_1) = (\frac{n-1}{2})^2Var(\bar(Y))$$
-$$Var(W_1) = \frac{n-1}{n}\frac{n-1}{n}\frac{\sigma^2}{n}$$
-$$Var(W_1) = \Big(\frac{(n-1)^2}{n^3}\Big)\sigma^2$$
 
-$$Var(W_2) = k^2Var(\bar(Y))$$
-$$Var(W_2) = \frac{k^2}{n}\sigma^2$$
+$\mathbf{\textcolor{red}{Var(W_1)}} = Var\left(\cfrac{n-1}{n}\bar{Y}\right) = \left(\cfrac{n-1}{n}\right)^2Var(\bar{Y}) = \left(\cfrac{n-1}{n}\right)^2\cfrac{\sigma^2}{n} = \mathbf{\textcolor{red}{\cfrac{(n-1)^2\sigma^2}{n^3}}}$
 
-Note that by choosing k sufficiently close to 0, the variance of $W_2$ can be made arbitrarily small. Thus $W_2$ has the lower variance.
+$\mathbf{\textcolor{red}{Var(W_2)}} = Var\left(k\bar{Y}\right) = k^2Var(\bar{Y}) = \mathbf{\textcolor{red}{k^2\cfrac{\sigma^2}{n}}}$
+
+Each variance dependes on the values of $n$ and $k$, respectively. Let's see how they should compare to each other for $Var(W_1)$ to be lower than $Var(W_2)$ (and vice versa):
+
+$Var(W_1) < Var(W_2) \Leftrightarrow \left(\cfrac{n-1}{n}\right)^2<k^2 \Rightarrow \cfrac{n-1}{n} < k \Rightarrow n(1-k)<1 \Rightarrow n < \cfrac{1}{1-k}$
+
+```{r, echo=FALSE, message = FALSE, warning = FALSE, fig.cap = "Maximum value of $n$ as function of $k$ for $Var(W_1)$ to be lower than $Var(W_2)$", fig.width = 4, fig.height = 4}
+k <- seq(0.001, .999, .001)
+n <- floor(1/(1-k))
+plot(k[n>=2], n[n>=2])
+```
+
+So the closer $k$ is to 1, the largest $n$ can be for $Var(W_1)$ to be greater than $Var(W_2)$. But $n$ has to be an integer greater than $2$, which means that:
+
+$2 \leq n < \cfrac{1}{1-k} \Rightarrow 2(1-k) < 1 \Rightarrow 2-2k<1 \Rightarrow 1<2k \Rightarrow k>\cfrac{1}{2}$
+
+I.e., **\textcolor{red}{for $\mathbf{k>\cfrac{1}{2}, Var(W_1)<Var(W_2)}$ as long as $\mathbf{n<\cfrac{1}{1-k}}$. For $\mathbf{k<\cfrac{1}{2}, Var(W_1)>Var(W_2)}$ regardless of the value of $\mathbf{n}$. If $\mathbf{k=\cfrac{1}{2}, Var(W_1)=Var(W_2)}$ if $\mathbf{n=2}$ and $\mathbf{Var(W_1)>Var(W_2)}$ for any $\mathbf{n>2}$}**.
+
 
 
 ## Question 10
@@ -990,63 +987,91 @@ v. This analysis assumes that other factors that influence alcohol consumption o
 
 ## Question 13
 
-**Wooldridge's textbook: Appendix C, Question 8. In addition, answer the following questions:**
+**Wooldridge's textbook: Appendix C, Question 8**
 
-8. **For a given player, the outcome of a particular shot can be modeled as a Bernoulli variable: if $Y_i$ is the outcome of shot i, then $Y_i$ = 1 if the shot is made, and $Y_i$ = 0 if the shot is missed. Let $\theta$ denote the probability of making any particular three-point shot attempt. The natural estimator of u is $\bar{Y}$ = FGM/FGA.**
+**For a given player, the outcome of a particular shot can be modeled as a Bernoulli variable: if $Y_i$ is the outcome of shot i, then $Y_i$ = 1 if the shot is made, and $Y_i$ = 0 if the shot is missed. Let $\theta$ denote the probability of making any particular three-point shot attempt. The natural estimator of $\theta$ is $\bar{Y} = FGM/FGA$.**
 
-i. $$\theta = 188/429 \approx 0.438$$
-ii. For each trial
+i. **Estimate $\theta$ for Mark Price.**
+
+$$\mathbf{\textcolor{red}{\hat{\theta}_{\text{Mark Price}}}} = \bar{Y}_{\text{Mark Price}} = \cfrac{FGM_{\text{Mark Price}}}{FGA_{\text{Mark Price}}} = \mathbf{\textcolor{red}{\cfrac{188}{429} \approx `r formatC(188/429, format = "f", digits = 4, big.mark=",", drop0trailing = FALSE)`}}$$
+
+ii. **Find the standard deviation of the estimator $\bar{Y}$ in terms of $\theta$ and the number of shot attempts $n$.**
+
+For each trial (which is a Bernoulli process):
 
 $$Var(Y_i) = \theta(1-\theta)$$
 
-Thus for the sample mean we have
+Thus for the sample mean we have:
 
-$$Var(\bar{Y}) = \frac{\theta(1-\theta)}{n}$$
-$$sd(\bar{Y}) = \sqrt{\frac{\theta(1-\theta)}{n}}$$
+$$Var(\bar{Y}) = \cfrac{\theta(1-\theta)}{n}$$
 
-iii. For $\theta$ = 0.5, we have $t= (\bar{Y} - 0.5)/se(\bar{Y})$
+$$sd(\bar{Y}) = \sqrt{\cfrac{\theta(1-\theta)}{n}}$$
 
-$$se = \sqrt{0.438(1-.438)/429} \approx 0.024$$
-$$t = (.438 - 0.5)/0.024 \approx -2.58$$
-$$p \approx Pr(Z \leq -2.58) \approx 0.004$$
+iii. **Test $H_0: \theta = .5$ against $H_1: \theta < .5$ for Mark Price. Use a 1% significance level.**
+    
+$$t=\cfrac{\bar{Y}-\theta_0}{se(\bar{Y})} = \cfrac{(\theta-\theta_0)\sqrt{n}}{\sqrt{\theta(1-\theta)}}$$
 
-At the 1% significance level, we reject the null hypotheses that $\theta$ = 0.5
+```{r, echo=TRUE, message = FALSE, warning = FALSE}
+n <- 429
+theta <- 188/n
+theta_0 <- 0.5
+(se <- sqrt(theta*(1-theta)/n))
+(t <- (theta-theta_0)/se)
+```
+
+For $\theta_0=0.5, n=429$, and $\theta \approx `r formatC(188/429, format = "f", digits = 4, big.mark=",", drop0trailing = FALSE)`$ we have:
+
+$$t=`r formatC(t, format = "f", digits = 4, big.mark=",", drop0trailing = FALSE)`$$
+
+```{r, echo=FALSE, message = FALSE, warning = FALSE}
+(alpha <- pt(t, n-1))
+```
+
+Since we have a one-sided alternative:
+
+$$\Pr(t<`r formatC(t, format = "f", digits = 4, big.mark=",", drop0trailing = FALSE)`)=F_t(`r formatC(t, format = "f", digits = 4, big.mark=",", drop0trailing = FALSE)`, `r n-1`) =`r formatC(alpha, format = "f", digits = 4, big.mark=",", drop0trailing = FALSE)`$$
+
+And since the probability we have obtained is lower than 1%, **\textcolor{red}{at that significance level we reject the null hypothesis that $\theta_0 = 0.5$}** (do note that had our altenative hypothesis been double-sided, $H_1: \theta_0 \neq 0.5$, we would have had to consider both tails, leading to a probability of $`r formatC(2*alpha, format = "f", digits = 4, big.mark=",", drop0trailing = FALSE)`$).
 
 
 1. **Define Type I error.**
 
-Rejecting the null hypothesis when it is true. 
-
+Rejecting the null hypothesis when it is true.
 
 2. **What is the probability of Type I error of this test?**
 
-0.01
+$\mathbf{\textcolor{red}{1\%}}$
 
 3. **Define Type II error.**
 
-Accepting the null hypothesis when it is false. 
+Failing to reject the null hypothesis when it is false.
 
 4. **What is the probability of Type II error when using this decision rule, assuming the "true" population proportion is $\theta^*= 0.45$.**
 
-At the 1% significance level, $Z_{crit}$  = -2.33.  And 
+```{r, echo=TRUE, message = FALSE, warning = FALSE}
+true_theta <- 0.45
+sig <- 0.01
+(t_critical <- qt(sig, n-1))
+(theta_critical <- t_critical*se + theta_0)
+(t <- (true_theta-theta_critical)/se)
+(beta <- pt(t, n-1))*100
+```
 
-$$-2.33 = (\theta_{crit}^* - 0.5)/0.24$$
-$$\theta_{crit}^* = .444.$$
-$$ P(\theta_{crit}^* \geq .444 | \mu = 0.45 \text{ and } \sigma = 0.024) = Pr(Z \geq -.25)) \approx 0.60.$$
+At the 1% significance level, $t_{crit} = F_t^{-1}(`r sig`, `r n-1`) = `r formatC(t_critical, format = "f", digits = 4, big.mark=",", drop0trailing = FALSE)`$, which corresponding $\theta$ value can be calculated from:
 
-The type II error rate in this scenario is 0.60. 
+$$t_{crit} = \cfrac{\theta_{crit}-\theta_0}{se}$$
+
+Therefore, $\theta_{crit} = t_{crit}\cdot se + \theta_0 = `r formatC(t_critical, format = "f", digits = 4, big.mark=",", drop0trailing = FALSE)` \cdot `r formatC(se, format = "f", digits = 4, big.mark=",", drop0trailing = FALSE)` + `r theta_0` = `r formatC(theta_critical, format = "f", digits = 4, big.mark=",", drop0trailing = FALSE)`$. And
+
+$$\beta = \Pr(\text{failing to reject }H_0|\bar{H_0}) = \Pr\left(t<\cfrac{\theta^*-\theta_{crit}}{se}\right) = F_t\left(\cfrac{\theta^*\theta_{crit}}{se}, n-1\right) = `r formatC(beta, format = "f", digits = 4, big.mark=",", drop0trailing = FALSE)`$$
+
+**\textcolor{red}{The probability of type II error is about $\mathbf{`r formatC(beta, format = "f", digits = 2, big.mark=",", drop0trailing = FALSE)`}$.}**
 
 5. **Define the power of the test (in general terms).**
 
-The power of a test is the probability that we correctly reject the null hypothesis, ie. Pr(Reject | Null is False).
+The power of a test is the probability that we correctly reject the null hypothesis when it is false. Hence its probability is 1 minus the probability of type II error.
 
 6. **Calculate the power of this test, again assuming the "true" population proportion is $\theta^*= 0.45$.**
 
-The power is 1 - 0.65 = 0.40
+$\mathbf{\textcolor{red}{Power = 1 - \beta \approx 0.40}}$
 
-
-\pagebreak
-
-```{r, include=TRUE, message = FALSE, warning = FALSE, fig.cap = "Some plot", fig.width = 6, fig.height = 4.5}
-plot(cars)
-```

@@ -858,17 +858,91 @@ $$\widehat{\sigma^2} = \frac{1}{n}\sum_{i=1}^n \left(Y - \bar{Y} \right)^2$$
 
 ## Question 13
 
-**Wooldridge's textbook: Appendix C, Question 8. In addition, answer the following questions:**
+**Wooldridge's textbook: Appendix C, Question 8**
+
+**For a given player, the outcome of a particular shot can be modeled as a Bernoulli variable: if $Y_i$ is the outcome of shot i, then $Y_i$ = 1 if the shot is made, and $Y_i$ = 0 if the shot is missed. Let $\theta$ denote the probability of making any particular three-point shot attempt. The natural estimator of $\theta$ is $\bar{Y} = FGM/FGA$.**
+
+i. **Estimate $\theta$ for Mark Price.**
+
+$$\mathbf{\textcolor{red}{\hat{\theta}_{\text{Mark Price}}}} = \bar{Y}_{\text{Mark Price}} = \cfrac{FGM_{\text{Mark Price}}}{FGA_{\text{Mark Price}}} = \mathbf{\textcolor{red}{\cfrac{188}{429} \approx `r formatC(188/429, format = "f", digits = 4, big.mark=",", drop0trailing = FALSE)`}}$$
+
+ii. **Find the standard deviation of the estimator $\bar{Y}$ in terms of $\theta$ and the number of shot attempts $n$.**
+
+For each trial (which is a Bernoulli process):
+
+$$Var(Y_i) = \theta(1-\theta)$$
+
+Thus for the sample mean we have:
+
+$$Var(\bar{Y}) = \cfrac{\theta(1-\theta)}{n}$$
+
+$$sd(\bar{Y}) = \sqrt{\cfrac{\theta(1-\theta)}{n}}$$
+
+iii. **Test $H_0: \theta = .5$ against $H_1: \theta < .5$ for Mark Price. Use a 1% significance level.**
+    
+$$t=\cfrac{\bar{Y}-\theta_0}{se(\bar{Y})} = \cfrac{(\theta-\theta_0)\sqrt{n}}{\sqrt{\theta(1-\theta)}}$$
+
+```{r, echo=TRUE, message = FALSE, warning = FALSE}
+n <- 429
+theta <- 188/n
+theta_0 <- 0.5
+(se <- sqrt(theta*(1-theta)/n))
+(t <- (theta-theta_0)/se)
+```
+
+For $\theta_0=0.5, n=429$, and $\theta \approx `r formatC(188/429, format = "f", digits = 4, big.mark=",", drop0trailing = FALSE)`$ we have:
+
+$$t=`r formatC(t, format = "f", digits = 4, big.mark=",", drop0trailing = FALSE)`$$
+
+```{r, echo=FALSE, message = FALSE, warning = FALSE}
+(alpha <- pt(t, n-1))
+```
+
+Since we have a one-sided alternative:
+
+$$\Pr(t<`r formatC(t, format = "f", digits = 4, big.mark=",", drop0trailing = FALSE)`)=F_t(`r formatC(t, format = "f", digits = 4, big.mark=",", drop0trailing = FALSE)`, `r n-1`) =`r formatC(alpha, format = "f", digits = 4, big.mark=",", drop0trailing = FALSE)`$$
+
+And since the probability we have obtained is lower than 1%, **\textcolor{red}{at that significance level we reject the null hypothesis that $\theta_0 = 0.5$}** (do note that had our altenative hypothesis been double-sided, $H_1: \theta_0 \neq 0.5$, we would have had to consider both tails, leading to a probability of $`r formatC(2*alpha, format = "f", digits = 4, big.mark=",", drop0trailing = FALSE)`$).
+
 
 1. **Define Type I error.**
 
+Rejecting the null hypothesis when it is true.
+
 2. **What is the probability of Type I error of this test?**
+
+$\mathbf{\textcolor{red}{1\%}}$
 
 3. **Define Type II error.**
 
+Failing to reject the null hypothesis when it is false.
+
 4. **What is the probability of Type II error when using this decision rule, assuming the "true" population proportion is $\theta^*= 0.45$.**
+
+```{r, echo=TRUE, message = FALSE, warning = FALSE}
+true_theta <- 0.45
+sig <- 0.01
+(t_critical <- qt(sig, n-1))
+(theta_critical <- t_critical*se + theta_0)
+(t <- (true_theta-theta_critical)/se)
+(beta <- pt(t, n-1))*100
+```
+
+At the 1% significance level, $t_{crit} = F_t^{-1}(`r sig`, `r n-1`) = `r formatC(t_critical, format = "f", digits = 4, big.mark=",", drop0trailing = FALSE)`$, which corresponding $\theta$ value can be calculated from:
+
+$$t_{crit} = \cfrac{\theta_{crit}-\theta_0}{se}$$
+
+Therefore, $\theta_{crit} = t_{crit}\cdot se + \theta_0 = `r formatC(t_critical, format = "f", digits = 4, big.mark=",", drop0trailing = FALSE)` \cdot `r formatC(se, format = "f", digits = 4, big.mark=",", drop0trailing = FALSE)` + `r theta_0` = `r formatC(theta_critical, format = "f", digits = 4, big.mark=",", drop0trailing = FALSE)`$. And
+
+$$\beta = \Pr(\text{failing to reject }H_0|\bar{H_0}) = \Pr\left(\cfrac{\theta^*\theta_{crit}}{se}\right) = F_t\left(\cfrac{\theta^*\theta_{crit}}{se}, n-1\right) = `r formatC(beta, format = "f", digits = 4, big.mark=",", drop0trailing = FALSE)`$$
+
+**\textcolor{red}{The probability of type II error is about $\mathbf{`r formatC(beta, format = "f", digits = 2, big.mark=",", drop0trailing = FALSE)`}$.}**
 
 5. **Define the power of the test (in general terms).**
 
+The power of a test is the probability that we correctly reject the null hypothesis when it is false. Hence its probability is 1 minus the probability of type II error.
+
 6. **Calculate the power of this test, again assuming the "true" population proportion is $\theta^*= 0.45$.**
+
+$\mathbf{\textcolor{red}{Power = 1 - \beta \approx 0.40}}$
 
