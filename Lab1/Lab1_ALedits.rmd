@@ -839,18 +839,17 @@ $\theta=\cfrac{188}{429} \approx 0.438$
 **(ii) Find the statnd deviation of the estimator $\bar{Y}$ in terms of $\theta$ and the number of shot attempts n.**
 
 for Random samples from a Bernoulli distribution, 
-$$Var(\bar{Y})=Var\left( \cfrac{1}{n} \sum_{i=1}^n Y_i \right)=\cfrac{1}{n} \cdot (\theta) \cdot (1-\theta)=\cfrac{\theta \cdot (1-\theta)}{n}$$ 
+$$Var(\bar{Y})=Var\left( \cfrac{1}{n} \sum_{i=1}^n Y_i \right)=\cfrac{1}{n} \cdot \theta \cdot (1-\theta)=\cfrac{\theta \cdot (1-\theta)}{n}$$ 
 
 **(iii) The asymptotic distribution of $\cfrac{(\bar{Y} - \theta)}{se(\bar{Y})}$ is a standard normal, where $se(\bar{Y}) = \sqrt{\bar{Y} \cdot (1-\bar{Y})/n}$. Use this fact to test $H_0: \theta=.5$ against $H_1: \theta < .5$ for Mark Price. Use a $1 \%$ significance level.**
 
-Since $\theta \approx 0.438$, $Se(\bar{Y}) =  \sqrt{cfrac{\bar{Y} \cdot (1-\bar{Y})}{n} }\approx \sqrt{cfrac{ 0.438 \cdot (1-0.438}{429} } \approx 0.024$
+Since $\theta \approx 0.438$, $Se(\bar{Y}) =  \sqrt{\cfrac{\bar{Y} \cdot (1-\bar{Y})}{n} }\approx \sqrt{\cfrac{ 0.438 \cdot (1-0.438)}{429} } \approx 0.024$
 
 therefore, the t statistic of $H_0:\theta=0.5$: 
 
 $$t=\cfrac{(\bar{Y}-0.5}{Se(\bar{Y})}=\cfrac{0.438-0.5}{0.024}=-2.58$$
 
 Since $t < -2.326$, which is the critical value of standard normal distribution at 1% significant level (according to appendix Table G2 - critical value of t distribution), $H_0$ is rejected  against $H_1$ at 1% significant level. 
-
 
 1. **Define Type I error.**
 
