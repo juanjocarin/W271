@@ -10,6 +10,7 @@ output:
 numbersections: false
 geometry: margin=1in
 fontsize: 10pt
+linkcolor: blue
 header-includes:
 - \usepackage{fancyhdr}
 - \pagestyle{fancy}
@@ -208,7 +209,7 @@ $\ \ \ \ \ \ = \displaystyle\int_{x=A\sqrt{k/2}}^{A\sqrt{k-1}}\cfrac{2x^2}{kA^2}
 $\ \ \ \ \ \ = \left[ \cfrac{2x^2}{3kA^2}\right]_{x=A\sqrt{k/2}}^{A\sqrt{k-1}} + 0\cdot\cfrac{1}{4} + \cfrac{\theta}{10}\cdot\cfrac{1}{4} + \theta\cdot\cfrac{1}{k} = \mathbf{\textcolor{red}{\cfrac{2A}{3k}\left((k-1)^{\frac{3}{2}}-\left(\cfrac{k}{2}\right)^{\frac{3}{2}}\right) + \cfrac{\theta}{40} + \cfrac{\theta}{k}}}$
 
 
-```{r, echo=FALSE}
+```{r, echo = FALSE}
 require(knitr,quietly=T)
 read_chunk('code/W271_Lab1_Carin-Davis-Levato-Song.R')
 ```
@@ -216,7 +217,7 @@ read_chunk('code/W271_Lab1_Carin-Davis-Levato-Song.R')
 ```{r Libraries, echo = FALSE, message= FALSE, warning = FALSE} 
 ```
 
-```{r Question3-part2, echo=FALSE, message = FALSE, warning = FALSE, fig.cap = "Approximate aspect of $F_X(x)$ (for $A=2, k=8, \\theta=30$)", fig.width = 4, fig.height = 4}
+```{r Question3-part2, echo = FALSE, message = FALSE, warning = FALSE, fig.cap = "Approximate aspect of $F_X(x)$ (for $A=2, k=8, \\theta=30$)", fig.width = 4, fig.height = 4}
 ```
 
 
@@ -368,7 +369,7 @@ $\ \ \ \ \ \ = \mathbf{\textcolor{red}{1-e^{-a}}}$
 
 **Let $X$ be a random variable and $x$ be a real number. A linear function of the squared deviation from $x$ is another random variable, $Y = a+b(X - x)^2$, where $a$ and $b$ are some positive constant.**
 
-1. **Find the value of $x$ that minimizes $E(Y)$. Show that your result is really the minimum.**
+1. **Find the value of $x$ that minimizes $E(Y)$. Show that your result is really the minimum.** \label{Question5-part1}
 
 The *Law of the unconscious statistician* states that:
 
@@ -395,7 +396,7 @@ And consequently:
 $\cfrac{dE(Y)}{dx} = 0 \Rightarrow \mathbf{\textcolor{red}{x=E(X)}}$
 
 
-2. **Find the value of $E(Y)$ for the choice of $x$ you found in (1)?**
+2. **Find the value of $E(Y)$ for the choice of $x$ you found in [(1)](#Question5-part1)?**
 
 We just have to substitute in the last expression of $E(Y)$
 
@@ -442,14 +443,14 @@ $\cfrac{dE(Y)}{dx} = 0 \Rightarrow \mathbf{\textcolor{red}{x=E(X) - \cfrac{a}{2b
 
 First let's plot the thre variables:
 
-```{r Question6-part1-a, echo=FALSE, message = FALSE, warning = FALSE, fig.cap = "Contour plot and 3D plot of $X, Y, Z$", fig.width = 6, fig.height = 4.5}
+```{r Question6-part1-1st, echo = FALSE, message = FALSE, warning = FALSE, fig.cap = "Contour plot and 3D plot of $X, Y, Z$", fig.width = 6, fig.height = 4.5}
 ```
 
 As shown above (especially in the contour plot on the left), $0 \leq Z \leq 1$, and for a given value of $z$ (let's use $z = 0.8$) the region of the $X-Y$ plane for which $Z<z$ will be a triangle with vertices $(0,0), (z,0)$, and $(0,z)$.
 
 \pagebreak
 
-```{r Question6-part1-b, echo=FALSE, message = FALSE, warning = FALSE, fig.cap = "Region of the $X-Y$ plane for which $Z<z$ where $z=0.8$", fig.width = 6, fig.height = 4.5}
+```{r Question6-part1-2nd, echo = FALSE, message = FALSE, warning = FALSE, fig.cap = "Region of the $X-Y$ plane for which $Z<z$ where $z=0.8$", fig.width = 6, fig.height = 4.5}
 ```
 
 2. **Derive the probability density function, $f(z)$.**
@@ -489,7 +490,7 @@ z & 0\leq z\leq 1 \\
 0 & Otherwise
 \end{cases}}}$$
 
-```{r Question6-part2, echo=FALSE, message = FALSE, warning = FALSE, fig.cap = "Histogram and (approximate) density distribution plot of $Z$", fig.width = 6, fig.height = 4.5}
+```{r Question6-part2, echo = FALSE, message = FALSE, warning = FALSE, fig.cap = "Histogram and (approximate) density distribution plot of $Z$", fig.width = 6, fig.height = 4.5}
 ```
 
 
@@ -523,13 +524,13 @@ Sum & Rolls & \# of Rolls & Win Outcome \\ [0.5ex]
 \end{tabular}
 \end{table}
 
-1. **Is the expected number of rolls given that you win more than, equal to, or less than the expected number of rolls given that house wins (in a game)? The steps to arrive at your answer numerically need to be clearly shown.**
+1. **Is the expected number of rolls given that you win more than, equal to, or less than the expected number of rolls given that house wins (in a game)? The steps to arrive at your answer numerically need to be clearly shown.** \label{Question7-part1}
 
 <http://www.dehn.wustl.edu/~blake/courses/WU-Ed6021-2012-Summer/handouts/Expected_Value.pdf>
 
 First we check how many possible games there are, and the probabilities for each outcome:
 
-```{r Question7-part1-a, echo=FALSE, message = FALSE, warning = FALSE}
+```{r Question7-part1, echo = FALSE, message = FALSE, warning = FALSE}
 ```
 
 From the table above we can derive the following:
@@ -643,13 +644,10 @@ $\ \ \ \ \ \ = \cfrac{55}{251}+\cfrac{990}{251}\left(\cfrac{1}{12}\cfrac{1}{6}\c
 
 $$\mathbf{\textcolor{red}{E[Y|Z]<E[Y|\bar{Z}]}}$$
 
-Let's prove it with a simulation:
-
-```{r Question7-part1-b, echo=TRUE, message = FALSE, warning = FALSE}
-```
+**See [(2)](#Question7-part2) for a simulation of 100,000 games that yields very similar values for $\mathbf{E[Y|Z]}$ and $\mathbf{E[Y|\bar{Z}]}$.**
 
 
-2. **Suppose it takes $\$20$ to pay, and the payoff is $\$100$, $\$80$, $\$60$, $\$40$, $\$0$ if you win in the 1st, 2nd, 3rd, 4th, 5th round, respectively. That is, if you win in the 1st round, you are paid $\$100$ (so your net profit is $\$80$), if you win in the 2nd round, you are paid $\$80$, etc. Derive the expected payoff function of a game.**
+2. **Suppose it takes $\$20$ to pay, and the payoff is $\$100$, $\$80$, $\$60$, $\$40$, $\$0$ if you win in the 1st, 2nd, 3rd, 4th, 5th round, respectively. That is, if you win in the 1st round, you are paid $\$100$ (so your net profit is $\$80$), if you win in the 2nd round, you are paid $\$80$, etc. Derive the expected payoff function of a game.** \label{Question7-part2}
 
 Let $W$ be the payoff:
 
@@ -680,22 +678,22 @@ $\ \ \ \ \ \ \ \ \ + \cfrac{25}{1296}\left(160 \cdot 1 + 120 \cdot \cfrac{25}{36
 
 $\ \ \ \ \ \ = \mathbf{\textcolor{red}{\cfrac{160658}{4829} \approx `r formatC((100*110/495+1/144*(160+120*3/4+80*9/16)+1/81*(160+120*13/18+80*169/324)+25/1296*(160+120*25/36+80*625/1296)), format = "f", digits = 4, big.mark=",", drop0trailing = FALSE)`}}$
 
-
-Again, let's confirm this result with a simulation:
-
-```{r Question7-part2, echo=TRUE, message = FALSE, warning = FALSE}
-```
-
 To calculate the net profit we would just have to subtract $\$20$ to every game:
 
 $E[\text{net profit}] = E[W-20] = E[W]-20 = `r formatC((100*110/495+1/144*(160+120*3/4+80*9/16)+1/81*(160+120*13/18+80*169/324)+25/1296*(160+120*25/36+80*625/1296)-20), format = "f", digits = 4, big.mark=",", drop0trailing = FALSE)`$
 
 (It's positive, so it does not seem likely that the house would choose payoffs so high: usually they are selected so $E[\text{net profit}] < 0$, so the house always wins on the long term.)
 
+Let's confirm the expected payoff, as well as the results in [(1)](#Question7-part1), with a simulation:
+
+```{r Question7-parts1and2, echo = c(1:10), message = FALSE, warning = FALSE}
+```
 
 
 **********
 **********
+
+\pagebreak
 
 # Part III: Statistical Estimation and Statistical Inference
 
@@ -711,7 +709,7 @@ $$\mathbf{W = \sum_{i=1}^n a_iY_i}$$
 
 **where the $a_i$ are constants.**
 
-1. **What restriction on the $a_i$ is needed for $W$ to be an unbiased estimator of $\mu$?**
+1. **What restriction on the $a_i$ is needed for $W$ to be an unbiased estimator of $\mu$?** \label{Question8-part1}
 
 For $W$ to be an unbiased estimator of $\mu$, the following condition has to be met:
 
@@ -721,11 +719,10 @@ $E[W] = E\left[\displaystyle\sum_{i=1}^n a_iY_i\right] = \displaystyle\sum_{i=1}
 
 So the condition is $\mathbf{\textcolor{red}{\sum_{i=1}^n a_i=1}}$ (for example---but not necessarily---, $a_i=\cfrac{1}{n} \ \forall i$).
 
-2. **Find $Var(W)$.**
+2. **Find $Var(W)$.** \label{Question8-part2}
 
-$\mathbf{\textcolor{red}{Var(W)}} = Var\left(\displaystyle\sum_{i=1}^n a_iY_i\right) = \displaystyle\sum_{i=1}^n a_i^2Var(Y_i) = \displaystyle\sum_{i=1}^n a_i^2\sigma^2 = \mathbf{\textcolor{red}{\sigma^2\displaystyle\sum_{i=1}^n a_i^2}}$
+$\mathbf{\textcolor{red}{Var(W)}} = Var\left(\displaystyle\sum_{i=1}^n a_iY_i\right) = \displaystyle\sum_{i=1}^n a_i^2Var(Y_i) = \displaystyle\sum_{i=1}^n a_i^2\sigma^2 = \mathbf{\textcolor{red}{\sigma^2\displaystyle\sum_{i=1}^n a_i^2}}$ 
 
-\pagebreak
 
 3. **Given a set of numbes $a_1,\dots,a_n$, the following inequality holds:**
 
@@ -733,11 +730,11 @@ $\mathbf{\textcolor{red}{Var(W)}} = Var\left(\displaystyle\sum_{i=1}^n a_iY_i\ri
 
     **Use this inequality, along with the previous parts of this question, tho show that $Var(W) \geq Var(\bar{Y})$ whenever $W$ is unbiased. We say that $\bar{Y}$ is the best linear unbiased estimator (BLUE).**
 
-As proved in (1), if $W$ is unbiased, $\displaystyle\sum_{i=1}^n a_i = 1$, and hence:
+As proved in [(1)](#Question8-part1), if $W$ is unbiased, $\displaystyle\sum_{i=1}^n a_i = 1$, and hence:
 
 $\displaystyle\sum_{i=1}^na_i^2 \geq \cfrac{1}{n}$
 
-And following the result of (2), we have:
+And following the result of [(2)](#Question8-part2), we have:
 
 $\mathbf{\textcolor{red}{Var(W) = \sigma^2 \displaystyle\sum_{i=1}^n a_i^2 \geq \sigma^2 = Var(\bar{Y})}}$
 
@@ -769,12 +766,7 @@ $\mathbf{\textcolor{red}{Var(W_2)}} = Var\left(k\bar{Y}\right) = k^2Var(\bar{Y})
 
 Each variance dependes on the values of $n$ and $k$, respectively. Let's see how they should compare to each other for $Var(W_1)$ to be lower than $Var(W_2)$ (and vice versa):
 
-\pagebreak
-
 $Var(W_1) < Var(W_2) \Leftrightarrow \left(\cfrac{n-1}{n}\right)^2<k^2 \Rightarrow \cfrac{n-1}{n} < k \Rightarrow n(1-k)<1 \Rightarrow n < \cfrac{1}{1-k}$
-
-```{r Question9-part2, echo=FALSE, message = FALSE, warning = FALSE, fig.cap = "Maximum value of $n$ as function of $k$ for $Var(W_1)$ to be lower than $Var(W_2)$", fig.width = 4, fig.height = 4}
-```
 
 So the closer $k$ is to 1, the largest $n$ can be for $Var(W_1)$ to be greater than $Var(W_2)$. But $n$ has to be an integer greater than $2$, which means that:
 
@@ -782,11 +774,14 @@ $2 \leq n < \cfrac{1}{1-k} \Rightarrow 2(1-k) < 1 \Rightarrow 2-2k<1 \Rightarrow
 
 I.e., **\textcolor{red}{for $\mathbf{k>\cfrac{1}{2}, Var(W_1)<Var(W_2)}$ as long as $\mathbf{n<\cfrac{1}{1-k}}$. For $\mathbf{k<\cfrac{1}{2}, Var(W_1)>Var(W_2)}$ regardless of the value of $\mathbf{n}$. If $\mathbf{k=\cfrac{1}{2}, Var(W_1)=Var(W_2)}$ if $\mathbf{n=2}$ and $\mathbf{Var(W_1)>Var(W_2)}$ for any $\mathbf{n>2}$}**.
 
+\pagebreak
+
+```{r Question9-part2, echo = FALSE, message = FALSE, warning = FALSE, fig.cap = "Maximum value of $n$ as function of $k$ for $Var(W_1)$ to be lower than $Var(W_2)$", fig.width = 4, fig.height = 4}
+```
+
 
 **********
 
-
-\pagebreak
 
 ## Question 10
 
@@ -904,6 +899,7 @@ $\mathbf{\textcolor{red}{\cfrac{n}{n-1} \widehat{\sigma^2}}}$ is an unbiased est
 
 **********
 
+\pagebreak
 
 ## Question 11
 
@@ -976,7 +972,7 @@ $\mathbf{\textcolor{red}{H_1: \mu < 0}}$
 
 iii. **Now, suppose your sample size is $n=900$ and you obtain the estimates $\bar{y}=-32.8$ and $s=466.4$. Calculate the $t$ statistic for testing $H_0$ against $H_1$; obtain the p-value for the test. (Because of the large sample size, just use the standard normal distribution tabulated in Table G.1) Do you reject $H_0$ at te 5% level? At the 1% level?**
 
-```{r Question12-partiii, echo=TRUE, message = FALSE, warning = FALSE}
+```{r Question12-partiii, echo = c(1:10), message = FALSE, warning = FALSE}
 ```
 
 
@@ -997,6 +993,7 @@ This analysis assumes that other factors that influence alcohol consumption over
 
 **********
 
+\pagebreak
 
 ## Question 13
 
@@ -1045,25 +1042,24 @@ $$Var(\bar{Y}) = \cfrac{\theta(1-\theta)}{n}$$
 
 $$\mathbf{\textcolor{red}{sd(\bar{Y}) = \sqrt{\cfrac{\theta(1-\theta)}{n}}}}$$
 
+\pagebreak
+
 iii. **Test $H_0: \theta = .5$ against $H_1: \theta < .5$ for Mark Price. Use a 1% significance level.**
-    
+
 $$t=\cfrac{\bar{Y}-\theta_0}{se(\bar{Y})} = \cfrac{(\theta-\theta_0)\sqrt{n}}{\sqrt{\theta(1-\theta)}}$$
 
-```{r Question13-partiii-a, echo=TRUE, message = FALSE, warning = FALSE}
+```{r Question13-partiii, echo = TRUE, message = FALSE, warning = FALSE}
 ```
 
 For $\theta_0=0.5, n=429$, and $\theta \approx `r formatC(188/429, format = "f", digits = 4, big.mark=",", drop0trailing = FALSE)`$ we have:
 
 $$t=`r formatC(t, format = "f", digits = 4, big.mark=",", drop0trailing = FALSE)`$$
 
-```{r Question13-partiii-b, echo=FALSE, message = FALSE, warning = FALSE}
-```
-
 Since we have a one-sided alternative:
 
-$$\Pr(t<`r formatC(t, format = "f", digits = 4, big.mark=",", drop0trailing = FALSE)`)=F_t(`r formatC(t, format = "f", digits = 4, big.mark=",", drop0trailing = FALSE)`, `r n-1`) =`r formatC(alpha, format = "f", digits = 4, big.mark=",", drop0trailing = FALSE)`$$
+$$\Pr(t<`r formatC(t, format = "f", digits = 4, big.mark=",", drop0trailing = FALSE)`)=F_t(`r formatC(t, format = "f", digits = 4, big.mark=",", drop0trailing = FALSE)`, `r n-1`) =`r formatC(p, format = "f", digits = 4, big.mark=",", drop0trailing = FALSE)`$$
 
-And since the probability we have obtained is lower than 1%, **\textcolor{red}{at that significance level we reject the null hypothesis that $\theta_0 = 0.5$}** (do note that had our altenative hypothesis been double-sided, $H_1: \theta_0 \neq 0.5$, we would have had to consider both tails, leading to a probability of $`r formatC(2*alpha, format = "f", digits = 4, big.mark=",", drop0trailing = FALSE)` > 0.01$).
+And since the probability we have obtained is lower than 1%, **\textcolor{red}{at that significance level we reject the null hypothesis that $\theta_0 = 0.5$}** (do note that had our altenative hypothesis been double-sided, $H_1: \theta_0 \neq 0.5$, we would have had to consider both tails, leading to a probability of $`r formatC(2*p, format = "f", digits = 4, big.mark=",", drop0trailing = FALSE)` > 0.01$).
 
 
 1. **Define Type I error.**
@@ -1078,9 +1074,11 @@ $\mathbf{\textcolor{red}{1\%}}$
 
 Failing to reject the null hypothesis when it is false.
 
+\pagebreak
+
 4. **What is the probability of Type II error when using this decision rule, assuming the "true" population proportion is $\theta^*= 0.45$.**
 
-```{r Question13-part4, echo=TRUE, message = FALSE, warning = FALSE}
+```{r Question13-part4, echo = TRUE, message = FALSE, warning = FALSE}
 ```
 
 At the 1% significance level, $t_{crit} = F_t^{-1}(`r sig`, `r n-1`) = `r formatC(t_critical, format = "f", digits = 4, big.mark=",", drop0trailing = FALSE)`$, which corresponding $\theta$ value can be calculated from:
