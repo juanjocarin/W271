@@ -210,7 +210,7 @@ $\ \ \ \ \ \ = \left[ \cfrac{2x^2}{3kA^2}\right]_{x=A\sqrt{k/2}}^{A\sqrt{k-1}} +
 
 ```{r, echo=FALSE}
 require(knitr,quietly=T)
-read_chunk('code/Lab1_Carin-Davis-Levato-Song.R')
+read_chunk('code/W271_Lab1_Carin-Davis-Levato-Song.R')
 ```
 
 ```{r Libraries, echo = FALSE, message= FALSE, warning = FALSE} 
