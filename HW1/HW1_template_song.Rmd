@@ -1,0 +1,181 @@
+---
+title: '**W271**-2 -- Spring 2016 -- **HW 1**'
+author: '***Juanjo Carin, Kevin Davis, Ashley Levato, Minghu Song***'
+date: '*February 2, 2016*'
+output:
+  pdf_document:
+    fig_caption: yes
+    toc: yes
+    toc_depth: 2
+  html_document:
+    toc: yes
+header-includes:
+- \usepackage{fancyhdr}
+- \usepackage{amsmath}
+- \pagestyle{fancy}
+- \fancyhead[LO,LE]{Carin, Davis, Levato, Song}
+- \fancyfoot[LO,LE]{UC Berkeley -- MIDS -- W271 -- Spring semester 2016}
+- \fancyfoot[CO,CE]{}
+- \fancyfoot[RE,RO]{\thepage}
+- \renewcommand{\headrulewidth}{0.5pt}
+- \renewcommand{\footrulewidth}{0.5pt}
+numbersections: no
+geometry: margin=1in
+fontsize: 10pt
+---
+
+#Data
+**The file birthweight w271.RData contains data from the 1988 National Health Inter-
+view Survey, which may have been modifed by the instructors to test your profciency.
+This survey is conducted by the U.S. Census Bureau and has collected data on individ-
+ual health metrics since 1957. Like all surveys, a full analysis would require advanced
+techniques such as those provided by the R survey package. For this exercise, however,
+you are to treat the data as a true random sample. You will use this dataset to practice
+interpreting OLS coeffcients.**
+
+#Exercises
+##Question 1:
+**Load the birthweight dataset. Note that the actual data is provided in a data table
+named "data".**
+
+**Use the following procedures to load the data:**
+
+**Step 1: put the provided R Workspace birthweight w271.RData in the directory of your
+choice.**
+
+**Step 2: Load the dataset using this command: load(\\birthweight:Rdata)**
+
+
+```{r, echo = FALSE, message=FALSE, warning=FALSE}
+require(knitr,quietly=T)
+read_chunk('code/W271_HW1_Carin-Davis-Levato-Song.R')
+```
+
+```{r Libraries, echo = FALSE, message= FALSE, warning = FALSE} 
+```
+
+```{r Question1, echo = TRUE, message = FALSE, warning = FALSE}
+```
+
+##Question 2:
+**Examine the basic structure of the data set using desc, str, and summary to examine all
+of the variables in the data set. How many variables and observations in the data?
+These commands will be useful:**
+
+1. desc
+
+2. str(data)
+
+3. summary(data)
+
+```{r Question2, echo = TRUE, message = FALSE, warning = FALSE}
+```
+
+therefore, there are totally `r dim(desc)[1]` variables and `r dim(data)[1]` observations. 
+
+##Question 3:
+**As we mentioned in the live session, it is important to start with a question (or a hy-
+pothesis) when conducting regression modeling. In this execrise, we are in the question:
+"Do mothers who smoke have babies with lower birth weight?"**
+
+**The dependent variable of interested is bwght, representing birthweight in ounces. Ex-
+amine this variable using both tabulated summary and graphs. Specifcally,**
+
+1. **Summarize the variable bwght: summary(data\$bwght)**
+
+```{r Question3-part1, echo = TRUE, message = FALSE, warning = FALSE}
+```
+
+2. **You may also use the quantile function: quantile(data$bwght). List the following
+quantiles: 1%, 5%, 10%, 25%, 50%, 75%, 90%, 95%, 99%**
+
+```{r Question3-part2, echo = TRUE, message = FALSE, warning = FALSE}
+```
+
+3. **Plot the histogram of bwght and comment on the shape of its distribution. Try dif-
+ferent bin sizes and comment how it affects the shape of the histogram. Remember
+to label the graph clearly. You will also need a title for the graph.**
+
+
+```{r Question3-part3, echo = FALSE, message = FALSE, warning = FALSE, fig.cap = "Histogram plots of Birth Weight with varied bins", fig.width = 8, fig.height = 6}
+```
+
+As shown in the above histrogram plots, the overall shape of those histograms are similar and all of them seem to follow the normal distribution.  Those distribution plots with the increasing number of bins becomes much smoother. 
+
+4. **This is a more open-ended question: Have you noticed anything "strange" with the
+bwght variable and the shape of histogram this variable? If so, please elaborate on
+your observations and investigate any issues you have identifed.**
+
+Strangely,  there are around 10 outliers with zero birth weight as shown in the left part of histograms. 
+
+##Question 4:
+
+**Examine the variable cigs, which represents number of cigarettes smoked each day by the
+mother while pregnant. Conduct the same analysis as in question 3.**
+
+1. **Summarize the variable cigs: summary(data\$cigs)**
+
+```{r Question4-part1, echo = TRUE, message = FALSE, warning = FALSE}
+```
+
+2. **You may also use the quantile function: quantile(data$cigs). List the following
+quantiles: 1%, 5%, 10%, 25%, 50%, 75%, 90%, 95%, 99%**
+
+```{r Question4-part2, echo = TRUE, message = FALSE, warning = FALSE}
+```
+
+3. **Plot the histogram of bwght and comment on the shape of its distribution. Try dif-
+ferent bin sizes and comment how it affects the shape of the histogram. Remember
+to label the graph clearly. You will also need a title for the graph.**
+
+```{r Question4-part3, echo = FALSE, message = FALSE, warning = FALSE, fig.cap = "Varied Histogram plots for the number of cigarettes smoked each day", fig.width = 6, fig.height = 3}
+```
+
+As shown in the above histrogram plots, their histrogram distribution for the number of cigarettes smoked each day are skewed toward zero, The overall shape of those histograms are similar as well. 
+
+4. **This is a more open-ended question: Have you noticed anything "strange" with the
+bwght variable and the shape of histogram this variable? If so, please elaborate on
+your observations and investigate any issues you have identifed.**
+
+???? 
+
+##Question 5:
+
+**Generate a scatterplot of bwght against cigs. Based on the appearance of this plot, how
+much of the variation in bwght do you think can be explained by cigs?**
+
+##Question 6:
+
+**Estimate the simple linear regression of bwght on cigs. What coeffcient estimates and
+the standard errors associated with the coeffcient estimates do you get Interpret the
+results. Note that you may have to "take care of" any potential data issues before build-
+ing a regression model.**
+
+##Question 7:
+
+**Now, introduce a new independent variable, faminc, representing family income in thou-
+sands of dollars. Examine this variable using the same analysis as in question 3. In
+addition, produce a scatterplot matrix of bwght, cigs, and faminc. Use the following
+command (as a starting point):**
+
+**library(car)**
+
+**scatterplot:matrix( bwght + cigs + faminc; data = data2)**
+
+**Note that the car package is needed in order to use the scatterplot.matrix function.**
+
+##Question 8:
+
+**Regress bwgth on both cigs and faminc. What coeffcient estimates and the standard
+errors associated with the coeffcient estimates do you get? Interpret the results.**
+
+##Question 9:
+
+**Explain, in your own words, what the coeffcient on cigs in the multiple regression means,
+and how it is different than the coeffcient on cigs in the simple regression? Please provide
+the intuition to explain the difference, if any.**
+
+##Question 10:
+
+**Which coeffcient for cigs is more negative than the other? Suggest an explanation for
+why this is so.**
