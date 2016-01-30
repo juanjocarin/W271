@@ -52,7 +52,7 @@ choice.**
 **Step 2: Load the dataset using this command: load(\\birthweight:Rdata)**
 
 ```{r, eval=TRUE}
-load ("C:\\Users\\Batman\\Documents\\Term2\\271\\data\\birthweight_w271.Rdata")
+load ("\\birthweight_w271.Rdata")
 
 ```
 
@@ -156,6 +156,13 @@ The cigs data is very skewed towards zero, so increasing the bin width doesn't n
 much of the variation in bwght do you think can be explained by cigs?**
 
 
+```{r, eval=TRUE}
+library(ggplot2)
+p1<-ggplot(data, aes(x=cigs, y=bwght))
+p1 + geom_point()
+```
+
+
 
 ##Question 6:
 
@@ -165,7 +172,7 @@ results. Note that you may have to "take care of" any potential data issues befo
 ing a regression model.**
 
 ```{r, eval=TRUE}
-
+#take car of any problems here
 
 ```
 
@@ -212,6 +219,9 @@ hist(data$faminc, breaks=5, main= 'Historgram of Faminc')
 
 ```
 
+```{r, eval=TRUE}
+scatterplot.matrix(~bwght + cigs + faminc, data = data, main='Scatterplot of bwght, cigs, and famic')
+```
 
 
 ##Question 8:
