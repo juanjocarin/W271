@@ -124,7 +124,7 @@ quantiles: 1%, 5%, 10%, 25%, 50%, 75%, 90%, 95%, 99%**
 ```{r Question4-part2, echo = TRUE, message = FALSE, warning = FALSE}
 ```
 
-3. **Plot the histogram of bwght and comment on the shape of its distribution. Try dif-
+3. **Plot the histogram of cigs and comment on the shape of its distribution. Try dif-
 ferent bin sizes and comment how it affects the shape of the histogram. Remember
 to label the graph clearly. You will also need a title for the graph.**
 
@@ -134,7 +134,7 @@ to label the graph clearly. You will also need a title for the graph.**
 As shown in the above histrogram plots, their histrogram distribution for the number of cigarettes smoked each day are skewed toward zero, The overall shape of those histograms are similar as well. 
 
 4. **This is a more open-ended question: Have you noticed anything "strange" with the
-bwght variable and the shape of histogram this variable? If so, please elaborate on
+cigs variable and the shape of histogram this variable? If so, please elaborate on
 your observations and investigate any issues you have identifed.**
 
 ???? 
@@ -144,12 +144,30 @@ your observations and investigate any issues you have identifed.**
 **Generate a scatterplot of bwght against cigs. Based on the appearance of this plot, how
 much of the variation in bwght do you think can be explained by cigs?**
 
+```{r Question5-part1, echo = FALSE, message = FALSE, warning = FALSE, fig.cap = "Varied Histogram plots for the number of cigarettes smoked each day", fig.width = 6, fig.height = 4.5}
+```
+
+```{r Question5-part2, echo = TRUE, message = FALSE, warning = FALSE}
+```
+The variable Cigs explains only about 1.5%  of variation in the variable of bwght. 
+
 ##Question 6:
 
 **Estimate the simple linear regression of bwght on cigs. What coeffcient estimates and
 the standard errors associated with the coeffcient estimates do you get Interpret the
 results. Note that you may have to "take care of" any potential data issues before build-
 ing a regression model.**
+
+Since there are 10 observations with zero body weights, we need to take care of those obvious outliers.  we remove those observations and assign the left data to a new data frame variable, newdata.
+```{r Question6-part1, echo = TRUE, message = FALSE, warning = FALSE}
+```
+
+The estimated coefficient and its standard error are listed in the belowed coefficient matrix:
+```{r Question6-part2, echo = TRUE, message = FALSE, warning = FALSE}
+```
+
+For cigs, the estimate coefficient is about -0.515 and its associated standard error is 0.091. 
+this means that if mothers increase their number smoked cigarettes by one each day during pregnancy, on average the predicted birth weight of their new babies would decrease about one-half a percentage point (0.515) ounces.
 
 ##Question 7:
 
@@ -163,6 +181,33 @@ command (as a starting point):**
 **scatterplot:matrix( bwght + cigs + faminc; data = data2)**
 
 **Note that the car package is needed in order to use the scatterplot.matrix function.**
+
+1. **Summarize the variable faminc: summary(data$faminc)**
+
+```{r Question7-part1, echo = TRUE, message = FALSE, warning = FALSE}
+```
+
+2. **You may also use the quantile function: quantile(data$faminc). List the following
+quantiles: 1%, 5%, 10%, 25%, 50%, 75%, 90%, 95%, 99%**
+
+```{r Question7-part2, echo = TRUE, message = FALSE, warning = FALSE}
+```
+
+3. **Plot the histogram of faminc and comment on the shape of its distribution. Try dif-
+ferent bin sizes and comment how it affects the shape of the histogram. Remember
+to label the graph clearly. You will also need a title for the graph.**
+
+
+```{r Question7-part3, echo = FALSE, message = FALSE, warning = FALSE, fig.cap = "Histogram plots of family income in 1988 with varied bins", fig.width = 8, fig.height = 6}
+```
+
+As shown in the above histrogram plots, their histograms looks like the bimodal distribution.  Those distribution plots with the increasing number of bins becomes much more spiky. 
+
+4. **This is a more open-ended question: Have you noticed anything "strange" with the
+faminc variable and the shape of histogram this variable? If so, please elaborate on
+your observations and investigate any issues you have identifed.**
+
+???  
 
 ##Question 8:
 
