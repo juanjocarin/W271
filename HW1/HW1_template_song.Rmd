@@ -203,22 +203,32 @@ to label the graph clearly. You will also need a title for the graph.**
 
 As shown in the above histrogram plots, their histograms looks like the bimodal distribution.  Those distribution plots with the increasing number of bins becomes much more spiky. 
 
-4. **This is a more open-ended question: Have you noticed anything "strange" with the
-faminc variable and the shape of histogram this variable? If so, please elaborate on
-your observations and investigate any issues you have identifed.**
+4. **Produce  a scatterplot matrix of bwght, cigs and faminc. **
 
-???  
+```{r Question7-part4, echo = FALSE, message = FALSE, warning = FALSE, fig.cap = "Scatterplot matrix of bwght, cigs and faminc", fig.width = 6, fig.height = 4.5}
+```
 
 ##Question 8:
 
 **Regress bwgth on both cigs and faminc. What coeffcient estimates and the standard
 errors associated with the coeffcient estimates do you get? Interpret the results.**
 
+The estimated coefficient and its standard error are listed in the belowed coefficient matrix:
+```{r Question8, echo = TRUE, message = FALSE, warning = FALSE}
+```
+
+
+First, the intercept 116.98 is the predicted birth weight of babies if the lady do not smoke cigarettes during the pregnancy and their family income in 1988 are zero.  there is a partial negative  relationship between cigs and bwght.  If Holding faminc fixed, one more cigarettes per day during the pregnancy would lead to a decrease of 0.464 ounce regarding the new born's birth weight. on the other hand,  there is a  partial positive relationship between faminc and bwght. If cigs is fixed, everyone one thousand dollar increase of the family income would contribute to 0.093 ounce gain of new born's weight. 
+
 ##Question 9:
 
 **Explain, in your own words, what the coeffcient on cigs in the multiple regression means,
 and how it is different than the coeffcient on cigs in the simple regression? Please provide
 the intuition to explain the difference, if any.**
+
+
+The coefficient on cigs derived from the multiple regresion is a little bit larger (less negative) than its coefficient derived from the simple regression.  However, unlike the simple regression, now we can utilize this equation to differentiate the birth weight prediction for those women with the same cigs value but different family incomes. 
+i
 
 ##Question 10:
 

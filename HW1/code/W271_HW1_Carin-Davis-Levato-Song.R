@@ -38,7 +38,6 @@ summary(data$bwght)
 quantile( data$bwght, probs = c(0.01, 0.05, 0.10, 0.25, 0.50, 0.75, 0.90, 0.95, 0.99) )
 
 ## @knitr Question3-part3
-#### PLOT HISTOGRAM AND PDF OF Z
 par(mfrow = c(2, 2))
 ## Histogram with 10 bins
 hist(data$bwght, breaks=10, main = 'Histogram with 10 bins', xlab ='Birth Weight')
@@ -62,7 +61,6 @@ summary(data$cigs)
 quantile( data$cigs, probs = c(0.01, 0.05, 0.10, 0.25, 0.50, 0.75, 0.90, 0.95, 0.99) )
 
 ## @knitr Question4-part3
-#### PLOT HISTOGRAM AND PDF OF Z
 par(mfrow = c(1, 2))
 ## Histogram with 10 bins
 hist(data$cigs, breaks=10, main = 'Histogram with 10 bins', xlab ='The Number of Smoked Cigarettes')
@@ -105,7 +103,6 @@ summary(data$faminc)
 quantile( data$faminc, probs = c(0.01, 0.05, 0.10, 0.25, 0.50, 0.75, 0.90, 0.95, 0.99) )
 
 ## @knitr Question7-part3
-#### PLOT HISTOGRAM AND PDF OF Z
 par(mfrow = c(2, 2))
 ## Histogram with 10 bins
 hist(data$faminc, breaks=10, main = 'Histogram with 10 bins', xlab ='Family Income in 1988')
@@ -115,3 +112,19 @@ hist(data$faminc, breaks=20, main = 'Histogram with 20 bins',  xlab ='Family Inc
 hist(data$faminc, breaks=30, main = 'Histogram with 30 bins',  xlab ='Family Income in 1988')
 ## Histogram with 40 bins
 hist(data$faminc, breaks=40, main = 'Histogram with 40 bins',  xlab ='Family Income in 1988')
+
+## @knitr Question7-part4
+scatterplotMatrix(~bwght + cigs + faminc, data = newdata, main='Scatterplot of bwght, cigs, and famic')
+
+
+
+# QUESTION 8 --------------------------------------------------------------
+
+## @knitr Question8
+bwght_cigs_faminc.lm = lm(bwght ~ cigs+faminc, data=newdata)
+summary(bwght_cigs_faminc.lm)$coefficients
+
+
+# QUESTION 9 --------------------------------------------------------------
+
+
