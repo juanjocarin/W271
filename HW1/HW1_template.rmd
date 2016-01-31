@@ -24,19 +24,16 @@ geometry: margin=1in
 fontsize: 10pt
 ---
 
-#Data
-**The file birthweight w271.RData contains data from the 1988 National Health Inter-
-view Survey, which may have been modifed by the instructors to test your profciency.
-This survey is conducted by the U.S. Census Bureau and has collected data on individ-
-ual health metrics since 1957. Like all surveys, a full analysis would require advanced
-techniques such as those provided by the R survey package. For this exercise, however,
-you are to treat the data as a true random sample. You will use this dataset to practice
-interpreting OLS coeffcients.**
+# Data
 
-#Exercises
-##Question 1:
-**Load the birthweight dataset. Note that the actual data is provided in a data table
-named "data".**
+**The file birthweight w271.RData contains data from the 1988 National Health Interview Survey, which may have been modifed by the instructors to test your profciency. This survey is conducted by the U.S. Census Bureau and has collected data on individual health metrics since 1957. Like all surveys, a full analysis would require advanced techniques such as those provided by the R survey package. For this exercise, however, you are to treat the data as a true random sample. You will use this dataset to practice interpreting OLS coeffcients.**
+
+
+# Exercises
+
+## Question 1
+
+**Load the birthweight dataset. Note that the actual data is provided in a data table named "data".**
 
 **Use the following procedures to load the data:**
 
