@@ -1,0 +1,240 @@
+---
+title: '**W271**-2 -- Spring 2016 -- **HW 1**'
+author: '***Juanjo Carin, Kevin Davis, Ashley Levato, Minghu Song***'
+date: '*February 2, 2016*'
+output:
+  pdf_document:
+    fig_caption: yes
+    toc: yes
+    toc_depth: 2
+  html_document:
+    toc: yes
+header-includes:
+- \usepackage{fancyhdr}
+- \usepackage{amsmath}
+- \pagestyle{fancy}
+- \fancyhead[LO,LE]{Carin, Davis, Levato, Song}
+- \fancyfoot[LO,LE]{UC Berkeley -- MIDS -- W271 -- Spring semester 2016}
+- \fancyfoot[CO,CE]{}
+- \fancyfoot[RE,RO]{\thepage}
+- \renewcommand{\headrulewidth}{0.5pt}
+- \renewcommand{\footrulewidth}{0.5pt}
+numbersections: no
+geometry: margin=1in
+fontsize: 10pt
+---
+
+#Data
+**The file birthweight w271.RData contains data from the 1988 National Health Inter-
+view Survey, which may have been modified by the instructors to test your proficiency.
+This survey is conducted by the U.S. Census Bureau and has collected data on individ-
+ual health metrics since 1957. Like all surveys, a full analysis would require advanced
+techniques such as those provided by the R survey package. For this exercise, however,
+you are to treat the data as a true random sample. You will use this dataset to practice
+interpreting OLS coefficients.**
+
+#Exercises
+##Question 1:
+**Load the birthweight dataset. Note that the actual data is provided in a data table
+named "data".**
+
+**Use the following procedures to load the data:**
+
+**Step 1: put the provided R Workspace birthweight w271.RData in the directory of your
+choice.**
+
+**Step 2: Load the dataset using this command: load(\\birthweight:Rdata)**
+
+``` {r Question 1}
+##setwd('.\\MIDS\\Semester3\\W271\\Homework'1)
+load("birthweight_w271.rdata")
+```
+
+
+##Question 2:
+**Examine the basic structure of the data set using desc, str, and summary to examine all
+of the variables in the data set. How many variables and observations in the data?
+These commands will be useful:**
+
+1. desc
+
+2. str(data)
+
+3. summary(data)
+
+``` {r Question 2}
+str(data)
+desc
+summary(data)
+```
+
+##Question 3:
+**As we mentioned in the live session, it is important to start with a question (or a hy-
+pothesis) when conducting regression modeling. In this execrise, we are in the question:
+"Do mothers who smoke have babies with lower birth weight?"**
+
+**The dependent variable of interested is bwght, representing birthweight in ounces. Ex-
+amine this variable using both tabulated summary and graphs. Specifcally,**
+
+1. **Summarize the variable bwght: summary(data\$bwght)**
+
+2. **You may also use the quantile function: quantile(data$bwght). List the following
+quantiles: 1%, 5%, 10%, 25%, 50%, 75%, 90%, 95%, 99%**
+
+3. **Plot the histogram of bwght and comment on the shape of its distribution. Try dif-
+ferent bin sizes and comment how it affects the shape of the histogram. Remember
+to label the graph clearly. You will also need a title for the graph.**
+
+4. **This is a more open-ended question: Have you noticed anything "strange" with the
+bwght variable and the shape of histogram this variable? If so, please elaborate on
+your observations and investigate any issues you have identified.**
+
+``` {r Question 3}
+attach(data)
+require(ggplot2)
+summary(bwght)
+qnt <-  c(.01, .05, .1, .25, .5, .75, .9, .95, .99)
+quantile(bwght, probs = qnt)
+# Regular bin wdith
+p1 <- ggplot(data, aes(bwght)) + geom_histogram(binwidth = 5) + 
+  ggtitle('Birthweight in Ounces, binwidth = 5')
+p1 +theme(plot.title = element_text(size=20, face="bold", 
+    margin = margin(10, 0, 10, 0)))
+#Narrow bin width
+p2 <- ggplot(data, aes(bwght)) + geom_histogram(binwidth = 1) + 
+  ggtitle('Birthweight in Ounces, binwidth = 1')
+p2 +theme(plot.title = element_text(size=20, face="bold", 
+    margin = margin(10, 0, 10, 0)))
+#Wide bin width
+p3 <- ggplot(data, aes(bwght)) + geom_histogram(binwidth = 15) + 
+  ggtitle('Birthweight in Ounces, binwidth = 15')
+p3 +theme(plot.title = element_text(size=20, face="bold", 
+    margin = margin(10, 0, 10, 0)))
+```
+
+The bwght variable has the general shape of a normal distribution with some outliers on both sides of the distribution when the histogram is viewed at an average bin width. At very wide bin sizes, the shape is compressed and outliers are difficult to see. At very narrow bin sizes the distribution becomes very jagged, representing that some neighboring bwght values do not necessarily occur with similar frequency. 
+
+Based on the histogram, the primary values of interest are the birth weight values that seem implausably small and large. There is a spike in frequency at 0 ounces and a few observations above 250 ounces that merit further investigation.
+
+``` {r Question 3b}
+outliers <- data[data$bwght < 10 | data$bwght > 200,]
+outliers[,c("bwght", "lbwght", "bwghtlbs")]
+```
+Examing the various outlier points there doesn't seem to be any obvious evidence of errant data entry. Without knowing if 0 values represent mortality or missed observations, I would be hesitant to just throw them out of the dataset, but would consider running the analysis keeping these points in as well as without them. I would also reach out to the data provider to see if I could get clarification on the meaning of those points. Finally, I would remove the outlier at 271 oz because it is likely to have undue influence on the relationship between weight and cigarette smoking and is a true outlier in the sense that from a population sample these large, the odds of a baby having that birth weight are astronomically low. 
+
+##Question 4:
+
+**Examine the variable cigs, which represents number of cigarettes smoked each day by the
+mother while pregnant. Conduct the same analysis as in question 3.**
+``` {r Question 4}
+summary(cigs)
+quantile(cigs, qnt)
+c1 <- ggplot(data, aes(cigs)) + geom_histogram(binwidth = 5) + 
+  ggtitle('Daily Cigarettes Smoked While Pregnant, binwidth = 5')
+c1 +theme(plot.title = element_text(size=14, face="bold", 
+    margin = margin(10, 0, 10, 0)))
+c2 <- ggplot(data, aes(cigs)) + geom_histogram(binwidth = 1) + 
+  ggtitle('Daily Cigarettes Smoked While Pregnant, binwidth = 1')
+c2 +theme(plot.title = element_text(size=14, face="bold", 
+    margin = margin(10, 0, 10, 0)))
+c3 <- ggplot(data, aes(cigs)) + geom_histogram(binwidth = 15) + 
+  ggtitle('Daily Cigarettes Smoked While Pregnant, binwidth = 15')
+c3 +theme(plot.title = element_text(size=14, face="bold", 
+    margin = margin(10, 0, 10, 0)))
+```
+
+The histogram and quantiles of the cigs variable tell us that the vast majority of women in this sample did not smoke while pregnant. To better assess the shape of the distribution, it is more useful to look at the distribution among smokers.
+```{r Question 4b}
+c4 <- ggplot(data[!cigs==0,], aes(cigs[!cigs==0])) + geom_histogram(binwidth= 1) + 
+  ggtitle('Daily Cigarettes Smoked While Pregnant, Smokers Only')
+c4 + theme(plot.title = element_text(size=14, face="bold", 
+    margin = margin(10, 0, 10, 0)))
+c5 <- ggplot(data[!cigs==0,], aes(log(cigs[!cigs==0] + 1))) + geom_histogram(binwidth= 0.5) + 
+  ggtitle('Log of Daily Cigarettes Smoked While Pregnant, Smokers Only')
+c5 + theme(plot.title = element_text(size=14, face="bold", 
+    margin = margin(10, 0, 10, 0)))
+#Hartigan's dip test for multimodality
+require(diptest)
+dip.test(log(cigs[!cigs==0] + 1))
+```
+Among smokers, the distribution of cigarettes smoked is heavily right skewed. Log transformation gives the data a bimodel appearance. 
+
+##Question 5:
+
+**Generate a scatterplot of bwght against cigs. Based on the appearance of this plot, how
+much of the variation in bwght do you think can be explained by cigs?**
+
+```{r Question 5}
+s <- ggplot(data, aes(cigs, bwght)) + geom_point() +
+  ggtitle('Scatterplot of Birght Weight and \n Cigarettes Smoked During Pregnancy') + 
+  theme(plot.title = element_text(size=14, face="bold", margin = margin(10, 0, 10, 0)))
+s
+```
+
+Looking at the scatterplot, there seems to be a small negative relationship between birth weight 
+and cigarettes smoked during pregnancy. The relationship looks weak because there is still wide variation in birth weight at a given level of cigarette smoking, and thus the cigarettes probably account for a small share of the variation. 
+
+##Question 6:
+
+**Estimate the simple linear regression of bwght on cigs. What coefficient estimates and
+the standard errors associated with the coefficient estimates do you get Interpret the
+results. Note that you may have to "take care of" any potential data issues before build-
+ing a regression model.**
+``` {r Question 6}
+# Exclude any data where there is no observation for cigs or bwght
+data = data[complete.cases(data$bwght, data$cigs),]
+# Exclude the upper outlier for bwght
+data = data[data$bwght < 200, ]
+m <- lm(data$bwght~data$cigs)
+summary.lm(m)
+```
+Regression showed a small negative effect of maternal cigarette smoking on birthweight ($\beta_1$ = -0.45 (0.10), p < .001, $R^2$ = 0.014). This represents a practically small but not meaningless effect. For example, among smokers, the average daily cigarettes smoked is 13.7. Thus, the mean cigarette smoker would have a 6 Oz. lower expected birth weight, other factors held constant. 
+
+##Question 7:
+
+**Now, introduce a new independent variable, faminc, representing family income in thou-
+sands of dollars. Examine this variable using the same analysis as in question 3. In
+addition, produce a scatterplot matrix of bwght, cigs, and faminc. Use the following
+command (as a starting point):**
+
+
+``` {r Question 7}
+summary(faminc)
+quantile(faminc, qnt)
+h <- ggplot(data, aes(faminc)) + geom_histogram(binwidth= 5) +
+  ggtitle('Family Income') + 
+  theme(plot.title = element_text(size=14, face="bold", margin = margin(10, 0, 10, 0)))
+h
+require(car)
+scatterplotMatrix(data[, c("bwght", "cigs", "faminc")], smoother = F)
+```
+
+
+##Question 8:
+
+**Regress bwgth on both cigs and faminc. What coefficient estimates and the standard
+errors associated with the coefficient estimates do you get? Interpret the results.**
+
+``` {r Question 8}
+data = data[complete.cases(data$bwght, data$cigs, data$faminc),]
+m2 <- lm(bwght~cigs + faminc, data = data)
+summary.lm(m2)
+```
+
+Regression showed that maternal cigarette smoking had a small negative association with birth weight and family income had a small positive association with birth weight ($\beta_1$ = -.41 (.10), P<.001), $\beta_2$ = .09 (.03), p=.004, $R^2$ = .02).  The effect of income on birth weight is practically very small, as moving from the median income in the sample to the $95^{th}$ percentile would only increase expected birth rate by 3.5 Oz. The effect of smoking is more practically significant as the median smoking mother would have an expected birth weight about .4 Oz lower than a non smoker, and a smoker in the 95% percentile would have a 12 Oz. decrease in expected birth weight.
+
+
+##Question 9:
+
+**Explain, in your own words, what the coefficient on cigs in the multiple regression means,
+and how it is different than the coefficient on cigs in the simple regression? Please provide
+the intuition to explain the difference, if any.**
+
+In the multiple regression the coefficient represents the association of maternal smoking on birth weight, holding familiy income constant. This differs from the simple regression as that coefficient represents the association of cigarettes smoked and birth weight without holding any other measured variables constant. 
+
+##Question 10:
+
+**Which coefficient for cigs is more negative than the other? Suggest an explanation for
+why this is so.**
+
+The coefficient in the simple regression model is more negative. An explaination for this is that familiy income also has a negative relationship with cigarettes smoked, and thus some of the variation that was accounted for by only cigarettes smoked in the simple model is accounted for by family income in the multiple regression model, lowering the coefficient for cigarettes smoked. 
