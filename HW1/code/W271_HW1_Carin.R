@@ -7,7 +7,8 @@
 # Load libraries
 # Define constants used in multiple chunks
 library(ggplot2)
-# library(knitr)
+library(knitr)
+library(car)
 # library(plot3D)
 # num_sim <- 100e3 # number of simulations
 
@@ -103,16 +104,17 @@ bin_width = 1
 hist(data$cigs, breaks = seq(floor(min(data$cigs)/bin_width)*bin_width, 
                              ceiling(max(data$cigs)/bin_width)*bin_width, 
                              by = bin_width), 
-     xlab = "Cigarettes smoked each day by the mother while pregnant", 
+     xlab = "Cigarettes smoked each day\nby the mother while pregnant", 
      ylab = "Count", 
      main = "Histogram of cigarettes smoked each day\nby the mother while pregnant")
 
 ## @knitr Question4-3-2
 # Use ggplot and bin width = 1
+bin_width = 1
 ggplot(data = data, aes(cigs)) + 
   geom_histogram(colour = 'black', fill = 'white', 
                  binwidth = bin_width) +  
-  labs(x = "Cigarettes smoked each day by the mother while pregnant", 
+  labs(x = "Cigarettes smoked each day\nby the mother while pregnant", 
        y = "Count", 
        title = "Histogram of cigarettes smoked each day\nby the mother while pregnant")
 
@@ -122,7 +124,7 @@ bin_width = 5
 ggplot(data = data, aes(cigs)) + 
   geom_histogram(colour = 'black', fill = 'white', 
                  binwidth = bin_width) +  
-  labs(x = "Cigarettes smoked each day by the mother while pregnant", 
+  labs(x = "Cigarettes smoked each day\nby the mother while pregnant", 
        y = "Count", 
        title = "Histogram of cigarettes smoked each day\nby the mother while pregnant")
 
@@ -140,22 +142,138 @@ ggplot(data = data, aes(cigs)) +
 
 ## @knitr Question5
 # QUESTION 5 --------------------------------------------------------------
-
+# Generate a scatterplot of `bwght` against `cigs`
+ggplot(data = data, aes(cigs, bwght)) + 
+  geom_point() + 
+  labs(x = "Cigarettes smoked each day by the mother while pregnant", 
+       y = "Birth weight (ounces)", 
+       title = "Cigarettes smoked by the mother\nagainst birth weight") + 
+  geom_smooth(method = "lm")
+  
 
 
 ## @knitr Question6
 # QUESTION 6 --------------------------------------------------------------
+params <- "cigs"
+model <- lm(as.formula(paste("bwght", paste(params, sep = "", 
+                                            collapse = " + "), sep = " ~ ")), 
+            data = data[data$bwght !=0, ])
+summary(model)
+
+sig_stars = function(p) {
+  stars = symnum(p, na = F, cutpoints = c(0, .001, .01, .05, .1, 1), 
+                 symbols=c("**`***`**","**`** `**", "**`*  `**", "**.  **", 
+                           "   "))
+  return(stars)
+  }
+c(2:1+length(params))
+create_regtable <- function(model, df, params, causes, effect) {
+  model_summary <- summary(model)
+  model_coefs <- model_summary$coefficients
+  estimate <- unlist(lapply(c(seq(2, 1+length(params)), 1), function(x) 
+    paste0(formatC(model_coefs[x, 1], digits = 3, format = "f", 
+                   drop0trailing = FALSE), sig_stars(model_coefs[x, 4]))))
+  SE <- unlist(lapply(c(seq(2, 1+length(params)), 1), function(x) 
+    paste0("(", formatC(model_coefs[x, 2], digits = 3, format = "f", 
+                        drop0trailing = FALSE), ")  ")))
+  N <- paste0(nrow(df), "   ")
+  R2 <- paste0(formatC(model_summary$r.squared, digits = 3, format = "f", 
+                       drop0trailing = FALSE), "   ")
+  Fstatistic <- paste0(formatC(model_summary$fstatistic[1], digits = 3, 
+                               format = "f", drop0trailing = FALSE), "   ")
+  pvalue <- paste0(formatC(1 - pf(model_summary$fstatistic[1], 2, 300), 
+                           digits = 3, format = "f", drop0trailing = FALSE), 
+                   "   ")
+  table <- matrix(c(t(matrix(c(estimate, SE), ncol = 2)), R2, Fstatistic, 
+                    pvalue, N), ncol = 1)
+  rows <- NULL
+  for (cause in causes) {
+    rows <- c(rows, paste("**", cause, "**", sep = ""), "")
+  }
+  rownames(table) <- c(rows, "Baseline (Intercept)", " ", "$R^2$", "F", "p", 
+                       "N")
+  colnames(table) <- effect
+  return(table)
+}
+
+table <- create_regtable(model, data, params, 
+                         c("Cigarettes smoked each day by the mother"), 
+                         "Birth weight (ounces)")
+kable(table, align = "r", 
+      caption = paste("Effect of the number of cigarettes smoked each day", 
+                      "\nby the mother while pregnant on the birth weight", 
+                      sep = ""))
 
 
 
-## @knitr Question7
+## @knitr Question7-1
 # QUESTION 7 --------------------------------------------------------------
+# Summarize the variable faminc
+summary(data$faminc)
 
+## @knitr Question7-2
+# List the following quantiles: 1%, 5%, 10%, 25%, 50%, 75%, 90%, 95%, 99%**
+quantile(data$faminc, probs = c(1, 5, 10, 25, 50, 75, 90, 95, 99)/100)
+
+## @knitr Question7-3-2
+# Plot the histogram of bwght and comment on the shape of its distribution
+# Use ggplot and bin width = 2
+bin_width = 2
+ggplot(data = data, aes(faminc)) + 
+  geom_histogram(colour = 'black', fill = 'white', 
+                 binwidth = bin_width) +  
+  labs(x = "Family income (thousands of dollars)", y = "Count", 
+       title = "Histogram of family income")
+
+
+## @knitr Question7-3-3
+# Use ggplot and bin width = 5
+bin_width = 5
+ggplot(data = data, aes(faminc)) + 
+  geom_histogram(colour = 'black', fill = 'white', 
+                 binwidth = bin_width) +  
+  labs(x = "Family income (thousands of dollars)", y = "Count", 
+       title = "Histogram of family income")
+
+## @knitr Question7-3-4
+# Use ggplot and bin width = 10
+bin_width = 10
+ggplot(data = data, aes(faminc)) + 
+  geom_histogram(colour = 'black', fill = 'white', 
+                 binwidth = bin_width) +  
+  labs(x = "Family income (thousands of dollars)", y = "Count", 
+       title = "Histogram of family income")
+
+## @knitr Question7-4
+# Generate a scatterplot of `bwght` against `faminc`
+ggplot(data = data, aes(faminc, bwght)) + 
+  geom_point() + 
+  labs(x = "Family income (thousands of dollars)", 
+       y = "Birth weight (ounces)", 
+       title = "Family income against birth weight") + 
+  geom_smooth(method = "lm")
+
+## @knitr Question7-5
+# scatterplot.matrix has been deprecated, we used the new function instead
+scatterplotMatrix(~ bwght + cigs + faminc, data[data$bwght !=0, ])
 
 
 ## @knitr Question8
 # QUESTION 8 --------------------------------------------------------------
+params <- c("cigs", "faminc")
+model2 <- lm(as.formula(paste("bwght", paste(params, sep = "", 
+                                             collapse = " + "), sep = " ~ ")), 
+             data = data[data$bwght !=0, ])
+summary(model2)
 
+table <- create_regtable(model2, data, params, 
+                         c("Cigarettes smoked each day by the mother", 
+                           "Family income (thousands of dollars)"), 
+                         "Birth weight (ounces)")
+kable(table, align = "r", 
+      caption = paste("Effect of the number of cigarettes smoked each day", 
+                      "\nby the mother while pregnant and the family income\n", 
+                      "on the birth weight", sep = ""))
 
 
 ## @knitr Question9
