@@ -90,22 +90,51 @@ As shown by `desc` and `str(data)`, there are `r dim(data)[2]` variables and `r 
 
 3. **Plot the histogram of bwght and comment on the shape of its distribution. Try different bin sizes and comment how it affects the shape of the histogram. Remember to label the graph clearly. You will also need a title for the graph.**
 
-We tested several bin widths, though here only three (5, 10, and 20) are plotted---they're enough to show that the smaller the bin size, the closer the histogram looks to the density plot (which is closer to the normal distribution in this case).
+We tested several bin widths, though here only three (5, 10, and 20) are plotted---they're enough to show that the smaller the bin size, the closer the histogram looks to the density plot (which is close to the normal distribution---except for a long left tail---in this case).
 
 The first bin size (5) is plotted below using `hist` and `ggplot`. The rest are plotted using `ggplot` exclusively.
 
 ```{r Question3-3-1, echo = TRUE, message = FALSE, warning = FALSE, fig.cap = "Histogram of birth weight (in ounces), using `hist` and bin width = 5", fig.width = 4, fig.height = 3}
 ```
 
+\pagebreak
+
 ```{r Question3-3-2, echo = c(1:2), message = FALSE, warning = FALSE, fig.cap = "Histogram of birth weight (in ounces), using `ggplot` and bin width = 5", fig.width = 4, fig.height = 3}
 ```
 
-```{r Question3-3-3, echo = TRUE, message = FALSE, warning = FALSE, fig.cap = "Histogram of birth weight (in ounces), using `ggplot` and bin width = 10", fig.width = 4, fig.height = 3}
+```{r Question3-3-3, echo = c(1:2), message = FALSE, warning = FALSE, fig.cap = "Histogram of birth weight (in ounces), using `ggplot` and bin width = 10", fig.width = 4, fig.height = 3}
 ```
 
-```{r Question3-3-4, echo = TRUE, message = FALSE, warning = FALSE, fig.cap = "Histogram of birth weight (in ounces), using `ggplot` and bin width = 20", fig.width = 4, fig.height = 3}
+```{r Question3-3-4, echo = c(1:2), message = FALSE, warning = FALSE, fig.cap = "Histogram of birth weight (in ounces), using `ggplot` and bin width = 20", fig.width = 4, fig.height = 3}
 ```
 
 4. **This is a more open-ended question: Have you noticed anything "strange" with the `bwght` variable and the shape of histogram this variable? If so, please elaborate on your observations and investigate any issues you have identified.**
 
+The left tail of the distribution is quite long for such variable. Actually, there are `r length(data$bwght[data$bwght==0])` observations with a weight equal to zero, which makes no sense. If we exclude those observations, the minimum birth weight is `r min(data$bwght[data$bwght!=0])` ounces, which still seems very low but might be possible.
 
+There are no `NA` values for `data$bwght` so it seems likely that missing values have been coded as `0`.
+
+
+## Question 4
+
+**Examine the variable `cigs`, which represents number of cigarettes smoked each day by the mother while pregnant. Conduct the same analysis as in question 3.**
+
+```{r Question4-1, echo = TRUE, message = FALSE, warning = FALSE}
+```
+
+```{r Question4-2, echo = TRUE, message = FALSE, warning = FALSE}
+```
+
+```{r Question4-3-2, echo = c(1:2), message = FALSE, warning = FALSE, fig.cap = "Histogram of cigarettes smoked each day by the mother while pregnant, using `ggplot` and bin width = 1", fig.width = 4, fig.height = 3}
+```
+
+```{r Question4-3-3, echo = c(1:2), message = FALSE, warning = FALSE, fig.cap = "Histogram of cigarettes smoked each day by the mother while pregnant, using `ggplot` and bin width = 5", fig.width = 4, fig.height = 3}
+```
+
+```{r Question4-3-4, echo = c(1:2), message = FALSE, warning = FALSE, fig.cap = "Histogram of cigarettes smoked each day by the mother while pregnant, using `ggplot` and bin width = 10", fig.width = 4, fig.height = 3}
+```
+
+
+## Question 5
+
+**Generate a scatterplot of `bwght` against `cigs`. Based on the appearance of this plot, how much of the variation in `bwght` do you think can be explained by `cigs`?**
