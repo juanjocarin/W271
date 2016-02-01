@@ -3,8 +3,7 @@
 
 
 ## @knitr Libraries
-# PATHS, LIBRARIES AND CONSTANTS -------------------------------------------------
-# Set relative path (referred to project)
+# LIBRARIES AND CONSTANTS -------------------------------------------------
 # Load libraries
 # Define constants used in multiple chunks
 library(ggplot2)
@@ -17,7 +16,7 @@ library(ggplot2)
 ## @knitr Question1
 # QUESTION 1 --------------------------------------------------------------
 # Load the birthweight dataset
-load("data/birthweight_w271.rdata")
+load("birthweight_w271.rdata")
 
 
 
@@ -87,6 +86,7 @@ ggplot(data = data, aes(bwght)) +
        title = "Histogram of birth weight")
 
 
+
 ## @knitr Question4-1
 # QUESTION 4 --------------------------------------------------------------
 # Summarize the variable cigs: summary(data$cigs)
@@ -98,7 +98,7 @@ quantile(data$cigs, probs = c(1, 5, 10, 25, 50, 75, 90, 95, 99)/100)
 
 ## @knitr Question4-3-1
 # Plot the histogram of bwght and comment on the shape of its distribution
-# Use hist and bin width = 5
+# Use hist and bin width = 1
 bin_width = 1
 hist(data$cigs, breaks = seq(floor(min(data$cigs)/bin_width)*bin_width, 
                              ceiling(max(data$cigs)/bin_width)*bin_width, 
@@ -108,7 +108,7 @@ hist(data$cigs, breaks = seq(floor(min(data$cigs)/bin_width)*bin_width,
      main = "Histogram of cigarettes smoked each day\nby the mother while pregnant")
 
 ## @knitr Question4-3-2
-# Use ggplot and bin width = 5
+# Use ggplot and bin width = 1
 ggplot(data = data, aes(cigs)) + 
   geom_histogram(colour = 'black', fill = 'white', 
                  binwidth = bin_width) +  
@@ -117,7 +117,7 @@ ggplot(data = data, aes(cigs)) +
        title = "Histogram of cigarettes smoked each day\nby the mother while pregnant")
 
 ## @knitr Question4-3-3
-# Use ggplot and bin width = 10
+# Use ggplot and bin width = 5
 bin_width = 5
 ggplot(data = data, aes(cigs)) + 
   geom_histogram(colour = 'black', fill = 'white', 
@@ -127,7 +127,7 @@ ggplot(data = data, aes(cigs)) +
        title = "Histogram of cigarettes smoked each day\nby the mother while pregnant")
 
 ## @knitr Question4-3-4
-# Use ggplot and bin width = 20
+# Use ggplot and bin width = 10
 bin_width = 10
 ggplot(data = data, aes(cigs)) + 
   geom_histogram(colour = 'black', fill = 'white', 
@@ -135,3 +135,33 @@ ggplot(data = data, aes(cigs)) +
   labs(x = "Cigarettes smoked each day by the mother while pregnant", 
        y = "Count", 
        title = "Histogram of cigarettes smoked each day\nby the mother while pregnant")
+
+
+
+## @knitr Question5
+# QUESTION 5 --------------------------------------------------------------
+
+
+
+## @knitr Question6
+# QUESTION 6 --------------------------------------------------------------
+
+
+
+## @knitr Question7
+# QUESTION 7 --------------------------------------------------------------
+
+
+
+## @knitr Question8
+# QUESTION 8 --------------------------------------------------------------
+
+
+
+## @knitr Question9
+# QUESTION 9 --------------------------------------------------------------
+
+
+
+## @knitr Question10
+# QUESTION 10 --------------------------------------------------------------

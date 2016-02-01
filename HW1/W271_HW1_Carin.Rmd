@@ -14,7 +14,8 @@ header-includes:
 - \usepackage{fancyhdr}
 - \pagestyle{fancy}
 - \fancyhead[LO,LE]{Carin, Davis, Levato, Song}
-- \fancyfoot[LO,LE]{UC Berkeley -- MIDS -- W271 -- Spring semester 2016 -- **HW 1**}
+- \fancyfoot[LO,LE]{UC Berkeley -- MIDS -- Spring semester 2016}
+- \fancyhead[RE,RO]{W271 -- HW1 -- \leftmark}
 - \fancyfoot[CO,CE]{}
 - \fancyfoot[RE,RO]{\thepage}
 - \renewcommand{\headrulewidth}{0.5pt}
@@ -25,38 +26,36 @@ header-includes:
 
 \pagebreak
 
-# Data
-
 **The file birthweight w271.RData contains data from the 1988 National Health Interview Survey, which may have been modifed by the instructors to test your profciency. This survey is conducted by the U.S. Census Bureau and has collected data on individual health metrics since 1957. Like all surveys, a full analysis would require advanced techniques such as those provided by the R survey package. For this exercise, however, you are to treat the data as a true random sample. You will use this dataset to practice interpreting OLS coeffcients.**
 
 
-# Exercises
-
-## Question 1
+# Question 1
 
 **Load the birthweight dataset. Note that the actual data is provided in a data table named "data".**
 
-**Use the following procedures to load the data:**
+**Use the following procedures to load the data**
 
-**Step 1: put the provided R Workspace birthweight w271.RData in the directory of your choice.**
++ **Step 1: put the provided R Workspace birthweight w271.RData in the directory of your choice.**
 
-**Step 2: Load the dataset using this command: `load("\birthweight:Rdata")`**
++ **Step 2: Load the dataset using this command: `load("\birthweight.Rdata")`**
 
 ```{r, echo = FALSE}
-# opts_knit$set(root.dir = '/HW1')
 require(knitr,quietly=T)
 read_chunk('code/W271_HW1_Carin.R')
+opts_knit$set(message = FALSE, warning = FALSE)
+# Set path to data here (don't use setwd() inside a chunk!!!)
+opts_knit$set(root.dir = './data')
 ```
 
-```{r Libraries, echo = FALSE, message = FALSE, warning = FALSE}
+```{r Libraries, echo = FALSE}
 ```
 
 
-```{r Question1, echo = TRUE, message = FALSE, warning = FALSE}
+```{r Question1, echo = -c(1:2)}
 ```
 
 
-## Question 2
+# Question 2
 
 **Examine the basic structure of the data set using desc, str, and summary to examine all of the variables in the data set. How many variables and observations in the data?**
 
@@ -66,13 +65,13 @@ read_chunk('code/W271_HW1_Carin.R')
 2. **`str(data)`**
 3. **`summary(data)`**
 
-```{r Question2, echo = TRUE, message = FALSE, warning = FALSE}
+```{r Question2, echo = -c(1:2)}
 ```
 
 As shown by `desc` and `str(data)`, there are `r dim(data)[2]` variables and `r dim(data)[1]` observations in the data.
 
 
-## Question 3:
+# Question 3
 
 **As we mentioned in the live session, it is important to start with a question (or a hypothesis) when conducting regression modeling. In this exercise, we are in the question: "Do mothers who smoke have babies with lower birth weight?"**
 
@@ -80,12 +79,12 @@ As shown by `desc` and `str(data)`, there are `r dim(data)[2]` variables and `r 
 
 1. **Summarize the variable `bwght`: `summary(data$bwght)`**
 
-```{r Question3-1, echo = TRUE, message = FALSE, warning = FALSE}
+```{r Question3-1, echo = -c(1:2)}
 ```
 
 2. **You may also use the `quantile` function: `quantile(data$bwght)`. List the following quantiles: 1%, 5%, 10%, 25%, 50%, 75%, 90%, 95%, 99%**
 
-```{r Question3-2, echo = TRUE, message = FALSE, warning = FALSE}
+```{r Question3-2, echo = -1}
 ```
 
 3. **Plot the histogram of bwght and comment on the shape of its distribution. Try different bin sizes and comment how it affects the shape of the histogram. Remember to label the graph clearly. You will also need a title for the graph.**
@@ -94,18 +93,18 @@ We tested several bin widths, though here only three (5, 10, and 20) are plotted
 
 The first bin size (5) is plotted below using `hist` and `ggplot`. The rest are plotted using `ggplot` exclusively.
 
-```{r Question3-3-1, echo = TRUE, message = FALSE, warning = FALSE, fig.cap = "Histogram of birth weight (in ounces), using `hist` and bin width = 5", fig.width = 4, fig.height = 3}
+```{r Question3-3-1, echo = -1, fig.cap = "Histogram of birth weight (in ounces), using `hist` and bin width = 5", fig.width = 4, fig.height = 3}
 ```
 
 \pagebreak
 
-```{r Question3-3-2, echo = c(1:2), message = FALSE, warning = FALSE, fig.cap = "Histogram of birth weight (in ounces), using `ggplot` and bin width = 5", fig.width = 4, fig.height = 3}
+```{r Question3-3-2, echo = c(1:2),fig.cap = "Histogram of birth weight (in ounces), using `ggplot` and bin width = 5", fig.width = 4, fig.height = 3}
 ```
 
-```{r Question3-3-3, echo = c(1:2), message = FALSE, warning = FALSE, fig.cap = "Histogram of birth weight (in ounces), using `ggplot` and bin width = 10", fig.width = 4, fig.height = 3}
+```{r Question3-3-3, echo = c(1:2), fig.cap = "Histogram of birth weight (in ounces), using `ggplot` and bin width = 10", fig.width = 4, fig.height = 3}
 ```
 
-```{r Question3-3-4, echo = c(1:2), message = FALSE, warning = FALSE, fig.cap = "Histogram of birth weight (in ounces), using `ggplot` and bin width = 20", fig.width = 4, fig.height = 3}
+```{r Question3-3-4, echo = c(1:2), fig.cap = "Histogram of birth weight (in ounces), using `ggplot` and bin width = 20", fig.width = 4, fig.height = 3}
 ```
 
 4. **This is a more open-ended question: Have you noticed anything "strange" with the `bwght` variable and the shape of histogram this variable? If so, please elaborate on your observations and investigate any issues you have identified.**
@@ -115,26 +114,74 @@ The left tail of the distribution is quite long for such variable. Actually, the
 There are no `NA` values for `data$bwght` so it seems likely that missing values have been coded as `0`.
 
 
-## Question 4
+# Question 4
 
 **Examine the variable `cigs`, which represents number of cigarettes smoked each day by the mother while pregnant. Conduct the same analysis as in question 3.**
 
-```{r Question4-1, echo = TRUE, message = FALSE, warning = FALSE}
+```{r Question4-1, echo = -c(1:2)}
 ```
 
-```{r Question4-2, echo = TRUE, message = FALSE, warning = FALSE}
+```{r Question4-2, echo = -c(1:2)}
 ```
 
-```{r Question4-3-2, echo = c(1:2), message = FALSE, warning = FALSE, fig.cap = "Histogram of cigarettes smoked each day by the mother while pregnant, using `ggplot` and bin width = 1", fig.width = 4, fig.height = 3}
+```{r Question4-3-2, echo = c(1:2), fig.cap = "Histogram of cigarettes smoked each day by the mother while pregnant, using `ggplot` and bin width = 1", fig.width = 4, fig.height = 3}
 ```
 
-```{r Question4-3-3, echo = c(1:2), message = FALSE, warning = FALSE, fig.cap = "Histogram of cigarettes smoked each day by the mother while pregnant, using `ggplot` and bin width = 5", fig.width = 4, fig.height = 3}
+```{r Question4-3-3, echo = c(1:2), fig.cap = "Histogram of cigarettes smoked each day by the mother while pregnant, using `ggplot` and bin width = 5", fig.width = 4, fig.height = 3}
 ```
 
-```{r Question4-3-4, echo = c(1:2), message = FALSE, warning = FALSE, fig.cap = "Histogram of cigarettes smoked each day by the mother while pregnant, using `ggplot` and bin width = 10", fig.width = 4, fig.height = 3}
+```{r Question4-3-4, echo = c(1:2), fig.cap = "Histogram of cigarettes smoked each day by the mother while pregnant, using `ggplot` and bin width = 10", fig.width = 4, fig.height = 3}
 ```
 
 
-## Question 5
+# Question 5
 
 **Generate a scatterplot of `bwght` against `cigs`. Based on the appearance of this plot, how much of the variation in `bwght` do you think can be explained by `cigs`?**
+
+```{r Question5, echo = -c(1:2)}
+```
+
+
+# Question 6
+
+**Estimate the simple linear regression of `bwght` on `cigs`. What coefficient estimates and the standard errors associated with the coefficient estimates do you get? Interpret the results. Note that you may have to "take care of" any potential data issues before building a regression model.**
+
+```{r Question6, echo = -c(1:2)}
+```
+
+
+# Question 7
+
+**Now, introduce a new independent variable, `faminc`, representing family income in thousands of dollars. Examine this variable using the same analysis as in question 3. In addition, produce a scatterplot matrix of `bwght`, `cigs`, and `faminc`. Use the following command (as a starting point):
+
+```r
+library(car)
+scatterplot:matrix( bwght + cigs + faminc; data = data2)
+```
+
+**Note that the `car` package is needed in order to use the `scatterplot.matrix` function.**
+
+```{r Question7, echo = -c(1:2)}
+```
+
+
+# Question 8
+
+**Regress `bwgth` on both `cigs` and `faminc`. What coefficient estimates and the standard errors associated with the coefficient estimates do you get? Interpret the results.**
+
+```{r Question8, echo = -c(1:2)}
+```
+
+# Question 9
+
+**Explain, in your own words, what the coefficient on `cigs` in the multiple regression means, and how it is different than the coefficient on `cigs` in the simple regression? Please provide the intuition to explain the difference, if any.**
+
+```{r Question9, echo = -c(1:2)}
+```
+
+# Question 10
+
+**Which coeffcient for `cigs` is more negative than the other? Suggest an explanation for why this is so.**
+
+```{r Question10, echo = -c(1:2)}
+```
