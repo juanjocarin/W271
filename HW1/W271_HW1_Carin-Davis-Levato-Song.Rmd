@@ -56,7 +56,7 @@ opts_chunk$set(message = FALSE, warning = FALSE)
 opts_knit$set(root.dir = './data')
 ```
 
-```{r Libraries, echo = FALSE}
+```{r Libraries-Functions-Constants, echo = FALSE}
 ```
 
 
@@ -183,7 +183,9 @@ There seems to be a (small) negative relationship between the number of cigarett
 ```{r Question6, echo = c(2:4)}
 ```
 
-Regression showed a small negative effect of maternal cigarette smoking on birthweight ($\beta_1 = `r formatC(summary(model)$coefficients[2, 1], digits = 3, format = "f", drop0trailing = FALSE)` \ (`r formatC(summary(model)$coefficients[2, 2], digits = 3, format = "f", drop0trailing = FALSE)`)$). This represents a practically small but not meaningless effect. For example, among smokers, the average daily cigarettes smoked is `r formatC(mean(data$cigs[data$bwght != 0 & data$cigs != 0]), digits = 1, format = "f", drop0trailing = FALSE)`. Thus, the child of an average smoker would have a `r formatC(abs(mean(data$cigs[data$bwght != 0 & data$cigs != 0])*summary(model)$coefficients[2, 1]), digits = 1, format = "f", drop0trailing = FALSE)` Oz. lower expected birth weight, other factors held constant.
+\label{Table1}
+
+Regression showed a small negative effect of maternal cigarette smoking on birthweight ($\beta_1 = `r frmt(summary(model)$coefficients[2, 1])` \ (`r frmt(summary(model)$coefficients[2, 2])`)$). This represents a practically small but not meaningless effect. For example, among smokers, the average daily cigarettes smoked is `r frmt(mean(data$cigs[data$bwght != 0 & data$cigs != 0]), digits = 1)`. Thus, the child of an average smoker would have a `r frmt(abs(mean(data$cigs[data$bwght != 0 & data$cigs != 0])*summary(model)$coefficients[2, 1]), digits = 1)` Oz. lower expected birth weight, other factors held constant.
 
 
 
@@ -234,9 +236,11 @@ This graph above also appears in the first row and second column of the scatterp
 ```{r Question8, echo = c(2:5)}
 ```
 
-Maternal cigarette smoking still has a small negative effect on birthweight, slightly smaller (in absolute value) than when family income is not considered ($\beta_1 = `r formatC(summary(model2)$coefficients[2, 1], digits = 3, format = "f", drop0trailing = FALSE)` \ (`r formatC(summary(model2)$coefficients[2, 2], digits = 3, format = "f", drop0trailing = FALSE)`)$).
+\label{Table2}
 
-The effect of income on birth weight ($\beta_2 = `r formatC(summary(model2)$coefficients[3, 1], digits = 3, format = "f", drop0trailing = FALSE)` \ (`r formatC(summary(model2)$coefficients[3, 2], digits = 3, format = "f", drop0trailing = FALSE)`)$), though statistically significant, has a small practical significance, as we would have to move from the median income in the sample ($\$`r formatC(1000*quantile(data$faminc, probs = 0.5), digits = 0, format = "f", drop0trailing = FALSE, big.mark = ",")`$) to the 95th percentile ($\$`r formatC(1000*quantile(data$faminc, probs = 0.95), digits = 0, format = "f", drop0trailing = FALSE, big.mark = ",")`$) to have an expected increase in birth weight of `r  formatC(as.numeric(quantile(data$faminc, probs = .95) - quantile(data$faminc, probs = .5)) * summary(model2)$coefficients[3, 1], digits = 1, format = "f", drop0trailing = FALSE)` Oz. Following what we mentioned in Question 6, the effect of smoking is more practically significant, since the child of a median smoker (i.e., excluding non-smokers; `r quantile(data$cigs[data$cigs != 0], probs = 0.5)` cigarettes per day) would have about a `r formatC(abs(as.numeric(quantile(data$cigs[data$cigs != 0], probs = .5) - 0) * summary(model2)$coefficients[2, 1]), digits = 1, format = "f", drop0trailing = FALSE)` Oz. decrease in expected birth weight.
+Maternal cigarette smoking still has a small negative effect on birthweight, slightly smaller (in absolute value) than when family income is not considered ($\beta_1 = `r frmt(summary(model2)$coefficients[2, 1])` \ (`r frmt(summary(model2)$coefficients[2, 2])`)$).
+
+The effect of income on birth weight ($\beta_2 = `r frmt(summary(model2)$coefficients[3, 1])` \ (`r frmt(summary(model2)$coefficients[3, 2])`)$), though statistically significant, has a small practical significance, as we would have to move from the median income in the sample ($\$`r frmt(1000*quantile(data$faminc, probs = 0.5), digits = 0)`$) to the 95th percentile ($\$`r frmt(1000*quantile(data$faminc, probs = 0.95), digits = 0)`$) to have an expected increase in birth weight of `r  frmt(as.numeric(quantile(data$faminc, probs = .95) - quantile(data$faminc, probs = .5)) * summary(model2)$coefficients[3, 1], digits = 1)` Oz. Following what we mentioned in Question 6, the effect of smoking is more practically significant, since the child of a median smoker (i.e., excluding non-smokers; `r quantile(data$cigs[data$cigs != 0], probs = 0.5)` cigarettes per day) would have about a `r frmt(abs(as.numeric(quantile(data$cigs[data$cigs != 0], probs = .5) - 0) * summary(model2)$coefficients[2, 1]), digits = 1)` Oz. decrease in expected birth weight.
 
 
 
@@ -259,3 +263,11 @@ $$\tilde{\beta}_1 = \hat{\beta}_1 + \hat{\beta}_2 \tilde{\delta}_1$$
 where $\hat{\beta}_1$ and $\hat{\beta}_2$ are the slope estimators from the multiple regression and $\tilde{\delta}_1$ is the slope from the simple regression of $X_2$ on $X_1$.
 
 That means that, in this case, the relationship between `cigs` and `faminc` is negative ($\tilde{\delta}_1 < 0$; the higher the family income of the mother, the less she smokes while pregnant); that is why $\tilde{\beta}_1$ is more negative than $\hat{\beta}_1$.
+
+Let's confirm the expression above (we had all coefficients but $\tilde{\delta}_1$ from [Table 1](#Table1) and [Table 2](#Table2), but we'll recalculate anyway):
+
+```{r Question10, echo = -1}
+```
+
+
+$$`r frmt(hat_beta_1)` + `r frmt(hat_beta_2)` \cdot (`r frmt(tilde_delta_1)`) = `r frmt(tilde_beta_1)`$$
