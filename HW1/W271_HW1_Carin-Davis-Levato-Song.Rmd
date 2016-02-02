@@ -50,7 +50,7 @@ header-includes:
 
 ```{r, echo = FALSE}
 require(knitr, quietly = TRUE)
-read_chunk('code/W271_HW1_Carin.R')
+read_chunk('code/W271_HW1_Carin-Davis-Levato-Song.R')
 opts_chunk$set(message = FALSE, warning = FALSE)
 # Set path to data here (don't use setwd() inside a chunk!!!)
 opts_knit$set(root.dir = './data')
@@ -235,7 +235,7 @@ This graph above also appears in the first row and second column of the scatterp
 
 **Regress `bwgth` on both `cigs` and `faminc`. What coefficient estimates and the standard errors associated with the coefficient estimates do you get? Interpret the results.**
 
-```{r Question8, echo = c(2:4)}
+```{r Question8, echo = c(2:5)}
 ```
 
 Maternal cigarette smoking still has a small negative effect on birthweight, slightly smaller (in absolute value) than when family income is not considered ($\beta_1 = `r formatC(summary(model2)$coefficients[2, 1], digits = 3, format = "f", drop0trailing = FALSE)` \ (`r formatC(summary(model2)$coefficients[2, 2], digits = 3, format = "f", drop0trailing = FALSE)`)$).

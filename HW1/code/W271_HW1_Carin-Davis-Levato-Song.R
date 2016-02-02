@@ -1,130 +1,305 @@
-## MIDS W271-4 HW1           ##
+## MIDS W271-4 HW1            ##
 ## Carin, Davis, Levato, Song ##
 
 
-# LIBRARIES AND CONSTANTS -------------------------------------------------
 ## @knitr Libraries
-#### LOAD LIBRARIES AND DEFINE CONSTANTS USED IN MULTIPLE CHUNKS
+# LIBRARIES AND CONSTANTS -------------------------------------------------
+# Load libraries
+# Define constants used in multiple chunks
+library(ggplot2)
 library(knitr)
 library(car)
+# library(plot3D)
+# num_sim <- 100e3 # number of simulations
 
-# QUESTION 1 --------------------------------------------------------------
-# load the data
+
+
 ## @knitr Question1
-#### Load the data 
-setwd("C:/Users/songminghu/UCB_DataScience/W271_ApplyRegressionTimeSeriesAnalysis/data")
-load("birthweight_w271.Rdata")
+# QUESTION 1 --------------------------------------------------------------
+# Load the birthweight dataset
+load("birthweight_w271.rdata")
 
 
 
-
-# QUESTION 2 --------------------------------------------------------------
-# check how many variables and observations in the data -------------------
-# there are  14 variables and 1388   observations in the data -------------
 ## @knitr Question2
-dim(desc)[1] # check number of variables, or use str(data) command
-dim(data)[1] # check number of observations, or use str(data) command
+# QUESTION 2 --------------------------------------------------------------
+# Examine the basic structure of the data set using desc, str, and summary
+desc
+str(data)
+summary(data)
 
 
 
-
+## @knitr Question3-1
 # QUESTION 3 --------------------------------------------------------------
-
-## @knitr Question3-part1
+# Summarize the variable bwght: summary(data$bwght)
 summary(data$bwght)
 
+## @knitr Question3-2
+# List the following quantiles: 1%, 5%, 10%, 25%, 50%, 75%, 90%, 95%, 99%**
+quantile(data$bwght, probs = c(1, 5, 10, 25, 50, 75, 90, 95, 99)/100)
 
-## @knitr Question3-part2
-quantile( data$bwght, probs = c(0.01, 0.05, 0.10, 0.25, 0.50, 0.75, 0.90, 0.95, 0.99) )
+## @knitr Question3-3-1
+# Plot the histogram of bwght and comment on the shape of its distribution
+# Use hist and bin width = 5
+bin_width = 5
+hist(data$bwght, breaks = seq(floor(min(data$bwght)/bin_width)*bin_width, 
+                              ceiling(max(data$bwght)/bin_width)*bin_width, 
+                              by = bin_width), 
+     xlab = "Birth weight (ounces)", ylab = "Count", 
+     main = "Histogram of birth weight")
 
-## @knitr Question3-part3
-par(mfrow = c(2, 2))
-## Histogram with 10 bins
-hist(data$bwght, breaks=10, main = 'Histogram with 10 bins', xlab ='Birth Weight')
-## Histogram with 20 bins
-hist(data$bwght, breaks=20, main = 'Histogram with 20 bins',  xlab ='Birth Weight')
-## Histogram with 30 bins
-hist(data$bwght, breaks=30, main = 'Histogram with 30 bins',  xlab ='Birth Weight')
-## Histogram with 40 bins
-hist(data$bwght, breaks=40, main = 'Histogram with 40 bins',  xlab ='Birth Weight')
+## @knitr Question3-3-2
+# Use ggplot and bin width = 5
+ggplot(data = data, aes(bwght)) + 
+  geom_histogram(colour = 'black', fill = 'white', 
+                 binwidth = bin_width) +  
+  labs(x = "Birth weight (ounces)", y = "Count", 
+       title = "Histogram of birth weight")
+
+# With density plot
+# ggplot(data = data, aes(bwght)) + 
+#   geom_histogram(aes(y = ..density..), colour = 'black', fill = 'white', 
+#                  binwidth = bin_width) +  
+#   labs(x = "Birth weight (ounces)", y = "Density", 
+#        title = "Histogram of birth weight") + 
+#   stat_function(fun = dnorm, args = list(mean = mean(data$bwght, 
+#                                                      na.rm = TRUE), 
+#                                          sd = sd(data$bwght, na.rm = TRUE)), 
+#                 colour = 'black', size = 1)
+
+## @knitr Question3-3-3
+# Use ggplot and bin width = 10
+bin_width = 10
+ggplot(data = data, aes(bwght)) + 
+  geom_histogram(colour = 'black', fill = 'white', 
+                 binwidth = bin_width) +  
+  labs(x = "Birth weight (ounces)", y = "Count", 
+       title = "Histogram of birth weight")
+
+## @knitr Question3-3-4
+# Use ggplot and bin width = 20
+bin_width = 20
+ggplot(data = data, aes(bwght)) + 
+  geom_histogram(colour = 'black', fill = 'white', 
+                 binwidth = bin_width) +  
+  labs(x = "Birth weight (ounces)", y = "Count", 
+       title = "Histogram of birth weight")
 
 
 
-
+## @knitr Question4-1
 # QUESTION 4 --------------------------------------------------------------
-
-## @knitr Question4-part1
+# Summarize the variable cigs: summary(data$cigs)
 summary(data$cigs)
 
+## @knitr Question4-2
+# List the following quantiles: 1%, 5%, 10%, 25%, 50%, 75%, 90%, 95%, 99%**
+quantile(data$cigs, probs = c(1, 5, 10, 25, 50, 75, 90, 95, 99)/100)
 
-## @knitr Question4-part2
-quantile( data$cigs, probs = c(0.01, 0.05, 0.10, 0.25, 0.50, 0.75, 0.90, 0.95, 0.99) )
+## @knitr Question4-3-1
+# Plot the histogram of bwght and comment on the shape of its distribution
+# Use hist and bin width = 1
+bin_width = 1
+hist(data$cigs, breaks = seq(floor(min(data$cigs)/bin_width)*bin_width, 
+                             ceiling(max(data$cigs)/bin_width)*bin_width, 
+                             by = bin_width), 
+     xlab = "Cigarettes smoked each day\nby the mother while pregnant", 
+     ylab = "Count", 
+     main = "Histogram of cigarettes smoked each day\nby the mother while pregnant")
 
-## @knitr Question4-part3
-par(mfrow = c(1, 2))
-## Histogram with 10 bins
-hist(data$cigs, breaks=10, main = 'Histogram with 10 bins', xlab ='The Number of Smoked Cigarettes')
-## Histogram with 20 bins
-hist(data$cigs, breaks=20, main = 'Histogram with 20 bins',  xlab ='The Number of Smoked Cigarettes')
+## @knitr Question4-3-2
+# Use ggplot and bin width = 1
+bin_width = 1
+ggplot(data = data, aes(cigs)) + 
+  geom_histogram(colour = 'black', fill = 'white', 
+                 binwidth = bin_width) +  
+  labs(x = "Cigarettes smoked each day\nby the mother while pregnant", 
+       y = "Count", 
+       title = "Histogram of cigarettes smoked each day\nby the mother while pregnant")
+
+## @knitr Question4-3-3
+# Use ggplot and bin width = 5
+bin_width = 5
+ggplot(data = data, aes(cigs)) + 
+  geom_histogram(colour = 'black', fill = 'white', 
+                 binwidth = bin_width) +  
+  labs(x = "Cigarettes smoked each day\nby the mother while pregnant", 
+       y = "Count", 
+       title = "Histogram of cigarettes smoked each day\nby the mother while pregnant")
+
+## @knitr Question4-3-4
+# Use ggplot and bin width = 10
+bin_width = 10
+ggplot(data = data, aes(cigs)) + 
+  geom_histogram(colour = 'black', fill = 'white', 
+                 binwidth = bin_width) +  
+  labs(x = "Cigarettes smoked each day\nby the mother while pregnant", 
+       y = "Count", 
+       title = "Histogram of cigarettes smoked each day\nby the mother while pregnant")
+
+## @knitr Question4-3-5
+# Use ggplot and bin width = 5, smokers only
+bin_width = 5
+ggplot(data = data[data$cigs != 0, ], aes(cigs)) + 
+  geom_histogram(colour = 'black', fill = 'white', 
+                 binwidth = bin_width) +  
+  labs(x = "Cigarettes smoked each day\nby the mother while pregnant", 
+       y = "Count", 
+       title = "Histogram of cigarettes smoked each day\nby the mother while pregnant. Smokers only")
+
+## @knitr Question4-3-6
+# Use ggplot and bin width = 0.5, smokers only and log(cigs)
+bin_width = 0.5
+ggplot(data = data[data$cigs != 0, ], aes(log(cigs))) + 
+  geom_histogram(colour = 'black', fill = 'white', 
+                 binwidth = bin_width) +  
+  labs(x = "Log of Cigarettes smoked each day\nby the mother while pregnant", 
+       y = "Count", 
+       title = "Histogram of log of cigarettes smoked each day\nby the mother while pregnant. Smokers only")
 
 
 
-
+## @knitr Question5
 # QUESTION 5 --------------------------------------------------------------
+# Generate a scatterplot of `bwght` against `cigs`
+ggplot(data = data, aes(cigs, bwght)) + 
+  geom_point() + 
+  labs(x = "Cigarettes smoked each day by the mother while pregnant", 
+       y = "Birth weight (ounces)", 
+       title = "Cigarettes smoked by the mother\nagainst birth weight") + 
+  geom_smooth(method = "lm")
+  
 
-## @knitr Question5-part1
-plot(data$cigs, data$bwght, xlab='Number of Smoked Cigarettes', ylab='Birth Weight', main='Scatterplot of Bwght Against Cigs')
 
-## @knitr Question5-part2
-bwght_cigs.lm = lm(bwght ~ cigs, data=data) 
-summary(bwght_cigs.lm)$r.squared
-
-
-
-
+## @knitr Question6
 # QUESTION 6 --------------------------------------------------------------
- 
-## @knitr Question6-part1
-newdata = data[data[,"bwght"] != 0,]
+# Regressor
+params <- "cigs"
+# Excluding bwght == 0 (possible missing observations)
+model <- lm(as.formula(paste("bwght", paste(params, sep = "", 
+                                            collapse = " + "), sep = " ~ ")), 
+            data = data[data$bwght !=0, ])
+summary(model)
 
-## @knitr Question6-part2
-bwght_cigs_2.lm = lm(bwght ~ cigs, data=newdata)
-summary(bwght_cigs_2.lm)$coefficients
+# A function that codes significance level
+sig_stars = function(p) {
+  stars = symnum(p, na = F, cutpoints = c(0, .001, .01, .05, .1, 1), 
+                 symbols=c("**`***`**","**`** `**", "**`*  `**", "**.  **", 
+                           "   "))
+  return(stars)
+  }
+
+# A function that draws a nice-looking table (following standard format for 
+  # publication) with the summary of the regression model 
+create_regtable <- function(model, df, params, causes, effect) {
+  model_summary <- summary(model)
+  model_coefs <- model_summary$coefficients
+  estimate <- unlist(lapply(c(seq(2, 1+length(params)), 1), function(x) 
+    paste0(formatC(model_coefs[x, 1], digits = 3, format = "f", 
+                   drop0trailing = FALSE), sig_stars(model_coefs[x, 4]))))
+  SE <- unlist(lapply(c(seq(2, 1+length(params)), 1), function(x) 
+    paste0("(", formatC(model_coefs[x, 2], digits = 3, format = "f", 
+                        drop0trailing = FALSE), ")  ")))
+  N <- paste0(nrow(df), "   ")
+  R2 <- paste0(formatC(model_summary$r.squared, digits = 3, format = "f", 
+                       drop0trailing = FALSE), "   ")
+  Fstatistic <- paste0(formatC(model_summary$fstatistic[1], digits = 3, 
+                               format = "f", drop0trailing = FALSE), "   ")
+  pvalue <- paste0(formatC(1 - pf(model_summary$fstatistic[1], 2, 300), 
+                           digits = 3, format = "f", drop0trailing = FALSE), 
+                   "   ")
+  table <- matrix(c(t(matrix(c(estimate, SE), ncol = 2)), R2, Fstatistic, 
+                    pvalue, N), ncol = 1)
+  rows <- NULL
+  for (cause in causes) {
+    rows <- c(rows, paste("**", cause, "**", sep = ""), "")
+  }
+  rownames(table) <- c(rows, "Baseline (Intercept)", " ", "$R^2$", "F", "p", 
+                       "N")
+  colnames(table) <- effect
+  return(table)
+}
+
+# Create the table with the given parameters
+table <- create_regtable(model, data, params, 
+                         c("Cigarettes smoked each day by the mother"), 
+                         "Birth weight (ounces)")
+# Print the table
+kable(table, align = "r", 
+      caption = paste("Effect of the number of cigarettes smoked each day", 
+                      "\nby the mother while pregnant on the birth weight", 
+                      sep = ""))
 
 
 
+## @knitr Question7-1
 # QUESTION 7 --------------------------------------------------------------
-
-## @knitr Question7-part1
+# Summarize the variable faminc
 summary(data$faminc)
 
+## @knitr Question7-2
+# List the following quantiles: 1%, 5%, 10%, 25%, 50%, 75%, 90%, 95%, 99%**
+quantile(data$faminc, probs = c(1, 5, 10, 25, 50, 75, 90, 95, 99)/100)
 
-## @knitr Question7-part2
-quantile( data$faminc, probs = c(0.01, 0.05, 0.10, 0.25, 0.50, 0.75, 0.90, 0.95, 0.99) )
-
-## @knitr Question7-part3
-par(mfrow = c(2, 2))
-## Histogram with 10 bins
-hist(data$faminc, breaks=10, main = 'Histogram with 10 bins', xlab ='Family Income in 1988')
-## Histogram with 20 bins
-hist(data$faminc, breaks=20, main = 'Histogram with 20 bins',  xlab ='Family Income in 1988')
-## Histogram with 30 bins
-hist(data$faminc, breaks=30, main = 'Histogram with 30 bins',  xlab ='Family Income in 1988')
-## Histogram with 40 bins
-hist(data$faminc, breaks=40, main = 'Histogram with 40 bins',  xlab ='Family Income in 1988')
-
-## @knitr Question7-part4
-scatterplotMatrix(~bwght + cigs + faminc, data = newdata, main='Scatterplot of bwght, cigs, and famic')
+## @knitr Question7-3-2
+# Plot the histogram of bwght and comment on the shape of its distribution
+# Use ggplot and bin width = 2
+bin_width = 2
+ggplot(data = data, aes(faminc)) + 
+  geom_histogram(colour = 'black', fill = 'white', 
+                 binwidth = bin_width) +  
+  labs(x = "Family income (thousands of dollars)", y = "Count", 
+       title = "Histogram of family income")
 
 
+## @knitr Question7-3-3
+# Use ggplot and bin width = 5
+bin_width = 5
+ggplot(data = data, aes(faminc)) + 
+  geom_histogram(colour = 'black', fill = 'white', 
+                 binwidth = bin_width) +  
+  labs(x = "Family income (thousands of dollars)", y = "Count", 
+       title = "Histogram of family income")
 
-# QUESTION 8 --------------------------------------------------------------
+## @knitr Question7-3-4
+# Use ggplot and bin width = 10
+bin_width = 10
+ggplot(data = data, aes(faminc)) + 
+  geom_histogram(colour = 'black', fill = 'white', 
+                 binwidth = bin_width) +  
+  labs(x = "Family income (thousands of dollars)", y = "Count", 
+       title = "Histogram of family income")
+
+## @knitr Question7-4
+# Generate a scatterplot of `bwght` against `faminc`
+ggplot(data = data, aes(faminc, bwght)) + 
+  geom_point() + 
+  labs(x = "Family income (thousands of dollars)", 
+       y = "Birth weight (ounces)", 
+       title = "Family income against birth weight") + 
+  geom_smooth(method = "lm")
+
+## @knitr Question7-5
+# scatterplot.matrix has been deprecated, we used the new function instead
+scatterplotMatrix(~ bwght + cigs + faminc, data[data$bwght !=0, ])
+
 
 ## @knitr Question8
-bwght_cigs_faminc.lm = lm(bwght ~ cigs+faminc, data=newdata)
-summary(bwght_cigs_faminc.lm)$coefficients
+# QUESTION 8 --------------------------------------------------------------
+# New regressors
+params <- c("cigs", "faminc")
+model2 <- lm(as.formula(paste("bwght", paste(params, sep = "", 
+                                             collapse = " + "), sep = " ~ ")), 
+             data = data[data$bwght !=0, ])
+summary(model2)
 
-
-# QUESTION 9 --------------------------------------------------------------
-
-
+# Create summary table using function defined in QUESTION 7
+table <- create_regtable(model2, data, params, 
+                         c("Cigarettes smoked each day by the mother", 
+                           "Family income (thousands of dollars)"), 
+                         "Birth weight (ounces)")
+kable(table, align = "r", 
+      caption = paste("Effect of the number of cigarettes smoked each day", 
+                      "\nby the mother while pregnant and the family income\n", 
+                      "on the birth weight", sep = ""))

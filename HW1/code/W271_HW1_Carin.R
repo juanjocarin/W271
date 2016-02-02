@@ -134,9 +134,29 @@ bin_width = 10
 ggplot(data = data, aes(cigs)) + 
   geom_histogram(colour = 'black', fill = 'white', 
                  binwidth = bin_width) +  
-  labs(x = "Cigarettes smoked each day by the mother while pregnant", 
+  labs(x = "Cigarettes smoked each day\nby the mother while pregnant", 
        y = "Count", 
        title = "Histogram of cigarettes smoked each day\nby the mother while pregnant")
+
+## @knitr Question4-3-5
+# Use ggplot and bin width = 5, smokers only
+bin_width = 5
+ggplot(data = data[data$cigs != 0, ], aes(cigs)) + 
+  geom_histogram(colour = 'black', fill = 'white', 
+                 binwidth = bin_width) +  
+  labs(x = "Cigarettes smoked each day\nby the mother while pregnant", 
+       y = "Count", 
+       title = "Histogram of cigarettes smoked each day\nby the mother while pregnant. Smokers only")
+
+## @knitr Question4-3-6
+# Use ggplot and bin width = 0.5, smokers only and log(cigs)
+bin_width = 0.5
+ggplot(data = data[data$cigs != 0, ], aes(log(cigs))) + 
+  geom_histogram(colour = 'black', fill = 'white', 
+                 binwidth = bin_width) +  
+  labs(x = "Log of Cigarettes smoked each day\nby the mother while pregnant", 
+       y = "Count", 
+       title = "Histogram of log of cigarettes smoked each day\nby the mother while pregnant. Smokers only")
 
 
 
@@ -154,19 +174,24 @@ ggplot(data = data, aes(cigs, bwght)) +
 
 ## @knitr Question6
 # QUESTION 6 --------------------------------------------------------------
+# Regressor
 params <- "cigs"
+# Excluding bwght == 0 (possible missing observations)
 model <- lm(as.formula(paste("bwght", paste(params, sep = "", 
                                             collapse = " + "), sep = " ~ ")), 
             data = data[data$bwght !=0, ])
 summary(model)
 
+# A function that codes significance level
 sig_stars = function(p) {
   stars = symnum(p, na = F, cutpoints = c(0, .001, .01, .05, .1, 1), 
                  symbols=c("**`***`**","**`** `**", "**`*  `**", "**.  **", 
                            "   "))
   return(stars)
   }
-c(2:1+length(params))
+
+# A function that draws a nice-looking table (following standard format for 
+  # publication) with the summary of the regression model 
 create_regtable <- function(model, df, params, causes, effect) {
   model_summary <- summary(model)
   model_coefs <- model_summary$coefficients
@@ -196,9 +221,11 @@ create_regtable <- function(model, df, params, causes, effect) {
   return(table)
 }
 
+# Create the table with the given parameters
 table <- create_regtable(model, data, params, 
                          c("Cigarettes smoked each day by the mother"), 
                          "Birth weight (ounces)")
+# Print the table
 kable(table, align = "r", 
       caption = paste("Effect of the number of cigarettes smoked each day", 
                       "\nby the mother while pregnant on the birth weight", 
@@ -260,12 +287,14 @@ scatterplotMatrix(~ bwght + cigs + faminc, data[data$bwght !=0, ])
 
 ## @knitr Question8
 # QUESTION 8 --------------------------------------------------------------
+# New regressors
 params <- c("cigs", "faminc")
 model2 <- lm(as.formula(paste("bwght", paste(params, sep = "", 
                                              collapse = " + "), sep = " ~ ")), 
              data = data[data$bwght !=0, ])
 summary(model2)
 
+# Create summary table using function defined in QUESTION 7
 table <- create_regtable(model2, data, params, 
                          c("Cigarettes smoked each day by the mother", 
                            "Family income (thousands of dollars)"), 
@@ -274,12 +303,3 @@ kable(table, align = "r",
       caption = paste("Effect of the number of cigarettes smoked each day", 
                       "\nby the mother while pregnant and the family income\n", 
                       "on the birth weight", sep = ""))
-
-
-## @knitr Question9
-# QUESTION 9 --------------------------------------------------------------
-
-
-
-## @knitr Question10
-# QUESTION 10 --------------------------------------------------------------
