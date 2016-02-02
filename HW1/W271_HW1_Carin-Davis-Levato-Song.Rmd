@@ -120,7 +120,7 @@ The first bin size (5) is plotted below using `hist` and `ggplot`. The rest are 
 
 4. **This is a more open-ended question: Have you noticed anything "strange" with the `bwght` variable and the shape of histogram this variable? If so, please elaborate on your observations and investigate any issues you have identified.**
 
-The left tail of the distribution is quite long for such variable. Actually, there are `r length(data$bwght[data$bwght==0])` observations with a weight equal to zero, which makes no sense.There are no `NA` values for `data$bwght` so it seems likely that missing values have been coded as `0`, so we will exclude them from our analysis from now on (another option is that this is how mortality has been encoded). If we exclude those observations, the minimum birth weight is `r min(data$bwght[data$bwght!=0])` ounces, which still seems very low but might be possible. Finally, some of us thought we should remove the outlier at 271 oz because it is likely to have undue influence on the relationship between weight and cigarette smoking and is a true outlier in the sense that from a population sample this large, the odds of a baby having at that birth weight are astronomically low.
+The left tail of the distribution is quite long for such variable. Actually, there are `r length(data$bwght[data$bwght==0])` observations with a weight equal to zero, which could be representative of a few situations. There are no `NA` values for `data$bwght` so it seems likely that missing values have been coded as `0`, so we will exclude them from our analysis from now on. Alternatively,  these values may be how mortality has been encoded. If we exclude those observations, the minimum birth weight is `r min(data$bwght[data$bwght!=0])` ounces, which still seems very low but might be possible. Finally, some of us thought we should remove the outlier at 271 oz because it is likely to have undue influence on the relationship between weight and cigarette smoking and is a true outlier in the sense that from a population sample this large, the odds of a baby having at that birth weight are astronomically low.
 
 
 
@@ -145,11 +145,7 @@ The left tail of the distribution is quite long for such variable. Actually, the
 ```{r Question4-3-4, echo = FALSE, fig.cap = "Histogram of cigarettes smoked each day by the mother while pregnant, bin width = 10", fig.width = 4, fig.height = 3}
 ```
 
-`cigs` has a heavy-tailed distribution, similar to a Pareto one. This makes sense, since most of the women do not smoke while pregnant.
-
-Not only the histogram but also the quantiles of `cigs` tell us that the vast majority of women in this sample did
-not smoke while pregnant. To better assess the shape of the distribution, it is more useful to look at the
-distribution among smokers.
+`cigs` has a heavy-tailed distribution, similar to a Pareto one. This makes sense, since most of the women do not smoke while pregnant, which is evident not only the histogram but also the quantiles of `cigs`. To better assess the shape of the distribution, it is more useful to look at the distribution among smokers.
 
 \pagebreak
 
@@ -159,7 +155,7 @@ distribution among smokers.
 Among smokers, the distribution of cigarettes smoked is right skewed. Log transformation gives the data a
 more approximately normal appearance. Log transformation could be considered for the `cigs` variatble, but
 given that the resulting variable is still non-normal and would make interpretation of the model less clear,
-using the non-transformed variable seems more appropriate.
+using the non-transformed variable seems more appropriate. Another alternative is making the cigs variable binary and just having a smokers vs non-smokers. However, since we lose some information in these approaches we kept origional cigs variable for further analysis. 
 
 
 ```{r Question4-3-6, echo = FALSE, fig.cap = "Histogram of log of cigarettes smoked each day by the mother while pregnant, bin width = 0.5, smokers only", fig.width = 4, fig.height = 3}
