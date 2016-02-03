@@ -63,22 +63,37 @@ opts_knit$set(root.dir = './data')
 
 **Your dependent variable will be `prate`, representing the fraction of a company's employees participating in its 401k plan. Because this variable is bounded between 0 and 1, a linear model without any transformations may not be the most ideal way to analyze the data, but we can still learn a lot from it. Examine the `prate` variable and comment on the shape of its distribution.**
 
-```{r Question1-1, echo = c(3:11), fig.width = 6, fig.height = 4.5, fig.cap = "Histogram of participation rate ($\\%$) in 401k plans (bin width = 5)"}
+```{r Question1-1, echo = -c(1:2)}
+```
+
+Based on the R output above, `prate` is one of the `r dim(desc)[1]` variables contained in the dataset. There are **`r dim(data)[1]` observations** of `prate`, and `r sum(is.na(data$prate))` of them correspond to `NA` values.
+
+Its minimum and **maximum** values are `r frmt(min(data$prate), 1)` and **`r frmt(max(data$prate), 1)`**, respectively: the latter must correspond to an error, since a rate cannot be greater than $100\%$. A further analysis reveals that there are **`r length(data$prate[data$prate > 100])` observations** in which `prate` exceeds 100, so we should and shall **discard** them from our analysis.
+
+Its **mean** and **median** values are `r frmt(mean(data$prate), 1)` and `r frmt(median(data$prate), 1)`, respectively.
+
+The **excess kurtosis** (the kurtosis minus 3) is positive (`r require(e1071); frmt(kurtosis(data$prate), 2)`), which indicates that the distribution of the sample is **leptokurtic** (a more acute peak around the mean and fatter tails than the normal distribution). Its skewness is negative (`r require(e1071); frmt(skewness(data$prate), 2)`), which indicates that the distribution of the sample is **left-skewed** (it has a long left tail). The following Figures confirm both aspects.
+
+```{r Question1-2, echo = FALSE, fig.width = 6, fig.height = 4.5, fig.cap = "Histogram of participation rate ($\\%$) in 401k plans of a company's employees (bin width = 5)"}
 ```
 
 \label{hist-Q1}
 
-```{r Question1-2, echo = FALSE, fig.cap = "Approximate density plot of participation rate ($\\%$) in 401k plans"}
+Though hard to see (roughly $`r frmt(100*length(data$prate[data$prate == 100])/length(data$prate), 1)`\%$ of the observations correspond to the exact value of 100%), the histogram above reveals the one observation with a value of `r frmt(data$prate[data$prate > 100 & data$prate < 200], 1)` and the two observations with a value of `r frmt(max(data$prate), 1)`.
+
+\pagebreak
+
+```{r Question1-3, echo = FALSE, fig.width = 3.8, fig.height = 3/(4/3.8), fig.cap = "Approximate density plot of participation rate ($\\%$) in 401k plans of a company's employees "}
 ```
 
 \label{density1-Q1}
 
-```{r Question1-3, echo = FALSE, fig.cap = "Approximate density plot of participation rate ($\\%$) in 401k plans (excluding wrong values, higher than 100%)"}
+If we omit the `r length(data$prate[data$prate > 100])` anomalous observations (which we'll do from now on), the (approximate) density plot looks like this (not normal at all):
+
+```{r Question1-4, echo = FALSE, fig.cap = "Approximate density plot of participation rate ($\\%$) in 401k plans of a company's employees (excluding wrong values, higher than 100%)"}
 ```
 
 \label{density2-Q1}
-
-See `r I(pasteLabel("Figure", figCount, "density2-Q1"))`
 
 
 
@@ -88,20 +103,46 @@ See `r I(pasteLabel("Figure", figCount, "density2-Q1"))`
 
 **Your independent variable will be `mrate`, the rate at which a company matches employee 401k contributions. Examine this variable and comment on the shape of its distribution.**
 
-```{r Question2, echo = -c(1:2)}
+```{r Question2-1, echo = -c(1:2)}
 ```
 
+As with `prate`, there are no `NA` values of `mrate`.
 
+Its minimum and maximum values are `r frmt(min(data2$mrate), 1)` and `r frmt(max(data2$mrate), 1)` (these values, as those of `prate`, correspond to percentages).
+
+Its **mean** and **median** values are `r frmt(mean(data2$mrate))` and `r frmt(median(data2$mrate))`, respectively.
+
+The **excess kurtosis** (the kurtosis minus 3) is positive (`r require(e1071); frmt(kurtosis(data2$mrate), 2)`), which indicates that the distribution of the sample is **leptokurtic** (a more acute peak around the mean and fatter tails than the normal distribution). Its skewness is positive (`r require(e1071); frmt(skewness(data2$mrate), 2)`), which indicates that the distribution of the sample is **right-skewed** (it has a long right tail). The following Figures confirm both aspects.
+
+\pagebreak
+
+```{r Question2-2, echo = FALSE, fig.cap = "Histogram of companies' match rate ($\\%$) to their employees' 401k contributions (bin width = 0.1)"}
+```
+
+\label{hist-Q2}
+
+```{r Question2-3, echo = FALSE, fig.cap = "Approximate density plot of companies' match rate ($\\%$) to their employees' 401k contributions"}
+```
+
+\label{density-Q2}
+
+
+
+\pagebreak
 
 ## Question 3
 
 **Generate a scatterplot of `prate` against `mrate`. Then estimate the linear regression of `prate` on `mrate`. What slope coefficient did you get?**
 
-
-```{r Question3, echo = -c(1:2)}
+```{r Question3-1, echo = FALSE, fig.width = 6, fig.height = 4.5, fig.cap = "Scatterplot of the participation rate ($\\%$) to 401k plans of a company's employees against the match rate ($\\%$) of that company to their employees' contributions"}
 ```
 
+\label{scatter-Q3}
 
+```{r Question3-2, echo = c(1:4)}
+```
+
+\label{table-Q3}
 
 ## Question 4
 
@@ -145,3 +186,11 @@ See `r I(pasteLabel("Figure", figCount, "density2-Q1"))`
 
 ```{r Question8, echo = -c(1:2)}
 ```
+
+\pagebreak
+
+See `r I(pasteLabel("Figure", figCount, "scatter-Q3"))`
+
+See `r I(pasteLabel("Table", tableCount, "table-Q3"))`
+
+<!-- See `r I(pasteLabel("Figure", figCount, "density2-Q1"))` -->

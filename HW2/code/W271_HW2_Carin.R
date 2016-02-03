@@ -91,6 +91,8 @@ round(stat.desc(data$prate, desc = TRUE, basic = TRUE, norm = TRUE), 2)
 round(quantile(data$prate, probs = c(1, 5, 10, 25, 50, 75, 90, 95, 99, 
                                      100)/100), 1)
 data$prate[data$prate > 100]
+
+## @knitr Question1-2
 # Plots: histogram
 bin_width = 5
 ggplot(data = data, aes(prate)) + 
@@ -98,39 +100,91 @@ ggplot(data = data, aes(prate)) +
                  fill = 'white', binwidth = bin_width) + 
   labs(x = "Percentage of a company's employees\nparticipating in its 401k plan", 
        y = "Relative frequency", 
-       title = "Histogram of participation rate (%)\nin 401k plans")
+       title = "Histogram of participation rate (%) in 401k plans")
 figCount <- incCount(figCount, "hist-Q1")
 
 
-## @knitr Question1-2
+## @knitr Question1-3
 # Plots: density
 ggplot(data = data, aes(prate)) + 
   geom_density() + 
   labs(x = "Percentage of a company's employees\nparticipating in its 401k plan", 
        y = "Density", 
-       title = "Approximate density plot of participation rate (%)\nin 401k plans")
+       title = "Approximate density plot of\nparticipation rate (%) in 401k plans\n(incl. anomalous observations)")
 figCount <- incCount(figCount, "density1-Q1")
 
-## @knitr Question1-3
+## @knitr Question1-4
 # Plots: density
 ggplot(data = data[data$prate <= 100, ], aes(prate)) + 
   geom_density() + 
   labs(x = "Percentage of a company's employees\nparticipating in its 401k plan", 
        y = "Density", 
-       title = "Approximate density plot of participation rate (%)\nin 401k plans")
+       title = "Approximate density plot of\nparticipation rate (%) in 401k plans")
 figCount <- incCount(figCount, "density2-Q1")
 
 
-## @knitr Question2
+## @knitr Question2-1
 # QUESTION 2 --------------------------------------------------------------
-# ...
+# Examine the mrate variable and comment on the shape of its distribution
+# First, discard anomalous observations of prate
+data2 <- data[data$prate <= 100, ]
+# Descriptive statistics of prate
+summary(data2$mrate)
+round(stat.desc(data2$mrate, desc = TRUE, basic = TRUE, norm = TRUE), 2)
+round(quantile(data2$mrate, probs = c(1, 5, 10, 25, 50, 75, 90, 95, 99, 
+                                     100)/100), 1)
+
+## @knitr Question2-2
+# Plots: histogram
+bin_width = 0.1
+ggplot(data = data, aes(mrate)) + 
+  geom_histogram(aes(y = (..count..)/sum(..count..)), colour = 'black', 
+                 fill = 'white', binwidth = bin_width) + 
+  labs(x = "Percentage of a company's employees\nparticipating in its 401k plan", 
+       y = "Relative frequency", 
+       title = "Histogram of companies' match rate (%)\nto their employees' 401k contributions")
+figCount <- incCount(figCount, "hist-Q2")
 
 
 
-## @knitr Question3
+## @knitr Question2-3
+# Plots: density
+ggplot(data = data2, aes(mrate)) + 
+  geom_density() + 
+  labs(x = "Percentage of a company's employees\nparticipating in its 401k plan", 
+       y = "Density", 
+       title = "Approximate density plot of companies'\nmatch rate (%) to their employees'\n401k contributions")
+figCount <- incCount(figCount, "density-Q2")
+
+
+
+## @knitr Question3-1
 # QUESTION 3 --------------------------------------------------------------
-# ...
+# Scatterplot of prate against mrate and linear regression of former on latter
+ggplot(data = data2, aes(mrate, prate)) + 
+  geom_point() + 
+  labs(x = "Company match rate (%) to their\nemployees' contribution to 401k plans", 
+       y = "Employees' participation rate (%)\nto 401k plans", 
+       title = "Employees' participation rate to 401k plans\nagainst their company's match rate") + 
+  geom_smooth(method = "lm")
+figCount <- incCount(figCount, "scatter-Q3")
 
+## @knitr Question3-2
+params <- "mrate" # regressor()
+# Excluding bwght == 0 (possible missing observations)
+model1 <- lm(as.formula(paste("prate", paste(params, sep = "", 
+                                             collapse = " + "), sep = " ~ ")), 
+             data = data2)
+summary(model1)
+# Create the table with the given parameters (using function in 1st section)
+table <- create_regtable(model1, data2, params, 
+                         c("Company match rate (%)"), 
+                         "Employees' participation rate (%) to 401k plans")
+# Print the table
+kable(table, align = "r", 
+      caption = paste("Effect of a company match rate to 401k plans", 
+                      "\non its employees'contribution", sep = ""))
+tableCount <- incCount(tableCount, "table-Q3")
 
 
 ## @knitr Question4
