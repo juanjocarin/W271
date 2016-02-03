@@ -48,6 +48,7 @@ header-includes:
 require(knitr, quietly = TRUE)
 read_chunk('code/W271_HW2_Carin.R')
 opts_chunk$set(message = FALSE, warning = FALSE)
+opts_chunk$set(fig.width = 4, fig.height = 3)
 # Set path to data here (don't use setwd() inside a chunk!!!)
 opts_knit$set(root.dir = './data')
 ```
@@ -62,12 +63,26 @@ opts_knit$set(root.dir = './data')
 
 **Your dependent variable will be `prate`, representing the fraction of a company's employees participating in its 401k plan. Because this variable is bounded between 0 and 1, a linear model without any transformations may not be the most ideal way to analyze the data, but we can still learn a lot from it. Examine the `prate` variable and comment on the shape of its distribution.**
 
-```{r Question1, echo = -c(1:2)}
+```{r Question1-1, echo = c(3:11), fig.width = 6, fig.height = 4.5, fig.cap = "Histogram of participation rate ($\\%$) in 401k plans (bin width = 5)"}
 ```
 
-$`r frmt(12345678.90)`$
+\label{hist-Q1}
+
+```{r Question1-2, echo = FALSE, fig.cap = "Approximate density plot of participation rate ($\\%$) in 401k plans"}
+```
+
+\label{density1-Q1}
+
+```{r Question1-3, echo = FALSE, fig.cap = "Approximate density plot of participation rate ($\\%$) in 401k plans (excluding wrong values, higher than 100%)"}
+```
+
+\label{density2-Q1}
+
+See `r I(pasteLabel("Figure", figCount, "density2-Q1"))`
 
 
+
+\pagebreak
 
 ## Question 2
 
