@@ -73,7 +73,7 @@ library(pastecs)
 
 ## @knitr Load_Data
 # LOAD DATA --------------------------------------------------------------
-# Load the 401k contributions dataset
+# Load the 401K contributions dataset
 load("401k_w271.Rdata")
 
 
@@ -98,9 +98,9 @@ bin_width = 5
 ggplot(data = data, aes(prate)) + 
   geom_histogram(aes(y = (..count..)/sum(..count..)), colour = 'black', 
                  fill = 'white', binwidth = bin_width) + 
-  labs(x = "Percentage of a company's employees\nparticipating in its 401k plan", 
+  labs(x = "Percentage of a company's employees\nparticipating in its 401K plan", 
        y = "Relative frequency", 
-       title = "Histogram of participation rate (%) in 401k plans")
+       title = "Histogram of participation rate (%) in 401K plans")
 figCount <- incCount(figCount, "hist-Q1")
 
 
@@ -108,18 +108,18 @@ figCount <- incCount(figCount, "hist-Q1")
 # Plots: density
 ggplot(data = data, aes(prate)) + 
   geom_density() + 
-  labs(x = "Percentage of a company's employees\nparticipating in its 401k plan", 
+  labs(x = "Percentage of a company's employees\nparticipating in its 401K plan", 
        y = "Density", 
-       title = "Approximate density plot of\nparticipation rate (%) in 401k plans\n(incl. anomalous observations)")
+       title = "Approximate density plot of\nparticipation rate (%) in 401K plans\n(incl. anomalous observations)")
 figCount <- incCount(figCount, "density1-Q1")
 
 ## @knitr Question1-4
 # Plots: density
 ggplot(data = data[data$prate <= 100, ], aes(prate)) + 
   geom_density() + 
-  labs(x = "Percentage of a company's employees\nparticipating in its 401k plan", 
+  labs(x = "Percentage of a company's employees\nparticipating in its 401K plan", 
        y = "Density", 
-       title = "Approximate density plot of\nparticipation rate (%) in 401k plans")
+       title = "Approximate density plot of\nparticipation rate (%) in 401K plans")
 figCount <- incCount(figCount, "density2-Q1")
 
 
@@ -140,9 +140,9 @@ bin_width = 0.1
 ggplot(data = data, aes(mrate)) + 
   geom_histogram(aes(y = (..count..)/sum(..count..)), colour = 'black', 
                  fill = 'white', binwidth = bin_width) + 
-  labs(x = "Percentage of a company's employees\nparticipating in its 401k plan", 
+  labs(x = "Percentage of a company's employees\nparticipating in its 401K plan", 
        y = "Relative frequency", 
-       title = "Histogram of companies' match rate (%)\nto their employees' 401k contributions")
+       title = "Histogram of companies' match rate (%)\nto their employees' 401K contributions")
 figCount <- incCount(figCount, "hist-Q2")
 
 
@@ -151,9 +151,9 @@ figCount <- incCount(figCount, "hist-Q2")
 # Plots: density
 ggplot(data = data2, aes(mrate)) + 
   geom_density() + 
-  labs(x = "Percentage of a company's employees\nparticipating in its 401k plan", 
+  labs(x = "Percentage of a company's employees\nparticipating in its 401K plan", 
        y = "Density", 
-       title = "Approximate density plot of companies'\nmatch rate (%) to their employees'\n401k contributions")
+       title = "Approximate density plot of companies'\nmatch rate (%) to their employees'\n401K contributions")
 figCount <- incCount(figCount, "density-Q2")
 
 
@@ -163,33 +163,52 @@ figCount <- incCount(figCount, "density-Q2")
 # Scatterplot of prate against mrate and linear regression of former on latter
 ggplot(data = data2, aes(mrate, prate)) + 
   geom_point() + 
-  labs(x = "Company match rate (%) to their\nemployees' contribution to 401k plans", 
-       y = "Employees' participation rate (%)\nto 401k plans", 
-       title = "Employees' participation rate to 401k plans\nagainst their company's match rate") + 
+  labs(x = "Company match rate (%) to their\nemployees' contribution to 401K plans", 
+       y = "Employees' participation rate (%)\nto 401K plans", 
+       title = "Employees' participation rate to 401K plans\nagainst their company's match rate") + 
   geom_smooth(method = "lm")
 figCount <- incCount(figCount, "scatter-Q3")
 
 ## @knitr Question3-2
 params <- "mrate" # regressor()
 # Excluding bwght == 0 (possible missing observations)
-model1 <- lm(as.formula(paste("prate", paste(params, sep = "", 
+model <- lm(as.formula(paste("prate", paste(params, sep = "", 
                                              collapse = " + "), sep = " ~ ")), 
              data = data2)
-summary(model1)
+summary(model)
 # Create the table with the given parameters (using function in 1st section)
-table <- create_regtable(model1, data2, params, 
+table <- create_regtable(model, data2, params, 
                          c("Company match rate (%)"), 
-                         "Employees' participation rate (%) to 401k plans")
+                         "Employees' participation rate (%) to 401K plans")
 # Print the table
 kable(table, align = "r", 
-      caption = paste("Effect of a company match rate to 401k plans", 
+      caption = paste("Effect of a company match rate to 401K plans", 
                       "\non its employees'contribution", sep = ""))
 tableCount <- incCount(tableCount, "table-Q3")
 
 
 ## @knitr Question4
 # QUESTION 4 --------------------------------------------------------------
-# ...
+# Assumption of zero-conditional mean: E[u|x] = 0
+  # df_aux <- data.frame(x = data2$mrate, fitted = model$fitted.values, 
+  #                      residuals = model$residuals)
+  # ggplot(data = df_aux, aes(x, residuals)) + 
+  #   geom_point() + 
+  #   labs(x = "Company match rate (%) to their\nemployees' contribution to 401K plans", 
+  #        y = "Employees' participation rate (%)\nto 401K plans", 
+  #        title = "Employees' participation rate to 401K plans\nagainst their company's match rate") + 
+  #   geom_smooth(method = "loess", se = FALSE, colour = "red") + 
+  #   geom_hline(aes(yintercept = 0), colour = "blue")
+df_aux <- data.frame(fitted = model$fitted.values, residuals = model$residuals)
+ggplot(data = df_aux, aes(fitted, residuals)) + 
+  geom_point() + 
+  labs(x = "Fitted values of the regressand", 
+       y = "Residuals", 
+       title = "Residuals vs. Fitted") + 
+  geom_smooth(method = "loess", se = FALSE, colour = "red") + 
+  geom_hline(aes(yintercept = 0), colour = "blue")
+figCount <- incCount(figCount, "fitted-residuals-Q4")
+# plot(model)
 
 
 
@@ -199,9 +218,21 @@ tableCount <- incCount(tableCount, "table-Q3")
 
 
 
-## @knitr Question6
+## @knitr Question6-1
 # QUESTION 6 --------------------------------------------------------------
 # ...
+df_aux$std_res <- rstandard(model)
+ggplot(data = df_aux, aes(sample = std_res)) + 
+  stat_qq() + geom_abline(intercept=0, slope=1) + 
+  geom_abline(slope = 1, intercept = 0, colour = "red")
+figCount <- incCount(figCount, "QQplot-Q6")
+# qqnorm(rstandard(model))
+# abline(a = 0, b = 1)
+# qqline(model$rank)
+
+## @knitr Question6-2
+ggplot(df_aux, aes(residuals)) + geom_density()
+figCount <- incCount(figCount, "density-Q6")
 
 
 
