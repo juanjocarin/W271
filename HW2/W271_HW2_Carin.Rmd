@@ -30,7 +30,7 @@ header-includes:
 
 # Data
 
-**In the United States, a 401K is a type of retirement savings plan that is tied to a worker's place of employment. Employees that put money into a 401K enjoy certain tax benefits. Moreover, many employers have a policy of promoting 401K use, by matching some percentage of an employee's contributions. If an employer matches at, say, 50%, for every dollar that an employee puts into a 401k, the employer will put in another 50 cents.**
+**In the United States, a 401K is a type of retirement savings plan that is tied to a worker's place of employment. Employees that put money into a 401K enjoy certain tax benefits. Moreover, many employers have a policy of promoting 401K use, by matching some percentage of an employee's contributions. If an employer matches at, say, 50%, for every dollar that an employee puts into a 401K, the employer will put in another 50 cents.**
 
 **The file `401k_w271.RData` contains data on 401k contributions that were filed with the IRS on form 5500. It was collected by Professor L. E. Papke and may have been further modified by the instructors to test your proficiency.**
 
@@ -74,7 +74,7 @@ Its **mean** and **median** values are `r frmt(mean(data$prate), 1)` and `r frmt
 
 The **excess kurtosis** (the kurtosis minus 3) is positive (`r require(e1071); frmt(kurtosis(data$prate), 2)`), which indicates that the distribution of the sample is **leptokurtic** (a more acute peak around the mean and fatter tails than the normal distribution). Its skewness is negative (`r require(e1071); frmt(skewness(data$prate), 2)`), which indicates that the distribution of the sample is **left-skewed** (it has a long left tail). The following Figures confirm both aspects.
 
-```{r Question1-2, echo = FALSE, fig.width = 6, fig.height = 4.5, fig.cap = "Histogram of participation rate ($\\%$) in 401k plans of a company's employees (bin width = 5)"}
+```{r Question1-2, echo = FALSE, fig.width = 6, fig.height = 4.5, fig.cap = "Histogram of participation rate ($\\%$) in 401K plans of a company's employees (bin width = 5)"}
 ```
 
 \label{hist-Q1}
@@ -83,14 +83,14 @@ Though hard to see (roughly $`r frmt(100*length(data$prate[data$prate == 100])/l
 
 \pagebreak
 
-```{r Question1-3, echo = FALSE, fig.width = 3.8, fig.height = 3/(4/3.8), fig.cap = "Approximate density plot of participation rate ($\\%$) in 401k plans of a company's employees "}
+```{r Question1-3, echo = FALSE, fig.width = 3.8, fig.height = 3/(4/3.8), fig.cap = "Approximate density plot of participation rate ($\\%$) in 401K plans of a company's employees "}
 ```
 
 \label{density1-Q1}
 
 If we omit the `r length(data$prate[data$prate > 100])` anomalous observations (which we'll do from now on), the (approximate) density plot looks like this (not normal at all):
 
-```{r Question1-4, echo = FALSE, fig.cap = "Approximate density plot of participation rate ($\\%$) in 401k plans of a company's employees (excluding wrong values, higher than 100%)"}
+```{r Question1-4, echo = FALSE, fig.cap = "Approximate density plot of participation rate ($\\%$) in 401K plans of a company's employees (excluding wrong values, higher than 100%)"}
 ```
 
 \label{density2-Q1}
@@ -101,7 +101,7 @@ If we omit the `r length(data$prate[data$prate > 100])` anomalous observations (
 
 ## Question 2
 
-**Your independent variable will be `mrate`, the rate at which a company matches employee 401k contributions. Examine this variable and comment on the shape of its distribution.**
+**Your independent variable will be `mrate`, the rate at which a company matches employee 401K contributions. Examine this variable and comment on the shape of its distribution.**
 
 ```{r Question2-1, echo = -c(1:2)}
 ```
@@ -116,12 +116,12 @@ The **excess kurtosis** (the kurtosis minus 3) is positive (`r require(e1071); f
 
 \pagebreak
 
-```{r Question2-2, echo = FALSE, fig.cap = "Histogram of companies' match rate ($\\%$) to their employees' 401k contributions (bin width = 0.1)"}
+```{r Question2-2, echo = FALSE, fig.cap = "Histogram of companies' match rate ($\\%$) to their employees' 401K contributions (bin width = 0.1)"}
 ```
 
 \label{hist-Q2}
 
-```{r Question2-3, echo = FALSE, fig.cap = "Approximate density plot of companies' match rate ($\\%$) to their employees' 401k contributions"}
+```{r Question2-3, echo = FALSE, fig.cap = "Approximate density plot of companies' match rate ($\\%$) to their employees' 401K contributions"}
 ```
 
 \label{density-Q2}
@@ -134,22 +134,34 @@ The **excess kurtosis** (the kurtosis minus 3) is positive (`r require(e1071); f
 
 **Generate a scatterplot of `prate` against `mrate`. Then estimate the linear regression of `prate` on `mrate`. What slope coefficient did you get?**
 
-```{r Question3-1, echo = FALSE, fig.width = 6, fig.height = 4.5, fig.cap = "Scatterplot of the participation rate ($\\%$) to 401k plans of a company's employees against the match rate ($\\%$) of that company to their employees' contributions"}
+```{r Question3-1, echo = FALSE, fig.width = 6, fig.height = 4.5, fig.cap = "Scatterplot of the participation rate ($\\%$) to 401K plans of a company's employees against the match rate ($\\%$) of that company to their employees' contributions"}
 ```
 
 \label{scatter-Q3}
+
+While a low match rate of a company may correspond to almost the whole range of employees' participation rates, higher match rates correspond to high participation rates, which seems to indicate the positive relationship between both variables.
 
 ```{r Question3-2, echo = c(1:4)}
 ```
 
 \label{table-Q3}
 
+As shown in `r I(pasteLabel("Table", tableCount, "table-Q3"))` above, **the slope coefficient is** $\mathbf{`r frmt(summary(model)$coefficients[2, 1])` \ (`r frmt(summary(model)$coefficients[2, 2])`)}$: a 1 percentage point increase in the match rate would correspond to an increase of almost `r frmt(summary(model)$coefficients[2, 1], digits = 0)` percentage points in the participation rate to 401K plans of the employees, which could indicate that more employees are willing to make this kind of investment when their companies promote 401K plans by matching a higher percentage of their own contributions.
+
+
+
+\pagebreak
+
 ## Question 4
 
 **Is the assumption of zero-conditional mean realistic? Explain your evidence. What are the implications for your OLS coefficients?**
 
-```{r Question4, echo = -c(1:2)}
+```{r Question4, echo = FALSE, fig.width = 6, fig.height = 4, fig.cap = "Scatterplot of fitted values of the regressand against the residuals"}
 ```
+
+\label{fitted-residuals-Q4}
+
+One of the ways to check this assumption is by plotting the residuals ($\hat{u}$) against the fitted values ($\hat{y}$), or even against the regressor when only one is used. This plot shows that the residuals change with the fitted values, which suggests that the assumption may **not** be **realistic** (as well as a possible non-linear relationship between `mrate` and `prate`).
 
 
 
@@ -157,19 +169,34 @@ The **excess kurtosis** (the kurtosis minus 3) is positive (`r require(e1071); f
 
 **Is the assumption of homoskedasticity realistic? Provide at least two pieces of evidence to support your conclusion. What are the implications for your OLS analysis?**
 
+The funnel shape of `r I(pasteLabel("Figure", figCount, "fitted-residuals-Q4"))` also suggests that the assumption of homoskedasticity is **not realistic**. based on the shape of the scatterplot: the variance of the residuals is much greater for lower values of $\hat{y}$ than it is for greater values.
+
 ```{r Question5, echo = -c(1:2)}
 ```
 
 
 
+\pagebreak
+
 ## Question 6
 
 **Is the assumption of normal errors realistic? Provide at least two pieces of evidence to support your conclusion. What are the implications for your OLS analysis?**
 
-```{r Question6, echo = -c(1:2)}
+```{r Question6-1, echo = FALSE, fig.cap = "Q-Q plot of the residuals of the regression"}
 ```
 
+\label{QQplot-Q6}
 
+The left tail of the Q-Q plot twists counterclockwise, while the right tail twists clockwise, which indicates that the distribution is left-skewed (and not normal).
+
+```{r Question6-2, echo = FALSE, fig.cap = "Density plot of the residuals of the regression"}
+```
+
+\label{density-Q6}
+
+
+
+\pagebreak
 
 ## Question 7
 
@@ -187,10 +214,5 @@ The **excess kurtosis** (the kurtosis minus 3) is positive (`r require(e1071); f
 ```{r Question8, echo = -c(1:2)}
 ```
 
-\pagebreak
-
-See `r I(pasteLabel("Figure", figCount, "scatter-Q3"))`
-
-See `r I(pasteLabel("Table", tableCount, "table-Q3"))`
 
 <!-- See `r I(pasteLabel("Figure", figCount, "density2-Q1"))` -->
