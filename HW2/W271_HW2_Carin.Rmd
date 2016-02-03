@@ -161,6 +161,10 @@ As shown in `r I(pasteLabel("Table", tableCount, "table-Q3"))` above, **the slop
 
 \label{fitted-residuals-Q4}
 
+```{r, echo = FALSE, fig.align = 'center'}
+plot(model, which = 1, main = "Residuals vs. Fitted Values", sub = "", caption = "")
+```
+
 One of the ways to check this assumption is by plotting the residuals ($\hat{u}$) against the fitted values ($\hat{y}$), or even against the regressor when only one is used. This plot shows that the residuals change with the fitted values, which suggests that the assumption may **not** be **realistic** (as well as a possible non-linear relationship between `mrate` and `prate`).
 
 
@@ -186,6 +190,10 @@ The funnel shape of `r I(pasteLabel("Figure", figCount, "fitted-residuals-Q4"))`
 ```
 
 \label{QQplot-Q6}
+
+```{r, echo = FALSE, fig.align = 'center'}
+plot(model, which = 2, main = "Q-Q plot of the Standardized Residuals", sub = "", caption = "")
+```
 
 The left tail of the Q-Q plot twists counterclockwise, while the right tail twists clockwise, which indicates that the distribution is left-skewed (and not normal).
 

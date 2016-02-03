@@ -204,11 +204,12 @@ ggplot(data = df_aux, aes(fitted, residuals)) +
   geom_point() + 
   labs(x = "Fitted values of the regressand", 
        y = "Residuals", 
-       title = "Residuals vs. Fitted") + 
+       title = "Residuals vs. Fitted Values") + 
   geom_smooth(method = "loess", se = FALSE, colour = "red") + 
   geom_hline(aes(yintercept = 0), colour = "blue")
 figCount <- incCount(figCount, "fitted-residuals-Q4")
-# plot(model)
+# plot(model, which = 1, main = "Residuals vs. Fitted Values", sub = "", 
+#      caption = "")
 
 
 
@@ -224,14 +225,23 @@ figCount <- incCount(figCount, "fitted-residuals-Q4")
 df_aux$std_res <- rstandard(model)
 ggplot(data = df_aux, aes(sample = std_res)) + 
   stat_qq() + geom_abline(intercept=0, slope=1) + 
-  geom_abline(slope = 1, intercept = 0, colour = "red")
+  geom_abline(slope = 1, intercept = 0, colour = "red") + 
+  labs(x = "Theoretical Quantiles", 
+       y = "Standardized residuals", 
+       title = "Q-Q plot of the Standardized Residuals")
 figCount <- incCount(figCount, "QQplot-Q6")
+# plot(model, which = 2, main = "Q-Q plot of the Standardized Residuals", sub = "", 
+#      caption = "")
 # qqnorm(rstandard(model))
-# abline(a = 0, b = 1)
-# qqline(model$rank)
+# abline(a = 0, b = 1, col = "red")
+
+
 
 ## @knitr Question6-2
-ggplot(df_aux, aes(residuals)) + geom_density()
+ggplot(df_aux, aes(residuals)) + geom_density() + 
+  labs(x = "Residuals", 
+       y = "Density", 
+       title = "Density plot of the residuals")
 figCount <- incCount(figCount, "density-Q6")
 
 
