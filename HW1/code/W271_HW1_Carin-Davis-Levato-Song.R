@@ -25,17 +25,20 @@ sig_stars <- function(p) {
 }
 # A function that draws a nice-looking table (following standard format for 
 # publication) with the summary of the regression model 
-create_regtable <- function(model, df, params, causes, effect) {
+create_regtable <- function(model, params, causes, effect) {
   model_summary <- summary(model)
   model_coefs <- model_summary$coefficients
   estimate <- unlist(lapply(c(seq(2, 1+length(params)), 1), function(x) 
     paste0(frmt(model_coefs[x, 1]), sig_stars(model_coefs[x, 4]))))
   SE <- unlist(lapply(c(seq(2, 1+length(params)), 1), function(x) 
     paste0("(", frmt(model_coefs[x, 2]), ")  ")))
-  N <- paste0(nrow(df), "   ")
+  N <- paste0(length(model_summary$residuals), "   ")
   R2 <- paste0(frmt(model_summary$r.squared), "   ")
-  Fstatistic <- paste0(frmt(model_summary$fstatistic[1]), "   ")
-  pvalue <- paste0(frmt(1 - pf(model_summary$fstatistic[1], 2, 300)), "   ")
+  Fsttstc <- model_summary$fstatistic
+  Fstatistic <- paste0(frmt(Fsttstc["value"]), "   ")
+  pvalue <- paste0(frmt(1 - pf(q = Fsttstc["value"], 
+                               df1 = Fsttstc["numdf"], 
+                               df2 = Fsttstc["dendf"])), "   ")
   table <- matrix(c(t(matrix(c(estimate, SE), ncol = 2)), R2, Fstatistic, 
                     pvalue, N), ncol = 1)
   rows <- NULL
@@ -219,7 +222,7 @@ model <- lm(as.formula(paste("bwght", paste(params, sep = "",
             data = data[data$bwght !=0, ])
 summary(model)
 # Create the table with the given parameters (using function in 1st section)
-table <- create_regtable(model, data, params, 
+table <- create_regtable(model, params, 
                          c("Cigarettes smoked each day by the mother"), 
                          "Birth weight (ounces)")
 # Print the table
@@ -292,7 +295,7 @@ model2 <- lm(as.formula(paste("bwght", paste(params, sep = "",
 summary(model2)
 
 # Create summary table using function defined in QUESTION 7
-table <- create_regtable(model2, data, params, 
+table <- create_regtable(model2, params, 
                          c("Cigarettes smoked each day by the mother", 
                            "Family income (thousands of dollars)"), 
                          "Birth weight (ounces)")
