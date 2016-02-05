@@ -77,6 +77,8 @@ library(pastecs)
 ## @knitr Load_Data
 # LOAD DATA --------------------------------------------------------------
 # Load the 401K contributions dataset
+# Path relative to W271.Rproj, never to be run by the .Rmd (conflict with knitr)
+# setwd('HW2/data') 
 load("401k_w271.Rdata")
 
 
@@ -148,8 +150,6 @@ ggplot(data = data, aes(mrate)) +
        title = "Histogram of companies' match rate (%)\nto their employees' 401K contributions")
 figCount <- incCount(figCount, "hist-Q2")
 
-
-
 ## @knitr Question2-3
 # Plots: density
 ggplot(data = data2, aes(mrate)) + 
@@ -174,7 +174,6 @@ figCount <- incCount(figCount, "scatter-Q3")
 
 ## @knitr Question3-2
 params <- "mrate" # regressor()
-# Excluding bwght == 0 (possible missing observations)
 model <- lm(as.formula(paste("prate", paste(params, sep = "", 
                                              collapse = " + "), sep = " ~ ")), 
              data = data2)
@@ -189,7 +188,7 @@ kable(table, align = "r",
 tableCount <- incCount(tableCount, "table-Q3")
 
 
-## @knitr Question4
+## @knitr Question4-1
 # QUESTION 4 --------------------------------------------------------------
 # Assumption of zero-conditional mean: E[u|x] = 0
   # df_aux <- data.frame(x = data2$mrate, fitted = model$fitted.values, 
@@ -212,6 +211,10 @@ ggplot(data = df_aux, aes(fitted, residuals)) +
 figCount <- incCount(figCount, "fitted-residuals-Q4")
 # plot(model, which = 1, main = "Residuals vs. Fitted Values", sub = "", 
 #      caption = "")
+
+## @knitr Question4-2
+mean(model$residuals)
+cov(model$residuals, data2$mrate)
 
 
 
@@ -254,6 +257,3 @@ figCount <- incCount(figCount, "density-Q6")
 
 
 
-## @knitr Question8
-# QUESTION 8 --------------------------------------------------------------
-# ...
