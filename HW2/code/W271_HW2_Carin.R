@@ -10,12 +10,22 @@ library(knitr)
 library(pastecs)
 
 # Define functions
+    # A function to calculate Robust Standard Errors
+    RSEs <- function(model){
+      require(sandwich, quietly = TRUE)
+      require(lmtest, quietly = TRUE)
+      newSE <- vcovHC(model)
+      coeftest(model, newSE)
+    }
+
     # THE FOLLOWING FUNCTIONS ARE JUST FOR FORMATTING PURPOSES
+    
     # A function to apply format (using formatC
     frmt <- function(qty, digits = 3) {
       formatC(qty, digits = digits, format = "f", drop0trailing = FALSE, 
                      big.mark = ",")
     }
+    
     # A function that codes significance level
     sig_stars <- function(p) {
       stars = symnum(p, na = F, cutpoints = c(0, .001, .01, .05, .1, 1), 
@@ -23,6 +33,7 @@ library(pastecs)
                                "   "))
       return(stars)
     }
+    
     # A function that draws a nice-looking table (following standard format for 
     # publication) with the summary of the regression model 
     create_regtable <- function(model, params, causes, effect) {
@@ -50,6 +61,33 @@ library(pastecs)
       colnames(table) <- effect
       return(table)
     }
+    
+    # Same function to draw table with regression results, but using robust SEs
+    create_regtable_RSEs <- function(model, params, causes, effect) {
+      model_coefs <- RSEs(model)
+      estimate <- unlist(lapply(c(seq(2, 1+length(params)), 1), function(x) 
+        paste0(frmt(model_coefs[x, 1]), sig_stars(model_coefs[x, 4]))))
+      SE <- unlist(lapply(c(seq(2, 1+length(params)), 1), function(x) 
+        paste0("(", frmt(model_coefs[x, 2]), ")  ")))
+      N <- paste0(length(model_summary$residuals), "   ")
+      R2 <- paste0(frmt(model_summary$r.squared), "   ")
+      Fsttstc <- model_summary$fstatistic
+      Fstatistic <- paste0(frmt(Fsttstc["value"]), "   ")
+      pvalue <- paste0(frmt(1 - pf(q = Fsttstc["value"], 
+                                   df1 = Fsttstc["numdf"], 
+                                   df2 = Fsttstc["dendf"])), "   ")
+      table <- matrix(c(t(matrix(c(estimate, SE), ncol = 2)), R2, Fstatistic, 
+                        pvalue, N), ncol = 1)
+      rows <- NULL
+      for (cause in causes) {
+        rows <- c(rows, paste("**", cause, "**", sep = ""), "")
+      }
+      rownames(table) <- c(rows, "Baseline (Intercept)", " ", "$R^2$", "F", "p", 
+                           "N")
+      colnames(table) <- effect
+      return(table)
+    }
+    
     # Functions to count & refer figures & tables
     # http://rmflight.github.io/posts/2012/10/papersinRmd.html
     incCount <- function(inObj, useName) {
@@ -68,8 +106,10 @@ library(pastecs)
       }
       useText
     }
+    # Counters for Figures and Tables
     figCount <- c(`_` = 0)
     tableCount <- c(`_` = 0)
+
 # Define constants
 
 
@@ -78,7 +118,7 @@ library(pastecs)
 # LOAD DATA --------------------------------------------------------------
 # Load the 401K contributions dataset
 # Path relative to W271.Rproj, never to be run by the .Rmd (conflict with knitr)
-# setwd('HW2/data') 
+# setwd('HW2/data')
 load("401k_w271.Rdata")
 
 
@@ -221,7 +261,15 @@ cov(model$residuals, data2$mrate)
 ## @knitr Question5
 # QUESTION 5 --------------------------------------------------------------
 # ...
-
+df_aux$std_res <- rstandard(model)
+ggplot(data = df_aux, aes(fitted, sqrt(abs(std_res)))) + 
+  geom_point() + 
+  labs(x = "Fitted values of the regressand", 
+       y = "Residuals", 
+       title = "Residuals vs. Fitted Values") + 
+  geom_smooth(method = "loess", se = FALSE, colour = "red") + 
+  geom_hline(aes(yintercept = 0), colour = "blue")
+figCount <- incCount(figCount, "fitted-residuals-Q4")
 
 
 ## @knitr Question6-1
@@ -235,8 +283,8 @@ ggplot(data = df_aux, aes(sample = std_res)) +
        y = "Standardized residuals", 
        title = "Q-Q plot of the Standardized Residuals")
 figCount <- incCount(figCount, "QQplot-Q6")
-# plot(model, which = 2, main = "Q-Q plot of the Standardized Residuals", sub = "", 
-#      caption = "")
+# plot(model, which = 2, main = "Q-Q plot of the Standardized Residuals", 
+#      sub = "", caption = "")
 # qqnorm(rstandard(model))
 # abline(a = 0, b = 1, col = "red")
 
@@ -253,7 +301,6 @@ figCount <- incCount(figCount, "density-Q6")
 
 ## @knitr Question7
 # QUESTION 7 --------------------------------------------------------------
-# ...
-
-
-
+# Standard error of slope coefficient
+summary(model)$coefficients[2, 2]
+RSEs(model)[2, 2]

@@ -186,14 +186,18 @@ The implication is that the OLS coefficients are **biased**. But though the assu
 
 **Is the assumption of homoskedasticity realistic? Provide at least two pieces of evidence to support your conclusion. What are the implications for your OLS analysis?**
 
-The funnel shape of `r I(pasteLabel("Figure", figCount, "fitted-residuals-Q4"))` also suggests that the assumption of homoskedasticity is **not realistic**. based on the shape of the scatterplot: the variance of the residuals is much greater for lower values of $\hat{y}$ than it is for greater values.
+The funnel shape of `r I(pasteLabel("Figure", figCount, "fitted-residuals-Q4"))` suggests that the assumption of homoskedasticity is **not realistic**. based on the shape of the scatterplot: the variance of the residuals is much greater for lower values of $\hat{y}$ than it is for greater values.
 
 ```{r Question5, echo = -c(1:2)}
 ```
 
-\textcolor{red}{2nd evidence?}
+\textcolor{red}{2nd evidence: scale-location plot}
 
-\textcolor{red}{We can derive formulas for the sampling variances whose components are easy to characterize + We can conclude that the OLS estimators have smallest variance among *all* linear, unbiased estimators}
+The implications are that:
+
+1. we cannot conclude that the OLS estimators have the smallest variance among *all linear*, unbiased estimators, and
+2. we cannot compute the variance of our estimates of the coefficients, so we don't have a clear idea of their precision.
+
 
 
 ## Question 6
@@ -222,7 +226,14 @@ The left tail of the Q-Q plot twists counterclockwise, while the right tail twis
 
 \pagebreak
 
-The implication of non-normality of the errors is two-fold: the OLS estimators wiil not have the smallest variance among *all* (linear or not) unbiased estimators (assuming the Gauss-Markov assumptions are met, which is not the case here), and the *t* and *F* statistics do not have *t* and *F* distributions, respectively, which makes hypothesis testing impossible\textcolor{red}{... though...}.
+The implication of non-normality of the errors is two-fold:
+
+1. the OLS estimators wiil not have the smallest variance among *all* (linear or not) unbiased estimators (assuming the Gauss-Markov assumptions are met, which is not the case here), and 
+2. the *t* and *F* statistics do not have *t* and *F* distributions, respectively, which makes hypothesis testing impossible.
+
+But if the Gauss-Markov assumptions were met (which is not the case; for example, the zero conditional mean and the homoskedasticity assumptions are broken), we could still use assume that the (standardized) OLS estimators are *asymptotically normally distributed. I.e., we might use the $t_{n-k-1}$ distribution for hypothesis testing, since our sample is quite large (`r dim(data2)[1]` observations after discarding the `r length(data$prate[data$prate > 100])` ones): the actual significance level we may get will be close to the one we chose (5% or any other).
+
+\textcolor{red}{... though...}.
 
 
 
