@@ -222,7 +222,7 @@ The left tail of the Q-Q plot twists counterclockwise, while the right tail twis
 
 \pagebreak
 
-The implication of non-normality of the errors is that the *t* and *F* statistics do not have *t* and *F* distributions, respectively, which makes hypothesis testing impossible\textcolor{red}{... though...}.
+The implication of non-normality of the errors is two-fold: the OLS estimators wiil not have the smallest variance among *all* (linear or not) unbiased estimators (assuming the Gauss-Markov assumptions are met, which is not the case here), and the *t* and *F* statistics do not have *t* and *F* distributions, respectively, which makes hypothesis testing impossible\textcolor{red}{... though...}.
 
 
 
