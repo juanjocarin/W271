@@ -167,12 +167,6 @@ One of the ways to check this assumption is by plotting the residuals ($\hat{u}$
 
 \label{fitted-residuals-Q4}
 
-<!--
-```{r, echo = FALSE, fig.align = 'center'}
-plot(model, which = 1, main = "Residuals vs. Fitted Values", sub = "", caption = "")
-```
--->
-
 The implication is that the OLS coefficients are **biased**. But though the assumption of zero-conditional mean ($E(u|x)=0$) is not met, the assumption of zero mean ($E(u)=0$) and zero correlation ($Cov(x,u)=0$) seems realistic, though they may be **consistent** at least:
 
 ```{r Question4-2}
@@ -188,8 +182,10 @@ The implication is that the OLS coefficients are **biased**. But though the assu
 
 The funnel shape of `r I(pasteLabel("Figure", figCount, "fitted-residuals-Q4"))` suggests that the assumption of homoskedasticity is **not realistic**. based on the shape of the scatterplot: the variance of the residuals is much greater for lower values of $\hat{y}$ than it is for greater values.
 
-```{r Question5, echo = -c(1:2)}
+```{r Question5, echo = FALSE, fig.width = 6, fig.height = 4, fig.cap = "Scale-location plot of the regression model"}
 ```
+
+\label{scale-location-Q5}
 
 \textcolor{red}{2nd evidence: scale-location plot}
 
@@ -199,6 +195,8 @@ The implications are that:
 2. we cannot compute the variance of our estimates of the coefficients, so we don't have a clear idea of their precision.
 
 
+
+\pagebreak
 
 ## Question 6
 
@@ -215,16 +213,16 @@ plot(model, which = 2, main = "Q-Q plot of the Standardized Residuals", sub = ""
 ```
 -->
 
-> As expected, the density plot of the residuals has a shape similar to the explained variable.
-
 The left tail of the Q-Q plot twists counterclockwise, while the right tail twists clockwise, which indicates that the distribution is left-skewed (and not normal).
+
+\textcolor{red}{2nd evidence: ...}
 
 ```{r Question6-2, echo = FALSE, fig.cap = "Density plot of the residuals of the regression"}
 ```
 
 \label{density-Q6}
 
-\pagebreak
+> As expected, the density plot of the residuals has a shape similar to the explained variable.
 
 The implication of non-normality of the errors is two-fold:
 
@@ -241,16 +239,27 @@ But if the Gauss-Markov assumptions were met (which is not the case; for example
 
 **Based on the above considerations, what is the standard error of your slope coefficient?**
 
-```{r Question7, echo = -c(1:2)}
+The standard error of the slope coefficient (which is `r frmt(summary(model)$coefficients[2, 1])`) is shown in `r I(pasteLabel("Table", tableCount, "table-Q3"))`: **`r frmt(summary(model)$coefficients[2, 2])`**.
+
+```{r Question7-1, echo = 3}
 ```
 
+Just for fun (and since the CLM assumptions are not met in this example), we also computed the robust standard errors (the function we used can be found in the .R file accompanying this report), which is even smaller for the slope coefficient: **`r frmt(RSEs(model)[2, 2])`**.
 
+```{r Question7-2, echo = 1}
+```
+
+\label{table-Q7}
+
+
+
+\pagebreak
 
 ## Question 8
 
 **Is the effect you find statistically significant, and is it practically significant?**
 
-As shown in `r I(pasteLabel("Table", tableCount, "table-Q3"))` and the R output in [Question 3](#Q3)), the effect of `mrate` on `prate` is highly statistically significante: the exact *p*-value is $p = `r formatC(summary(model)$coefficient[2, 4], format = "e", digits = 1)`$.
+As shown in `r I(pasteLabel("Table", tableCount, "table-Q3"))` and the R output in [Question 3](#Q3)), the effect of `mrate` on `prate` is highly statistically significante: the exact *p*-value is $p = `r formatC(summary(model)$coefficient[2, 4], format = "e", digits = 1)`$; even lower if we use robust standard errors, as shown in `r I(pasteLabel("Table", tableCount, "table-Q7"))`: $p = `r formatC(RSEs(model)[2, 4], format = "e", digits = 1)`$).
 
 If a company matches one percentage point more of its employees' contributions, the contribution of those employees to 401k is, on average, about `r frmt(summary(model)$coefficients[2, 1], digits = 1)` percentage points higher, which is also a practically significant effect.
 
