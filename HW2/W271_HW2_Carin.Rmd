@@ -36,6 +36,8 @@ header-includes:
 
 
 
+**********
+
 \pagebreak
 
 # Exercises
@@ -74,7 +76,7 @@ Its **mean** and **median** values are `r frmt(mean(data$prate), 1)` and `r frmt
 
 The last two values in the output of the `stat.desc()` function used above show the results of a Shapiro-Wilk test, which indicates non-normality (but that test is not very conlusive with such a large sample).
 
-The **excess kurtosis** (the kurtosis minus 3) is positive (`r require(e1071); frmt(kurtosis(data$prate), 2)`), which indicates that the distribution of the sample is **leptokurtic** (a more acute peak around the mean and fatter tails than the normal distribution). Its skewness is negative (`r require(e1071); frmt(skewness(data$prate), 2)`), which indicates that the distribution of the sample is **left-skewed** (it has a long left tail). The following Figures confirm both aspects.
+The **excess kurtosis** (the kurtosis minus 3) is positive (`r frmt(kurtosis(data$prate), 2)`), which indicates that the distribution of the sample is **leptokurtic** (a more acute peak around the mean and fatter tails than the normal distribution). Its skewness is negative (`r frmt(skewness(data$prate), 2)`), which indicates that the distribution of the sample is **left-skewed** (it has a long left tail). The following Figures confirm both aspects.
 
 ```{r Question1-2, echo = FALSE, fig.width = 6, fig.height = 4.5, fig.cap = "Histogram of participation rate ($\\%$) in 401K plans of a company's employees (bin width = 5)"}
 ```
@@ -99,6 +101,8 @@ If we omit the `r length(data$prate[data$prate > 100])` anomalous observations (
 
 
 
+**********
+
 \pagebreak
 
 ## Question 2
@@ -116,7 +120,7 @@ Its **mean** and **median** values are `r frmt(mean(data2$mrate))` and `r frmt(m
 
 Again, a Shapiro-Wilk test (see the last two values in the output of the `stat.desc()` function) indicates that the distribution is far from normal, but this kind of test is not conclusive whatsoever with with such a large sample.
 
-The **excess kurtosis** (the kurtosis minus 3) is positive (`r require(e1071); frmt(kurtosis(data2$mrate), 2)`), which indicates that the distribution of the sample is **leptokurtic** (a more acute peak around the mean and fatter tails than the normal distribution). Its skewness is positive (`r require(e1071); frmt(skewness(data2$mrate), 2)`), which indicates that the distribution of the sample is **right-skewed** (it has a long right tail). The following Figures confirm both aspects.
+The **excess kurtosis** (the kurtosis minus 3) is positive (`r frmt(kurtosis(data2$mrate), 2)`), which indicates that the distribution of the sample is **leptokurtic** (a more acute peak around the mean and fatter tails than the normal distribution). Its skewness is positive (`r frmt(skewness(data2$mrate), 2)`), which indicates that the distribution of the sample is **right-skewed** (it has a long right tail). The following Figures confirm both aspects.
 
 \pagebreak
 
@@ -132,13 +136,15 @@ The **excess kurtosis** (the kurtosis minus 3) is positive (`r require(e1071); f
 
 
 
+**********
+
 \pagebreak
 
 ## Question 3 \label{Q3}
 
 **Generate a scatterplot of `prate` against `mrate`. Then estimate the linear regression of `prate` on `mrate`. What slope coefficient did you get?**
 
-```{r Question3-1, echo = FALSE, fig.width = 6, fig.height = 4.5, fig.cap = "Scatterplot of the participation rate ($\\%$) to 401K plans of a company's employees against the match rate ($\\%$) of that company to their employees' contributions"}
+```{r Question3-1, echo = FALSE, fig.cap = "Scatterplot of the participation rate ($\\%$) to 401K plans of a company's employees against the match rate ($\\%$) of that company to their employees' contributions"}
 ```
 
 \label{scatter-Q3}
@@ -154,24 +160,20 @@ As shown in `r I(pasteLabel("Table", tableCount, "table-Q3"))` above, **the slop
 
 
 
+**********
+
 \pagebreak
 
 ## Question 4
 
 **Is the assumption of zero-conditional mean realistic? Explain your evidence. What are the implications for your OLS coefficients?**
 
-One of the ways to check this assumption is by plotting the residuals ($\hat{u}$) against the fitted values ($\hat{y}$), or even against the regressor when only one is used. That plot (below) shows that the residuals change with the fitted values, which suggests that the assumption may **not** be **realistic** (as well as a possible non-linear relationship between `mrate` and `prate`).
+One of the ways to check this assumption is by plotting the residuals ($\hat{u}$) against the fitted values ($\hat{y}$), or even against the regressor when only one is used. That plot (below) shows that the residuals change with the fitted values (see the blue line; the smoother is far from flat), which suggests that the assumption may **not** be **realistic** (as well as a possible non-linear relationship between `mrate` and `prate`).
 
-```{r Question4-1, echo = FALSE, fig.width = 6, fig.height = 4, fig.cap = "Scatterplot of fitted values of the regressand against the residuals"}
+```{r Question4-1, echo = FALSE, fig.cap = "Scatterplot of fitted values of the regressand against the residuals"}
 ```
 
 \label{fitted-residuals-Q4}
-
-<!--
-```{r, echo = FALSE, fig.align = 'center'}
-plot(model, which = 1, main = "Residuals vs. Fitted Values", sub = "", caption = "")
-```
--->
 
 The implication is that the OLS coefficients are **biased**. But though the assumption of zero-conditional mean ($E(u|x)=0$) is not met, the assumption of zero mean ($E(u)=0$) and zero correlation ($Cov(x,u)=0$) seems realistic, though they may be **consistent** at least:
 
@@ -179,6 +181,8 @@ The implication is that the OLS coefficients are **biased**. But though the assu
 ```
 
 
+
+**********
 
 \pagebreak
 
@@ -188,10 +192,29 @@ The implication is that the OLS coefficients are **biased**. But though the assu
 
 The funnel shape of `r I(pasteLabel("Figure", figCount, "fitted-residuals-Q4"))` suggests that the assumption of homoskedasticity is **not realistic**. based on the shape of the scatterplot: the variance of the residuals is much greater for lower values of $\hat{y}$ than it is for greater values.
 
-```{r Question5, echo = -c(1:2)}
+\small
+
+> The fact that about $`r frmt(100*length(data2$mrate[data2$mrate<1]) / length(data2$mrate), digits = 0)`\%$ of the data points in `r I(pasteLabel("Figure", figCount, "fitted-residuals-Q4"))` are concentrated in about one fifth of the x-axis (corresponding to `mrate` < 1) may make it look like there's more variation than is actually occurring. But there are more evidence of homoskedasticity...
+
+\normalsize
+
+A second piece of evidence comes from the analysis of the scale-location plot:
+
+```{r Question5-1, echo = FALSE, fig.cap = "Scale-location plot of the regression model"}
 ```
 
-\textcolor{red}{2nd evidence: scale-location plot}
+\label{scale-location-Q5}
+
+The smoother (the blue line in the figure above) should be flat, which is not the case.
+
+\small
+
+> We might also run a Breusch-Pagan test, but with such a large dataset it is very likely that the result will be significant even if the assumption of homoskedasticity were realistic.
+
+> ```{r Question5-2}
+> ```
+
+\normalsize
 
 The implications are that:
 
@@ -199,6 +222,8 @@ The implications are that:
 2. we cannot compute the variance of our estimates of the coefficients, so we don't have a clear idea of their precision.
 
 
+
+**********
 
 ## Question 6
 
@@ -215,44 +240,74 @@ plot(model, which = 2, main = "Q-Q plot of the Standardized Residuals", sub = ""
 ```
 -->
 
-> As expected, the density plot of the residuals has a shape similar to the explained variable.
-
 The left tail of the Q-Q plot twists counterclockwise, while the right tail twists clockwise, which indicates that the distribution is left-skewed (and not normal).
 
-```{r Question6-2, echo = FALSE, fig.cap = "Density plot of the residuals of the regression"}
+Let's also check some descriptive statistics of the residuals. As seen below, the **excess kurtosis** (the kurtosis minus 3) is positive (`r frmt(kurtosis(model$residuals), 2)`), which indicates that the distribution of the sample is **leptokurtic** (a more acute peak around the mean and fatter tails than the normal distribution), and the skewness is negative (`r frmt(skewness(model$residuals), 2)`), which indicates that the distribution of the sample is **left-skewed** (it has a long left tail). Both details indicate a non-normal distribution.
+
+```{r Question6-2, echo = TRUE}
+```
+
+\pagebreak
+
+Let's plot the approximate distribution of the residuals:
+
+```{r Question6-3, echo = FALSE, fig.cap = "Density plot of the residuals of the regression"}
 ```
 
 \label{density-Q6}
 
-\pagebreak
+\small
+
+> As expected, the density plot of the residuals has a shape similar to the explained variable; see `r I(pasteLabel("Figure", figCount, "density2-Q1"))`.
+
+\normalsize
+
+Finally, the last two values in the output of the `stat.desc()` function used in the previous page showed the results of a Shapiro-Wilk test, which indicates non-normality (but that test is not very conlusive with such a large sample). We can confirm that result using the specific R function:
+
+```{r Question6-4, echo = TRUE}
+```
 
 The implication of non-normality of the errors is two-fold:
 
 1. the OLS estimators wiil not have the smallest variance among *all* (linear or not) unbiased estimators (assuming the Gauss-Markov assumptions are met, which is not the case here), and 
 2. the *t* and *F* statistics do not have *t* and *F* distributions, respectively, which makes hypothesis testing impossible.
 
-But if the Gauss-Markov assumptions were met (which is not the case; for example, the zero conditional mean and the homoskedasticity assumptions are broken), we could still use assume that the (standardized) OLS estimators are *asymptotically normally distributed. I.e., we might use the $t_{n-k-1}$ distribution for hypothesis testing, since our sample is quite large (`r dim(data2)[1]` observations after discarding the `r length(data$prate[data$prate > 100])` ones): the actual significance level we may get will be close to the one we chose (5% or any other).
-
-\textcolor{red}{... though...}.
+But if the Gauss-Markov assumptions were met (which is not the case; for example, the zero conditional mean and the homoskedasticity assumptions are broken), we could still use assume that the (standardized) OLS estimators are *asymptotically normally distributed*. I.e., we might use the $t_{n-k-1}$ distribution for hypothesis testing, since our sample is quite large (`r dim(data2)[1]` observations after discarding the `r length(data$prate[data$prate > 100])` ones): the actual significance level we may get will be close to the one we chose (5% or any other).
 
 
+
+**********
+
+\pagebreak
 
 ## Question 7
 
 **Based on the above considerations, what is the standard error of your slope coefficient?**
 
-```{r Question7, echo = -c(1:2)}
+The standard error of the slope coefficient (which is `r frmt(summary(model)$coefficients[2, 1])`) is shown in `r I(pasteLabel("Table", tableCount, "table-Q3"))`: **`r frmt(summary(model)$coefficients[2, 2])`**.
+
+```{r Question7-1, echo = 3}
 ```
 
+Just for fun (and since the CLM assumptions are not met in this example), we also computed the robust standard errors (the function we used can be found in the .R file accompanying this report), which is even smaller for the slope coefficient: **`r frmt(RSEs(model)[2, 2])`**.
 
+```{r Question7-2, echo = 1}
+```
+
+\label{table-Q7}
+
+
+
+**********
 
 ## Question 8
 
 **Is the effect you find statistically significant, and is it practically significant?**
 
-As shown in `r I(pasteLabel("Table", tableCount, "table-Q3"))` and the R output in [Question 3](#Q3)), the effect of `mrate` on `prate` is highly statistically significante: the exact *p*-value is $p = `r formatC(summary(model)$coefficient[2, 4], format = "e", digits = 1)`$.
+As shown in `r I(pasteLabel("Table", tableCount, "table-Q3"))` and the R output in [Question 3](#Q3)), the effect of `mrate` on `prate` is highly **statistically significante**: the exact *p*-value is $p = `r formatC(summary(model)$coefficient[2, 4], format = "e", digits = 1)`$; even lower if we use robust standard errors, as shown in `r I(pasteLabel("Table", tableCount, "table-Q7"))`: $p = `r formatC(RSEs(model)[2, 4], format = "e", digits = 1)`$).
 
-If a company matches one percentage point more of its employees' contributions, the contribution of those employees to 401k is, on average, about `r frmt(summary(model)$coefficients[2, 1], digits = 1)` percentage points higher, which is also a practically significant effect.
-
+If a company matches one percentage point more of its employees' contributions, the contribution of those employees to 401k is, on average, about `r frmt(summary(model)$coefficients[2, 1], digits = 1)` percentage points higher, which is also a **practically significant** effect.
 
 <!-- See `r I(pasteLabel("Figure", figCount, "density2-Q1"))` -->
+
+**********
