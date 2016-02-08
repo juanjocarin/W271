@@ -82,9 +82,13 @@ create_regtable <- function(model, params, causes, effect) {
   R2 <- paste0(frmt(model_summary$r.squared), "   ")
   Fsttstc <- model_summary$fstatistic
   Fstatistic <- paste0(frmt(Fsttstc["value"]), "   ")
-  pvalue <- paste0(frmt(1 - pf(q = Fsttstc["value"], 
-                               df1 = Fsttstc["numdf"], 
-                               df2 = Fsttstc["dendf"])), "   ")
+  p <- pf(q = Fsttstc["value"], df1 = Fsttstc["numdf"], df2 = Fsttstc["dendf"], 
+          lower.tail = FALSE)
+  if (p < 0.001) {
+    pvalue <- paste0(formatC(p, digits = 1, format = "e"), "   ")
+  } else {
+    pvalue <- paste0(frmt(p), "   ")
+  }
   table <- matrix(c(t(matrix(c(estimate, SE), ncol = 2)), R2, Fstatistic, 
                     pvalue, N), ncol = 1)
   rows <- NULL
@@ -100,18 +104,24 @@ create_regtable <- function(model, params, causes, effect) {
 # Same function to draw table with regression results, but using robust SEs
 create_regtable_RSEs <- function(model, params, causes, effect) {
   model_summary <- summary(model)
-  model_coefs <- RSEs(model)
+  require(sandwich, quietly = TRUE)
+  require(lmtest, quietly = TRUE)
+  newSE <- vcovHC(model)
+  model_coefs <- coeftest(model, newSE)
   estimate <- unlist(lapply(c(seq(2, 1+length(params)), 1), function(x) 
     paste0(frmt(model_coefs[x, 1]), sig_stars(model_coefs[x, 4]))))
   SE <- unlist(lapply(c(seq(2, 1+length(params)), 1), function(x) 
     paste0("(", frmt(model_coefs[x, 2]), ")  ")))
   N <- paste0(length(model_summary$residuals), "   ")
   R2 <- paste0(frmt(model_summary$r.squared), "   ")
-  Fsttstc <- model_summary$fstatistic
-  Fstatistic <- paste0(frmt(Fsttstc["value"]), "   ")
-  pvalue <- paste0(frmt(1 - pf(q = Fsttstc["value"], 
-                               df1 = Fsttstc["numdf"], 
-                               df2 = Fsttstc["dendf"])), "   ")
+  Fsttstc <- waldtest(model, vcov = vcovHC)
+  Fstatistic <- paste0(frmt(Fsttstc$F[2]), "   ")
+  p <- Fsttstc$`Pr(>F)`[2]
+  if (p < 0.001) {
+    pvalue <- paste0(formatC(p, digits = 1, format = "e"), "   ")
+  } else {
+    pvalue <- paste0(frmt(p), "   ")
+  }
   table <- matrix(c(t(matrix(c(estimate, SE), ncol = 2)), R2, Fstatistic, 
                     pvalue, N), ncol = 1)
   rows <- NULL
