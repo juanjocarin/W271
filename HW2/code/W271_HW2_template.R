@@ -11,12 +11,44 @@ library(knitr)
 library(pastecs)
 
 # Define functions
-# A function to calculate Robust Standard Errors
+
+# Functions to calculate Robust Standard Errors
+# http://drewdimmery.com/robust-ses-in-r/
 RSEs <- function(model){
   require(sandwich, quietly = TRUE)
   require(lmtest, quietly = TRUE)
   newSE <- vcovHC(model)
   coeftest(model, newSE)
+}
+
+# The following function has the same output than Stata
+# But that could also be performed using the following in the previous function
+# newSE <- vcovHC(model, type = "HC1")
+# https://thetarzan.wordpress.com/2011/05/28/heteroskedasticity-robust-and-clustered-standard-errors-in-r/
+summaryw <- function(model) {
+  s <- summary(model)
+  X <- model.matrix(model)
+  u2 <- residuals(model)^2
+  XDX <- 0
+  # Here one needs to calculate X'DX. But due to the fact that D is huge (NxN), 
+  # it is better to do it with a cycle.
+  for(i in 1:nrow(X)) {
+    XDX <- XDX + u2[i]*X[i,]%*%t(X[i,])
+  }
+  # inverse(X'X)
+  XX1 <- solve(t(X)%*%X)
+  # Variance calculation (Bread x meat x Bread)
+  varcovar <- XX1 %*% XDX %*% XX1
+  # degrees of freedom adjustment
+  dfc <- sqrt(nrow(X))/sqrt(nrow(X)-ncol(X))
+  # Standard errors of the coefficient estimates are the square roots of the 
+  # diagonal elements
+  stdh <- dfc*sqrt(diag(varcovar))
+  t <- model$coefficients/stdh
+  p <- 2*pnorm(-abs(t))
+  results <- cbind(model$coefficients, stdh, t, p)
+  dimnames(results) <- dimnames(s$coefficients)
+  results
 }
 
 # THE FOLLOWING FUNCTIONS ARE JUST FOR FORMATTING PURPOSES
@@ -119,6 +151,8 @@ tableCount <- c(`_` = 0)
 ## @knitr Load_Data
 # LOAD DATA --------------------------------------------------------------
 # Load the 401K contributions dataset
+# Path relative to W271.Rproj, never to be run by the .Rmd (conflict with knitr)
+# setwd('HW2/data')
 load("401k_w271.Rdata")
 
 

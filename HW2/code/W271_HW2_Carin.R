@@ -9,14 +9,47 @@ library(ggplot2)
 library(ggfortify)
 library(knitr)
 library(pastecs)
+library(lmtest)
 
 # Define functions
-# A function to calculate Robust Standard Errors
+
+# Functions to calculate Robust Standard Errors
+# http://drewdimmery.com/robust-ses-in-r/
 RSEs <- function(model){
   require(sandwich, quietly = TRUE)
   require(lmtest, quietly = TRUE)
   newSE <- vcovHC(model)
   coeftest(model, newSE)
+}
+
+# The following function has the same output than Stata
+# But that could also be performed using the following in the previous function
+# newSE <- vcovHC(model, type = "HC1")
+# https://thetarzan.wordpress.com/2011/05/28/heteroskedasticity-robust-and-clustered-standard-errors-in-r/
+summaryw <- function(model) {
+  s <- summary(model)
+  X <- model.matrix(model)
+  u2 <- residuals(model)^2
+  XDX <- 0
+  # Here one needs to calculate X'DX. But due to the fact that D is huge (NxN), 
+  # it is better to do it with a cycle.
+  for(i in 1:nrow(X)) {
+    XDX <- XDX + u2[i]*X[i,]%*%t(X[i,])
+  }
+  # inverse(X'X)
+  XX1 <- solve(t(X)%*%X)
+  # Variance calculation (Bread x meat x Bread)
+  varcovar <- XX1 %*% XDX %*% XX1
+  # degrees of freedom adjustment
+  dfc <- sqrt(nrow(X))/sqrt(nrow(X)-ncol(X))
+  # Standard errors of the coefficient estimates are the square roots of the 
+  # diagonal elements
+  stdh <- dfc*sqrt(diag(varcovar))
+  t <- model$coefficients/stdh
+  p <- 2*pnorm(-abs(t))
+  results <- cbind(model$coefficients, stdh, t, p)
+  dimnames(results) <- dimnames(s$coefficients)
+  results
 }
 
 # THE FOLLOWING FUNCTIONS ARE JUST FOR FORMATTING PURPOSES
@@ -241,7 +274,7 @@ autoplot(model, which = 1)
 # The same using plot {graphics}
 # plot(model, which = 1, main = "Residuals vs. Fitted Values", sub = "", 
 #     caption = "")
-# Using ggplot2 is worse: not clear which method to use to plot the line
+# Using ggplot2 is worse: not clear which method to use to plot the smoother
 # ggplot(data = df_aux, aes(fitted, residuals)) + 
 #   geom_point() + 
 #   labs(x = "Fitted values of the regressand", 
@@ -257,20 +290,23 @@ cov(model$residuals, data2$mrate)
 
 
 
-## @knitr Question5
+## @knitr Question5-1
 # QUESTION 5 --------------------------------------------------------------
 # Assumption of homoskedasticity
 # Using autoplot (ggfortify makes autoplot {ggplot2} support lm objects)
 autoplot(model, which = 3)
 # Using plot {graphics}
 # plot(model, which = 3)
-# Using ggplot2 (but the trend is different, not sure which method to choose)
+# Using ggplot2 (but the smoother is different, not sure which method to choose)
 # Using ggplot2# df_aux$std_res <- rstandard(model)
 # ggplot(data = df_aux, aes(fitted, sqrt(abs(std_res)))) + 
 #   geom_point() + 
 #   geom_smooth(method = "loess", se = FALSE, colour = "red") + 
 #   geom_hline(aes(yintercept = 0), colour = "blue")
 figCount <- incCount(figCount, "scale-location-Q5")
+
+## @knitr Question5-2
+bptest(model) # Breusch-Pagan test
 
 
 

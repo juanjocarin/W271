@@ -36,6 +36,8 @@ header-includes:
 
 
 
+**********
+
 \pagebreak
 
 # Exercises
@@ -99,6 +101,8 @@ If we omit the `r length(data$prate[data$prate > 100])` anomalous observations (
 
 
 
+**********
+
 \pagebreak
 
 ## Question 2
@@ -132,6 +136,8 @@ The **excess kurtosis** (the kurtosis minus 3) is positive (`r require(e1071); f
 
 
 
+**********
+
 \pagebreak
 
 ## Question 3 \label{Q3}
@@ -154,13 +160,15 @@ As shown in `r I(pasteLabel("Table", tableCount, "table-Q3"))` above, **the slop
 
 
 
+**********
+
 \pagebreak
 
 ## Question 4
 
 **Is the assumption of zero-conditional mean realistic? Explain your evidence. What are the implications for your OLS coefficients?**
 
-One of the ways to check this assumption is by plotting the residuals ($\hat{u}$) against the fitted values ($\hat{y}$), or even against the regressor when only one is used. That plot (below) shows that the residuals change with the fitted values, which suggests that the assumption may **not** be **realistic** (as well as a possible non-linear relationship between `mrate` and `prate`).
+One of the ways to check this assumption is by plotting the residuals ($\hat{u}$) against the fitted values ($\hat{y}$), or even against the regressor when only one is used. That plot (below) shows that the residuals change with the fitted values (see the blue line; the smoother is far from flat), which suggests that the assumption may **not** be **realistic** (as well as a possible non-linear relationship between `mrate` and `prate`).
 
 ```{r Question4-1, echo = FALSE, fig.width = 6, fig.height = 4, fig.cap = "Scatterplot of fitted values of the regressand against the residuals"}
 ```
@@ -174,6 +182,8 @@ The implication is that the OLS coefficients are **biased**. But though the assu
 
 
 
+**********
+
 \pagebreak
 
 ## Question 5
@@ -182,12 +192,21 @@ The implication is that the OLS coefficients are **biased**. But though the assu
 
 The funnel shape of `r I(pasteLabel("Figure", figCount, "fitted-residuals-Q4"))` suggests that the assumption of homoskedasticity is **not realistic**. based on the shape of the scatterplot: the variance of the residuals is much greater for lower values of $\hat{y}$ than it is for greater values.
 
-```{r Question5, echo = FALSE, fig.width = 6, fig.height = 4, fig.cap = "Scale-location plot of the regression model"}
+> The fact that about $`r frmt(100*length(data2$mrate[data2$mrate<1]) / length(data2$mrate), digits = 0)`\%$ of the data points in `r I(pasteLabel("Figure", figCount, "fitted-residuals-Q4"))` are concentrated in about one fifth of the x-axis (corresponding to `mrate` < 1) may make it look like there's more variation than is actually occurring. But there are more evidence of homoskedasticity...
+
+A second piece of evidence comes from the analysis of the scale-location plot:
+
+```{r Question5-1, echo = FALSE, fig.width = 6, fig.height = 4, fig.cap = "Scale-location plot of the regression model"}
 ```
 
 \label{scale-location-Q5}
 
-\textcolor{red}{2nd evidence: scale-location plot}
+The smoother (the blue line in the figure above) should be flat, which is not the case.
+
+> We might also run a Breusch-Pagan test, but with such a large dataset it is very likely that the result will be significant even if the assumption of homoskedasticity were realistic.
+
+> ```{r Question5-2}
+> ```
 
 The implications are that:
 
@@ -196,7 +215,7 @@ The implications are that:
 
 
 
-\pagebreak
+**********
 
 ## Question 6
 
@@ -222,7 +241,9 @@ The left tail of the Q-Q plot twists counterclockwise, while the right tail twis
 
 \label{density-Q6}
 
-> As expected, the density plot of the residuals has a shape similar to the explained variable.
+\pagebreak
+
+> As expected, the density plot of the residuals has a shape similar to the explained variable; see `r I(pasteLabel("Figure", figCount, "density2-Q1"))`.
 
 The implication of non-normality of the errors is two-fold:
 
@@ -234,6 +255,10 @@ But if the Gauss-Markov assumptions were met (which is not the case; for example
 \textcolor{red}{... though...}.
 
 
+
+**********
+
+\pagebreak
 
 ## Question 7
 
@@ -253,15 +278,15 @@ Just for fun (and since the CLM assumptions are not met in this example), we als
 
 
 
-\pagebreak
+**********
 
 ## Question 8
 
 **Is the effect you find statistically significant, and is it practically significant?**
 
-As shown in `r I(pasteLabel("Table", tableCount, "table-Q3"))` and the R output in [Question 3](#Q3)), the effect of `mrate` on `prate` is highly statistically significante: the exact *p*-value is $p = `r formatC(summary(model)$coefficient[2, 4], format = "e", digits = 1)`$; even lower if we use robust standard errors, as shown in `r I(pasteLabel("Table", tableCount, "table-Q7"))`: $p = `r formatC(RSEs(model)[2, 4], format = "e", digits = 1)`$).
+As shown in `r I(pasteLabel("Table", tableCount, "table-Q3"))` and the R output in [Question 3](#Q3)), the effect of `mrate` on `prate` is highly **statistically significante**: the exact *p*-value is $p = `r formatC(summary(model)$coefficient[2, 4], format = "e", digits = 1)`$; even lower if we use robust standard errors, as shown in `r I(pasteLabel("Table", tableCount, "table-Q7"))`: $p = `r formatC(RSEs(model)[2, 4], format = "e", digits = 1)`$).
 
-If a company matches one percentage point more of its employees' contributions, the contribution of those employees to 401k is, on average, about `r frmt(summary(model)$coefficients[2, 1], digits = 1)` percentage points higher, which is also a practically significant effect.
+If a company matches one percentage point more of its employees' contributions, the contribution of those employees to 401k is, on average, about `r frmt(summary(model)$coefficients[2, 1], digits = 1)` percentage points higher, which is also a **practically significant** effect.
 
 
 <!-- See `r I(pasteLabel("Figure", figCount, "density2-Q1"))` -->
