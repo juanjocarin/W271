@@ -5,10 +5,12 @@
 ## @knitr Libraries-Functions-Constants
 # LIBRARIES, FUNCTIONS AND CONSTANTS -------------------------------------------------
 # Load libraries
+library(e1071)
 library(ggplot2)
 library(ggfortify)
 library(knitr)
 library(pastecs)
+library(lmtest)
 
 # Define functions
 

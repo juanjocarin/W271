@@ -5,6 +5,7 @@
 ## @knitr Libraries-Functions-Constants
 # LIBRARIES, FUNCTIONS AND CONSTANTS -------------------------------------------------
 # Load libraries
+library(e1071)
 library(ggplot2)
 library(ggfortify)
 library(knitr)
@@ -330,14 +331,19 @@ df_aux$std_res <- rstandard(model)
 #        title = "Q-Q plot of the Standardized Residuals")
 figCount <- incCount(figCount, "QQplot-Q6")
 
-
-
 ## @knitr Question6-2
+format(stat.desc(model$residuals, desc = TRUE, basic = TRUE, norm = TRUE), 
+       digits = 3, drop0trailing = TRUE, scientific = TRUE, trim = TRUE)
+
+## @knitr Question6-3
 ggplot(df_aux, aes(residuals)) + geom_density() + 
   labs(x = "Residuals", 
        y = "Density", 
        title = "Density plot of the residuals")
 figCount <- incCount(figCount, "density-Q6")
+
+## @knitr Question6-4
+shapiro.test(model$residuals)
 
 
 
@@ -353,7 +359,7 @@ table <- create_regtable(model, params, c("Company match rate (%)"),
                          "Employees' participation rate (%) to 401K plans")
 # Print the table
 kable(table, align = "r", 
-      caption = paste("Effect of a company match rate to 401K plans", 
-                      "on its employees'contribution (using robust SEs)", 
-                      sep = " "))
+      caption = paste("Effect of a company match rate to 401K plans on its", 
+                      "employees'contribution (using", 
+                      "heteroskedasticity-robust SEs)", sep = " "))
 tableCount <- incCount(tableCount, "table-Q7")
