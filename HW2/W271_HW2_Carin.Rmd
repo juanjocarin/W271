@@ -175,7 +175,7 @@ One of the ways to check this assumption is by plotting the residuals ($\hat{u}$
 
 \label{fitted-residuals-Q4}
 
-The implication is that the OLS coefficients are **biased**. But though the assumption of zero-conditional mean ($E(u|x)=0$) is not met, the assumption of zero mean ($E(u)=0$) and zero correlation ($Cov(x,u)=0$) seems realistic, though they may be **consistent** at least:
+The implication is that the OLS coefficients are **biased**. But though the assumption of zero-conditional mean ($E(u|x)=0$) is not met, the assumption of zero mean ($E(u)=0$) and zero correlation ($Cov(x,u)=0$) seems realistic (i.e., the **exogeneity** assumption is met), so they may be **consistent** at least:
 
 ```{r Question4-2}
 ```
@@ -289,7 +289,7 @@ The standard error of the slope coefficient (which is `r frmt(summary(model)$coe
 ```{r Question7-1, echo = 3}
 ```
 
-Just for fun (and since the CLM assumptions are not met in this example), we also computed the robust standard errors (the function we used can be found in the .R file accompanying this report), which is even smaller for the slope coefficient: **`r frmt(RSEs(model)[2, 2])`**.
+But the variance of the residuals is not constant, so we should use **robust standard errors** instead (which is actually smaller for the slope coefficient: **`r frmt(coeftest(model, vcovHC(model))[2, 2])`**.
 
 ```{r Question7-2, echo = 1}
 ```
@@ -304,7 +304,7 @@ Just for fun (and since the CLM assumptions are not met in this example), we als
 
 **Is the effect you find statistically significant, and is it practically significant?**
 
-As shown in `r I(pasteLabel("Table", tableCount, "table-Q3"))` and the R output in [Question 3](#Q3)), the effect of `mrate` on `prate` is highly **statistically significante**: the exact *p*-value is $p = `r formatC(summary(model)$coefficient[2, 4], format = "e", digits = 1)`$; even lower if we use robust standard errors, as shown in `r I(pasteLabel("Table", tableCount, "table-Q7"))`: $p = `r formatC(RSEs(model)[2, 4], format = "e", digits = 1)`$).
+As shown in `r I(pasteLabel("Table", tableCount, "table-Q7"))`, the effect of `mrate` on `prate` is highly **statistically significante**: the exact *p*-value is $p = `r formatC(coeftest(model, vcovHC(model))[2, 4], format = "e", digits = 1)`$ (lower than what we got in [Question 3](#Q3): according to `r I(pasteLabel("Table", tableCount, "table-Q3"))`, $p = `r formatC(summary(model)$coefficient[2, 4], format = "e", digits = 1)`$ when we do not use heteroskedasticity-robust standard errors).
 
 If a company matches one percentage point more of its employees' contributions, the contribution of those employees to 401k is, on average, about `r frmt(summary(model)$coefficients[2, 1], digits = 1)` percentage points higher, which is also a **practically significant** effect.
 

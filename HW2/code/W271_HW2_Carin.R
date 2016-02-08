@@ -10,11 +10,12 @@ library(ggplot2)
 library(ggfortify)
 library(knitr)
 library(pastecs)
+library(sandwich)
 library(lmtest)
 
 # Define functions
 
-# Functions to calculate Robust Standard Errors
+# Functions to calculate Robust Standard Errors (NOT USED)
 # http://drewdimmery.com/robust-ses-in-r/
 RSEs <- function(model){
   require(sandwich, quietly = TRUE)
@@ -106,15 +107,14 @@ create_regtable_RSEs <- function(model, params, causes, effect) {
   model_summary <- summary(model)
   require(sandwich, quietly = TRUE)
   require(lmtest, quietly = TRUE)
-  newSE <- vcovHC(model)
-  model_coefs <- coeftest(model, newSE)
+  model_coefs <- coeftest(model, vcovHC(model))
   estimate <- unlist(lapply(c(seq(2, 1+length(params)), 1), function(x) 
     paste0(frmt(model_coefs[x, 1]), sig_stars(model_coefs[x, 4]))))
   SE <- unlist(lapply(c(seq(2, 1+length(params)), 1), function(x) 
     paste0("(", frmt(model_coefs[x, 2]), ")  ")))
   N <- paste0(length(model_summary$residuals), "   ")
   R2 <- paste0(frmt(model_summary$r.squared), "   ")
-  Fsttstc <- waldtest(model, vcov = vcovHC)
+  Fsttstc <- waldtest(model, vcov = vcovHC(model))
   Fstatistic <- paste0(frmt(Fsttstc$F[2]), "   ")
   p <- Fsttstc$`Pr(>F)`[2]
   if (p < 0.001) {
@@ -363,7 +363,7 @@ shapiro.test(model$residuals)
 summary(model)$coefficients[2, 2]
 
 ## @knitr Question7-2
-RSEs(model)[2, 2]
+coeftest(model, vcovHC(model))[2, 2]
 # Create the table with the given parameters (using function in 1st section)
 table2 <- create_regtable_RSEs(model, params, c("Company match rate (%)"), 
                                "Employees' participation rate (%) to 401K plans")
