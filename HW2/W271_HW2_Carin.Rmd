@@ -221,6 +221,7 @@ The implications are that:
 1. we cannot conclude that the OLS estimators have the smallest variance among *all linear*, unbiased estimators, and
 2. we cannot compute the variance of our estimates of the coefficients, so we don't have a clear idea of their precision.
 
+The use of robust standard error calculations or weighted least squares regression may be able to aid in estimating variance under the heteroskedasticity case; however they may necessitate other assumption to be met. Alternatively a transform (ie log or square root) could be applied to the variable to try and address the heteroskedasticity in running the OLS regression. 
 
 
 **********
