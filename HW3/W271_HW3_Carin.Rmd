@@ -48,12 +48,14 @@ opts_knit$set(root.dir = './data')
 
 ## Question 1
 
-**Load the twoyear.RData dataset and describe the basic structure of the data.**
+**Load the `twoyear.RData` dataset and describe the basic structure of the data.**
   
 ```{r Question1, echo = -c(1:4)}
 ```
 
 
+
+**********
 
 ## Question 2
 
@@ -62,7 +64,7 @@ set using univariate, bivariate, and multivariate analyses before attempting any
 model. For this homework, assume that this step has been conducted. Estimate
 the following regression:**
   
-$$\mathbf{log(wage) = \beta_0 + \beta_1jc + \beta_2univ + \beta_3exper + \beta_4black + \beta_5hispanic + \beta_6AA + \beta_7BA + \beta_8exper \cdot black+e}$$
+$$\begin{aligned}\mathbf{log(wage) =}& \mathbf{\ \beta_0 + \beta_1jc + \beta_2univ + \beta_3exper + \beta_4black + \beta_5hispanic} \\ & \mathbf{+\ \beta_6AA + \beta_7BA + \beta_8exper \cdot black+e}\end{aligned}$$
   
 **Interpret the coefficients $\hat{\beta}_4$ and $\hat{\beta}_8$.**
   
@@ -70,6 +72,8 @@ $$\mathbf{log(wage) = \beta_0 + \beta_1jc + \beta_2univ + \beta_3exper + \beta_4
 ```
 
 
+
+**********
 
 ## Question 3
 
@@ -80,6 +84,8 @@ $$\mathbf{log(wage) = \beta_0 + \beta_1jc + \beta_2univ + \beta_3exper + \beta_4
 
 
 
+**********
+
 ## Question 4
 
 **With this model, test that the return to junior college education is equal for black and non-black.**
@@ -88,6 +94,8 @@ $$\mathbf{log(wage) = \beta_0 + \beta_1jc + \beta_2univ + \beta_3exper + \beta_4
 ```
 
 
+
+**********
 
 ## Question 5
 
@@ -98,6 +106,8 @@ $$\mathbf{log(wage) = \beta_0 + \beta_1jc + \beta_2univ + \beta_3exper + \beta_4
 
 
 
+**********
+
 ## Question 6
 
 **Test the overall significance of this regression.**
@@ -106,6 +116,8 @@ $$\mathbf{log(wage) = \beta_0 + \beta_1jc + \beta_2univ + \beta_3exper + \beta_4
 ```
 
 
+
+**********
 
 ## Question 7
 
@@ -116,9 +128,22 @@ $$\mathbf{log(wage) = \beta_0 + \beta_1jc + \beta_2univ + \beta_3exper + \beta_4
 
 
 
+**********
+
+\pagebreak
+
 ## Question 8
 
 **Provide the diagnosis of the homoskedasticity assumption. Does this assumption hold? If so, how does it affect the testing of no effect of university education on salary change? If not, what potential remedies are available?**
-  
-```{r Question8, echo = -c(1:6)}
+
+```{r Question8, echo = FALSE, results='asis'}
 ```
+
+...
+
+```{r Question8-2, echo = FALSE, results='asis'}
+```
+
+...
+
+**********
