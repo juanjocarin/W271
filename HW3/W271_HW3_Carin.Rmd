@@ -1,16 +1,13 @@
 ---
-title: "**W271**-2 -- Spring 2016 -- **HW 3**"
-author: "***Juanjo Carin, Kevin Davis, Ashley Levato, Minghu Song***"
-date: "*February 17, 2016*"
+title: '**W271**-2 -- Spring 2016 -- **HW 3**'
+author: '***Juanjo Carin, Kevin Davis, Ashley Levato, Minghu Song***'
+date: '*February 17, 2016*'
 output:
-   pdf_document:
-     fig_caption: yes
-     toc: yes
-numbersections: false
-geometry: margin=1in
-options: width=30
-fontsize: 10pt
-linkcolor: blue
+  pdf_document:
+    fig_caption: yes
+    toc: yes
+  html_document:
+    toc: yes
 header-includes:
 - \usepackage{fancyhdr}
 - \pagestyle{fancy}
@@ -22,6 +19,11 @@ header-includes:
 - \fancyfoot[RE,RO]{\thepage}
 - \renewcommand{\headrulewidth}{0.5pt}
 - \renewcommand{\footrulewidth}{0.5pt}
+linkcolor: blue
+numbersections: no
+options: width=30
+geometry: margin=1in
+fontsize: 10pt
 ---
   
 **********
@@ -49,28 +51,53 @@ opts_knit$set(root.dir = './data')
 ## Question 1
 
 **Load the `twoyear.RData` dataset and describe the basic structure of the data.**
-  
-```{r Question1, echo = -c(1:4)}
+
+\small
+
+```{r Question1-1, echo = c(5:10)}
 ```
+
+\normalsize
+
+There are `r dim(data)[1]` observations of `r dim(data)[2]` variables. There are `r sum(unlist(lapply(data, function(x) sum(is.na(x)))))` `NA`s in the whole dataset.
+
+One of the variables, `id`, is an ID number, so it should be unrelated with any other and hence of no interest. But it helps us to determine if the **random sampling** assumption (MRL.2) is met... which may not be the case: there are no observations for IDs between 65,500 and 70,000, and fewer members of the sample have an ID higher than 70,000, compared to lower values (see the missing ranges between 65,500 and 70,000, as well as the histogram, in the next page).
+
+\pagebreak
+
+```{r Question1-2, echo = c(1:4), fig.cap = "Histogram of ID numbers (in subsets of 2,000) in the sample"}
+```
+
+\label{hist-Q1}
+
+Without information about how the IDs were assigned, we will have to assume that for some reason those IDs between 65,500 and 70,000 did not even exist in the population, and that IDs higher than 70,000 have been assigned randomly---not subsequentially---and recently, and hence it is normal than fewer people in the sample have such higher IDs. I.e., we will assume that the sampling distribution resembles the distribution of the population and the dataset is a random sample of the population.
 
 
 
 **********
 
+\pagebreak
+
 ## Question 2
 
-**Typically, you will need to thoroughly analyze each of the variables in the data
-set using univariate, bivariate, and multivariate analyses before attempting any
-model. For this homework, assume that this step has been conducted. Estimate
-the following regression:**
+**Typically, you will need to thoroughly analyze each of the variables in the data set using univariate, bivariate, and multivariate analyses before attempting any model. For this homework, assume that this step has been conducted. Estimate the following regression:**
   
 $$\begin{aligned}\mathbf{log(wage) =}& \mathbf{\ \beta_0 + \beta_1jc + \beta_2univ + \beta_3exper + \beta_4black + \beta_5hispanic} \\ & \mathbf{+\ \beta_6AA + \beta_7BA + \beta_8exper \cdot black+e}\end{aligned}$$
   
 **Interpret the coefficients $\hat{\beta}_4$ and $\hat{\beta}_8$.**
-  
-```{r Question2, echo = -c(1:2)}
+
+```{r Question2-1, echo = -c(1:3)}
 ```
 
+
+```{r Question2-2, echo = FALSE, results = 'asis'}
+```
+
+\label{table-Q2}
+
+\pagebreak
+
+`r coeftest(model1, vcovHC(model1))`
 
 
 **********
@@ -83,10 +110,10 @@ $$\begin{aligned}\mathbf{log(wage) =}& \mathbf{\ \beta_0 + \beta_1jc + \beta_2un
 ```
 
 
-
 **********
 
 ## Question 4
+
 
 **With this model, test that the return to junior college education is equal for black and non-black.**
   
@@ -138,6 +165,8 @@ $$\begin{aligned}\mathbf{log(wage) =}& \mathbf{\ \beta_0 + \beta_1jc + \beta_2un
 
 ```{r Question8, echo = FALSE, results='asis'}
 ```
+
+\label{Table-Q8}
 
 ...
 

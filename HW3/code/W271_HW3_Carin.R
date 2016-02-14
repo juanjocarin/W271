@@ -8,10 +8,12 @@
 library(e1071)
 library(ggplot2)
 library(ggfortify)
+library(scales)
 library(knitr)
 library(pastecs)
 library(sandwich)
 library(lmtest)
+library(dplyr)
 library(stargazer)
 library(texreg)
 
@@ -36,7 +38,7 @@ sig_stars <- function(p) {
 # A function that draws a nice-looking table, based on stargazer
 # USING HETEROSKEDASTICTY-ROBUST STANDARD ERRORS AND F STATISTIC
 stargazer2 <- function(model_list, ...) {
-  stargazer(model_list, type = 'text', header = FALSE, table.placement = "h!", 
+  stargazer(model_list, type = 'latex', header = FALSE, table.placement = "h!", 
             star.cutoffs = c(0.1, 0.05, 0.01, 0.001), 
             star.char = c("\\mathbf{\\cdot}", "*", "**", "***"), 
             notes.append = FALSE, notes.label = "", 
@@ -50,7 +52,7 @@ stargazer2 <- function(model_list, ...) {
                 c("df", unlist(lapply(model_list, function(m) 
                   paste0(abs(waldtest(m, vcov=vcovHC)$Df[2]), "; ", 
                          waldtest(m, vcov=vcovHC)$Res.Df[1]))))), 
-            df = FALSE, omit.stat = "f", ...)
+            df = FALSE, omit.stat = "f", no.space = TRUE, ...)
 }
 
 # Another (2) function(s) to draw tables, based on stargazer
@@ -98,18 +100,68 @@ tableCount <- c(`_` = 0)
 
 
 
-## @knitr Question1
+## @knitr Question1-1
 # QUESTION 1 --------------------------------------------------------------
 # Load the twoyear.RData dataset and describe the basic structure of the data
 # Path relative to W271.Rproj, never to be run by the .Rmd (conflict with knitr)
 # setwd('HW3/data')
 load("twoyear.RData")
+desc
+str(data)
+head(data)
+#summary(data)
+round(stat.desc(data, desc = TRUE, basic = TRUE), 2)
+# kable(round(stat.desc(data[, 1:floor(dim(data)[2]/4)], 
+#                       desc = TRUE, basic = TRUE), 2))
+
+## @knitr Question1-2
+# Assign each ID to a 500-range
+id_range = cut(data$id, breaks = seq(1, (ceiling(max(data$id)/500) + 1)*500, 
+                                     by = 500))
+# Check unassigned ranges / levels
+setdiff(levels(id_range), droplevels(id_range))
+# Further (unnecessary) checking
+# id_range_count <- data %>% 
+#   select(id) %>% 
+#   mutate(id_range = cut(data$id, 
+#                         breaks = seq(1, (ceiling(max(data$id)/500) + 1)*500, 
+#                                      by = 500))) %>% 
+#   group_by(ID_range = id_range) %>% 
+#   summarise(Count = n())
+# data.frame(id_range_count)[125:135, ]
+ggplot(data, aes(id)) + 
+  geom_histogram(aes(y = (..count..)/sum(..count..)), colour = 'black', 
+                 fill = 'white', binwidth = 2000) + 
+  scale_y_continuous(labels = percent_format()) + 
+  labs(x = "Percentage of ID numbers (in subsets of 2,000)\nin the sample", 
+       y = "Relative frequency", 
+       title = "Histogram of ID numbers in the sample")
+figCount <- incCount(figCount, "hist-Q1")
 
 
 
-## @knitr Question2
+## @knitr Question2-1
 # QUESTION 2 --------------------------------------------------------------
 # Interpret the coefficients beta4 and beta8.
+# I.e., 'black' and 'exper*black'
+# Set of independent variables
+params <- c('jc', 'univ', 'exper', 'black', 'hispanic', 'AA', 'BA')
+# Include interaction terms
+params2 <- c(params, 'exper*black')
+# Include dependent variable
+var_of_interest <- c('lwage', params)
+# (Reminder of) Meaning of each variable
+subset(desc, variable %in% var_of_interest)
+model1 <- lm(as.formula(paste(var_of_interest[!var_of_interest %in% params], 
+                              paste(params2, sep = "", collapse = " + "), 
+                              sep = " ~ ")), data = data)
+
+## @knitr Question2-2
+stargazer2(list(model1), title = "Regression summary", 
+           dep.var.labels = "lwage", digits = 4, digits.extra = 6)
+tableCount <- incCount(tableCount, "table-Q2")
+# dep.var.caption = ""
+# covariate.labels = c("XX", "ZZ", "(Intercept)"), 
 
 
 
@@ -166,18 +218,20 @@ m1<- extract(model, include.rmse=F, include.fstatistic=T)
 m2<- extract(model2, include.rmse=F, include.fstatistic=T)
 #screenreg(list(m1,m2))
 
-
+tableCount <- incCount(tableCount, "kk")
 
 texreg2(list(createTexreg2(model), createTexreg2(model2)), 
         reorder.coef = c(2,3,1), caption = "Table caption", 
         custom.model.names = c("uno", "dos"))
+tableCount <- incCount(tableCount, "table-Q8")
+
 texreg(list(model, model2), digits = 3, caption = "Table", 
        caption.above = TRUE, bold = 0.05, float.pos = "h!")
 
 ## @knitr Question8-2
-stargazer(list(model, model2), title = "test stargzer", 
-          covariate.labels = c("XX", "ZZ"), 
-          dep.var.labels = c("YY"))
+# stargazer(list(model, model2), title = "test stargzer", 
+#           covariate.labels = c("XX", "ZZ"), 
+#           dep.var.labels = c("YY"))
 
 stargazer2(list(model, model2), title = "test stargzer", 
            covariate.labels = c("XX", "ZZ", "(Intercept)"), 
