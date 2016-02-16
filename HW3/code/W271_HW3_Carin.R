@@ -169,7 +169,13 @@ model1 <- lm(as.formula(paste(vars_of_interest[!vars_of_interest %in% params],
 
 ## @knitr Question2-2
 stargazer2(model1, title = "Regression summary", digits = 4, digits.extra = 6, 
-           dep.var.labels = 'lwage')
+           dep.var.labels = 'lwage', order = c(1:4, 8, 5:7, 9), 
+           covariate.labels = c("Junior college (2-yr credits)", 
+                                "University (4-yr credits)", 
+                                "Work experience (months)", 
+                                "Black", "Experience * Black", "Hispanic", 
+                                "Associate's degree", "Bachelor's degree", 
+                                "Intercept (Constant)"))
 tableCount <- incCount(tableCount, "table-Q2")
 
 ## @knitr Question2-3
@@ -192,11 +198,21 @@ model2 <- lm(as.formula(paste(vars_of_interest2[!vars_of_interest2 %in%
              data = data2)
 
 ## @knitr Question2-5
-stargazer2(list(model1, model2), 
-           title = paste0("Regression summary using 0 and its mean (", 
-                          frmt(mean(data$exper), 1), 
-                          ") as the baselines values of exper"), 
-           digits = 4, digits.extra = 6, dep.var.labels = rep('lwage', 2))
+stargazer2(list(model1, model2),
+           title = paste0("Regression summary using 0 and its mean (",
+                          frmt(mean(data$exper), 1),
+                          ") as the baselines values of exper"),
+           digits = 4, digits.extra = 6, dep.var.labels = rep('lwage', 2), 
+           order = c(1:5, 9:10, 6:8, 11), 
+           covariate.labels = c("Junior college (2-yr credits)",
+                                "University (4-yr credits)",
+                                "Work experience (months)",
+                                paste("Work experience (months) with",
+                                      "respect to mean (122.4)"),
+                                "Black", "Experience * Black",
+                                "Experience with respect to mean * Black", 
+                                "Hispanic", "Associate's degree",
+                                "Bachelor's degree", "Intercept (Constant)"))
 tableCount <- incCount(tableCount, "table-Q2-2")
 
 
@@ -311,7 +327,7 @@ linearHypothesis(model1, c("univ = jc"), vcov = vcovHC)
 
 
 
-## @knitr Question7
+## @knitr Question7-1
 # QUESTION 7 --------------------------------------------------------------
 # Including a square term of working experience to the regression model,
 # estimate the linear regression model again.
@@ -321,47 +337,53 @@ model7 <- lm(as.formula(paste(vars_of_interest[!vars_of_interest %in% params],
                               paste(params_plus_interaction_square, sep = "", 
                                     collapse = " + "), sep = " ~ ")), 
              data = data)
-coeftest(model7, vcovHC(model7))
+# coeftest(model7, vcov = vcovHC(model7))
+100 * (coeftest(model7, vcov = vcovHC(model7))[3+1, 1] + 
+         2*coeftest(model7, vcov = vcovHC(model7))[8+1, 1] * 
+         mean(data$exper)) * 12
+100 * coeftest(model1, vcov = vcovHC(model1))[3+1, 1] * 12
+
+
+## @knitr Question7-2
+stargazer2(list(model7, model1),
+           title = paste0("Regression summary with and without including the ",
+                          "square term of working experience"),
+           digits = 4, digits.extra = 6, dep.var.labels = rep('lwage', 2), 
+           order = c(1:3, 8, 4, 9, 5:7, 10), 
+           covariate.labels = c("Junior college (2-yr credits)",
+                                "University (4-yr credits)",
+                                "Work experience (months)", 
+                                "Work experience$^2$", "Black", 
+                                "Experience * Black", "Hispanic", 
+                                "Associate's degree", "Bachelor's degree", 
+                                "Intercept (Constant)"))
+tableCount <- incCount(tableCount, "table-Q7")
 
 
 
-## @knitr Question8
+## @knitr Question8-1
 # QUESTION 8 --------------------------------------------------------------
 # Provide the diagnosis of the homoskedasticity assumption.
 # Does this assumption hold?
 # If so, how does it affect the testing of no effect of university education on
 # salary change?
 # If not, what potential remedies are available?
-
-
-x <- rnorm(100)
-z <- rnorm(100)
-y <- 2*x+.25*z
-model <- lm(y ~ x)
-model2 <- lm(y ~ z)
-
-m1<- extract(model, include.rmse=F, include.fstatistic=T)
-m2<- extract(model2, include.rmse=F, include.fstatistic=T)
-#screenreg(list(m1,m2))
-
-tableCount <- incCount(tableCount, "kk")
-
-texreg2(list(createTexreg2(model), createTexreg2(model2)), 
-        reorder.coef = c(2,3,1), caption = "Table caption", 
-        custom.model.names = c("uno", "dos"))
-tableCount <- incCount(tableCount, "table-Q8")
-
-texreg(list(model, model2), digits = 3, caption = "Table", 
-       caption.above = TRUE, bold = 0.05, float.pos = "h!")
+# Breusch-Pagan test
+bptest(model1)
+ncvTest(model1)
 
 ## @knitr Question8-2
-# stargazer(list(model, model2), title = "test stargzer", 
-#           covariate.labels = c("XX", "ZZ"), 
-#           dep.var.labels = c("YY"))
+autoplot(model1, which = 1)
+figCount <- incCount(figCount, "residuals-fitted-Q8")
 
-stargazer2(list(model, model2), title = "test stargzer", 
-           covariate.labels = c("XX", "ZZ", "(Intercept)"), 
-           dep.var.caption = "")
-           
-           
-           
+## @knitr Question8-3
+df <- data.frame(x = data$univ, y = model1$residuals)
+ggplot(df, aes(x, y)) + 
+  geom_point() + geom_smooth() + 
+  labs(x = "University (total 4-year credits)", y = "Residuals", 
+       title = "Residuals vs. University")
+figCount <- incCount(figCount, "residuals-univ-Q8")
+
+## @knitr Question8-4
+autoplot(model1, which = 3)
+figCount <- incCount(figCount, "scale-location-Q8")

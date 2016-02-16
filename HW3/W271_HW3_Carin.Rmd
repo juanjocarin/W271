@@ -104,7 +104,7 @@ As shown in Table 1 above, the coefficients of interest are $\hat{\beta}_4 = `r 
 
 \pagebreak
 
-The diagnostic plots (below) show that all the CLM assumptions are met to some extent (the residuals are not totally homoskedastic, but that might be due to a lack of observations for the most extreme values):
+The diagnostic plots (below) show that all the CLM assumptions are met to some extent (the residuals are not totally homoskedastic---we will analyze this point in [Question 8](#question-8)):
 
 ```{r Question2-3, echo = FALSE, fig.width = 6, fig.height = 4.5, fig.cap = "Diagnotic plots of the regression model"}
 ```
@@ -245,8 +245,23 @@ The value of the *F* statistic for the overall significance of the regression ($
 
 **Including a square term of working experience to the regression model built above, estimate the linear regression model again. What is the estimated return to work experience in this model?**
   
-```{r Question7, echo = -c(1:4)}
+```{r Question7-1, echo = c(5:6, 8:9)}
 ```
+
+As shown in Table 3 in the following page, $\hat{\beta}_{exper}$ has now decreased to `r frmt(coeftest(model7, vcov = vcovHC(model7))[3+1, 1], digits = 4)` (and it's still highly statistically significant) and `$\hat{\beta}_{exper^2} = `r frmt(coeftest(model7, vcov = vcovHC(model7))[8+1, 1], digits = 6)`$ (not significant, $p = `r frmt(coeftest(model7, vcov = vcovHC(model7))[8+1, 4], digits = 2)`). This means that, holding all other variables fixed, the estimated return to work experience can be approximated by:
+
+$$\Delta\widehat{lwage} \simeq \left(\hat{\beta}_{exper} + 2 \hat{\beta}_{exper^2} exper \right)\Delta exper$$
+
+$$\%\Delta\widehat{wage} \simeq 100\left(\hat{\beta}_{exper} + 2 \hat{\beta}_{exper^2} exper \right)\Delta exper$$
+
+I.e., $\mathbf{\%\Delta\widehat{wage} \simeq (`r frmt(100*coeftest(model7, vcov = vcovHC(model7))[3+1, 1], digits = 6)` + `r frmt(100*coeftest(model7, vcov = vcovHC(model7))[8+1, 1]*2, digits = 8)` \cdot exper)\Delta exper}$. A 1-year increase in work experience for someone with an average experience will increase his or her hourly wage by $`r frmt(100 * (coeftest(model7, vcov = vcovHC(model7))[3+1, 1] + 2*coeftest(model7, vcov = vcovHC(model7))[8+1, 1] * mean(data$exper)) * 12, digits = 2)`\%$ (compared to an average $`r frmt(100 * coeftest(model1, vcov = vcovHC(model1))[3+1, 1] * 12, digits = 2)`\%$ increase if we don't include the square term of working experience in the model; but keep in mind the contribution of that effect is uncertain due to its lack of signficance).
+
+\pagebreak
+
+```{r Question7-2, echo = FALSE, results = 'asis'}
+```
+
+\label{table-Q7}
 
 
 
@@ -258,14 +273,36 @@ The value of the *F* statistic for the overall significance of the regression ($
 
 **Provide the diagnosis of the homoskedasticity assumption. Does this assumption hold? If so, how does it affect the testing of no effect of university education on salary change? If not, what potential remedies are available?**
 
-```{r Question8, echo = FALSE, results='asis'}
+We can start running run a Breusch-Pagan test to test for heteroskedasticity. The results of two implementations of such test in R are slightly different, but both are significant, which indicates heteroskedasticity . . . but our sample is so large (`r dim(data)[1]` observations) that this test is very likely to yield a significant result even in the absence of heteroskedasticity.
+
+```{r Question8-1, echo = -c(1:7)}
 ```
 
-...
+For such a huge dataset, it's better to use diagnostic plots. Let's plot again two of the graphs already shown in Figure 2, this time with more detail:
 
-```{r Question8-2, echo = FALSE, results='asis'}
+```{r Question8-2, echo = FALSE, fig.cap = "Residuals vs. Fitted values plot"}
 ```
 
-...
+\label{residuals-fitted-Q8}
+
+The thickness of the band in the residuals vs. fitted plot is almost the same for all fitted values. There seems to be less variance on both extremes, but that might be due to a lack of observations for the most extreme values of `lwage`.
+
+Since we are presented with a hypothesis that involves `univ`, let's also plot how the residuals vary with that specific variable. As shown in Figure 5, the variance is higher for extreme and middle values of `univ` (around the minimum, mean, and maximum) and lower (though not too much) for values inbetween.
+
+```{r Question8-3, echo = FALSE, fig.cap = "Residuals vs. University"}
+```
+
+\label{residuals-univ-Q8}
+
+Finally, the scale-location plot shows a almost horizontal band of points (which does not go upwards or downwards), which also suggests homoskedasticity.
+
+```{r Question8-4, echo = FALSE, fig.cap = "Scale-Location plot"}
+```
+
+\label{scale-location-Q8}
+
+The assumption of homoskedasticity (together with assumptions MLR.1 through MLR.4) is required for the OLS estimators to be BLUE (the best---the ones with less variance among---linear unbiased estimator). It is also required (together with the normality of errors) to ensure that the distribution of the *t* and *F* statistics follow *t* and *F* distributions, respectively. So if this assumption were broken, we would not be able to estimate the significance level of a hypothesis test like that university education has no effect on salary.
+
+There are some signs that the assumption is broken, which we can overcome by using **heteroskedasticity-robust standard errors** . . .  which we have done through this whole document. This way, we can be confident in the significance results of testing $H_0: \beta_{univ} = 0$ (which we reject at the `r formatC(coeftest(model1, vcov = vcovHC(model1))[2+1, 4], 1)` significance level!). 
 
 **********
