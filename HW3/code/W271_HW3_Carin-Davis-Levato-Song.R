@@ -311,17 +311,6 @@ tableCount <- incCount(tableCount, "table-Q4")
 ## @knitr Question4-6
 linearHypothesis(model5, c("black = 0", "jc:black = 0"), vcov = vcovHC)
 
-## @knitr Question4-7
-# Just some tests
-# m <- lm(lwage ~ jc + univ + exper + hispanic + AA + BA, data)
-# m1 <- lm(lwage ~ jc + univ + exper + hispanic + AA + BA, 
-#          data[data$black == 0, ])
-# m2 <- lm(lwage ~ jc + univ + exper + hispanic + AA + BA, 
-#          data[data$black == 1, ])
-# f <- (sum(m$residuals^2) - sum(m1$residuals^2) - sum(m2$residuals^2)) / 
-#   (sum(m1$residuals^2) + sum(m2$residuals^2)) * (dim(data)[1] - 2*3) / (2 + 1)
-# pf(f, 3, dim(data)[1] - 4, lower.tail = FALSE)
-
 
 
 ## @knitr Question5-1
