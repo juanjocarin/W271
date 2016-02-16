@@ -11,6 +11,7 @@ library(ggfortify)
 library(scales)
 library(knitr)
 library(pastecs)
+library(car)
 library(sandwich)
 library(lmtest)
 library(dplyr)
@@ -37,8 +38,14 @@ sig_stars <- function(p) {
 
 # A function that draws a nice-looking table, based on stargazer
 # USING HETEROSKEDASTICTY-ROBUST STANDARD ERRORS AND F STATISTIC
-stargazer2 <- function(model_list, ...) {
-  stargazer(model_list, type = 'latex', header = FALSE, table.placement = "h!", 
+stargazer2 <- function(models, type = 'latex', ...) {
+  if (class(models) != "lm") {
+    model_list <- models
+    } else {
+      model_list <- list()
+      model_list[[1]] <- models
+      }
+  stargazer(model_list, type = type, header = FALSE, table.placement = "h!", 
             star.cutoffs = c(0.1, 0.05, 0.01, 0.001), 
             star.char = c("\\mathbf{\\cdot}", "*", "**", "***"), 
             notes.append = FALSE, notes.label = "", 
@@ -52,7 +59,7 @@ stargazer2 <- function(model_list, ...) {
                 c("df", unlist(lapply(model_list, function(m) 
                   paste0(abs(waldtest(m, vcov=vcovHC)$Df[2]), "; ", 
                          waldtest(m, vcov=vcovHC)$Res.Df[1]))))), 
-            df = FALSE, omit.stat = "f", no.space = TRUE, ...)
+            df = FALSE, no.space = TRUE, omit.stat = "f", ...)
 }
 
 # Another (2) function(s) to draw tables, based on stargazer
@@ -121,12 +128,12 @@ id_range = cut(data$id, breaks = seq(1, (ceiling(max(data$id)/500) + 1)*500,
 # Check unassigned ranges / levels
 setdiff(levels(id_range), droplevels(id_range))
 # Further (unnecessary) checking
-# id_range_count <- data %>% 
-#   select(id) %>% 
-#   mutate(id_range = cut(data$id, 
-#                         breaks = seq(1, (ceiling(max(data$id)/500) + 1)*500, 
-#                                      by = 500))) %>% 
-#   group_by(ID_range = id_range) %>% 
+# id_range_count <- data %>%
+#   select(id) %>%
+#   mutate(id_range = cut(data$id,
+#                         breaks = seq(1, (ceiling(max(data$id)/500) + 1)*500,
+#                                      by = 500))) %>%
+#   group_by(ID_range = id_range) %>%
 #   summarise(Count = n())
 # data.frame(id_range_count)[125:135, ]
 ggplot(data, aes(id)) + 
@@ -147,41 +154,154 @@ figCount <- incCount(figCount, "hist-Q1")
 # Set of independent variables
 params <- c('jc', 'univ', 'exper', 'black', 'hispanic', 'AA', 'BA')
 # Include interaction terms
-params2 <- c(params, 'exper*black')
+params_plus_interaction <- c(params, 'exper*black')
 # Include dependent variable
-var_of_interest <- c('lwage', params)
+vars_of_interest <- c('lwage', params)
 # (Reminder of) Meaning of each variable
-subset(desc, variable %in% var_of_interest)
-model1 <- lm(as.formula(paste(var_of_interest[!var_of_interest %in% params], 
-                              paste(params2, sep = "", collapse = " + "), 
-                              sep = " ~ ")), data = data)
+subset(desc, variable %in% vars_of_interest)
+# Summary of variables of interest only
+summary(data[, vars_of_interest])
+# OLS model
+model1 <- lm(as.formula(paste(vars_of_interest[!vars_of_interest %in% params], 
+                              paste(params_plus_interaction, sep = "", 
+                                    collapse = " + "), sep = " ~ ")), 
+             data = data)
 
 ## @knitr Question2-2
-stargazer2(list(model1), title = "Regression summary", 
-           dep.var.labels = "lwage", digits = 4, digits.extra = 6)
+stargazer2(model1, title = "Regression summary", digits = 4, digits.extra = 6, 
+           dep.var.labels = 'lwage')
 tableCount <- incCount(tableCount, "table-Q2")
-# dep.var.caption = ""
-# covariate.labels = c("XX", "ZZ", "(Intercept)"), 
+
+## @knitr Question2-3
+autoplot(model1)
+figCount <- incCount(figCount, "regression-Q2")
+
+
+## @knitr Question2-4
+# Center exper around its mean
+data2 <- data[, vars_of_interest]
+data2$exper_mean <- data2$exper - mean(data2$exper)
+params2 <- gsub('exper', 'exper_mean', params)
+params_plus_interaction2 <- gsub('exper', 'exper_mean', 
+                                 params_plus_interaction)
+vars_of_interest2 <- c('lwage', params2)
+model2 <- lm(as.formula(paste(vars_of_interest2[!vars_of_interest2 %in% 
+                                                  params2], 
+                              paste(params_plus_interaction2, sep = "", 
+                                    collapse = " + "), sep = " ~ ")), 
+             data = data2)
+
+## @knitr Question2-5
+stargazer2(list(model1, model2), 
+           title = paste0("Regression summary using 0 and its mean (", 
+                          frmt(mean(data$exper), 1), 
+                          ") as the baselines values of exper"), 
+           digits = 4, digits.extra = 6, dep.var.labels = rep('lwage', 2))
+tableCount <- incCount(tableCount, "table-Q2-2")
 
 
 
-## @knitr Question3
+## @knitr Question3-1
 # QUESTION 3 --------------------------------------------------------------
 # Test that the return to university education is 7%.
+# New t statististic
+(t <- (coeftest(model1, vcovHC(model1))[2+1, 1] - .07) / 
+   coeftest(model1, vcovHC(model1))[2+1, 2])
+(t_exact <- (coeftest(model1, vcovHC(model1))[2+1, 1] - log(0.07 + 1)) / 
+  coeftest(model1, vcovHC(model1))[2+1, 2])
+# New p value
+2*pt(t, dim(data)[1] - 1, lower.tail = FALSE)
+2*pt(t_exact, dim(data)[1] - 1, lower.tail = FALSE)
+
+## @knitr Question3-2
+data3 <- data[, vars_of_interest]
+data3$lwage_minus7univ <- data3$lwage - .07 * data3$univ
+vars_of_interest3 <- c('lwage_minus7univ', params)
+model3 <- lm(as.formula(paste(vars_of_interest3[!vars_of_interest3 %in% 
+                                                  params], 
+                              paste(params_plus_interaction, sep = "", 
+                                    collapse = " + "), sep = " ~ ")), 
+             data = data3)
+coeftest(model3, vcovHC(model3))
+
+data4 <- data[, vars_of_interest]
+data4$lwage_minus7univ <- data4$lwage - log(0.07 + 1) * data4$univ
+vars_of_interest4 <- c('lwage_minus7univ', params)
+model4 <- lm(as.formula(paste(vars_of_interest3[!vars_of_interest4 %in% 
+                                                  params], 
+                              paste(params_plus_interaction, sep = "", 
+                                    collapse = " + "), sep = " ~ ")), 
+             data = data4)
+coeftest(model4, vcovHC(model4))[3, ]
+
+## @knitr Question3-3
+linearHypothesis(model1, c("univ = 0.07"), vcov = vcovHC(model1))$'Pr(>F)'[2]
+linearHypothesis(model1, c(paste("univ = ", log(0.07 + 1))), 
+                 vcov = vcovHC(model1))$'Pr(>F)'[2]
 
 
 
-## @knitr Question4
+## @knitr Question4-1
 # QUESTION 4 --------------------------------------------------------------
 # Test that the return to junior college education is equal for black and 
 # non-black.
+linearHypothesis(model1, c("black = 0"), vcov = vcovHC(model1))
+
+## @knitr Question4-2
+coeftest(model1, vcov = vcovHC(model1))[4+1, 4]
+
+## @knitr Question4-3
+data$black_factor <- factor(data$black, labels = c("Non-black", "Black"))
+ggplot(data = data, aes(jc, lwage, black_factor)) + 
+  geom_point() +
+  geom_smooth(method = "lm") + facet_wrap( ~ black_factor) +
+  labs(x = "Junior college education (total 2-year credits)",
+       y = "log(wage)",
+       title = paste0("Scatterplot of junior college education against\n",
+                      "log of hourly wage for black and non-black"))
+# ggplot(data = data, aes(jc, lwage, colour = black_factor)) +
+#   geom_point() +
+#   geom_smooth(method = "lm", aes(fill = black_factor)) +
+#   labs(x = "Junior college education (total 2-year credits)",
+#        y = "log(wage)", fill = "Ethnicity", colour = "Ethnicity",
+#        title = paste0("Scatterplot of junior college education against\n",
+#                       "log of hourly wage for black and non-black"))
+figCount <- incCount(figCount, "scatter-Q4")
+
+## @knitr Question4-4
+params_plus_interaction5 <- c(params_plus_interaction, 'jc*black')
+model5 <- lm(as.formula(paste(vars_of_interest[!vars_of_interest %in% params], 
+                              paste(params_plus_interaction5, sep = "", 
+                                    collapse = " + "), sep = " ~ ")), 
+             data = data)
+coeftest(model5, vcovHC(model5))
+linearHypothesis(model5, c("black = 0", "jc:black = 0", "exper:black = 0"), 
+                 vcov = vcovHC)
+
+# m <- lm(lwage ~ jc + univ + exper + hispanic + AA + BA, data)
+# m1 <- lm(lwage ~ jc + univ + exper + hispanic + AA + BA, 
+#          data[data$black == 0, ])
+# m2 <- lm(lwage ~ jc + univ + exper + hispanic + AA + BA, 
+#          data[data$black == 1, ])
+# f <- (sum(m$residuals^2) - sum(m1$residuals^2) - sum(m2$residuals^2)) / 
+#   (sum(m1$residuals^2) + sum(m2$residuals^2)) * (dim(data)[1] - 2*3) / (2 + 1)
+# pf(f, 3, dim(data)[1] - 4, lower.tail = FALSE)
 
 
-
-## @knitr Question5
+## @knitr Question5-1
 # QUESTION 5 --------------------------------------------------------------
 # Test whether the return to university education is equal to the return to 
 # 1 year of working experience.
+linearHypothesis(model1, c("univ = 12*exper"), vcov = vcovHC)
+
+## @knitr Question5-2
+model6 <- lm(lwage ~ jc + I(12*univ + exper) + univ + black + hispanic + AA + 
+               BA + exper * black, data)
+coeftest(model6, vcovHC(model6))[1:4, ]
+
+## @knitr Question5-3
+linearHypothesis(model1, c("jc = 12*exper"), vcov = vcovHC)
+linearHypothesis(model1, c("univ = jc"), vcov = vcovHC)
 
 
 
@@ -196,6 +316,12 @@ tableCount <- incCount(tableCount, "table-Q2")
 # Including a square term of working experience to the regression model,
 # estimate the linear regression model again.
 # What is the estimated return to work experience in this model?
+params_plus_interaction_square <- c(params_plus_interaction, 'I(exper^2)')
+model7 <- lm(as.formula(paste(vars_of_interest[!vars_of_interest %in% params], 
+                              paste(params_plus_interaction_square, sep = "", 
+                                    collapse = " + "), sep = " ~ ")), 
+             data = data)
+coeftest(model7, vcovHC(model7))
 
 
 
@@ -206,7 +332,7 @@ tableCount <- incCount(tableCount, "table-Q2")
 # If so, how does it affect the testing of no effect of university education on
 # salary change?
 # If not, what potential remedies are available?
-#texreg(list(lm(speed~dist,data=cars)), float.pos = 'h')
+
 
 x <- rnorm(100)
 z <- rnorm(100)
@@ -235,7 +361,7 @@ texreg(list(model, model2), digits = 3, caption = "Table",
 
 stargazer2(list(model, model2), title = "test stargzer", 
            covariate.labels = c("XX", "ZZ", "(Intercept)"), 
-           dep.var.caption = "", dep.var.labels = "YY")
+           dep.var.caption = "")
            
            
            
