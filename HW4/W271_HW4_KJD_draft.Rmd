@@ -160,7 +160,7 @@ We need to assume that the error term has the same variance given any values of 
 
 $$ Var(u|x_{1},\dots, x_{k}) = \sigma^2 $$
 
-Inuitively, this assumption means that the variance of the error does not depend on the values of x. We can examine this assumption by looking at the fitted vs. residuals plot and noting if the spread of the residuals tends to be the same over the entire range of the dataset. 
+Intuitively, this assumption means that the variance of the error does not depend on the values of x. We can examine this assumption by looking at the fitted vs. residuals plot and noting if the spread of the residuals tends to be the same over the entire range of the dataset. 
 
 b) **What additional assumption is needed for OLS to consistently estimate the first-difference model? Write this in mathematical notation and also explain it intuitively in English. Comment on whether this assumption is plausible in this setting.**
 
@@ -168,7 +168,7 @@ To estimate the first-difference model we must assume 'parallel trends'. Take an
 
 $$ E(Y^{0}_{A} - Y^{0}_{B}|D=1) - E(Y^{0}_{A} - Y^{0}_{B}|D=0) = 0 $$
 
-Intuitively, this assumption says that if we consider the counterfactual where the treated group was not treated, then the change in the explanatory variable would have been the same for both groups. By comparing the trend for the treated group with a similar untreated control group, we can argue in favor of the parallel trends assumption, although it is not formally testable since the hypothetical untreated outcome for treated units is not observed.
+Intuitively, this assumption says that if we consider the counter-factual where the treated group was not treated, then the change in the explanatory variable would have been the same for both groups. By comparing the trend for the treated group with a similar untreated control group, we can argue in favor of the parallel trends assumption, although it is not formally testable since the hypothetical untreated outcome for treated units is not observed.
 
 
 ```{r Question4, echo = -c(1:2)}
@@ -188,11 +188,11 @@ Intuitively, this assumption says that if we consider the counterfactual where t
 ```{r Question5-1, echo = FALSE, results = 'asis'}
 ```
 
-The change in bowl appearances variable was associated with a statistically significant increase in logged college applications, ($\beta$ = `r round(model$coefficients[4], 2)`, t = `r round(coeftest(model, vcov=vcovHC)[12],2)`, p = `r round(coeftest(model, vcov=vcovHC)[16],2)`). The coefficient for change in final four appearances was `r round(model$coefficients[2],2)` and was not statistically significant ($\beta$ = `r round(model$coefficients[2], 2)`, t = `r round(coeftest(model, vcov=vcovHC)[10],2)`). The coefficient for change in football conference titles was `r round(model$coefficients[3],2)` and was not statistically significant ($\beta$ = `r round(model$coefficients[3], 2)`, t = `r round(coeftest(model, vcov=vcovHC)[11],2)`). 
+The change in bowl appearances variable was associated with a statistically significant increase in change logged college applications, ($\beta$ = `r round(model$coefficients[4], 2)`, t = `r round(coeftest(model, vcov=vcovHC)[12],2)`, p = `r round(coeftest(model, vcov=vcovHC)[16],2)`). The coefficient for change in final four appearances was `r round(model$coefficients[2],2)` and was not statistically significant ($\beta$ = `r round(model$coefficients[2], 2)`, t = `r round(coeftest(model, vcov=vcovHC)[10],2)`). The coefficient for change in football conference titles was `r round(model$coefficients[3],2)` and was not statistically significant ($\beta$ = `r round(model$coefficients[3], 2)`, t = `r round(coeftest(model, vcov=vcovHC)[11],2)`). 
 
 To illustrate the magnitude of the effect for the change in bowl appearances variable, a college with average logged college applicants in 1992 would have an expected increase of `r round(((exp(mean(wide$lapps.1992) * (1 + model$coefficients[4]))) - exp(mean(wide$lapps.1992))),0)` applicants due to the effect of appearing in a bowl. 
 
-Both the change in final four appearances and change in college football conference titles variables suffer from the fact that there are very few observations in the yes group. This makes the assumption of parallel trends less plausable because the individual factors effecting this small group of colleges probably outweigh the national and regional factors effecting all colleges. If there was relative equality among the group sizes, we would expect these factors to be overwelmed by national trends, but that is not the case here. 
+Both the change in final four appearances and change in college football conference titles variables suffer from the fact that there are very few observations in the yes group. This makes the assumption of parallel trends less plausible because the individual factors effecting this small group of colleges probably outweigh the national and regional factors effecting all colleges. If there was relative equality among the group sizes, we would expect these factors to be overwhelmed by national trends, but that is not the case here. 
 
 **********
 
