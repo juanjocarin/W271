@@ -48,7 +48,7 @@ header-includes:
 
 ```{r, echo = FALSE}
 require(knitr, quietly = TRUE)
-read_chunk('code/W271_HW2_Carin.R')
+read_chunk('code/W271_HW2_Carin-Davis-Levato-Song.R')
 opts_chunk$set(message = FALSE, warning = FALSE)
 opts_chunk$set(fig.width = 4, fig.height = 3)
 # Set path to data here (don't use setwd() inside a chunk!!!)

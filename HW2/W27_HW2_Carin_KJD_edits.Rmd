@@ -144,7 +144,7 @@ The **excess kurtosis** (the kurtosis minus 3) is positive (`r frmt(kurtosis(dat
 
 **Generate a scatterplot of `prate` against `mrate`. Then estimate the linear regression of `prate` on `mrate`. What slope coefficient did you get?**
 
-```{r Question3-1, echo = FALSE, fig.cap = "Scatterplot of the participation rate ($\\%$) to 401K plans of a company's employees against the match rate ($\\%$) of that company to their employees' contributions"}
+```{r Question3-1, echo = FALSE, fig.cap = "Scatterplot of the employee participation rate ($\\%$) in 401K plans against company match rate ($\\%$) of employee contributions"}
 ```
 
 \label{scatter-Q3}
@@ -156,7 +156,7 @@ While a low match rate of a company may correspond to almost the whole range of 
 
 \label{table-Q3}
 
-As shown in `r I(pasteLabel("Table", tableCount, "table-Q3"))` above, **the slope coefficient is** $\mathbf{`r frmt(summary(model)$coefficients[2, 1])` \ (`r frmt(summary(model)$coefficients[2, 2])`)}$: a 1 percentage point increase in the match rate would correspond to an increase of almost `r frmt(summary(model)$coefficients[2, 1], digits = 0)` percentage points in the participation rate to 401K plans of the employees, which could indicate that more employees are willing to make this kind of investment when their companies promote 401K plans by matching a higher percentage of their own contributions.
+As shown in `r I(pasteLabel("Table", tableCount, "table-Q3"))` above, **the slope coefficient is** $\mathbf{`r frmt(summary(model)$coefficients[2, 1])` \ (`r frmt(summary(model)$coefficients[2, 2])`)}$: a 1 percentage point increase in the match rate would correspond to an increase of almost `r frmt(summary(model)$coefficients[2, 1], digits = 0)` percentage points in the participation rate in 401K plans of the employees, which could indicate that more employees are willing to make this kind of investment when their companies promote 401K plans by matching a higher percentage of their own contributions.
 
 
 
@@ -194,7 +194,7 @@ The funnel shape of `r I(pasteLabel("Figure", figCount, "fitted-residuals-Q4"))`
 
 \small
 
-> The fact that about $`r frmt(100*length(data2$mrate[data2$mrate<1]) / length(data2$mrate), digits = 0)`\%$ of the data points in `r I(pasteLabel("Figure", figCount, "fitted-residuals-Q4"))` are concentrated in about one fifth of the x-axis (corresponding to `mrate` < 1) may make it look like there's more variation than is actually occurring. But there are more evidence of homoskedasticity...
+> The fact that about $`r frmt(100*length(data2$mrate[data2$mrate<1]) / length(data2$mrate), digits = 0)`\%$ of the data points in `r I(pasteLabel("Figure", figCount, "fitted-residuals-Q4"))` are concentrated in about one fifth of the x-axis (corresponding to `mrate` < 1) may make it look like there's more variation than is actually occurring. But there is more evidence of homoskedasticity...
 
 \normalsize
 
@@ -221,7 +221,6 @@ The implications are that:
 1. we cannot conclude that the OLS estimators have the smallest variance among *all linear*, unbiased estimators, and
 2. we cannot compute the variance of our estimates of the coefficients, so we don't have a clear idea of their precision.
 
-The use of heteroskedasticity robust standard errors (which we use in [Question 7](#Q7) or weighted least squares regression may be able to aid in estimating variance under the heteroskedasticity case; however they may necessitate other assumption to be met. Alternatively a transform (i.e., log or square root) could be applied to the variable to try and address the heteroskedasticity in running the OLS regression. 
 
 
 **********
@@ -281,7 +280,7 @@ But if the Gauss-Markov assumptions were met (which is not the case; for example
 
 \pagebreak
 
-## Question 7 \label{Q7}
+## Question 7
 
 **Based on the above considerations, what is the standard error of your slope coefficient?**
 
@@ -305,9 +304,9 @@ But the variance of the residuals is not constant, so we should use **robust sta
 
 **Is the effect you find statistically significant, and is it practically significant?**
 
-As shown in `r I(pasteLabel("Table", tableCount, "table-Q7"))`, the effect of `mrate` on `prate` is highly **statistically significante**: the exact *p*-value is $p = `r formatC(coeftest(model, vcovHC(model))[2, 4], format = "e", digits = 1)`$ (lower than what we got in [Question 3](#Q3): according to `r I(pasteLabel("Table", tableCount, "table-Q3"))`, $p = `r formatC(summary(model)$coefficient[2, 4], format = "e", digits = 1)`$ when we do not use heteroskedasticity-robust standard errors).
+As shown in `r I(pasteLabel("Table", tableCount, "table-Q7"))`, the effect of `mrate` on `prate` is highly **statistically significant**: the exact *p*-value is $p = `r formatC(coeftest(model, vcovHC(model))[2, 4], format = "e", digits = 1)`$ (lower than what we got in [Question 3](#Q3): according to `r I(pasteLabel("Table", tableCount, "table-Q3"))`, $p = `r formatC(summary(model)$coefficient[2, 4], format = "e", digits = 1)`$ when we do not use heteroskedasticity-robust standard errors).
 
-If a company matches one percentage point more of its employees' contributions, the contribution of those employees to 401k is, on average, about `r frmt(summary(model)$coefficients[2, 1], digits = 1)` percentage points higher, which is also a **practically significant** effect.
+If a company matches one percentage point more of its employees' contributions, the participation rate of those employees to 401k is, on average, about `r frmt(summary(model)$coefficients[2, 1], digits = 1)` percentage points higher, which is also a **practically significant** effect.
 
 <!-- See `r I(pasteLabel("Figure", figCount, "density2-Q1"))` -->
 

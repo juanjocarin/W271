@@ -254,7 +254,7 @@ ggplot(data = data2, aes(mrate, prate)) +
   geom_point() + 
   labs(x = "Company match rate (%) to their\nemployees' contribution to 401K plans", 
        y = "Employees' participation rate (%)\nto 401K plans", 
-       title = "Employees' participation rate to 401K plans\nagainst their company's match rate") + 
+       title = "Employee participation rate in 401K plan\nagainst company match rate") + 
   geom_smooth(method = "lm")
 figCount <- incCount(figCount, "scatter-Q3")
 
@@ -370,6 +370,6 @@ table2 <- create_regtable_RSEs(model, params, c("Company match rate (%)"),
 # Print the table
 kable(table2, align = "r", 
       caption = paste("Effect of a company match rate to 401K plans on its", 
-                      "employees'contribution (using", 
+                      "employees'participation rate (using", 
                       "heteroskedasticity-robust SEs)", sep = " "))
 tableCount <- incCount(tableCount, "table-Q7")

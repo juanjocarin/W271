@@ -1,4 +1,4 @@
-## MIDS W271-4 HW2            ##
+## MIDS W271-4 HW3            ##
 ## Carin, Davis, Levato, Song ##
 
 
@@ -8,54 +8,21 @@
 library(e1071)
 library(ggplot2)
 library(ggfortify)
+library(scales)
 library(knitr)
 library(pastecs)
+library(car)
+library(sandwich)
 library(lmtest)
+library(dplyr)
+library(stargazer)
+library(texreg)
 
 # Define functions
 
-# Functions to calculate Robust Standard Errors
-# http://drewdimmery.com/robust-ses-in-r/
-RSEs <- function(model){
-  require(sandwich, quietly = TRUE)
-  require(lmtest, quietly = TRUE)
-  newSE <- vcovHC(model)
-  coeftest(model, newSE)
-}
-
-# The following function has the same output than Stata
-# But that could also be performed using the following in the previous function
-# newSE <- vcovHC(model, type = "HC1")
-# https://thetarzan.wordpress.com/2011/05/28/heteroskedasticity-robust-and-clustered-standard-errors-in-r/
-summaryw <- function(model) {
-  s <- summary(model)
-  X <- model.matrix(model)
-  u2 <- residuals(model)^2
-  XDX <- 0
-  # Here one needs to calculate X'DX. But due to the fact that D is huge (NxN), 
-  # it is better to do it with a cycle.
-  for(i in 1:nrow(X)) {
-    XDX <- XDX + u2[i]*X[i,]%*%t(X[i,])
-  }
-  # inverse(X'X)
-  XX1 <- solve(t(X)%*%X)
-  # Variance calculation (Bread x meat x Bread)
-  varcovar <- XX1 %*% XDX %*% XX1
-  # degrees of freedom adjustment
-  dfc <- sqrt(nrow(X))/sqrt(nrow(X)-ncol(X))
-  # Standard errors of the coefficient estimates are the square roots of the 
-  # diagonal elements
-  stdh <- dfc*sqrt(diag(varcovar))
-  t <- model$coefficients/stdh
-  p <- 2*pnorm(-abs(t))
-  results <- cbind(model$coefficients, stdh, t, p)
-  dimnames(results) <- dimnames(s$coefficients)
-  results
-}
-
 # THE FOLLOWING FUNCTIONS ARE JUST FOR FORMATTING PURPOSES
 
-# A function to apply format (using formatC
+# A function to apply format
 frmt <- function(qty, digits = 3) {
   formatC(qty, digits = digits, format = "f", drop0trailing = FALSE, 
           big.mark = ",")
@@ -160,58 +127,94 @@ tableCount <- c(`_` = 0)
 
 
 
+## @knitr Question1
+# QUESTION 1 --------------------------------------------------------------
+# Load the twoyear.RData dataset and describe the basic structure of the data
+# Path relative to W271.Rproj, never to be run by the .Rmd (conflict with knitr)
+# setwd('HW3/data')
+
 ## @knitr Load_Data
 # LOAD DATA --------------------------------------------------------------
-# Load the 401K contributions dataset
-# Path relative to W271.Rproj, never to be run by the .Rmd (conflict with knitr)
-# setwd('HW2/data')
-load("401k_w271.Rdata")
-
+load("twoyear.RData")
 
 
 ## @knitr Question1-1
-# QUESTION 1 --------------------------------------------------------------
-# Examine the prate variable and comment on the shape of its distribution
+#Describe the general characteristics of the dataset. 
+desc
+summary(data)
 
 
+## @knitr Question2
+# QUESTION 2 --------------------------------------------------------------
+# Interpret the coefficients beta4 and beta8.
 
 ## @knitr Question2-1
-# QUESTION 2 --------------------------------------------------------------
-# Examine the mrate variable and comment on the shape of its distribution
+# Create the model and examine the coefficients of interest.
+model <- lm(lwage~jc + univ + exper + black + hispanic + AA + 
+              BA + exper*black, data = data)
 
+model$coefficients[5]
+model$coefficients[9]
 
+## @knitr Question3
+# QUESTION 3 --------------------------------------------------------------
+# Test that the return to university education is 7%.
 
 ## @knitr Question3-1
-# QUESTION 3 --------------------------------------------------------------
-# Scatterplot of prate against mrate and linear regression of former on latter
-
-
+#Testing hypothesis that the true value of the coefficient for univ is 0.7
+t <-  (model$coefficients[3] - 0.07)/(coef(summary.lm(model))[,2][3])
+p_value = 2 * pt(t, dim(data)[1] - 1, lower.tail = F)
+t
+p_value
 
 ## @knitr Question4
 # QUESTION 4 --------------------------------------------------------------
-# Assumption of zero-conditional mean: E[u|x] = 0
+# Test that the return to junior college education is equal for black and 
+# non-black.
 
+## @knitr Question4-1
+linearHypothesis(model, c("black = 0"), vcov = vcovHC(model))
 
 
 ## @knitr Question5
 # QUESTION 5 --------------------------------------------------------------
-# ...
+# Test whether the return to university education is equal to the return to 
+# 1 year of working experience.
+
+## @knitr Question5-1
+linearHypothesis(model, c("univ = 12*exper"), vcov = vcovHC(model))
 
 
+## @knitr Question6
+# QUESTION 6 --------------------------------------------------------------
+# Test the overall significance of this regression.
 
 ## @knitr Question6-1
-# QUESTION 6 --------------------------------------------------------------
-# ...
-
-
+summary.lm(model)
 
 
 ## @knitr Question7
 # QUESTION 7 --------------------------------------------------------------
-# ...
+# Including a square term of working experience to the regression model,
+# estimate the linear regression model again.
+# What is the estimated return to work experience in this model?
 
+## @knitr Question7-1
+data$exper2 <- data$exper*data$exper
+model2 <- lm(lwage~jc + univ + exper + exper2 + black + hispanic + AA + 
+               BA + exper*black, data = data)
+summary.lm(model2)
 
 
 ## @knitr Question8
 # QUESTION 8 --------------------------------------------------------------
-# ...
+# Provide the diagnosis of the homoskedasticity assumption.
+# Does this assumption hold?
+# If so, how does it affect the testing of no effect of university education on
+# salary change?
+# If not, what potential remedies are available?
+
+
+## @knitr Question8-1
+plot(model)
+hist(model$residuals)

@@ -1,0 +1,329 @@
+---
+title: "**W271**-2 -- Spring 2016 -- **HW 3**"
+author: "***Juanjo Carin, Kevin Davis, Ashley Levato, Minghu Song***"
+date: "*February 17, 2016*"
+output:
+   pdf_document:
+     fig_caption: yes
+     toc: yes
+numbersections: false
+geometry: margin=1in
+options: width=30
+fontsize: 10pt
+linkcolor: blue
+header-includes:
+- \usepackage{fancyhdr}
+- \pagestyle{fancy}
+- \fancyhead[LO,LE]{Carin, Davis, Levato, Song}
+- \fancyhead[CE,CO]{W271 -- HW2 -- \leftmark}
+- \fancyhead[RE,RO]{\rightmark}
+- \fancyfoot[LO,LE]{UC Berkeley -- MIDS}
+- \fancyfoot[CO,CE]{Spring semester 2016}
+- \fancyfoot[RE,RO]{\thepage}
+- \renewcommand{\headrulewidth}{0.5pt}
+- \renewcommand{\footrulewidth}{0.5pt}
+---
+  
+**********
+
+
+
+\pagebreak
+
+# Exercises
+
+```{r, echo = FALSE}
+require(knitr, quietly = TRUE)
+read_chunk('code/W271_HW3_Carin-Davis-Levato-Song.R')
+opts_chunk$set(message = FALSE, warning = FALSE)
+opts_chunk$set(fig.width = 4, fig.height = 3)
+# Set path to data here (don't use setwd() inside a chunk!!!)
+opts_knit$set(root.dir = './data')
+```
+
+```{r Libraries-Functions-Constants, echo = FALSE}
+```
+
+
+
+## Question 1
+
+**Load the `twoyear.RData` dataset and describe the basic structure of the data.**
+  
+\small
+
+```{r Question1-1, echo = c(5:10)}
+```
+
+\normalsize
+
+There are `r dim(data)[1]` observations of `r dim(data)[2]` variables. There are `r sum(unlist(lapply(data, function(x) sum(is.na(x)))))` `NA`s in the whole dataset.
+
+One of the variables, `id`, is an ID number, so it should be unrelated with any other and hence of no interest. But it helps us to determine if the **random sampling** assumption (MRL.2) is met... which may not be the case: there are no observations for IDs between 65,500 and 70,000, and fewer members of the sample have an ID higher than 70,000, compared to lower values (see the missing ranges between 65,500 and 70,000, as well as the histogram, in the next page).
+
+\pagebreak
+
+```{r Question1-2, echo = c(1:4), fig.cap = "Histogram of ID numbers (in subsets of 2,000) in the sample"}
+```
+
+\label{hist-Q1}
+
+Without information about how the IDs were assigned, we will have to assume that for some reason those IDs between 65,500 and 70,000 did not even exist in the population, and that IDs higher than 70,000 have been assigned randomly---not subsequentially---and recently, and hence it is normal than fewer people in the sample have such higher IDs. I.e., we will assume that the sampling distribution resembles the distribution of the population and the dataset is a random sample of the population.
+
+
+
+**********
+
+\pagebreak
+
+## Question 2
+
+**Typically, you will need to thoroughly analyze each of the variables in the data set using univariate, bivariate, and multivariate analyses before attempting any model. For this homework, assume that this step has been conducted. Estimate the following regression:**
+  
+$$\begin{aligned}\mathbf{log(wage) =}& \mathbf{\ \beta_0 + \beta_1jc + \beta_2univ + \beta_3exper + \beta_4black + \beta_5hispanic} \\ & \mathbf{+\ \beta_6AA + \beta_7BA + \beta_8exper \cdot black+e}\end{aligned}$$
+  
+**Interpret the coefficients $\hat{\beta}_4$ and $\hat{\beta}_8$.**
+
+Before estimating the regression, let's remember the meaning and summary statistics of the variables of interest:
+
+```{r Question2-1, echo = -c(1:3)}
+```
+
+```{r Question2-2, echo = FALSE, results = 'asis'}
+```
+
+\label{table-Q2}
+
+> **All the *p* and *F* values shown in this document have been estimated using heteroskedasticity-robust standard errors.**
+
+As shown in Table 1 above, the coefficients of interest are $\hat{\beta}_4 = `r frmt(coeftest(model1, vcovHC(model1))[4+1, 1], digits = 4)` \ (`r frmt(coeftest(model1, vcovHC(model1))[4+1, 2], digits = 4)`)$ and $\hat{\beta}_8 = `r frmt(coeftest(model1, vcovHC(model1))[8+1, 1], digits = 4)` \ (`r frmt(coeftest(model1, vcovHC(model1))[8+1, 2], digits = 4)`)$, respectively. They mean that, all other factors held constant *at their baseline values* (i.e., 0 total 2- and 4-year credits, not being Hispanic, having no experience and neither a Bachelor's nor an Associate's degree):
+
++ on average, being African-American increases the log of hourly wage by `r frmt(coeftest(model1, vcovHC(model1))[4+1, 1], digits = 4)`. I.e., on average an African-American earns about $`r frmt(100*coeftest(model1, vcovHC(model1))[4+1, 1], digits = 1)`\%$ more than a person that is not. The estimate of this coefficient is not statistically significant ($p = `r frmt(coeftest(model1, vcovHC(model1))[4+1, 4])`$).
+
++ on average, each additional month of experience (the maximum value of `exper` is `r max(data$exper)` so we assume that its units of measurement are months, not years) decreases the log of wage by `r frmt(coeftest(model1, vcovHC(model1))[8+1, 1], digits = 4)`; i.e., roughly a $`r frmt(100*abs(coeftest(model1, vcovHC(model1))[8+1, 1]), digits = 1)`\%$ decrease. The estimate of this coefficient is statistically significant at the `r cut(coeftest(model1, vcovHC(model1))[8+1, 4], breaks = c(0, 0.001, 0.01, 0.05, 0.1, 1), labels = c('0.001', '0.001', '0.05', '0.1', '1'))` level.
+
+\pagebreak
+
+The diagnostic plots (below) show that all the CLM assumptions are met to some extent (the residuals are not totally homoskedastic---we will analyze this point in [Question 8](#question-8)):
+
+```{r Question2-3, echo = FALSE, fig.width = 6, fig.height = 4.5, fig.cap = "Diagnotic plots of the regression model"}
+```
+
+\label{regression-Q2}
+
+Anyway, using `exper` = 0 as the baseline does not make too much sense (the minimum value that `exper` takes is `r min(data$exper)`). We can build a new model where the mean value of that variable (`r frmt(mean(data$exper), digits = 1)`, presumably about `r frmt(mean(data$exper)/12, digits = 1)` years if the former value is in months) is the baseline by replacing `exper` by its value centered around its mean , `exper_mean = exper - mean(exper)`.
+
+```{r Question2-4, echo = TRUE, results = 'asis'}
+```
+
+As shown in Table 2 in the following page, all the coefficients except the intercept and the one corresponding to `black` remain the same. Now $\hat{\beta_4}$ becomes $`r frmt(coeftest(model2, vcovHC(model2))[4+1, 1], digits = 3)` \ (`r frmt(coeftest(model2, vcovHC(model2))[4+1, 2], digits = 3)`)$, and it's highly statistically significant ($p = `r formatC(coeftest(model2, vcovHC(model2))[4+1, 4], 2)`$). I.e., all other factors held constant *at their (new) baseline values* (i.e., 0 total 2- and 4-year credits, having neither a Bachelor's nor an Associate's degree, and `r frmt(mean(data$exper)/12, digits = 1)` years of experience), being African-American decreases the log of hourly wage by `r frmt(abs(coeftest(model2, vcovHC(model2))[4+1, 1]), digits = 3)` on average (about a $`r frmt(100*abs(coeftest(model2, vcovHC(model2))[4+1, 1]), digits = 1)`\%$ decrease). An additional month of experience still reduces the hourly wage by roughly another `r frmt(100*abs(coeftest(model2, vcovHC(model2))[8+1, 1]), digits = 1)` percentage points.
+
+```{r Question2-5, echo = FALSE, results = 'asis'}
+```
+
+\label{table-Q2-2}
+
+
+
+**********
+
+\pagebreak
+
+## Question 3
+
+**With this model, test that the return to university education is $7\%$.**
+
+Since we are using the log of the dependent variable, a coefficient of $7\%$ can be approximated by 0.07. But, strictly speaking, the coefficient $\hat{\beta}_2$ should be $\log(0.07+1) = `r frmt(log(0.07+1), digits = 4)`$ to have a return to university education of exactly $7\%$ (because $e^{\log(0.07+1)}-1=0.07$). We will test both hypotheses and see that we fail to reject the former (the approximation) but the latter (the exact hypothesis) is rejected at the 0.1 level (the size of our sample has a large influence, so overall we could say we should not reject the hypothesis, either approximate or exact).
+
+
+Because we want to test $H_0: \beta_2 = \mu$ (where $\mu = 0.07$ or $`r frmt(log(0.07+1), digits = 4)`$), the *t* statistic we have to use is:
+
+$$t = \cfrac{\hat{\beta}_2-\mu}{se(\hat{\beta}_2)}$$
+
+We can use the values for $\hat{\beta}_2$ and $se(\hat{\beta}_2)$ that we obtained before (shown in Table 1) to estimate the *p* value:
+
+```{r Question3-1, echo = -c(1:2)}
+```
+
+The *t* statistic for $\beta_2 = 0.07$ is quite low (about half the typical critical value of 1.96 for a 0.05 significance level), so the probability of obtaining such a low value is quite high (about $`r round(100*2*pt(t, dim(data)[1] - 1, lower.tail = FALSE), 1)` \%$) and hence we fail to reject the null hypothesis: we do not have enough evidence to believe that the return to university education is different than $7\%$.
+
+But the *t* statistic for $\beta_2 = \log(0.07 + 1) = `r frmt(log(0.07+1), digits = 4)`$ is below 1.64, the critical value for a 0.1 significance level (when the number of observations is huge and we can approximate a *t* distribution by the standard normal distribution), so the probability of obtaining such a low value is below 0.1 so we reject the hypothesis at that significance level.
+
+> Another way to test the hypothesis would be the following: suppose that our (simplified) model is $y = \beta_0 + \beta_2 x$; testing $\beta_2 = \mu$ is equivalent to test $\beta_2' = 0$, where $\beta_2' = \beta_2 - \mu$. Replacing $\beta_2$ by $\beta_2'+\mu$ we can rewrite the model as $y' = y-\mu x = \beta_0 + \beta_2'x$. If we do so, we should get an estimate $\hat{\beta}_2'$ close to zero, with the same *t* statistic and *p* value that we obtained above:
+
+> ```{r Question3-2, echo = TRUE}
+> ```
+
+> And yet another way would be:
+
+> ```{r Question3-3, echo = TRUE}
+> ```
+
+
+
+**********
+
+\pagebreak
+
+## Question 4
+
+**With this model, test that the return to junior college education is equal for black and non-black.**
+  
+Without including the corresponding interaction term (`jc * black`), the most we can test is whether the partial effect of junior college education has the same intercept for black and non-black (after controlling for all other factors), but no test about different slopes can be carried.
+
+```{r Question4-1, echo = -c(1:3)}
+```
+
+This would be equivalent to test the effect of dropping `black` from the regression model, so the *p* value is equal to the one of the *t* statistic of `black:
+
+```{r Question4-2, echo = TRUE}
+```
+
+The *p* value is quite high (see also Table 1), so we fail to reject the hypothesis.
+
+\pagebreak
+
+A visual inspection of `jc` against `lwage` for both groups seems to suggest that the intercepts are different (and the slopes are almost the same, maybe more pronounced for non-black).
+
+```{r Question4-3, echo = FALSE, fig.width = 6, fig.height = 4.5, fig.cap = "Scatterplot of junior college education against log of hourly wage for black and non-black"}
+```
+
+\label{scatter-Q4}
+
+But as mentioned, we won't have certainty without including the interaction term:
+
+```{r Question4-4, echo = c(2:3)}
+```
+
+\pagebreak
+
+```{r Question4-5, echo = FALSE, results = 'asis'}
+```
+
+\label{table-Q4}
+
+Neither the coefficient for `black` nor the one for the interaction with `jc` are statistically significant, but the proper test to check whether the return to junior college education is equal (it has the same intercept and slope) for black and non-black would be an *F* test comparing the whole model to the one dropping both terms (`black` and `jc*black`):
+
+```{r Question4-6, echo = TRUE}
+```
+
+Now that we know that the corresponding *F* test is not significant at all **we fail to reject that the return to junior college education is equal for black and non-black**.
+
+
+
+**********
+
+\pagebreak
+
+## Question 5
+
+**With this model, test whether the return to university education is equal to the return to 1 year of working experience.**
+  
+We want to test the hypothesis $H_0: \hat{\beta}_{univ} = 12 \cdot \hat{\beta}_{exper}$: 
+  
+```{r Question5-1, echo = -c(1:3)}
+```
+
+So we reject that hypothesis at the `r cut(linearHypothesis(model1, c("univ = 12*exper"), vcov = vcovHC)$'Pr(>F)'[2], breaks = c(0, 0.001, 0.01, 0.05, 0.1, 1), labels = c('0.001', '0.001', '0.05', '0.1', '1'))` level.
+
+> Another way would be to rewrite the model $log(wage) = \beta_0 + \beta_2univ + \beta_3exper + \dots$ as $log(wage) = \beta_0 + \beta_3(12 \cdot univ + expr) + \beta_3' univ + \dots$ (replacing $\beta_2$ by $12 \cdot \beta_3+\beta_3'$) and check whether $\beta_3'$ is statistically significantly different from zero:
+
+> ```{r Question5-2, echo = TRUE}
+> ```
+
+Interestingly, we fail to reject the two null hypotheses that the return to junior college education is equal to the return to:
+
+1. 1 year of working experience
+2. university education
+
+\pagebreak
+
+```{r Question5-3, echo = TRUE}
+```
+
+
+
+**********
+
+\pagebreak
+
+## Question 6
+
+**Test the overall significance of this regression.**
+
+The value of the *F* statistic for the overall significance of the regression ($F = `r frmt(waldtest(model1, vcov=vcovHC)$F[2])`, p = `r waldtest(model1, vcov=vcovHC)$'Pr(>F)'[2]`$) was already shown in Table 1, [Question 2](#question-2): we reject the hypothesis that none of the explanatory variables included in this regression model help to explain `lwage` (i.e., at least one of the coefficients is different from zero).
+
+```{r Question6, echo = -c(1:2)}
+```
+
+
+
+**********
+
+\pagebreak
+
+## Question 7
+
+**Including a square term of working experience to the regression model built above, estimate the linear regression model again. What is the estimated return to work experience in this model?**
+  
+```{r Question7-1, echo = c(5:6, 8:9)}
+```
+
+As shown in Table 4 in the following page, $\hat{\beta}_{exper}$ has now decreased to `r frmt(coeftest(model7, vcov = vcovHC(model7))[3+1, 1], digits = 4)` (and it's still highly statistically significant) and `$\hat{\beta}_{exper^2} = `r frmt(coeftest(model7, vcov = vcovHC(model7))[8+1, 1], digits = 6)`$ (not significant, $p = `r frmt(coeftest(model7, vcov = vcovHC(model7))[8+1, 4], digits = 2)`). This means that, holding all other variables fixed, the estimated return to work experience can be approximated by:
+
+$$\Delta\widehat{lwage} \simeq \left(\hat{\beta}_{exper} + 2 \hat{\beta}_{exper^2} exper \right)\Delta exper$$
+
+$$\%\Delta\widehat{wage} \simeq 100\left(\hat{\beta}_{exper} + 2 \hat{\beta}_{exper^2} exper \right)\Delta exper$$
+
+I.e., $\mathbf{\%\Delta\widehat{wage} \simeq (`r frmt(100*coeftest(model7, vcov = vcovHC(model7))[3+1, 1], digits = 6)` + `r frmt(100*coeftest(model7, vcov = vcovHC(model7))[8+1, 1]*2, digits = 8)` \cdot exper)\Delta exper}$. A 1-year increase in work experience for someone with an average experience will increase his or her hourly wage by $`r frmt(100 * (coeftest(model7, vcov = vcovHC(model7))[3+1, 1] + 2*coeftest(model7, vcov = vcovHC(model7))[8+1, 1] * mean(data$exper)) * 12, digits = 2)`\%$ (compared to an average $`r frmt(100 * coeftest(model1, vcov = vcovHC(model1))[3+1, 1] * 12, digits = 2)`\%$ increase if we don't include the square term of working experience in the model; but keep in mind the contribution of that effect is uncertain due to its lack of signficance).
+
+\pagebreak
+
+```{r Question7-2, echo = FALSE, results = 'asis'}
+```
+
+\label{table-Q7}
+
+
+
+**********
+
+\pagebreak
+
+## Question 8
+
+**Provide the diagnosis of the homoskedasticity assumption. Does this assumption hold? If so, how does it affect the testing of no effect of university education on salary change? If not, what potential remedies are available?**
+
+We can start running run a Breusch-Pagan test to test for heteroskedasticity. The results of two implementations of such test in R are slightly different, but both are significant, which indicates heteroskedasticity . . . but our sample is so large (`r dim(data)[1]` observations) that this test is very likely to yield a significant result even in the absence of heteroskedasticity.
+
+```{r Question8-1, echo = -c(1:7)}
+```
+
+For such a huge dataset, it's better to use diagnostic plots. Let's plot again two of the graphs already shown in Figure 2, this time with more detail:
+
+```{r Question8-2, echo = FALSE, fig.cap = "Residuals vs. Fitted values plot"}
+```
+
+\label{residuals-fitted-Q8}
+
+The thickness of the band in the residuals vs. fitted plot is almost the same for all fitted values. There seems to be less variance on both extremes, but that might be due to a lack of observations for the most extreme values of `lwage`.
+
+Since we are presented with a hypothesis that involves `univ`, let's also plot how the residuals vary with that specific variable. As shown in Figure 5, the variance is higher for extreme and middle values of `univ` (around the minimum, mean, and maximum) and lower (though not too much) for values inbetween.
+
+```{r Question8-3, echo = FALSE, fig.cap = "Residuals vs. University"}
+```
+
+\label{residuals-univ-Q8}
+
+Finally, the scale-location plot shows a almost horizontal band of points (which does not go upwards or downwards), which also suggests homoskedasticity.
+
+```{r Question8-4, echo = FALSE, fig.cap = "Scale-Location plot"}
+```
+
+\label{scale-location-Q8}
+
+The assumption of homoskedasticity (together with assumptions MLR.1 through MLR.4) is required for the OLS estimators to be BLUE (the best---the ones with less variance among---linear unbiased estimator). It is also required (together with the normality of errors) to ensure that the distribution of the *t* and *F* statistics follow *t* and *F* distributions, respectively. So if this assumption were broken, we would not be able to estimate the significance level of a hypothesis test like that university education has no effect on salary.
+
+There are some signs that the assumption is broken, which we can overcome by using **heteroskedasticity-robust standard errors** . . .  which we have done through this whole document. This way, we can be confident in the significance results of testing $H_0: \beta_{univ} = 0$ (which we reject at the `r formatC(coeftest(model1, vcov = vcovHC(model1))[2+1, 4], 1)` significance level!). 
+
+**********

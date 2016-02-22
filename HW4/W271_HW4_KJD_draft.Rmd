@@ -1,0 +1,208 @@
+---
+title: "**W271**-2 -- Spring 2016 -- **HW 4**"
+author: "***Juanjo Carin, Kevin Davis, Ashley Levato, Minghu Song***"
+date: "*February 24, 2016*"
+output:
+   pdf_document:
+     fig_caption: yes
+     toc: yes
+numbersections: false
+geometry: margin=1in
+options: width=30
+fontsize: 10pt
+linkcolor: blue
+header-includes:
+- \usepackage{fancyhdr}
+- \pagestyle{fancy}
+- \fancyhead[LO,LE]{Carin, Davis, Levato, Song}
+- \fancyhead[CE,CO]{W271 -- HW2 -- \leftmark}
+- \fancyhead[RE,RO]{\rightmark}
+- \fancyfoot[LO,LE]{UC Berkeley -- MIDS}
+- \fancyfoot[CO,CE]{Spring semester 2016}
+- \fancyfoot[RE,RO]{\thepage}
+- \renewcommand{\headrulewidth}{0.5pt}
+- \renewcommand{\footrulewidth}{0.5pt}
+---
+  
+**********
+
+
+
+# Data
+
+**The file `athletics.RData` contains a two-year panel of data on 59 universities. Some variables relate to admissions, while others are related to atheletic performance. You will use this dataset to investigate whether athletic success causes more students to apply to a university.**
+
+**This data was made available by Wooldridge, and collected by Patrick Tulloch, then an economics student at MSU. It may have been further modified to test your proficiency. Sources are as follows:**
+
+- **Peterson's Guide to Four Year Colleges, 1994 and 1995 (24th and 25th editions). Princeton University Press. Princeton, NJ.**
+- **The Official 1995 College Basketball Records Book, 1994, NCAA.**
+- **1995 Information Please Sports Almanac (6th edition). Houghton Mifflin. New York, NY.**
+
+
+
+**********
+
+\pagebreak
+
+# Exercises
+
+```{r, echo = FALSE}
+require(knitr, quietly = TRUE)
+read_chunk('code/W271_HW4_KJD_draft.R')
+opts_chunk$set(message = FALSE, warning = FALSE)
+opts_chunk$set(fig.width = 4, fig.height = 3)
+# Set path to data here (don't use setwd() inside a chunk!!!)
+opts_knit$set(root.dir = './data')
+```
+
+```{r Libraries-Functions-Constants, echo = FALSE}
+```
+
+
+
+## Question 1
+
+**Examine and summarize the dataset. Note that the actual data is found in the data object, while descriptions can be found in the `desc` object. How many observations and variables are there?**
+
+**Examine the variables of key interest: `apps` represents the number of applications for admission. `bowl`, `btitle`, and `finfour` are indicators of athletic success. The three athletic performance variables are all lagged by one year. Intuitively, this is because we expect a school's athletic success in the previous year to affect how many applications it recieves in the current year.**
+  
+```{r Question1-1, echo = c(7:8)}
+```
+
+The dataset consists of 116 observations of variables measuring athletic success and the number of applications to 58 universities. For each university, there are 2 observations, one from 1992 and one from 1993. 
+
+\pagebreak
+
+```{r Question1-2, echo = FALSE,  fig.cap = "Histogram of College Applications, 1992 - 1993"}
+```
+
+```{r Question1-3, echo = FALSE,  fig.cap = "Histogram of Logged College Applications, 1992 - 1993"}
+```
+
+\pagebreak
+
+```{r Question1-4, echo = FALSE,  fig.cap = "Histogram of Bowl Appearances, 1992 - 1993"}
+```
+
+```{r Question1-5, echo = FALSE,  fig.cap = "Histogram of Football Conference Championships, 1992 - 1993"}
+```
+
+\pagebreak
+
+```{r Question1-6, echo = FALSE,  fig.cap = "Histogram of Final Four Appearances, 1992 - 1993"}
+```
+
+The applicants variable is right skewed and possibly multi-model. The bowl appearance factor variable has a roughly equal split, while the majority of conference championship and final four variable observations are negative. 
+
+**********
+
+## Question 2
+
+**Note that the dataset is in long format, with a separate row for each year for each school. To prepare for a difference-in-difference analysis, transfer the dataset to wide-format. Each school should have a single row of data, with separate variables for 1992 and 1993. For example, you should have an `apps.1992` variable and an `apps.1993` variable to record the number of applications in either year.**
+
+**Create a new variable, `clapps` to represent the change in the log of the number of applications from 1992 to 1993. Examine this variable and its distribution.**
+
+**Which schools had the greatest increase and the greatest decrease in number of log applications?**
+
+```{r Question2-1, echo = c(11:15)}
+```
+
+```{r Question2-2, echo = c(1, 5)}
+```
+
+\pagebreak
+
+```{r Question2-3, echo = FALSE, fig.cap = "Histogram of the change in logged applications from 1992 to 1993" }
+```
+
+```{r Question2-4, echo = c(1:2)}
+```
+
+The University of Arizona had the highest increase in logged applications and  the University of Arkansas had the highest decrease in logged applications.
+
+**********
+
+## Question 3
+
+**Similarly to above, create three variables, `cperf`, `cbball`, and `cbowl` to represent the changes in the three athletic success variables. Since these variables are lagged by one year, you are actually computing the change in athletic success from 1991 to 1992.**
+
+**Which of these variables has the highest variance?**
+
+```{r Question3, echo = -c(1:4)}
+```
+
+```{r Question3-1, echo = c(1:4)}
+```
+
+The change in bowl appearance, cbowl, has the highest variance among the athletic performance variables. 
+
+**********
+
+## Question 4
+
+**We are interested in a population model,**
+
+$$\mathbf{lapps_i = \delta_0 + \beta_0I_{1993} + \beta_1bowl_i + \beta_2btitle_i + \beta_3finfour_i + a_i + u_{it}}$$
+
+**Here, $I_{1993}$ is an indicator variable for the year 1993. $a_i$ is the time-constant effect of school $i$. $u_{it}$ is the idiosyncratic effect of school $i$ at time $t$. The athletic success indicators are all lagged by one year as discussed above.**
+
+**At this point, we assume that (1) all data points are independent random draws from this population model (2) there is no perfect multicollinearity (3) $E(a_i) = E(u_{it}) = 0$.**
+
+**You will estimate the first-difference equation,**
+
+$$\mathbf{clapps_i = \beta_0 + \beta_1cbowl+i + \beta_2cbtitle_i + \beta_3cfinfour_i + a_i + cu_i}$$
+
+**where $cu_i = u_{i1993} - u_{i1992}$ is the change in the idiosyncratic term from 1992 to 1993.**
+
+a) **What additional assumption is needed for this population model to be causal? Write this in mathematical notation and also explain it intuitively in English.**
+
+We need to assume that the error term has the same variance given any values of the explanatory variables. This can be stated mathematically as:
+
+$$ Var(u|x_{1},\dots, x_{k}) = \sigma^2 $$
+
+Intuitively, this assumption means that the variance of the error does not depend on the values of x. We can examine this assumption by looking at the fitted vs. residuals plot and noting if the spread of the residuals tends to be the same over the entire range of the dataset. 
+
+b) **What additional assumption is needed for OLS to consistently estimate the first-difference model? Write this in mathematical notation and also explain it intuitively in English. Comment on whether this assumption is plausible in this setting.**
+
+To estimate the first-difference model we must assume 'parallel trends'. Take an example with period A(after) and B(before), indicator variable D = 1 if treated, and potential outcome $Y^0$
+
+$$ E(Y^{0}_{A} - Y^{0}_{B}|D=1) - E(Y^{0}_{A} - Y^{0}_{B}|D=0) = 0 $$
+
+Intuitively, this assumption says that if we consider the counter-factual where the treated group was not treated, then the change in the explanatory variable would have been the same for both groups. By comparing the trend for the treated group with a similar untreated control group, we can argue in favor of the parallel trends assumption, although it is not formally testable since the hypothetical untreated outcome for treated units is not observed.
+
+
+```{r Question4, echo = -c(1:2)}
+```
+
+
+
+**********
+
+\pagebreak
+
+## Question 5
+
+**Estimate the first-difference model given above. Using the best practices descibed in class, interpret the slope coefficients and comment on their statistical significance and practical significance.**
+
+
+```{r Question5-1, echo = FALSE, results = 'asis'}
+```
+
+The change in bowl appearances variable was associated with a statistically significant increase in change logged college applications, ($\beta$ = `r round(model$coefficients[4], 2)`, t = `r round(coeftest(model, vcov=vcovHC)[12],2)`, p = `r round(coeftest(model, vcov=vcovHC)[16],2)`). The coefficient for change in final four appearances was `r round(model$coefficients[2],2)` and was not statistically significant ($\beta$ = `r round(model$coefficients[2], 2)`, t = `r round(coeftest(model, vcov=vcovHC)[10],2)`). The coefficient for change in football conference titles was `r round(model$coefficients[3],2)` and was not statistically significant ($\beta$ = `r round(model$coefficients[3], 2)`, t = `r round(coeftest(model, vcov=vcovHC)[11],2)`). 
+
+To illustrate the magnitude of the effect for the change in bowl appearances variable, a college with average logged college applicants in 1992 would have an expected increase of `r round(((exp(mean(wide$lapps.1992) * (1 + model$coefficients[4]))) - exp(mean(wide$lapps.1992))),0)` applicants due to the effect of appearing in a bowl. 
+
+Both the change in final four appearances and change in college football conference titles variables suffer from the fact that there are very few observations in the yes group. This makes the assumption of parallel trends less plausible because the individual factors effecting this small group of colleges probably outweigh the national and regional factors effecting all colleges. If there was relative equality among the group sizes, we would expect these factors to be overwhelmed by national trends, but that is not the case here. 
+
+**********
+
+## Question 6
+
+**Test the joint signifance of the three indicator variables. This is the test of the overall model. What impact does the result have on your conclusions?**
+  
+```{r Question6, echo = -c(1:3)}
+```
+
+The overall significance test for the model was statistically significant (F(`r round(summary(model)$fstatistic[2],0)`, `r round(summary(model)$fstatistic[3],0)`) = `r formatC(round(summary(model)$fstatistic[1],2),format='f', digits=2)`, p = `r round(pf(summary(model)$fstatistic[1],summary(model)$fstatistic[2],summary(model)$fstatistic[3], lower.tail = F),2)`). This suggests that there is some effect of athletic performance on college enrollment. However, the issues with the group sizes in some variables, as well as the fact that this study was conducted over a two year period, with a relatively small sample of schools, means that this model is far from conclusive. Further investigation over a longer period of time would be needed to achieve a more conclusive result. 
+
+**********

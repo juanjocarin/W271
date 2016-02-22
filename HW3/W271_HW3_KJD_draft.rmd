@@ -1,0 +1,178 @@
+---
+title: "**W271**-2 -- Spring 2016 -- **HW 3**"
+author: "***Juanjo Carin, Kevin Davis, Ashley Levato, Minghu Song***"
+date: "*February 17, 2016*"
+output:
+   pdf_document:
+     fig_caption: yes
+     toc: yes
+numbersections: false
+geometry: margin=1in
+options: width=30
+fontsize: 10pt
+linkcolor: blue
+header-includes:
+- \usepackage{fancyhdr}
+- \pagestyle{fancy}
+- \fancyhead[LO,LE]{Carin, Davis, Levato, Song}
+- \fancyhead[CE,CO]{W271 -- HW2 -- \leftmark}
+- \fancyhead[RE,RO]{\rightmark}
+- \fancyfoot[LO,LE]{UC Berkeley -- MIDS}
+- \fancyfoot[CO,CE]{Spring semester 2016}
+- \fancyfoot[RE,RO]{\thepage}
+- \renewcommand{\headrulewidth}{0.5pt}
+- \renewcommand{\footrulewidth}{0.5pt}
+---
+
+**********
+
+
+# Exercises
+
+**Complete the following exercises, following the best practices outlined in class. Place your answers in a written report (pdf, word, or jupyter notebook format) along with relevant R statements and output.**
+
+```{r, echo = FALSE}
+require(knitr, quietly = TRUE)
+read_chunk('.\\code\\W271_HW3_KJD_draft.R')
+opts_chunk$set(message = FALSE, warning = FALSE)
+opts_chunk$set(fig.width = 4, fig.height = 3)
+# Set path to data here (don't use setwd() inside a chunk!!!)
+opts_knit$set(root.dir = './/data')
+```
+
+```{r Libraries-Functions-Constants, echo = FALSE}
+```
+
+
+
+## Question 1
+
+**Load the twoyear.RData dataset and describe the basic structure of the data.**
+
+
+```{r Load_Data, echo = -c(1:2)}
+```
+
+```{r Question1-1, echo = -c(1:2)}
+```
+
+The twoyear dataset contains 6763 observations of 23 variables related to wages,
+educational attainment, and respondent demographics. 
+
+## Question 2
+
+**Typically, you will need to thoroughly analyze each of the variables in the data set using univariate, bivariate, and multivariate analyses before attempting any model. For this homework, assume that this step has been conducted. Estimate the following regression:**
+  
+$$\begin{aligned}\mathbf{log(wage) =}& \mathbf{\ \beta_0 + \beta_1jc + \beta_2univ + \beta_3exper + \beta_4black + \beta_5hispanic} \\ & \mathbf{+\ \beta_6AA + \beta_7BA + \beta_8exper \cdot black+e}\end{aligned}$$
+  
+**Interpret the coefficients $\hat{\beta}_4$ and $\hat{\beta}_8$.**
+
+
+```{r Question2-1, echo = -c(1:2)}
+```
+
+The expected logged wages of black respondents, holding other variables constant, is $\Beta_0$ + $\Beta_4$ or 1.45. The coefficient for $\Beta_4$ represents the difference in logged wages for a black respondent versus a non-black respondent.
+The value of $\Beta_4$, 0.03, is not statistically significant ($\Beta_4$ = 0.03, t=0.54, p=n.s.). 
+
+The expected logged wages of respondents holding a bachelor's degree, holding other variables constant, is $\Beta_0$ + $\Beta_8$, or 1.50. The coefficient for $\Beta_8$ represents the difference in logged wages for a respondent with a bachelor's degree versus a respondent without a bachelor's degree. The value of $\Beta_8$, 0.02, is not statistically significant (beta_8 = 0.02, t=1.13, p=n.s.).
+
+
+\pagebreak
+
+## Question 3
+
+**With this model, test that the return to university education is 7%**
+
+
+```{r Question3, echo = -c(1:2)}
+```
+
+To test that the return to university education is 7%, we set up the following hypotheses:
+
+$$H_0: \Beta_2 = 0.7$$
+$$H_A: \Beta_2 \neq 0.7$$
+
+To obtain the t-statistic we use the following formula:
+
+$$t = \frac{\hat{\Beta} - H_0}{\hat{stderr}}$$
+
+```{r Question3-1, echo = -c(1:4)}
+```
+
+The coefficient for university is statistically different from 0.7 (t = -199, df = 6754, p < .001)
+
+
+## Question 4
+**With this model, test that the return to junior college education is equal for black and non-black.**
+
+```{r Question4, echo = -c(1:2)}
+```
+
+Given that this model does not include the interaction term of interest, we can only test if intercept for junior college is the same for black and non-black respondents.  
+
+```{r Question4-1, echo = -c(1:2)}
+```
+
+The differece in intercepts is not significantly diferent (F(1,6754) = 0.23, p = n.s.), suggesting that the returns for junior college for black and non black respondents are not different. 
+
+## Question 5
+
+**With this model, test whether the return to univeristy education is equal to the return to 1 year of working experience.**
+
+
+```{r Question5, echo = -c(1:2)}
+```
+
+Using the same approach to question 4 we can test the following hypotheses:
+
+$$H_0: \Beta_2 = 12* \Beta_3$$
+$$H_A: \Beta_2 \neq 12* \Beta_3$$
+
+```{r Question5-1, echo = -c(1:2)}
+```
+
+## Question 6
+
+**Test the overall significance of this regression.**
+
+```{r Question6, echo = -c(1:2)}
+```
+
+Looking at the regression output, we can test the hypothesis:
+
+$$H_0: \Beta_i = 0 \forall{i}$$
+
+```{r Question6-1, echo = -c(1:2)}
+```
+
+We reject the hypothesis that none of the coefficients in the model is statistically different from zero (f(8, 6754) = 249.6, p < 0.001)
+
+
+## Question 7
+
+**including a square term of working experience to the regression model built above, estimate the linear regression model again. What is the estimated return to work experience in this model?**
+
+```{r Question7, echo = -c(1:2)}
+```
+
+
+```{r Question7-1, echo = -c(1:4)}
+```
+
+With inclusion of the square of the return to work experience, the coefficient
+of the return to work experience is 0.004, which is a statistically significant increase in wages compared to workers with no experience (beta = 0.004, t(6753), p <.001). Inclusion of the square term lowers the coefficient for work experience by ~ 0.001. 
+
+## Question 8
+
+**Provide the diagnosis of the homoskedasticity assumption. Does this assumption hold? If so, how does it affect the testing of no effect of university education on salary change? If not, what potential remedies are available?**
+
+```{r Question8, echo = -c(1:2)}
+```
+
+```{r Question8-1}
+```
+
+Looking at the residuals versus fitted plot, the residuals do not appear to change in distribution at different values of logged wages. The q-q- plot shows that residuals within +- 3 standard deviations generally follow a normal distribution. Similarly, a histogram of the residuals looks generally normal. Given that the sample size is quiet large, normality tests find significant deviation from normallacy, but I would generally conclude the assumption of homoskedasticity is not violated in this case. 
+
+In the case of heteroskedasticity, we could no longer assume that our OLS estimates have the smallest possible variance among unbiased, linear estimators and we could not reliably estimate the variance of our coefficients. In this case, the use of robust standard errors would be appropriate. 
+
