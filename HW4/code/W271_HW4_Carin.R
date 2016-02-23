@@ -154,22 +154,31 @@ tableCount <- incCount(tableCount, "table-Q1")
 # ggplot(data2, aes(apps)) +
 #   geom_histogram(aes(y = (..count..)/sum(..count..)), colour = 'black',
 #                  fill = 'white', binwidth = 1000) +
-#   scale_y_continuous(labels = percent_format()) + 
-#   facet_wrap(nrow = 2, ~ year) + 
+#   scale_y_continuous(labels = percent_format()) +
+#   facet_wrap(nrow = 2, ~ year) +
 #   labs(x = "Number of applications for admission",
 #        y = "Relative frequency",
 #        title = "Histogram of applications for admission")
+# data_aux <- data2 %>% 
+#   select(school, year, apps) %>%
+#   group_by(school) %>%
+#   mutate(apps = mean(apps)) %>% 
+#   select(school, apps) %>% 
+#   filter(row_number() == 1) %>% 
+#   mutate(year = 'Average 1992-1993') %>% 
+#   select(school, year, apps)
 data_aux <- data2 %>% 
-  select(school, year, apps) %>%
-  group_by(school) %>%
-  mutate(apps = mean(apps)) %>% 
-  select(school, apps) %>% 
-  filter(row_number() == 1) %>% 
-  mutate(year = 'Average 1992-1993')
-data_aux <- rbind(data_aux, data2[, c('school', 'apps', 'year')])
+  select(school, year, apps) %>% 
+  gather(variable, value, -(year:school)) %>% 
+  unite(temp, variable, year, sep = ".") %>%
+  spread(temp, value) %>% 
+  mutate('1993 - 1992' = apps.1993 - apps.1992) %>% 
+  select(-matches('apps')) %>% 
+  gather(year, apps, -school)
+data_aux <- rbind(data_aux, data2[, c('school', 'year', 'apps')])
 ggplot(data_aux, aes(apps)) + 
   geom_histogram(aes(y = (..count..)/sum(..count..)), colour = 'black',
-                 fill = 'white', binwidth = 1000) +
+                 fill = 'white', binwidth = 500) +
   scale_y_continuous(labels = percent_format()) + 
   facet_wrap(nrow = 3, ~ year) + 
   labs(x = "Number of applications for admission",
@@ -319,6 +328,28 @@ tableCount <- incCount(tableCount, "table-Q2-2")
 # Schools more stable
 # data3 %>% arrange(abs(clapps)) %>% head(5)
 
+## @knitr Question2-5
+data_aux <- data3 %>% 
+  select(school, apps.1992, apps.1993, clapps) %>% 
+  mutate('log(apps) in 1992' = log(apps.1992), 
+         'log(apps) in 1993' = log(apps.1993), 
+         'change in log(apps)' = clapps) %>% 
+  select(school, matches('log')) %>% 
+  gather(year, value, -school) %>% 
+  mutate_each(funs(factor(., levels = c('log(apps) in 1992', 
+                                        'log(apps) in 1993', 
+                                        'change in log(apps)'))), year)
+ggplot(data_aux, aes(value)) + 
+  geom_histogram(aes(y = (..count..)/sum(..count..)), colour = 'black',
+                 fill = 'white', binwidth = 0.05) +
+  scale_y_continuous(labels = percent_format()) + 
+  facet_wrap(nrow = 3, ~ year) + 
+  labs(x = paste0("Log of number of applications for admission\n", 
+                  "(1992, 1993, and change)"),
+       y = "Relative frequency",
+       title = "Histogram of log of applications for admission per year")
+figCount <- incCount(figCount, "hist-Q2")
+
 
 
 ## @knitr Question3-1
@@ -365,19 +396,33 @@ stargazer2(model1, title = "Regression summary", digits = 4, digits.extra = 6,
                                 "Intercept (Constant): year 1993"))
 tableCount <- incCount(tableCount, "table-Q5")
 
-
 ## @knitr Question5-2
+autoplot(model1)
+figCount <- incCount(figCount, "regPlots-Q5")
+
+## @knitr Question5-3
+mean_apps.1992 <- mean(data3$apps.1992); mean_apps.1993 <- mean(data3$apps.1993)
+c(round(mean_apps.1992), round(mean_apps.1993))
+c((mean_apps.1993 - mean_apps.1992) / mean_apps.1992, 
+  (mean_apps.1992 - mean_apps.1993) / mean_apps.1993)
+model2 <- lm(clapps ~ 1, data3); coeftest(model2, vcov = vcovHC)
+
+## @knitr Question5-4
 model0 <- lm(log(apps) ~ as.factor(year) + bowl + btitle + finfour + 
                as.factor(school), data)
 coeftest(model0, vcov = vcovHC)[1:5, ]
 
-## @knitr Question5-3
-autoplot(model1)
 
 
-
-## @knitr Question6
+## @knitr Question6-1
 # QUESTION 6 --------------------------------------------------------------
 # Test the joint signifance of the three indicator variables. 
 # What impact does the result have on your conclusions?
-  
+waldtest(model1, vcov = vcovHC)
+# Another way
+# linearHypothesis(model1, c('cbowl', 'cbtitle', 'cfinfour'), vcov = vcovHC)
+
+## @knitr Question6-2
+waldtest(model1)
+# Same result that using
+# summary(model1)

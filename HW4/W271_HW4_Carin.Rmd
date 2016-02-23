@@ -168,6 +168,13 @@ The figures in the next three pages show the number of observations depending on
 
 \label{table-Q2-2}
 
+How does the sample distribution of this change in the log of applications for admission per year look like? As it happened if the log is not applied (see Figure 1), much more normal than the sample distribution of the log of applications each year:
+
+```{r Question2-5, echo = FALSE, fig.width = 6, fig.height = 4.5, fig.cap = "Histogram of log of applications for admission per year"}
+```
+
+\label{hist-Q2}
+
 
 
 **********
@@ -217,14 +224,36 @@ $$\mathbf{clapps_i = \beta_0 + \beta_1cbowl+i + \beta_2cbtitle_i + \beta_3cfinfo
 
 **where $cu_i = u_{i1993} - u_{i1992}$ is the change in the idiosyncratic term from 1992 to 1993.**
 
-First of all, we'll change the names of `cperf`, `cfinfour`, and `cbball` (as defined in [Question 3](#question-3)) to follow the notation in the formula above:
+First of all, we'll change the names of `cperf`, `cfinfour`, and `cbball` (as defined in [Question 3](#question-3)) to follow the notation in the formula above.
 
 ```{r Question4, echo = -c(1:2)}
 ```
 
 a) **What additional assumption is needed for this population model to be causal? Write this in mathematical notation and also explain it intuitively in English.**
 
+Causality is about whether manipulations to the independent variable influence the dependent variable but not the error term. For a model to be causal, we need to be able to introduce a manipulation in $x$, $dx$, that (we expect) will cause a change in $y$, $dy$, while the error term $u$ (that includes both the idiosyncratic error and the individual time-constant or fixed effect) needs to stay unchanged as we manipulate $x$. I.e., as long as
+
+$$\frac{\partial u}{\partial x} = 0$$
+
+we can claim that the effect of $x$ is
+
+$$\frac{\partial y}{\partial x} = \beta_1.$$
+
+
 b) **What additional assumption is needed for OLS to consistently estimate the first-difference model? Write this in mathematical notation and also explain it intuitively in English. Comment on whether this assumption is plausible in this setting.**
+
+The assumptions for OLS to consistently estimate the OLS parameters are:
+
+1. (the model is) linear in parameters
+2. random sampling
+3. no perfect collinearity (among the independent variables)
+3. zero mean (of the errors) and zero correlation (with any of the independent variables)
+
+The assumption that we have not made yet is the second part of the fourth one: that the errors (or unobserved factors) are uncorrelated with the (3) independent variables (the **exogeneity** assumption, together with $E(a_i) = E(u_{it}) = 0$). In a difference-in-difference model this means:
+
+$$Cov(\Delta u, \Delta x_j) = Cov(cu, cx_j) = 0 \ \forall j=1,2,\dots,k$$
+
+I.e., no individual-specific factors are changing over time, depending on the change of the independent variables. This may not be plausible in this setting: for example, winning one of those competitions may increase the income of a school, and that additional income might be spent on better professors or facilities, that would make the school more attractive and most likely for potential students to apply for admission. Or the other way around: an individual-specific factor that may cause the change in athletic success as well as more applications for admissions could have changed; for example, the school may have hired a highly reputed basketball coach, which can increase the number of applications for admission as well as the chances to win the title.
 
 
 
@@ -241,6 +270,45 @@ b) **What additional assumption is needed for OLS to consistently estimate the f
 
 \label{table-Q5}
 
+The standard errors shown in the Table above are **heteroskedasticity-robust**. This is always a good practice . . . and it's mandatory in this case because the homoskedasticity assumption does not hold, as the diagnostic plots in Figure 9 (see next page) suggest.
+
+> The normality assumption---keep in mind that our sample size is quite small: `r dim(data3)[1]` observations---and especially the zero conditional mean assumption are also broken.
+
+\pagebreak
+
+```{r Question5-2, echo = FALSE, fig.width = 5, fig.height = 3.75, fig.cap = "Diagnostic plots of the regression model"}
+```
+
+\label{regPlots-Q5}
+
+Since we are using the (change in) log of our dependent variable and the independent variables are binary, each coefficient can be understood as the estimated average effect of a change in those independent variables on the percentage change of the independent variable (`apps`; provided that the coefficient is not too high).
+
++ The intercept here is the average difference between 1993 and 1992: roughly `r frmt(coeftest(model1, vcov = vcovHC)[1, 1]*100, digits = 2)` percentage points more in the number of applications for admission. That effect (of the change in year) is neither statistically nor practically significant. 
+
+\small
+
+> > Let's prove that simplifying it a bit: considering all cases, not only the ones corresponding to the baseline case (no change in any of the athletic success indicators):
+
+> > ```{r Question5-3, echo = TRUE}
+> > ```
+
+\normalsize
+
++ The effect of the change in `bowl` (the only one statistically significant, $p = `r frmt(coeftest(model1, vcov = vcovHC)[2, 4])`$) means that winning the bowl game after not having won it the previous year increases the number of applications for admission the following year, on average, by roughly `r frmt(coeftest(model1, vcov = vcovHC)[2, 1]*100, digits = 2)` percentage points. This is also practically significant: almost `r round(mean(data3$apps.1992) * coeftest(model1, vcov = vcovHC)[2, 1] / 25) * 25` more applications on the average school.
+
++ The effect of the change in `btitle` means that winning the men's conference championship after not having won it the previous year increases the number of applications for admission the following year, on average, by roughly `r frmt(coeftest(model1, vcov = vcovHC)[3, 1]*100, digits = 2)` percentage points. This effect is practically significant (about `r round(mean(data3$apps.1992) * coeftest(model1, vcov = vcovHC)[3, 1])` more applications on the average school), but not statistically significant.
+
++ The effect of the change in `finfour` is the largest one in absolute value (though not statistically significant), but it's negative (and hence counterintuitive): it means that winning the men's final four after not having won it the previous year decreases the number of applications for admission the following year, on average, by roughly `r frmt(abs(coeftest(model1, vcov = vcovHC)[4, 1])*100, digits = 2)` percentage points. This would have a high practical significance: about `r round(mean(data3$apps.1992) * abs(coeftest(model1, vcov = vcovHC)[4, 1]))` fewer applications on the average school. Similarly---this same reasoning could be applied to the other variables of interest---, not winning the men's final four after having won it the previous year would increase the number of applications for admission the following year, on average, by roughly the same quantity, `r frmt(abs(coeftest(model1, vcov = vcovHC)[4, 1])*100, digits = 2)` percentage points.
+
+\small
+
+> > Of course, if we don't use the difference-in-difference model (and include the time-constant effect of school $i$, i.e., `school`) the values of the 4 coefficients are the same (but less precise---wider confidence intervals---; in this case not even `bowl` is significant):
+
+> > ```{r Question5-4, echo = TRUE}
+> > ```
+
+\normalsize
+
 
 
 **********
@@ -251,8 +319,16 @@ b) **What additional assumption is needed for OLS to consistently estimate the f
 
 **Test the joint signifance of the three indicator variables. This is the test of the overall model. What impact does the result have on your conclusions?**
   
-```{r Question6, echo = -c(1:3)}
+```{r Question6-1, echo = -c(1:3)}
 ```
 
+The *F* statistic for overall significance of the regression model is $`r frmt(waldtest(model1, vcov = vcovHC)$F[2])` \ (`r -waldtest(model1, vcov = vcovHC)$Df[2]`, `r waldtest(model1, vcov = vcovHC)$Res.Df[1]`)$ (as already shown in Table 4). Its *p* value is `r frmt(waldtest(model1, vcov = vcovHC)[[4]][2])`, so it's not significant at any acceptable level. Hence, the model does not help to explain the variance in the change in the log of applications; in other words, **athletic success seems unrelated to more students applying to a university**.
+
+Had we not used heteroskedasticity-robust standard errors, the *F* statistic would have been significant at the `r cut(waldtest(model1)[[4]][2], breaks = c(0, 0.001, 0.01, 0.05, 0.1, 1), labels = c('0.001', '0.001', '0.05', '0.1', '1'))` level.
+
+```{r Question6-2, echo = TRUE}
+```
+
+But as we demonstrated in [Question 5](#question-5), based on Figure 9, not using robust standard errors would not allow us to assume *t* and *F* distributions of the *t* and *F* statistics, so that signifcance level is meaningless in this case.
 
 **********
