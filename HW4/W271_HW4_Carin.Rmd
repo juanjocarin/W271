@@ -1,0 +1,258 @@
+---
+title: "**W271**-2 -- Spring 2016 -- **HW 4**"
+author: "***Juanjo Carin, Kevin Davis, Ashley Levato, Minghu Song***"
+date: "*February 24, 2016*"
+output:
+   pdf_document:
+     fig_caption: yes
+     toc: yes
+numbersections: false
+geometry: margin=1in
+options: width=30
+fontsize: 10pt
+linkcolor: blue
+header-includes:
+- \usepackage{fancyhdr}
+- \pagestyle{fancy}
+- \fancyhead[LO,LE]{Carin, Davis, Levato, Song}
+- \fancyhead[CE,CO]{W271 -- HW2 -- \leftmark}
+- \fancyhead[RE,RO]{\rightmark}
+- \fancyfoot[LO,LE]{UC Berkeley -- MIDS}
+- \fancyfoot[CO,CE]{Spring semester 2016}
+- \fancyfoot[RE,RO]{\thepage}
+- \renewcommand{\headrulewidth}{0.5pt}
+- \renewcommand{\footrulewidth}{0.5pt}
+---
+  
+**********
+
+
+
+# Data
+
+**The file `athletics.RData` contains a two-year panel of data on 59 universities. Some variables relate to admissions, while others related to atheletic performance. You will use this dataset to investigate whether athletic success causes more students to apply to a university.**
+
+**This data was made available by Wooldridge, and collected by Patrick Tulloch, then an economics student at MSU. It may have been further modified to test your proficiency. Sources are as follows:**
+
+- **Peterson’s Guide to Four Year Colleges, 1994 and 1995 (24th and 25th editions). Princeton University Press. Princeton, NJ.**
+- **The Official 1995 College Basketball Records Book, 1994, NCAA.**
+- **1995 Information Please Sports Almanac (6th edition). Houghton Mifflin. New York, NY.**
+
+
+
+**********
+
+\pagebreak
+
+# Exercises
+
+```{r, echo = FALSE}
+require(knitr, quietly = TRUE)
+read_chunk('code/W271_HW4_Carin.R')
+opts_chunk$set(message = FALSE, warning = FALSE)
+opts_chunk$set(fig.width = 4, fig.height = 3)
+# Set path to data here (don't use setwd() inside a chunk!!!)
+opts_knit$set(root.dir = './data')
+```
+
+```{r Libraries-Functions-Constants, echo = FALSE}
+```
+
+
+
+## Question 1
+
+**Examine and summarize the dataset. Note that the actual data is found in the data object, while descriptions can be found in the `desc` object. How many observations and variables are there?**
+
+**Examine the variables of key interest: `apps` represents the number of applications for admission. `bowl`, `btitle`, and `finfour` are indicators of athletic success. The three athletic performance variables are all lagged by one year. Intuitively, this is because we expect a school’s athletic success in the previous year to affect how many applications it recieves in the current year.**
+  
+```{r Question1-1, echo = -c(1:6)}
+```
+
+\pagebreak
+
+```{r Question1-1bis, echo = TRUE}
+```
+
+There are `r dim(data)[1]` observations of `r dim(data)[2]` variables (which correspond to `r dim(data)[1]/2` schools over two years, `r unique(data$year)[1]` and `r unique(data$year)[2]`.
+
+There are `r sum(unlist(lapply(data, function(x) sum(is.na(x)))))` `NA`s in the whole dataset, distributed as shown below:
+
+```{r Question1-2, echo = -c(1:2)}
+```
+
+None of the variables of interest contains missing values (so we don't have to omit any observation).
+
+For the rest of this assignment we'll focus on the 4 variables of interest mentioned above (and some others built from those ones), plus the names of the schools and the year (19922 or 1993).
+
+> There's no need to keep `lapps` since it's just the log of `apps` and we will only use its change from 1992 to 1993 (so we will have to apply a transformation anyway: $\log(apps.1993)-\log(apps.1992)$ instead of $lapps.1993 - lapps.1992$; the results may be slightly different---and more precise---because of the rounding decimal error at storing `lapps`).
+
+```{r Question1-3, echo = TRUE}
+```
+
+\pagebreak
+
+```{r Question1-4, echo = FALSE}
+```
+
+\label{table-Q1}
+
+```{r Question1-5, echo = FALSE, fig.width = 6, fig.height = 4.5, fig.cap = "Histogram of applications for admission per year"}
+```
+
+\label{hist-Q1}
+
+As shown above, in Figure 1, the sample distribution of `apps` is right-skewed (i.e., its skewness is positive skewed) and platykurtic (its excess kurtosis is negative, so it has thinner tails than the normal distribution). Both things happen each year, as well as to the average number of applications
+
+The figures in the next three pages show the number of observations depending on the three athletic success indicators for each of the two years under study, as well as the mean number of applications for admission is different whether if the school won the bowl game, the men's conference championship, or the final four in the previous year, but that difference is never significant (see how the confidence intervals always overlap in Figures 2, 4, and 6).
+
+```{r Question1-6, echo = FALSE, fig.cap = "Number of schools depending on bowl game in the previous year"}
+```
+
+\label{barchart-Q1-bowl-1}
+
+```{r Question1-7, echo = FALSE, fig.cap = "Bar chart of the mean number of applications depending on bowl game in the previous year"}
+```
+
+\label{barchart-Q1-bowl-2}
+
+```{r Question1-8, echo = FALSE, fig.cap = "Number of schools depending on men's conference championship in the previous year"}
+```
+
+\label{barchart-Q1-btitle-1}
+
+```{r Question1-9, echo = FALSE, fig.cap = "Bar chart of the mean number of applications depending on men's conference championship in the previous year"}
+```
+
+\label{barchart-Q1-btitle-2}
+
+```{r Question1-10, echo = FALSE, fig.cap = "Number of schools depending on men's final four in the previous year"}
+```
+
+\label{barchart-Q1-finfour-1}
+
+```{r Question1-11, echo = FALSE, fig.cap = "Bar chart of the mean number of applications depending on men's final four in the previous year"}
+```
+
+\label{barchart-Q1-finfour-2}
+
+
+
+**********
+
+\pagebreak
+
+## Question 2
+
+**Note that the dataset is in long format, with a separate row for each year for each school. To prepare for a difference-in-difference analysis, transfer the dataset to wide-format. Each school should have a single row of data, with separate variables for 1992 and 1993. For example, you should have an `apps.1992` variable and an `apps.1993` variable to record the number of applications in either year.**
+
+```{r Question2-1, echo = -c(1:9)}
+```
+
+\pagebreak
+
+**Create a new variable, `clapps` to represent the change in the log of the number of applications from 1992 to 1993. Examine this variable and its distribution.**
+
+```{r Question2-2, echo = TRUE}
+```
+
+**Which schools had the greatest increase and the greatest decrease in number of log applications?**
+
+```{r Question2-3, echo = -4}
+```
+
+\label{table-Q2-1}
+
+```{r Question2-4, echo = -c(4:7)}
+```
+
+\label{table-Q2-2}
+
+
+
+**********
+
+\pagebreak
+
+## Question 3
+
+**Similarly to above, create three variables, `cperf`, `cbball`, and `cbowl` to represent the changes in the three athletic success variables. Since these variables are lagged by one year, you are actually computing the change in athletic success from 1991 to 1992.**
+
+```{r Question3-1, echo = -c(1:4)}
+```
+
+**Which of these variables has the highest variance?**
+
+First, let's see how many of the `r dim(data3)[1]` schools in the sample won each title each year:
+
+```{r Question3-2, echo = TRUE}
+```
+
+Of course, this does not tell us anything about the variance: the same `r sum(data3$bowl.1992)` schools that won the bowl game in 1991 could have won it again in 1992.
+
+```{r Question3-3, echo = -1}
+```
+
+As shown above, **`r names(v[which(v == max(v))])`** is the variable with the highest variance.
+
+
+
+**********
+
+\pagebreak
+
+## Question 4
+
+**We are interested in a population model,**
+
+$$\mathbf{lapps_i = \delta_0 + \beta_0I_{1993} + \beta_1bowl_i + \beta_2btitle_i + \beta_3finfour_i + a_i + u_{it}}$$
+
+**Here, $I_{1993}$ is an indicator variable for the year 1993. $a_i$ is the time-constant effect of school $i$. $u_{it}$ is the idiosyncratic effect of school $i$ at time $t$. The athletic success indicators are all lagged by one year as discussed above.**
+
+**At this point, we assume that (1) all data points are independent random draws from this population model (2) there is no perfect multicollinearity (3) $E(a_i) = E(u_{it}) = 0$.**
+
+**You will estimate the first-difference equation,**
+
+$$\mathbf{clapps_i = \beta_0 + \beta_1cbowl+i + \beta_2cbtitle_i + \beta_3cfinfour_i + a_i + cu_i}$$
+
+**where $cu_i = u_{i1993} - u_{i1992}$ is the change in the idiosyncratic term from 1992 to 1993.**
+
+First of all, we'll change the names of `cperf`, `cfinfour`, and `cbball` (as defined in [Question 3](#question-3)) to follow the notation in the formula above:
+
+```{r Question4, echo = -c(1:2)}
+```
+
+a) **What additional assumption is needed for this population model to be causal? Write this in mathematical notation and also explain it intuitively in English.**
+
+b) **What additional assumption is needed for OLS to consistently estimate the first-difference model? Write this in mathematical notation and also explain it intuitively in English. Comment on whether this assumption is plausible in this setting.**
+
+
+
+**********
+
+\pagebreak
+
+## Question 5
+
+**Estimate the first-difference model given above. Using the best practices descibed in class, interpret the slope coefficients and comment on their statistical significance and practical significance.**
+
+```{r Question5-1, echo = 5, results = 'asis'}
+```
+
+\label{table-Q5}
+
+
+
+**********
+
+\pagebreak
+
+## Question 6
+
+**Test the joint signifance of the three indicator variables. This is the test of the overall model. What impact does the result have on your conclusions?**
+  
+```{r Question6, echo = -c(1:3)}
+```
+
+
+**********
