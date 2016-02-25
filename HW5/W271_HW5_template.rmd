@@ -1,0 +1,153 @@
+---
+title: "**W271**-2 -- Spring 2016 -- **HW 4**"
+author: "***Juanjo Carin, Kevin Davis, Ashley Levato, Minghu Song***"
+date: "*February 24, 2016*"
+output:
+   pdf_document:
+     fig_caption: yes
+     toc: yes
+numbersections: false
+geometry: margin=1in
+options: width=30
+fontsize: 10pt
+linkcolor: blue
+header-includes:
+- \usepackage{fancyhdr}
+- \pagestyle{fancy}
+- \fancyhead[LO,LE]{Carin, Davis, Levato, Song}
+- \fancyhead[CE,CO]{W271 -- HW2 -- \leftmark}
+- \fancyhead[RE,RO]{\rightmark}
+- \fancyfoot[LO,LE]{UC Berkeley -- MIDS}
+- \fancyfoot[CO,CE]{Spring semester 2016}
+- \fancyfoot[RE,RO]{\thepage}
+- \renewcommand{\headrulewidth}{0.5pt}
+- \renewcommand{\footrulewidth}{0.5pt}
+---
+
+
+\pagebreak
+
+# Exercises
+
+```{r, echo = FALSE}
+require(knitr, quietly = TRUE)
+read_chunk('code/W271_HW5_template.R')
+opts_chunk$set(message = FALSE, warning = FALSE)
+opts_chunk$set(fig.width = 4, fig.height = 3)
+# Set path to data here (don't use setwd() inside a chunk!!!)
+opts_knit$set(root.dir = './data')
+```
+
+```{r Libraries-Functions-Constants, echo = FALSE}
+```
+
+
+
+## Question 1
+
+
+**1. Install the library "astsa" using the function: install.packages("astsa")**
+
+```{r Question1-1, echo = -c(1:6)}
+```
+
+**2. Load the library: library(astsa)**
+
+```{r Question1-2, echo = -c(1:6)}
+```
+
+**3. Use the function str() to see the information of a particular data series, such as
+str(EQ5) for the Seismic Trace of Earthquake number 5 series.**
+
+```{r Question3, echo = -c(1:6)}
+```
+
+**4. Plot the time series plots and histograms of the following 3 series. Feel free to use
+the codes provided in the R scripts. Make sure that each of your graph has a title,
+the axis ticks are clear, the axes are well-labelled, and use color intelligently.**
+
+```{r Question1-4, echo = -c(1:6)}
+```
+
+**5. Write a few sentences to describe each of the series.**
+*EQ5
+*flue
+*gas 
+  
+```{r Question1-5, echo = -c(1:6)}
+```
+
+
+
+**********
+
+## Question 2
+
+**Describe 3 examples you have used in your work or encounter in real life. Ideally, you
+can even load at least one of these time series, plot it, and the write a few statements to
+describe its characteristics.**
+
+```{r Question2, echo = -c(1:9)}
+```
+
+
+
+**********
+
+## Question 3
+
+**Simulate a white noise series with 1000 random draws and plot (1) a time series plot and
+(2) a histogram. The usual reqirements on graphics (described) in Question 1) applied.**
+
+
+```{r Question3, echo = -c(1:4)}
+```
+
+
+
+**********
+
+## Question 4
+
+**Simulate (with 1000 random draws) two the following two zero-mean autoregressive model
+with order 1 (i.e. AR(1)) models:**
+
+$$yt=  0.9 y_{t1} + w$$
+$$y_t=  0.2 y_{t1} + w$$
+
+**Plot a time plot for each of the simulated series. Graph a histogram for each of thes
+simulated series. Write a few statements to compare the two series.**
+
+```{r Question4, echo = -c(1:2)}
+```
+
+
+
+**********
+
+## Question 5
+
+**Simulate (with 1000 random draws) the following 3 models:**
+
+**1. A deterministic linear (time) trend of the form: yt = 10 + 0:5t**
+
+```{r Question5-1, echo = -c(1:4)}
+```
+
+**2. Random walk without drift**
+
+```{r Question5-2, echo = -c(1:4)}
+```
+
+**3. Random walk with drift = 0.5**
+
+```{r Question5-3, echo = -c(1:4)}
+```
+
+**Plot a time plot for each of the simulated series. Graph a histogram for each of thes
+simulated series. Write a few statements to compare the two series.**
+
+```{r Question5-4, echo = -c(1:4)}
+```
+
+**********
