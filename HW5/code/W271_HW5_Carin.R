@@ -1,4 +1,4 @@
-## MIDS W271-4 HW4            ##
+## MIDS W271-4 HW5            ##
 ## Carin, Davis, Levato, Song ##
 
 
@@ -107,54 +107,65 @@ tableCount <- c(`_` = 0)
 
 
 
-## @knitr Question1
+## @knitr Question1-1
 # QUESTION 1 --------------------------------------------------------------
-# Examine and summarize the dataset.
-# How many observations and variables are there?
-# Examine the variables of key interest: apps, bowl, btitle, and finfour.
-# Path relative to W271.Rproj, never to be run by the .Rmd (conflict with knitr)
-# setwd('HW4/data')
-load("athletics.RData")
+# Install the library "astsa" using the function: install.packages("astsa")
+# Check if already installed; if not, install it
+if (!"astsa" %in% installed.packages()[, "Package"]) install.packages("astsa")
+
+## @knitr Question1-2
+# Load the library: library(astsa)
+library(astsa)
+# Last two commands can be substituted by simply...
+if (!require(astsa)) install.packages("astsa")
+
+## @knitr Question1-3
+# Use the function str() to see the information of a particular data series, 
+# such as str(EQ5) for the Seismic Trace of Earthquake number 5 series
+str(EQ5)
+str(flu)
+str(gas)
+
+## @knitr Question1-4
+# Plot the time series plots and histograms of the following 3 series.
+
+## @knitr Question1-5
+# Write a few sentences to describe each of the series: EQ5, flu, and gas
 
 
 
 ## @knitr Question2
 # QUESTION 2 --------------------------------------------------------------
-# To prepare for a difference-in-difference analysis, transfer the dataset to 
-# wide-format. Each school should have a single row of data, with separate 
-# variables for 1992 and 1993.
-# Create a new variable, clapps to represent the change in the log of the 
-# number of applications from 1992 to 1993.
-# Examine this variable and its distribution.
-# Which schools had the greatest increase and the greatest decrease in number 
-# of log applications?
+# Describe 3 examples you have used in your work or encounter in real life. 
+# Ideally, you can even load at least one of these time series, plot it, 
+# and the write a few statements to describe its characteristics.
+
 
 
 ## @knitr Question3
 # QUESTION 3 --------------------------------------------------------------
-# Create 3 variables, cperf, cbball, and cbowl to represent the changes in the 
-# 3 athletic success variables.
-# Which of these variables has the highest variance?
+# Simulate a white noise series with 1000 random draws and plot 
+# (1) a time series plot and
+# (2) a histogram.
 
 
 
 ## @knitr Question4
 # QUESTION 4 --------------------------------------------------------------
-# ...
+# Simulate (with 1000 random draws) the following two zero-mean 
+# autoregressive model with order 1 (i.e. AR(1)) models:
+# yt = 0.9yt1 + w
+# yt = 0.2yt1 + w
+# Plot a time plot for each of the simulated series. 
+# Graph a histogram for each of the simulated series.
 
 
 
 ## @knitr Question5
 # QUESTION 5 --------------------------------------------------------------
-# Estimate the first-difference model given above.
-# interpret the slope coefficients and comment on their statistical 
-# significance and practical significance.
-
-
-
-
-## @knitr Question6
-# QUESTION 6 --------------------------------------------------------------
-# Test the joint signifance of the three indicator variables. 
-# What impact does the result have on your conclusions?
-  
+# Simulate (with 1000 random draws) the following 3 models:
+# 1. A deterministic linear (time) trend of the form: yt = 10 + 0.5t
+# 2. Random walk without drift
+# 3. Random walk with drift = 0.5
+# Plot a time plot for each of the simulated series. 
+# Graph a histogram for each of the simulated series.
