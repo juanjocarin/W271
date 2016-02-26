@@ -58,8 +58,10 @@ opts_knit$set(root.dir = './data')
 
 3. **Use the function `str()` to see the information of a particular data series, such as `str(EQ5)` for the Seismic Trace of Earthquake number 5 series**
 
-```{r Question1-3, echo = TRUE}
+```{r Question1-3, echo = -c(1:2)}
 ```
+
+According to that [package documentation](https://cran.r-project.org/web/packages/astsa/astsa.pdf), `EQ5` corresponds to the *Seismic trace of an earthquake [two phases or arrivals along the surface, the primary wave (t = 1, . . . , 1024) and the shear wave (t = 1025, . . . , 2048)] recorded at a seismic station.*
 
 4. **Plot the time series plots and histograms of the following 3 series. Feel free to use the codes provided in the R scripts. Make sure that each of your graph has a title, the axis ticks are clear, the axes are well-labelled, and use color intelligently.**
 
@@ -70,16 +72,15 @@ opts_knit$set(root.dir = './data')
 
   + **EQ5**
 
-...
+  ...
 
   + **flu**
 
-...
+  ...
 
   + **gas**
 
-...
-
+  ...
 
 
 
