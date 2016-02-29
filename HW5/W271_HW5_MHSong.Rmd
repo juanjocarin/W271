@@ -87,10 +87,9 @@ According to that [package documentation](https://cran.r-project.org/web/package
 
 **Describe 3 examples you have used in your work or encounter in real life. Ideally, you can even load at least one of these time series, plot it, and the write a few statements to describe its characteristics.**
 
-+ **the fMRI Example:**
-Functional Magnetic Resonance Imaging (fMRI) is a powerful technique to address the functional connectivity within brain. We used the fMRI data in the astsa package as the illustrating example here. The plot below shows the fMRI spectrum measuring the blood oxygenationlevel
-dependent (BOLD) signal intensity from the cortex of four differnt subjects. For each subject, singals were sampled every 2 seconds for 256 seconds totally(n=128).  During the sampling process, the stimulus was first applied for 32 seconds and then stopped for the subsequent 32 seconds. Therefore, the whole sampling process (256 seconds) covers four periodic components.     
-
++ **the Biotech Stock Example:**
+Stock closing data is one kind of Non-regular time series and they will change every day as a result of market forces.  We use Biogen as the example here. Its closing stock price went up and down significantly in 2015 due to the promising clinical results of aducanumab for Alzheimer treatment in March as well as later unexpected slowing sales of its multiple sclerosis drug, Tecfidera.  
+   
 ```{r Question2-1, echo = -c(1:1)}
 ```
 
@@ -98,6 +97,14 @@ dependent (BOLD) signal intensity from the cortex of four differnt subjects. For
 The 2nd examples show the monthly averaged electricity usage of my house between 2014 and 2015.  This data shown summers, in general, tended to have lower monthly averaged electricity usage (<20KWh) than the other seasons.      
 
 ```{r Question2-2, echo = -c(1:1)}
+```
+
++ **the fMRI Example:**
+Functional Magnetic Resonance Imaging (fMRI) is a powerful technique to address the functional connectivity within brain. We used the fMRI data in the astsa package as the illustrating example here. The plot below shows the fMRI spectrum measuring the blood oxygenationlevel
+dependent (BOLD) signal intensity from the cortex of four differnt subjects. For each subject, singals were sampled every 2 seconds for 256 seconds totally(n=128).  During the sampling process, the stimulus was first applied for 32 seconds and then stopped for the subsequent 32 seconds. Therefore, the whole sampling process (256 seconds) covers four periodic components.  
+
+
+```{r Question2-3, echo = -c(1:1)}
 ```
 
 **********

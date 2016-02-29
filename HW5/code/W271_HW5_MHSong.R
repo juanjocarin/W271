@@ -17,6 +17,7 @@ library(lmtest)
 library(dplyr)
 library(stargazer)
 library(texreg)
+library(xts)
 
 # Define functions
 
@@ -155,12 +156,53 @@ qplot(gas, geom="histogram",  main='Histogram of Gas',
 # and the write a few statements to describe its characteristics.
 
 ## @knitr Question2-1
-# Plot the fMRI data example within the astsa package 
-autoplot(fmri1[,2:5],  ylab="Blood Oxygenationlevel Dependent
-         (BOLD) Signal Intensity", xlab="",main="Cortex",  ts.colour = 'dodgerblue3')
+# Plot some biotech stocks to watch in 2016.
+# define the variable to get access to the yahoo finacial stock data 
+biogen_stock_url <- "http://real-chart.finance.yahoo.com/table.csv?s=BIIB
+&a=07&b=24&c=2010&d=07&e=24&f=2015&g=d&ignore=.csv"
+mdvn_stock_url <- "http://real-chart.finance.yahoo.com/table.csv?s=MDVN
+&a=07&b=24&c=2010&d=07&e=24&f=2015&g=d&ignore=.csv"
+lexicon_stock_url <- "http://real-chart.finance.yahoo.com/table.csv?s=LXRX
+&a=07&b=24&c=2010&d=07&e=24&f=2015&g=d&ignore=.csv"
+gilead_stock_url <- "http://real-chart.finance.yahoo.com/table.csv?s=GILD
+&a=07&b=24&c=2010&d=07&e=24&f=2015&g=d&ignore=.csv"
+enanta_stock_url <- "http://real-chart.finance.yahoo.com/table.csv?s=ENTA
+&a=07&b=24&c=2010&d=07&e=24&f=2015&g=d&ignore=.csv"
+celgen_stock_url <- "http://real-chart.finance.yahoo.com/table.csv?s=CELG
+&a=07&b=24&c=2010&d=07&e=24&f=2015&g=d&ignore=.csv"
+
+# define function to read financial data through url
+yahoo.read <- function(url){
+  dat <- read.table(url,header=TRUE,sep=",")
+  df <- dat[,c(1,5)]
+  df$Date <- as.Date(as.character(df$Date))
+  return(df)}
+
+# grap the stock data from 2010 to 2016 for those companies 
+biogen  <- yahoo.read(biogen_stock_url)
+medivation <- yahoo.read(mdvn_stock_url)
+lexicon <- yahoo.read(lexicon_stock_url)
+gilead <- yahoo.read(gilead_stock_url)
+enanta <- yahoo.read(enanta_stock_url)
+celgen <- yahoo.read(celgen_stock_url)
+
+# time series plot for those stocks 
+ggplot(biogen,aes(Date,Close)) +  
+  geom_line(aes(color="biogen")) +
+  geom_line(data=medivation,aes(color="medivation")) +
+  geom_line(data=lexicon,aes(color="lexicon")) +
+  geom_line(data=gilead,aes(color="gilead")) +
+  geom_line(data=enanta,aes(color="enanta")) +
+  geom_line(data=celgen,aes(color="celgen")) +
+  labs(color="Legend") +
+  scale_colour_manual("", breaks = c("biogen", "medivation","lexicon","gilead","enanta","celgen"),
+                      values = c("red", "brown", "green", "blue","purple","black")) +
+  ggtitle("Biotech. Stocks to Watch in 2016") +
+  theme(plot.title = element_text(lineheight=.7, face="bold")) 
 
 ## @knitr Question2-2
 # the daily electricity usage for every month during 2014 Jan. and 2015 Dec.
+# load monthyl averaged electricity usage for months in 2014 and 2015
 elec_usage = c(35.94, 29.68, 31.83, 31.36, 24.61, 17.91, 18.29, 17.74, 15.70, 
               +19.33, 23.90, 23.39, 23.30, 28.63, 29.07, 24.27, 20.68, 18.33,
               +18.42, 18.41, 24.66, 18.93, 23.03, 23.18)
@@ -169,7 +211,10 @@ autoplot(elec_usage_ts, main='Monthyl Electricity Usage in 2014 & 2015', geom = 
          xlab='Time', ylab='Daily Electricity Usage (KWh)')
 
 ## @knitr Question2-3
-# Plot the .
+# Plot the fMRI data example within the astsa package 
+autoplot(fmri1[,2:5],  ylab="Blood Oxygenationlevel Dependent
+         (BOLD) Signal Intensity", xlab="",main="Cortex",  ts.colour = 'dodgerblue3')
+
 
 ## @knitr Question3
 # QUESTION 3 --------------------------------------------------------------
