@@ -30,7 +30,7 @@ header-includes:
 
 ```{r, echo = FALSE}
 require(knitr, quietly = TRUE)
-read_chunk('code/W271_Lab2_template.R')
+read_chunk('code/W271_Lab2_Carin.R')
 opts_chunk$set(message = FALSE, warning = FALSE)
 opts_chunk$set(fig.width = 4, fig.height = 3)
 # Set path to data here (don't use setwd() inside a chunk!!!)
@@ -49,16 +49,40 @@ opts_knit$set(root.dir = './data')
 $f_X = U(0,1)$ and $f_{Y|X}=U(0,X)$ (because the maximum length of the second left piece cannot be greater than the length of the first left piece). As we know, the probability density function for a variable $Z$ that follows a uniform distribution $U(a,b)$ is:
 
 $$f_Z(z) = \begin{cases}
-\cfrac{1}{b-a} & a\leq z\leq\ b \\
+\cfrac{1}{b-a} & a \leq z \leq b \\
 0 & \text{otherwise}
 \end{cases}$$
 
+So:
+
+$$f_{Y|X}(y|x) = \begin{cases}
+\cfrac{1}{x} & 0 \leq z \leq x \\
+0 & \text{otherwise}
+\end{cases}$$
+
+And:
+
 $\mathbf{\color{red}{E(Y|X)}} = \displaystyle\int_\mathbb{Y} y \cdot f_{Y|X}(y|x) \cdot dy = \displaystyle\int_{y=0}^x y \cdot \cfrac{1}{x} \cdot dy = \cfrac{1}{x}\left[ \cfrac{y^2}{2}\right]_{y=0}^x = \cfrac{x^2}{2x} = \mathbf{\color{red}{\cfrac{x}{2}}}$
 
+We'll make use of some simulations through this Question to confirm the results.
+
+\small
+
+> ```{r Question1-1-1, echo = -c(1:2), fig.cap = "Histogram and approximate pdf of $X$ and $Y$"}
+> ```
+
+\pagebreak
+
+> ```{r Question1-1-2, echo = TRUE, fig.cap = "Approximate pdf of $Y$ conditional on $X$ for a given value of $X$ (0.2)"}
+> ```
+
+\normalsize
+
+\pagebreak
 
 2. **Find the unconditional expectation of $\mathbf{Y}$. One way to do this is to apply the law of iterated expectations, which states that $\mathbf{E(Y) = E(E(Y|X))}$. The inner expectation is the conditional expectation computed above, which is a function of $\mathbf{X}$. The outer expectation finds the expected value of this function.**
 
-$\mathbf{\color{red}{E(Y)}} = E\left[E(Y|X)\right] = \displaystyle\int_\mathbb{X} E(Y|X) \cdot f_X(x) \cdot dx = \int_{x=0}^1 \cfrac{x}{2} \cdot 1 \cdot dx = \left[ \cfrac{x^2}{4}\right]_{x=0}^1 = \mathbf{\color{red}{\cfrac{1}{4}}}$
+$\mathbf{\color{red}{E(Y)}} = E\left[E(Y|X)\right] = \displaystyle\int_\mathbb{X} E(Y|X) \cdot f_X(x) \cdot dx = \int_{x=0}^1 \cfrac{x}{2} \cdot 1 \cdot dx = \left[ \cfrac{x^2}{4}\right]_{x=0}^1 = \mathbf{\color{red}{\cfrac{1}{4} = 0.25}}$
 
 
 3. **Write down an expression for the joint probability density function of $\mathbf{X}$ and $\mathbf{Y}$, $\mathbf{f_{X,Y}(x,y)}$.**
@@ -72,73 +96,50 @@ Let's check that this is a valid joint *pdf*:
 
 $\displaystyle\int_{\mathbb{X}} \displaystyle\int_{\mathbb{Y}} f_{X,Y}(x,y) \cdot dx \cdot dy = \displaystyle\int_{x=0}^1 \displaystyle\int_{y=0}^x\cfrac{1}{x} \cdot dy \cdot dx = \displaystyle\int_{x=0}^1 \left[\cfrac{y}{x}\right]_{y=0}^x dx = \displaystyle\int_{x=0}^1 dx = \left[x\right]_{x=0}^1 = 1$
 
+Simulations:
+
+\small
+
+> ```{r Question1-3, echo = TRUE, fig.width = 6, fig.height = 4.5, fig.cap = "Approximate joint pdf of $X$ and $Y$"}
+> ```
+
+\normalsize
+
+\pagebreak
+
 4. **Find the conditional probability density function of $\mathbf{X}$ given $\mathbf{Y}$, $\mathbf{f_{X|Y}}$.**
+
+In order to find $f_{X|Y}$ we need the marginal pdf of $Y$.
 
 $f_Y(y) = \displaystyle\int_{\mathbb{X}} f_{X,Y}(x,y) \cdot dx = \displaystyle\int_{y=0}^x \cfrac{1}{x} \cdot dx = \displaystyle\int_{x=y}^1 \cfrac{dx}{x} = \left[\log(x)\right]_{x=y}^1 dx = -\log(y)=\log\left(\cfrac{1}{y}\right)$
 
+This result confirms what the shape of $f_Y(y)$ in Figure 1 suggested.
+
+\small
+
+> ```{r Question1-4, echo = TRUE, fig.cap = "Approximate pdf of $Y$ conditional on $X$ for two values of $X$"}
+> ```
+
+\normalsize
+
 $\mathbf{\color{red}{f_{X|Y}(x|y)}}=\cfrac{f_{X,Y}(x,y)}{f_Y(y)} = \mathbf{\color{red}{\cfrac{-1}{x \cdot \log(y)}}}$
+
+
+\pagebreak
 
 5. **Find the expectation of $\mathbf{X}$, given that $\mathbf{Y}$ is $\mathbf{1/2}$, $\mathbf{E(X|Y = 1/2)}$.**
 
 $\begin{aligned}\mathbf{\color{red}{E(X|Y=1/2)}} &= \displaystyle\int_\mathbb{X} x \cdot f_{X|Y}(x|y=1/2) \cdot dx = \displaystyle\int_{x=1/2}^1 x \cdot \left(\cfrac{-1}{x \cdot \log(1/2)}\right) \cdot dx \\
 & = \cfrac{1}{\log(2)} \displaystyle\int_{x=1/2}^1 dx = \cfrac{1}{\log(2)}\left[x \right]_{x=1/2}^1 = \mathbf{\color{red}{\cfrac{1}{2\cdot\log(2)} = `r frmt(1/(2*log(2)))`}}\end{aligned}$
 
+\small
 
-```{r}
-library(plot3D)
-simulations <- 1e4
-x <- runif(simulations, min=0, max=1)
-y <- runif(simulations, min=0, max=x)
-par(mfrow = c(1, 2))
-hist(x, main = "pdf(x)")
-hist(y, main = "pdf(y|x)")
-plot(density(x), xlim=c(0,1))
-plot(density(y), xlim=c(0,1), main = 'pdf(y|x)')
+> ```{r Question1-5, echo = TRUE}
+> ```
 
-y <- runif(simulations, min=0, max=.5)
-plot(density(y), xlim=c(0,1), main = 'pdf(y|x=0.5)')
-y <- runif(simulations, min=0, max=.1)
-plot(density(y), xlim=c(0,1), main = 'pdf(y|x=0.1)')
-
-pdf_x <- function(x) ifelse(x<1 & x>0, 1, 0)
-pdf_y_given_x <- function(x,y) ifelse(y<x & y>0 & x<1 & x>0, 1/x, 0)
-
-pdf_y <- function(y) 
-  sapply(y, function(y) integrate(function(x) 
-    pdf_y_given_x(x,y)*pdf_x(x), 0, 1)$value)
-plot(sort(y), pdf_y(sort(y)), type = 'l', main = 'pdf(y)')
-plot(sort(y), log(1/sort(y)), type = 'l', main = 'pdf(y)')
-
-integrate(pdf_y, 0, 1)
+\normalsize
 
 
-x <- y <- seq(0, .2, by = 0.01)
-grid <- mesh(x, y)
-z <- with(grid, pdf_x(x)*pdf_y_given_x(x,y))
-par(mfrow = c(1, 2))
-contour(x, y, z, asp=1)
-persp3D(z = z, x = x, y = y)
-persp3D(z = z, x = x, y = y, pi = 0, theta = 0)
-persp3D(z = z, x = x, y = y, pi = 0, theta = 90)
-
-x <- y <- seq(0, 1, by = 0.01)
-grid <- mesh(x, y)
-z <- with(grid, pdf_x(x)*pdf_y_given_x(x,y))
-par(mfrow = c(1, 2))
-## 1st plot: contour lines
-contour(x, y, z, asp=1)
-persp3D(z = z, x = x, y = y)
-
-z2 <- with(grid, ifelse(x<=y | x==0 | y == 0, 0, 1/x))
-contour(x, y, z2, asp=1)
-persp3D(z = z2, x = x, y = y)
-
-integrate(pdf_x, 0, 1)
-
-pdf_xy <- function(x,y) pdf_x(x)*pdf_y_given_x(x,y)
-integrate(function(y) sapply(y, function(y) integrate(function(x) 
-  pdf_xy(x,y), 0, 1)$value), 0, 1)
-```
 
 **********
 
@@ -149,6 +150,60 @@ integrate(function(y) sapply(y, function(y) integrate(function(x)
 **Suppose that you are planning an investment in three different companies. The payoff per unit you invest in each company is represented by a random variable. $\mathbf{A}$ represents the payoff per unit invested in the first company, $\mathbf{B}$ in the second, and $\mathbf{C}$ in the third. $\mathbf{A}$, $\mathbf{B}$, and $\mathbf{C}$ are independent of each other. Furthermore, $\mathbf{Var(A) = 2Var(B) = 3Var(C)}$.**
 
 **You plan to invest a total of one unit in all three companies. You will invest amount $\mathbf{a}$ in the first company, $\mathbf{b}$ in the second, and $\mathbf{c}$ in the third, where $\mathbf{a,b, c \in [0,1]}$ and $\mathbf{a + b + c = 1}$. Find, the values of $\mathbf{a}$, $\mathbf{b}$, and $\mathbf{c}$ that minimize the variance of your total payoff.**
+
+Let's call $P$ the total payoff:
+
+$$Var(P) = Var(aA+bB+cC) = a^2Var(A) + b^2Var(B) + c^2Var(C)$$
+
+because $A$, $B$, and $C$ are independent of each other. And since $Var(A) = 2Var(B) = 3Var(C)$, we can derive that:
+
+$$Var(P) = Var(A)\left(a^2 + \cfrac{b^2}{2} + \cfrac{c^2}{3}\right)$$
+
+We want to:
+
+$$\begin{matrix}
+\text{minimize} & P(a,b,c)\\ 
+\text{subject to} & g(a,b,c) = 0
+\end{matrix}$$
+
+where $g(a,b,c)=a+b+c-1$, so $g(a,b,c)=0$ is our constraint.
+
+Using the Lagrange multiplier method, we can define:
+
+$$\mathcal{L}(a,b,c,\lambda) = P(a,b,c)-\lambda \cdot g(a,b,c)$$
+
+So to find our local minima we need to solve:
+
+$$\nabla_{a,b,c,\lambda}\mathcal{L} = 0$$
+
+$$\left( \cfrac{\partial\mathcal{L}}{\partial a}, \cfrac{\partial\mathcal{L}}{\partial b}, \cfrac{\partial\mathcal{L}}{\partial c}, \cfrac{\partial\mathcal{L}}{\partial \lambda}\right) = \left(2a-\lambda,b-\lambda,\cfrac{2}{3}c-\lambda,-(a+b+c-1)\right)=\mathbf{0}$$
+
+$$\Rightarrow \left\{\begin{matrix}
+2a-\lambda=0\\ 
+b-\lambda=0\\ 
+2c/3-\lambda=0\\ 
+a+b+c-1=0
+\end{matrix}\right.
+\Rightarrow \left\{\begin{matrix}
+a=\lambda/2\\ 
+b=\lambda\\ 
+c=3\lambda/2\\ 
+\cfrac{\lambda}{2}+\lambda+\cfrac{3\lambda}{2}=3\lambda=1
+\end{matrix}\right.
+\Rightarrow \left\{\begin{matrix}
+\mathbf{\color{red}{a=\cfrac{1}{6}}}\\ 
+\mathbf{\color{red}{b=\cfrac{1}{3}}}\\ 
+\mathbf{\color{red}{c=\cfrac{1}{2}}}
+\end{matrix}\right.$$
+
+Let's prove the result in R:
+
+\small
+
+```{r Question2, echo = -c(1:2)}
+```
+
+\normalsize
 
 
 
