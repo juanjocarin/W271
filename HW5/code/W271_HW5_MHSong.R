@@ -18,6 +18,9 @@ library(dplyr)
 library(stargazer)
 library(texreg)
 library(xts)
+library(weatherData)
+library(scales)
+
 
 # Define functions
 
@@ -201,6 +204,16 @@ ggplot(biogen,aes(Date,Close)) +
   theme(plot.title = element_text(lineheight=.7, face="bold")) 
 
 ## @knitr Question2-2
+# the daily tempreture of 2015 at JFK airport.
+# get access to the weather data through weatherdata package (need the scales package as well) 
+W_KJFK_2015 <- getWeatherForYear("KJFK",2015)
+W_KJFK_2015$Date <- as.Date(W_KJFK_2015$Date,format="%y-%m-%d")
+
+ggplot(W_KJFK_2015, aes(Date, Mean_TemperatureF)) + geom_line() +
+  scale_x_date(labels=date_format("%y/%m/%d")) + xlab("") + ylab("Mean Temp deg F") +
+  ggtitle("2015 Averaged Daily Temperature at JFK")
+
+## @knitr Question2-3
 # the daily electricity usage for every month during 2014 Jan. and 2015 Dec.
 # load monthyl averaged electricity usage for months in 2014 and 2015
 elec_usage = c(35.94, 29.68, 31.83, 31.36, 24.61, 17.91, 18.29, 17.74, 15.70, 
@@ -210,7 +223,7 @@ elec_usage_ts <- ts(elec_usage, start=c(2014, 1), end=c(2015, 12), frequency=12)
 autoplot(elec_usage_ts, main='Monthyl Electricity Usage in 2014 & 2015', geom = "bar",
          xlab='Time', ylab='Daily Electricity Usage (KWh)')
 
-## @knitr Question2-3
+## @knitr Question2-4
 # Plot the fMRI data example within the astsa package 
 autoplot(fmri1[,2:5],  ylab="Blood Oxygenationlevel Dependent
          (BOLD) Signal Intensity", xlab="",main="Cortex",  ts.colour = 'dodgerblue3')
