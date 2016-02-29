@@ -112,7 +112,7 @@ tableCount <- c(`_` = 0)
 # QUESTION 1 --------------------------------------------------------------
 # Find the conditional expectation of Y given X, E(Y|X)
 simulations <- 1e4 # number of simulations
-set.seed(1234)
+set.seed(123)
 x <- runif(simulations, min=0, max=1) # X ~ U(0,1)
 y <- runif(simulations, min=0, max=x) # Y|X ~ U(0,X)
 par(mfrow = c(1, 2))
@@ -124,9 +124,10 @@ lines(density(y), col = 'red')
 ## @knitr Question1-1-2
 # y1 <- runif(simulations, min = 0, max = 0.2) # Fix X to 0.2
 y1 <- y[x > 0.2 - 1e-2 & x < 0.2 + 1e-2] # Using previous simulation
-plot(density(y1), xlim = c(0, 1), main = 'pdf(y|x=0.2)')
-abline(v = mean(y1), col = 'red')
-legend("topright", "E(Y|X=0.2)", lty = 1, bty="n", col = 'red')
+hist(y1, main = 'pdf(y|x=0.2)', freq = FALSE)
+lines(density(y1), xlim = c(0, 1), main = 'pdf(y|x=0.2)', col = 'red')
+abline(v = mean(y1), col = 'green', lty	= 2, lwd = 4)
+# legend("topright", "E(Y|X=0.2)", lty = 1, bty="n", col = 'red')
 
 ## @knitr Question1-3
 pdf_x <- function(x) ifelse(x<1 & x>0, 1, 0) # f(x)
@@ -191,9 +192,20 @@ sol$par
 
 ## @knitr Question3
 # QUESTION 3 --------------------------------------------------------------
-# Simulate a white noise series with 1000 random draws and plot 
-# (1) a time series plot and
-# (2) a histogram.
+simulations <- 1e3 # number of simulations
+theta <- 100 # an arbitrary value of theta
+y <- runif(n = simulations, min = 0, max = theta) # Y ~ U(0,theta)
+# any(y == theta); all(y < theta) # FALSE and TRUE, respectively
+# No matter how large is the sample, Yi is always lower than 1
+set.seed(1)
+num_simulations <- sort(c(1, sample(c(2:simulations), 49)))
+theta_mle <- unlist(lapply(num_simulations, function(n) 
+  mean(max(runif(n = n, min = 0, max = theta)))))
+plot(num_simulations, theta_mle, ylim = c(floor(min(theta_mle)), theta),
+     xlab = "Number of simulations", ylab = "MLE of theta", pch = '*')
+lines(num_simulations, theta_mle, lwd = 0.5, col = 'blue')
+lines(num_simulations, theta*num_simulations/(num_simulations+1), col = 'green')
+abline(h = theta, col = 'red', lty = 2)
 
 
 

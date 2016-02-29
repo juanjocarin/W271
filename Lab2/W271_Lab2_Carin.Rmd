@@ -62,7 +62,7 @@ $$f_{Y|X}(y|x) = \begin{cases}
 
 And:
 
-$\mathbf{\color{red}{E(Y|X)}} = \displaystyle\int_\mathbb{Y} y \cdot f_{Y|X}(y|x) \cdot dy = \displaystyle\int_{y=0}^x y \cdot \cfrac{1}{x} \cdot dy = \cfrac{1}{x}\left[ \cfrac{y^2}{2}\right]_{y=0}^x = \cfrac{x^2}{2x} = \mathbf{\color{red}{\cfrac{x}{2}}}$
+$$\mathbf{\color{red}{E(Y|X)}} = \displaystyle\int_\mathbb{Y} y \cdot f_{Y|X}(y|x) \cdot dy = \displaystyle\int_{y=0}^x y \cdot \cfrac{1}{x} \cdot dy = \cfrac{1}{x}\left[ \cfrac{y^2}{2}\right]_{y=0}^x = \cfrac{x^2}{2x} = \mathbf{\color{red}{\cfrac{x}{2}}}$$
 
 We'll make use of some simulations through this Question to confirm the results.
 
@@ -73,16 +73,17 @@ We'll make use of some simulations through this Question to confirm the results.
 
 \pagebreak
 
-> ```{r Question1-1-2, echo = TRUE, fig.cap = "Approximate pdf of $Y$ conditional on $X$ for a given value of $X$ (0.2)"}
+> ```{r Question1-1-2, echo = TRUE, fig.cap = "Histogram and approximate pdf of $Y$ conditional on $X$ for a given value of $X$ (0.2)"}
 > ```
 
 \normalsize
+
 
 \pagebreak
 
 2. **Find the unconditional expectation of $\mathbf{Y}$. One way to do this is to apply the law of iterated expectations, which states that $\mathbf{E(Y) = E(E(Y|X))}$. The inner expectation is the conditional expectation computed above, which is a function of $\mathbf{X}$. The outer expectation finds the expected value of this function.**
 
-$\mathbf{\color{red}{E(Y)}} = E\left[E(Y|X)\right] = \displaystyle\int_\mathbb{X} E(Y|X) \cdot f_X(x) \cdot dx = \int_{x=0}^1 \cfrac{x}{2} \cdot 1 \cdot dx = \left[ \cfrac{x^2}{4}\right]_{x=0}^1 = \mathbf{\color{red}{\cfrac{1}{4} = 0.25}}$
+$$\mathbf{\color{red}{E(Y)}} = E\left[E(Y|X)\right] = \displaystyle\int_\mathbb{X} E(Y|X) \cdot f_X(x) \cdot dx = \int_{x=0}^1 \cfrac{x}{2} \cdot 1 \cdot dx = \left[ \cfrac{x^2}{4}\right]_{x=0}^1 = \mathbf{\color{red}{\cfrac{1}{4} = 0.25}}$$
 
 
 3. **Write down an expression for the joint probability density function of $\mathbf{X}$ and $\mathbf{Y}$, $\mathbf{f_{X,Y}(x,y)}$.**
@@ -94,7 +95,7 @@ $\mathbf{\color{red}{f_{X,Y}(x,y)}} = f_{Y|X}(y|x) \cdot f_X(x) = \mathbf{\color
 
 Let's check that this is a valid joint *pdf*:
 
-$\displaystyle\int_{\mathbb{X}} \displaystyle\int_{\mathbb{Y}} f_{X,Y}(x,y) \cdot dx \cdot dy = \displaystyle\int_{x=0}^1 \displaystyle\int_{y=0}^x\cfrac{1}{x} \cdot dy \cdot dx = \displaystyle\int_{x=0}^1 \left[\cfrac{y}{x}\right]_{y=0}^x dx = \displaystyle\int_{x=0}^1 dx = \left[x\right]_{x=0}^1 = 1$
+$$\displaystyle\int_{\mathbb{X}} \displaystyle\int_{\mathbb{Y}} f_{X,Y}(x,y) \cdot dx \cdot dy = \displaystyle\int_{x=0}^1 \displaystyle\int_{y=0}^x\cfrac{1}{x} \cdot dy \cdot dx = \displaystyle\int_{x=0}^1 \left[\cfrac{y}{x}\right]_{y=0}^x dx = \displaystyle\int_{x=0}^1 dx = \left[x\right]_{x=0}^1 = 1$$
 
 Simulations:
 
@@ -105,13 +106,14 @@ Simulations:
 
 \normalsize
 
+
 \pagebreak
 
 4. **Find the conditional probability density function of $\mathbf{X}$ given $\mathbf{Y}$, $\mathbf{f_{X|Y}}$.**
 
 In order to find $f_{X|Y}$ we need the marginal pdf of $Y$.
 
-$f_Y(y) = \displaystyle\int_{\mathbb{X}} f_{X,Y}(x,y) \cdot dx = \displaystyle\int_{y=0}^x \cfrac{1}{x} \cdot dx = \displaystyle\int_{x=y}^1 \cfrac{dx}{x} = \left[\log(x)\right]_{x=y}^1 dx = -\log(y)=\log\left(\cfrac{1}{y}\right)$
+$$f_Y(y) = \displaystyle\int_{\mathbb{X}} f_{X,Y}(x,y) \cdot dx = \displaystyle\int_{y=0}^x \cfrac{1}{x} \cdot dx = \displaystyle\int_{x=y}^1 \cfrac{dx}{x} = \left[\log(x)\right]_{x=y}^1 dx = -\log(y)=\log\left(\cfrac{1}{y}\right)$$
 
 This result confirms what the shape of $f_Y(y)$ in Figure 1 suggested.
 
@@ -122,15 +124,15 @@ This result confirms what the shape of $f_Y(y)$ in Figure 1 suggested.
 
 \normalsize
 
-$\mathbf{\color{red}{f_{X|Y}(x|y)}}=\cfrac{f_{X,Y}(x,y)}{f_Y(y)} = \mathbf{\color{red}{\cfrac{-1}{x \cdot \log(y)}}}$
+$$\mathbf{\color{red}{f_{X|Y}(x|y)}}=\cfrac{f_{X,Y}(x,y)}{f_Y(y)} = \mathbf{\color{red}{\cfrac{-1}{x \cdot \log(y)}}}$$
 
 
 \pagebreak
 
 5. **Find the expectation of $\mathbf{X}$, given that $\mathbf{Y}$ is $\mathbf{1/2}$, $\mathbf{E(X|Y = 1/2)}$.**
 
-$\begin{aligned}\mathbf{\color{red}{E(X|Y=1/2)}} &= \displaystyle\int_\mathbb{X} x \cdot f_{X|Y}(x|y=1/2) \cdot dx = \displaystyle\int_{x=1/2}^1 x \cdot \left(\cfrac{-1}{x \cdot \log(1/2)}\right) \cdot dx \\
-& = \cfrac{1}{\log(2)} \displaystyle\int_{x=1/2}^1 dx = \cfrac{1}{\log(2)}\left[x \right]_{x=1/2}^1 = \mathbf{\color{red}{\cfrac{1}{2\cdot\log(2)} = `r frmt(1/(2*log(2)))`}}\end{aligned}$
+$$\begin{aligned}\mathbf{\color{red}{E(X|Y=1/2)}} &= \displaystyle\int_\mathbb{X} x \cdot f_{X|Y}(x|y=1/2) \cdot dx = \displaystyle\int_{x=1/2}^1 x \cdot \left(\cfrac{-1}{x \cdot \log(1/2)}\right) \cdot dx \\
+& = \cfrac{1}{\log(2)} \displaystyle\int_{x=1/2}^1 dx = \cfrac{1}{\log(2)}\left[x \right]_{x=1/2}^1 = \mathbf{\color{red}{\cfrac{1}{2\cdot\log(2)} = `r frmt(1/(2*log(2)))`}}\end{aligned}$$
 
 \small
 
@@ -217,15 +219,76 @@ Let's prove the result in R:
 
 1. **Write down the likelihood function, $\mathbf{l(\theta)}$ in terms of $\mathbf{y_1, y_2, \dots, y_n}$.**
 
+<!--
+http://people.missouristate.edu/songfengzheng/Teaching/MTH541/Lecture%20notes/MLE.pdf
+http://math.stackexchange.com/questions/49543/maximum-estimator-method-more-known-as-mle-of-a-uniform-distribution
+https://en.wikipedia.org/wiki/Maximum_likelihood
+-->
+
+$$l(\theta;y_1,\dots,y_n)=f(y_1,\dots,y_n|\theta)=\displaystyle\prod_{i=1}^{n}f(y_i|\theta)=
+\begin{cases}
+\displaystyle\prod_{i=1}^{n}\cfrac{1}{\theta}=\theta^{-n} & 0\leq y_i \leq \theta \\
+0 & \text{otherwise}
+\end{cases}$$
+
+<!--We can also use the **log-likelihood** function (if the MLE exists, it will be the same regardless of whether we maximize the likelihood or the log-likelihood function):
+
+$$\ln l(\theta;y_1,\dots,y_n)=f(y_1,\dots,y_n|\theta)=\displaystyle\sum_{i=1}^{n}\ln f(x_i|\theta)=
+\begin{cases}
+n \cdot \ln \left(\cfrac{1}{\theta} \right)=-n \cdot \ln \theta & 0\leq y_i \leq \theta \\
+0 & \text{otherwise}
+\end{cases}$$-->
+
+
 2. **Based on the previous result, what is the maximum-likelihood estimator for $\mathbf{\theta}$?**
 
-3. **Let $\mathbf{\hat{\theta_{ml}}}$ be the maximum likelihood estimator above. For the simple case that $\mathbf{n \geq 1}$, what is the expectation of $\mathbf{\hat{\theta_{ml}}}$, given $\mathbf{\theta}$?**
+The MLE of $\theta$ must be a value of $\theta$ for which $\theta \geq y_i$ for $i=1,\dots,n$ and which maximizes $1/\theta^n$ among all such values. I.e., the maximum value of $y_i$ within the sample.
+
+$$\hat{\theta}_{ml} = \text{arg}\max\limits_{\theta \in \Theta}\ \hat{l}(\theta;y_1,\dots,y_n) = \max\{y_1,\dots,y_n\}$$
+
+
+3. **Let $\mathbf{\hat{\theta}_{ml}}$ be the maximum likelihood estimator above. For the simple case that $\mathbf{n = 1}$, what is the expectation of $\mathbf{\hat{\theta}_{ml}}$, given $\mathbf{\theta}$?**
+
+$$E\left(\hat{\theta}_{ml} \mid \theta\right) = E(y_1) = E(y) = \displaystyle\int_{y=0}^{\theta}\cfrac{y}{\theta}\cdot dy = \left[\cfrac{y^2}{2\theta}\right]_{y=0}^{\theta} = \cfrac{\theta}{2}$$
+
 
 4. **Is the maximum likelihood estimator biased?**
 
-5. **For the more general case that $\mathbf{n \geq 1}$, what is the expectation of $\mathbf{\hat{\theta_{ml}}}$?**
+Yes, it is:
+
+$$E\left(\hat{\theta}_{ml}\right) - \theta = \cfrac{\theta}{2} \neq 0$$
+
+
+5. **For the more general case that $\mathbf{n \geq 1}$, what is the expectation of $\mathbf{\hat{\theta}_{ml}}$?**
+
+<!--https://www.physicsforums.com/threads/expectation-of-an-uniform-distribution-maximum-likelihood-estimator.380389/-->
+
+Without loss of generality, let's suppose the individual $n$ is the one with the maximum lifespan among the sample, i.e., $y_n \geq y_i$ for $i=1,\dots,n-1$. Call $z$ that maximum value of $y_i$.
+
+$$E[max\{y_1,\dots,y_n\}]=E(y_n)=E(z)=\displaystyle\int_{z=0}^{\theta}z \cdot f(z) dz$$
+
+But what is the distribution of $z$?
+
+$$F(z) = \Pr(y_n \leq z) = \Pr(y_1\leq z \cap \dots \cap y_n \leq z) \stackrel{\text{i.i.d}}{=} \displaystyle\prod_{i=1}^n\Pr(y_i\leq z)=\left(\cfrac{z}{\theta}\right)^n \Rightarrow f(z) = \cfrac{nz^{n-1}}{\theta^n}$$
+
+$$E[max\{y_1,\dots,y_n\}] = \cfrac{n}{\theta^n}\displaystyle\int_{z=0}^\theta z^ndz=\cfrac{n}{\theta^n}\left[\cfrac{z^{n+1}}{n+1}\right]_{z=0}^\theta=\cfrac{n}{n+1}\cdot\theta$$
+
+(Which confirms the previous result, for $n=1$.)
 
 6. **Is the maximum likelihood estimator consistent?**
+
+It is:
+
+$$\Pr\left(|\hat{\theta}_{ml} - \theta|>\varepsilon\right) = \Pr\left(\cfrac{\theta}{n+1}>\varepsilon\right) \to 0 \text{ as } n \to \infty$$
+
+<!--(Even though $\Pr\left(max\{y_1, \dots, y_n\} < \theta\right) = 1$.)-->
+
+\small
+
+```{r Question3, echo = c(2:11), fig.cap = "Trend of the MLE of $\\theta$ depending on the sample size"}
+```
+
+\normalsize
 
 
 
