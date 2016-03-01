@@ -153,6 +153,9 @@ $$L(\theta) = \begin{cases}
 ```{r Question4-1-1, echo = F}
 ```
 
+```{r Question4-1-1-1, echo = F, fig.width = 7, fig.height = 10}
+```
+
 ```{r Question4-1-2, echo = F}
 ```
 
@@ -167,34 +170,6 @@ $$L(\theta) = \begin{cases}
 
 ```{r Question4-1-6, echo = F}
 ```
-
-```{r Question4-1-7, echo = F}
-```
-
-```{r Question4-1-8, echo = F}
-```
-
-```{r Question4-1-9, echo = F}
-```
-
-```{r Question4-1-10, echo = F}
-```
-
-```{r Question4-1-11, echo = F}
-```
-
-```{r Question4-1-12, echo = F}
-```
-
-```{r Question4-1-13, echo = F}
-```
-
-```{r Question4-1-14, echo = F}
-```
-
-```{r Question4-1-15, echo = F}
-```
-
 
 
 ## Question 4.2

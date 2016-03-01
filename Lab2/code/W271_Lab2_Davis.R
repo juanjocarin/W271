@@ -17,6 +17,7 @@ library(lmtest)
 library(dplyr)
 library(stargazer)
 library(texreg)
+library(reshape2)
 
 # Define functions
 
@@ -137,130 +138,136 @@ tableCount <- c(`_` = 0)
 data <- read.csv("WageData2.csv", header = T)
 round(stat.desc(data, desc = TRUE, basic = TRUE), 2)
 
+## @knitr Question4-1-1-1
+data2 <- melt(data[, c(2,3,4,5,7,8,13,14)])
+ggplot(data2, aes(x= value)) +
+  facet_wrap(~variable, scales = "free", ncol = 2) + geom_histogram() +
+  labs(title = "Histogram of Wage, Education, and Demogographic Variables")
+
+# ## @knitr Question4-1-2
+# ggplot(data, aes(wage)) + 
+#   geom_histogram(aes(y = (..count..)/sum(..count..)), colour = 'black',
+#                  fill = 'white', binwidth = 100) +
+#   scale_y_continuous(labels = percent_format()) + 
+#   labs(x = "Wage",
+#        y = "Relative frequency",
+#        title = "Histogram of Wage")
+# figCount <- incCount(figCount, "hist-Q4-1-1")
+# 
+# ## @knitr Question4-1-3
+# ggplot(data, aes(log(wage))) + 
+#   geom_histogram(aes(y = (..count..)/sum(..count..)), colour = 'black',
+#                  fill = 'white', binwidth = .1) +
+#   scale_y_continuous(labels = percent_format()) + 
+#   labs(x = "Log(Wage)",
+#        y = "Relative frequency",
+#        title = "Histogram of Log(Wage)")
+# figCount <- incCount(figCount, "hist-Q4-1-2")
+# 
+# ## @knitr Question4-1-4
+# ggplot(data, aes(education)) + 
+#   geom_histogram(aes(y = (..count..)/sum(..count..)), colour = 'black',
+#                  fill = 'white', binwidth = 1) +
+#   scale_y_continuous(labels = percent_format()) + 
+#   labs(x = "Education in Years",
+#        y = "Relative frequency",
+#        title = "Histogram of Education")
+# figCount <- incCount(figCount, "hist-Q4-1-3")
+# 
+# ## @knitr Question4-1-5
+# ggplot(data, aes(experience)) + 
+#   geom_histogram(aes(y = (..count..)/sum(..count..)), colour = 'black',
+#                  fill = 'white', binwidth = 1) +
+#   scale_y_continuous(labels = percent_format()) + 
+#   labs(x = "Experience",
+#        y = "Relative frequency",
+#        title = "Histogram of Experience")
+# figCount <- incCount(figCount, "hist-Q4-1-4")
+# 
+# ## @knitr Question4-1-6
+# ggplot(data, aes(experience^2)) + 
+#   geom_histogram(aes(y = (..count..)/sum(..count..)), colour = 'black',
+#                  fill = 'white', binwidth = 25) +
+#   scale_y_continuous(labels = percent_format()) + 
+#   labs(x = "Experience^2",
+#        y = "Relative frequency",
+#        title = "Histogram of Experience")
+# figCount <- incCount(figCount, "hist-Q4-1-5")
+# 
+# ## @knitr Question4-1-7
+# ggplot(data, aes(age)) + 
+#   geom_histogram(aes(y = (..count..)/sum(..count..)), colour = 'black',
+#                  fill = 'white', binwidth = 1) +
+#   scale_y_continuous(labels = percent_format()) + 
+#   labs(x = "Age",
+#        y = "Relative frequency",
+#        title = "Histogram of Age")
+# figCount <- incCount(figCount, "hist-Q4-1-6")
+
 ## @knitr Question4-1-2
-ggplot(data, aes(wage)) + 
-  geom_histogram(aes(y = (..count..)/sum(..count..)), colour = 'black',
-                 fill = 'white', binwidth = 100) +
-  scale_y_continuous(labels = percent_format()) + 
-  labs(x = "Wage",
-       y = "Relative frequency",
-       title = "Histogram of Wage")
-figCount <- incCount(figCount, "hist-Q4-1-1")
-
-## @knitr Question4-1-3
-ggplot(data, aes(log(wage))) + 
-  geom_histogram(aes(y = (..count..)/sum(..count..)), colour = 'black',
-                 fill = 'white', binwidth = .1) +
-  scale_y_continuous(labels = percent_format()) + 
-  labs(x = "Log(Wage)",
-       y = "Relative frequency",
-       title = "Histogram of Log(Wage)")
-figCount <- incCount(figCount, "hist-Q4-1-2")
-
-## @knitr Question4-1-4
-ggplot(data, aes(education)) + 
-  geom_histogram(aes(y = (..count..)/sum(..count..)), colour = 'black',
-                 fill = 'white', binwidth = 1) +
-  scale_y_continuous(labels = percent_format()) + 
-  labs(x = "Education in Years",
-       y = "Relative frequency",
-       title = "Histogram of Education")
-figCount <- incCount(figCount, "hist-Q4-1-3")
-
-## @knitr Question4-1-5
-ggplot(data, aes(experience)) + 
-  geom_histogram(aes(y = (..count..)/sum(..count..)), colour = 'black',
-                 fill = 'white', binwidth = 1) +
-  scale_y_continuous(labels = percent_format()) + 
-  labs(x = "Experience",
-       y = "Relative frequency",
-       title = "Histogram of Experience")
-figCount <- incCount(figCount, "hist-Q4-1-4")
-
-## @knitr Question4-1-6
-ggplot(data, aes(experience^2)) + 
-  geom_histogram(aes(y = (..count..)/sum(..count..)), colour = 'black',
-                 fill = 'white', binwidth = 25) +
-  scale_y_continuous(labels = percent_format()) + 
-  labs(x = "Experience^2",
-       y = "Relative frequency",
-       title = "Histogram of Experience")
-figCount <- incCount(figCount, "hist-Q4-1-5")
-
-## @knitr Question4-1-7
-ggplot(data, aes(age)) + 
-  geom_histogram(aes(y = (..count..)/sum(..count..)), colour = 'black',
-                 fill = 'white', binwidth = 1) +
-  scale_y_continuous(labels = percent_format()) + 
-  labs(x = "Age",
-       y = "Relative frequency",
-       title = "Histogram of Age")
-figCount <- incCount(figCount, "hist-Q4-1-6")
-
-## @knitr Question4-1-8
 ggplot(data, aes(factor(raceColor, labels = c('White',
                                          'Non-White')))) +
   geom_bar(colour='black', fill = 'white') + 
   labs(title = "Race of Respondents", x = element_blank())
 figCount <- incCount(figCount, "hist-Q4-1-7")
 
-## @knitr Question4-1-9
-ggplot(data, aes(dad_education)) + 
-  geom_histogram(aes(y = (..count..)/sum(..count..)), colour = 'black',
-                 fill = 'white', na.rm = T, binwidth = 1) +
-  scale_y_continuous(labels = percent_format()) + 
-  labs(x = "Father's Education in Years",
-       y = "Relative frequency",
-       title = "Histogram of Father's Education")
-figCount <- incCount(figCount, "hist-Q4-1-8")
+# ## @knitr Question4-1-9
+# ggplot(data, aes(dad_education)) + 
+#   geom_histogram(aes(y = (..count..)/sum(..count..)), colour = 'black',
+#                  fill = 'white', na.rm = T, binwidth = 1) +
+#   scale_y_continuous(labels = percent_format()) + 
+#   labs(x = "Father's Education in Years",
+#        y = "Relative frequency",
+#        title = "Histogram of Father's Education")
+# figCount <- incCount(figCount, "hist-Q4-1-8")
 
-## @knitr Question4-1-10
-ggplot(data, aes(mom_education)) + 
-  geom_histogram(aes(y = (..count..)/sum(..count..)), colour = 'black',
-                 fill = 'white', na.rm = T, binwidth = 1) +
-  scale_y_continuous(labels = percent_format()) + 
-  labs(x = "Mother's Education in Years",
-       y = "Relative frequency",
-       title = "Histogram of Mother's Education")
-figCount <- incCount(figCount, "hist-Q4-1-9")
+# ## @knitr Question4-1-10
+# ggplot(data, aes(mom_education)) + 
+#   geom_histogram(aes(y = (..count..)/sum(..count..)), colour = 'black',
+#                  fill = 'white', na.rm = T, binwidth = 1) +
+#   scale_y_continuous(labels = percent_format()) + 
+#   labs(x = "Mother's Education in Years",
+#        y = "Relative frequency",
+#        title = "Histogram of Mother's Education")
+# figCount <- incCount(figCount, "hist-Q4-1-9")
 
-## @knitr Question4-1-11
+## @knitr Question4-1-3
 ggplot(data, aes(factor(rural, labels = c('Non-rural',
                                               'Rural')))) +
   geom_bar(colour='black', fill = 'white') + 
   labs(title = "Respondant Location - Rural", x = element_blank())
 figCount <- incCount(figCount, "hist-Q4-1-10")
 
-## @knitr Question4-1-12
+## @knitr Question4-1-4
 ggplot(data, aes(factor(city, labels = c('Non-Urban',
                                           'City')))) +
   geom_bar(colour='black', fill = 'white') + 
   labs(title = "Respondant Location - City", x = element_blank())
 figCount <- incCount(figCount, "hist-Q4-1-11")
 
-## @knitr Question4-1-13
+## @knitr Question4-1-5
 ggplot(data, aes(factor(z1, labels = c('1',
                                          '0')))) +
   geom_bar(colour='black', fill = 'white') + 
   labs(title = "Indicator Variable 1", x = element_blank())
 figCount <- incCount(figCount, "hist-Q4-1-12")
 
-## @knitr Question4-1-14
+## @knitr Question4-1-6
 ggplot(data, aes(factor(z2, labels = c('1',
                                        '0')))) +
   geom_bar(colour='black', fill = 'white') + 
   labs(title = "Indicator Variable 2", x = element_blank())
 figCount <- incCount(figCount, "hist-Q4-1-13")
 
-## @knitr Question4-1-15
-ggplot(data, aes(IQscore)) + 
-  geom_histogram(aes(y = (..count..)/sum(..count..)), colour = 'black',
-                 fill = 'white', na.rm = T, binwidth = 5) +
-  scale_y_continuous(labels = percent_format()) + 
-  labs(x = "IQ Score",
-       y = "Relative frequency",
-       title = "Histogram of IQ Score")
-figCount <- incCount(figCount, "hist-Q4-1-14")
+# ## @knitr Question4-1-15
+# ggplot(data, aes(IQscore)) + 
+#   geom_histogram(aes(y = (..count..)/sum(..count..)), colour = 'black',
+#                  fill = 'white', na.rm = T, binwidth = 5) +
+#   scale_y_continuous(labels = percent_format()) + 
+#   labs(x = "IQ Score",
+#        y = "Relative frequency",
+#        title = "Histogram of IQ Score")
+# figCount <- incCount(figCount, "hist-Q4-1-14")
 
 data$experienceSquare <- data$experience^2
 
