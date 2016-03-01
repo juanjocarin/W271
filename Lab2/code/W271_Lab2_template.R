@@ -107,65 +107,35 @@ tableCount <- c(`_` = 0)
 
 
 
-## @knitr Question1-1
+## @knitr Question1-1-1
 # QUESTION 1 --------------------------------------------------------------
-# Install the library "astsa" using the function: install.packages("astsa")
-# Check if already installed; if not, install it
-if (!"astsa" %in% installed.packages()[, "Package"]) install.packages("astsa")
+# Find the conditional expectation of Y given X, E(Y|X)
 
-## @knitr Question1-2
-# Load the library: library(astsa)
-library(astsa)
-# Last two commands can be substituted by simply...
-if (!require(astsa)) install.packages("astsa")
+## @knitr Question1-1-2
 
 ## @knitr Question1-3
-# Use the function str() to see the information of a particular data series, 
-# such as str(EQ5) for the Seismic Trace of Earthquake number 5 series
-str(EQ5)
-str(flu)
-str(gas)
 
 ## @knitr Question1-4
-# Plot the time series plots and histograms of the following 3 series.
 
 ## @knitr Question1-5
-# Write a few sentences to describe each of the series: EQ5, flu, and gas
-
-
 
 ## @knitr Question2
 # QUESTION 2 --------------------------------------------------------------
-# Describe 3 examples you have used in your work or encounter in real life. 
-# Ideally, you can even load at least one of these time series, plot it, 
-# and the write a few statements to describe its characteristics.
+# Find, the values of a, b, and c that minimize the variance of total payoff
 
 
 
 ## @knitr Question3
 # QUESTION 3 --------------------------------------------------------------
-# Simulate a white noise series with 1000 random draws and plot 
-# (1) a time series plot and
-# (2) a histogram.
-
 
 
 ## @knitr Question4
 # QUESTION 4 --------------------------------------------------------------
-# Simulate (with 1000 random draws) the following two zero-mean 
-# autoregressive model with order 1 (i.e. AR(1)) models:
-# yt = 0.9yt1 + w
-# yt = 0.2yt1 + w
-# Plot a time plot for each of the simulated series. 
-# Graph a histogram for each of the simulated series.
-
 
 
 ## @knitr Question5
 # QUESTION 5 --------------------------------------------------------------
-# Simulate (with 1000 random draws) the following 3 models:
-# 1. A deterministic linear (time) trend of the form: yt = 10 + 0.5t
-# 2. Random walk without drift
-# 3. Random walk with drift = 0.5
-# Plot a time plot for each of the simulated series. 
-# Graph a histogram for each of the simulated series.
+
+## @knitr Question
+# QUESTION 6 --------------------------------------------------------------
+

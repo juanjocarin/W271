@@ -1,0 +1,356 @@
+---
+title: "**W271**-2 -- Spring 2016 -- **Lab 2**"
+author: "***Juanjo Carin, Kevin Davis, Ashley Levato, Minghu Song***"
+date: "*March 7, 2016*"
+output:
+   pdf_document:
+     fig_caption: yes
+     toc: yes
+numbersections: false
+geometry: margin=1in
+options: width=30
+fontsize: 10pt
+linkcolor: blue
+header-includes:
+- \usepackage{fancyhdr}
+- \pagestyle{fancy}
+- \fancyhead[LO,LE]{Carin, Davis, Levato, Song}
+- \fancyhead[CE,CO]{W271 -- Lab 2}
+- \fancyhead[RE,RO]{\leftmark}
+- \fancyfoot[LO,LE]{UC Berkeley -- MIDS}
+- \fancyfoot[CO,CE]{Spring semester 2016}
+- \fancyfoot[RE,RO]{\thepage}
+- \renewcommand{\headrulewidth}{0.5pt}
+- \renewcommand{\footrulewidth}{0.5pt}
+---
+
+**********
+
+\pagebreak
+
+```{r, echo = FALSE}
+require(knitr, quietly = TRUE)
+read_chunk('.\\code\\W271_Lab2_Davis.R')
+opts_chunk$set(message = FALSE, warning = FALSE)
+opts_chunk$set(fig.width = 4, fig.height = 3)
+# Set path to data here (don't use setwd() inside a chunk!!!)
+opts_knit$set(root.dir = './data')
+```
+
+```{r Libraries-Functions-Constants, echo = FALSE}
+```
+
+# Question 1: Broken Rulers
+
+**You have a ruler of length 1 and you choose a place to break it using a uniform probability distribution. Let random variable $\mathbf{X}$ represent the length of the left piece of the ruler. $\mathbf{X}$ is distributed uniformly in $\mathbf{[0, 1]}$. You take the left piece of the ruler and once again choose a place to break it using a uniform probability distribution. Let random variable $\mathbf{Y}$ be the length of the left piece from the second break.**
+
+1. **Find the conditional expectation of $\mathbf{Y}$ given $\mathbf{X}$, $\mathbf{E(Y|X)}$.**
+
+Note that for a continuous random variable, $Z$, the probability density function is:
+
+$$f_Z(z) = \begin{cases}
+\cfrac{1}{b-a} & a\leq z\leq\ b \\
+0 & \text{otherwise}
+\end{cases}$$
+
+In the case of variable $X$ this gives:
+
+$E(X) = \displaystyle\int_{x=0}^1 x \cdot dx = \frac{1^2}{2} = \frac{1}{2}$
+
+In the case of variable $Y$, note that the length of the ruler is simply $X$
+
+$\mathbf{\color{red}{E(Y|X)}} = \displaystyle\mathbf{\color{red}\frac{X}{2}}$
+
+2. **Find the unconditional expectation of $\mathbf{Y}$. One way to do this is to apply the law of iterated expectations, which states that $\mathbf{E(Y) = E(E(Y|X))}$. The inner expectation is the conditional expectation computed above, which is a function of $\mathbf{X}$. The outer expectation finds the expected value of this function.**
+
+$\mathbf{\color{red}E(Y)} = E(E(Y|X)) = \displaystyle\int_{X}E(Y|X) \cdot f_X(x) \cdot dx = \int_{x=0}^1 \frac{x}{2} \cdot 1 cdot dx = \frac{1}{2}\int_{x=0}^1 x = \mathbf{\color{red}\frac{1}{4}}$
+
+3. **Write down an expression for the joint probability density function of $\mathbf{X}$ and $\mathbf{Y}$, $\mathbf{f_{X,Y}(x,y)}$.**
+
+Using the definition from part 1:
+
+$$f_{X,Y}(x,y) = \begin{cases}
+\cfrac{1}{x} & \mathbf{x \in (0,1), y \in (0,x)} \\
+0 & \text{otherwise}
+\end{cases}$$
+
+4. **Find the conditional probability density function of $\mathbf{X}$ given $\mathbf{Y}$, $\mathbf{f_{X|Y}}$.**
+
+5. **Find the expectation of $\mathbf{X}$, given that $\mathbf{Y}$ is $\mathbf{1/2}$, $\mathbf{E(X|Y = 1/2)}$.**
+
+
+
+**********
+
+\pagebreak
+
+# Question 2: Investing
+
+**Suppose that you are planning an investment in three different companies. The payoff per unit you invest in each company is represented by a random variable. $\mathbf{A}$ represents the payoff per unit invested in the first company, $\mathbf{B}$ in the second, and $\mathbf{C}$ in the third. $\mathbf{A}$, $\mathbf{B}$, and $\mathbf{C}$ are independent of each other. Furthermore, $\mathbf{Var(A) = 2Var(B) = 3Var(C)}$.**
+
+**You plan to invest a total of one unit in all three companies. You will invest amount $\mathbf{a}$ in the first company, $\mathbf{b}$ in the second, and $\mathbf{c}$ in the third, where $\mathbf{a,b, c \in [0,1]}$ and $\mathbf{a + b + c = 1}$. Find, the values of $\mathbf{a}$, $\mathbf{b}$, and $\mathbf{c}$ that minimize the variance of your total payoff.**
+
+
+
+**********
+
+\pagebreak
+
+# Question 3: Turtles
+
+**Next, suppose that the lifespan of a species of turtle follows a uniform distribution over $\mathbf{[0, \theta]}$. Here, parameter $\mathbf{\theta}$ represents the unknown maximum lifespan. You have a random sample of $\mathbf{n}$ individuals, and measure the lifespan of each individual $i$ to be $\mathbf{y_i}$.**
+
+1. **Write down the likelihood function, $\mathbf{l(\theta)}$ in terms of $\mathbf{y_1, y_2, \dots, y_n}$.**
+
+The pdf of a given observation, y, is as follows:
+
+$$f(y|\theta) = \begin{cases}
+\cfrac{1}{\theta} & 0 \leq y \leq \theta \\
+0 & \text{otherwise}
+\end{cases}$$
+
+And the liklihood function has the form
+
+$$L(\theta) = \begin{cases}
+\cfrac{1}{\theta^n} & 0 \leq x_i \leq \theta (i = 1, \dots, n) \\
+0 & \text{otherwise}
+\end{cases}$$
+
+2. **Based on the previous result, what is the maximum-likelihood estimator for $\mathbf{\theta}$?**
+
+3. **Let $\mathbf{\hat{\theta_{ml}}}$ be the maximum likelihood estimator above. For the simple case that $\mathbf{n \geq 1}$, what is the expectation of $\mathbf{\hat{\theta_{ml}}}$, given $\mathbf{\theta}$?**
+
+4. **Is the maximum likelihood estimator biased?**
+
+5. **For the more general case that $\mathbf{n \geq 1}$, what is the expectation of $\mathbf{\hat{\theta_{ml}}}$?**
+
+6. **Is the maximum likelihood estimator consistent?**
+
+
+
+**********
+
+\pagebreak
+
+# Question 4: CLM 1
+
+## Background
+
+**The file `WageData2.csv` contains a dataset that has been used to quantify the impact of education on wage. One of the reasons we are proving another wage-equation exercise is that this area by far has the most (and most well-known) applications of instrumental variable techniques, the endogenity problem is obvious in this context, and the datasets are easy to obtain.**
+
+## The Data
+
+**You are given a sample of 1000 individuals with their wage, education level, age, working experience, race (as an indicator), father's and mother's education level, whether the person lived in a rural area, whether the person lived in a city, IQ score, and two potential instruments, called $\mathbf{z1}$ and $\mathbf{z2}$.**
+
+**The dependent variable of interest is `wage` (or its transformation), and we are interested in measuring "return" to education, where return is measured in the increase (hopefully) in wage with an additional year of education.**
+
+## Question 4.1
+
+**Conduct an univariate analysis (using tables, graphs, and descriptive statistics found in the last 7 lectures) of all of the variables in the dataset.**
+
+**Also, create two variables: (1) natural log of wage (name it `logWage`) (2) square of experience (name it `experienceSquare`)**
+
+```{r Question4-1-1, echo = F}
+```
+
+```{r Question4-1-2, echo = F}
+```
+
+```{r Question4-1-3, echo = F}
+```
+
+```{r Question4-1-4, echo = F}
+```
+
+```{r Question4-1-5, echo = F}
+```
+
+```{r Question4-1-6, echo = F}
+```
+
+```{r Question4-1-7, echo = F}
+```
+
+```{r Question4-1-8, echo = F}
+```
+
+```{r Question4-1-9, echo = F}
+```
+
+```{r Question4-1-10, echo = F}
+```
+
+```{r Question4-1-11, echo = F}
+```
+
+```{r Question4-1-12, echo = F}
+```
+
+```{r Question4-1-13, echo = F}
+```
+
+```{r Question4-1-14, echo = F}
+```
+
+```{r Question4-1-15, echo = F}
+```
+
+
+
+## Question 4.2
+
+**Conduct a bivariate analysis (using tables, graphs, descriptive statistics found in the last 7 lectures) of `wage` and `logWage` and all the other variables in the datasets.**
+
+```{r Question4-2-1, echo = F}
+```
+
+```{r Question4-2-2, echo = F}
+```
+
+```{r Question4-2-3, echo = F}
+```
+
+```{r Question4-2-4, echo = F}
+```
+
+```{r Question4-2-5, echo = F}
+```
+
+```{r Question4-2-6, echo = F}
+```
+
+```{r Question4-2-7, echo = F}
+```
+
+```{r Question4-2-8, echo = F}
+```
+
+```{r Question4-2-9, echo = F}
+```
+
+```{r Question4-2-10, echo = F}
+```
+
+```{r Question4-2-11, echo = F}
+```
+
+```{r Question4-2-12, echo = F}
+```
+
+```{r Question4-2-13, echo = F}
+```
+
+```{r Question4-2-14, echo = F}
+```
+
+```{r Question4-2-15, echo = F}
+```
+
+```{r Question4-2-16, echo = F}
+```
+
+```{r Question4-2-17, echo = F}
+```
+
+```{r Question4-2-18, echo = F}
+```
+
+```{r Question4-2-19, echo = F}
+```
+
+
+
+## Question 4.3
+
+**Regress *log(wage)* on education, experience, age, and raceColor.**
+
+1. **Report all the estimated coefficients, their standard errors, t-statistics, F-statistic of the regression, $\mathbf{R^2}$, $\mathbf{R_{adj}^2}$ , and degrees of freedom.**
+
+2. **Explain why the degrees of freedom takes on the specific value you observe in the regression output.**
+
+3. **Describe any unexpected results from your regression and how you would resolve them (if the intent is to estimate return to education, condition on race and experience).**
+
+4. **Interpret the coefficient estimate associated with education.**
+
+5. **Interpret the coefficient estimate associated with experience.**
+
+## Question 4.4
+
+**Regress *log(wage)* on education, experience, experienceSquare, and race-Color.**
+
+1. **Plot a graph of the estimated effect of experience on wage.**
+
+2. **What is the estimated effect of experience on wage when experience is 10 years?**
+
+## Question 4.5 {#question45}
+
+**Regress `logWage` on education, experience, `experienceSquare`, `raceColor`, `dad_education`, `mom_education`, rural, city.**
+
+1. **What are the number of observations used in this regression? Are missing values a problem? Analyze the missing values, if any, and see if there is any discernible pattern with wage, education, experience, and raceColor.**
+
+2. **Do you just want to "throw away" these observations?**
+
+3. **How about blindly replace all of the missing values with the average of the observed values of the corresponding variable? Rerun the original regression using all of the observations?**
+
+4. **How about regress the variable(s) with missing values on education, experience, and raceColor, and use this regression(s) to predict (i.e., "impute") the missing values and then rerun the original regression using all of the observations?**
+
+5. **Compare the results of all of these regressions. Which one, if at all, would you prefer?**
+
+## Question 4.6
+
+1. **Consider using $\mathbf{z_1}$ as the instrumental variable (IV) for education. What assumptions are needed on $\mathbf{z_1}$ and the error term (call it, $\mathbf{u}$)?**
+
+2. **Suppose $\mathbf{z_1}$ is an indicator representing whether or not an individual lives in an area in which there was a recent policy change to promote the importance of education. Could $\mathbf{z_1}$ be correlated with other unobservables captured in the error term?**
+
+3. **Using the same specification as that in [Question 4.5](#question45), estimate the equation by 2SLS, using both $\mathbf{z_1}$ and $\mathbf{z_2}$ as instrument variables. Interpret the results. How does the coefficient estimate on education change?**
+
+
+
+**********
+
+\pagebreak
+
+# Question 5: CLM 2
+
+**The dataset, `wealthy candidates.csv`, contains candidate level electoral data from a developing country. Politically, each region (which is a subset of the country) is divided in to smaller electoral districts where the candidate with the most votes wins the seat. This dataset has data on the financial wealth and electoral performance (voteshare) of electoral candidates. We are interested in understanding whether or not wealth is an electoral advantage. In other words, do wealthy candidates fare better in elections than their less wealthy peers?**
+
+1. **Begin with a parsimonious, yet appropriate, specification. Why did you choose this model? Are your results statistically significant? Based on these results, how would you answer the research question? Is there a linear relationship between wealth and electoral performance?**
+
+2. **A team-member suggests adding a quadratic term to your regression. Based on your prior model, is such an addition warranted? Add this term and interpret the results. Do wealthier candidates fare better in elections?**
+
+3. **Another team member suggests that it is important to take into account the fact that different regions have different electoral contexts. In particular, the relationship between candidate wealth and electoral performance might be different across states. Modify your model and report your results. Test the hypothesis that this addition is not needed.**
+
+4. **Return to your parsimonious model. Do you think you have found a causal and unbiased estimate? Please state the conditions under which you would have an unbiased and causal estimates. Do these conditions hold?**
+
+5. **Someone proposes a difference in difference design. Please write the equation for such a model. Under what circumstances would this design yield a causal effect?**
+
+
+
+**********
+
+\pagebreak
+
+# Question 6: CLM 3
+
+**Your analytics team has been tasked with analyzing aggregate revenue, cost and sales data, which have been provided to you in the R workspace/data frame `retailSales.Rdata`.**
+
+**Your task is two fold. First, your team is to develop a model for predicting (forecasting) revenues. Part of the model development documentation is a backtesting exercise where you train your model using data from the first two years and evaluate the model's forecasts using the last two years of data.**
+
+**Second, management is equally interested in understanding variables that might affect revenues in support of management adjustments to operations and revenue forecasts. You are also to identify factors that affect revenues, and discuss how useful management's planned revenue is for forecasting revenues.**
+
+**Your analysis should address the following:**
+
++ **Exploratory Data Analysis: focus on bivariate and multivariate relationships.**
+
++ **Be sure to assess conditions and identify unusual observations.**
+
++ **Is the change in the average revenue different from 95 cents when the planned revenue increases by $1?**
+
++ **Explain what interaction terms in your model mean in context supported by data visualizations.**
+
++ **Give two reasons why the OLS model coefficients may be biased and/or not consistent, be specific.**
+
++ **Propose (but do not actually implement) a plan for an IV approach to improve your forecasting model.**
+
+
+**********
