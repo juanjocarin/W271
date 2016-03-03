@@ -30,7 +30,7 @@ header-includes:
 
 ```{r, echo = FALSE}
 require(knitr, quietly = TRUE)
-read_chunk('code/W271_Lab2_template.R')
+read_chunk('code/W271_Lab2_AL.R')
 opts_chunk$set(message = FALSE, warning = FALSE)
 opts_chunk$set(fig.width = 4, fig.height = 3)
 # Set path to data here (don't use setwd() inside a chunk!!!)
@@ -112,13 +112,13 @@ opts_knit$set(root.dir = './data')
 
 **Also, create two variables: (1) natural log of wage (name it `logWage`) (2) square of experience (name it `experienceSquare`)**
 
-```{r Question4-1-1, echo = F}
+```{r Question4-1-1, echo = T}
 ```
 
-```{r Question4-1-2, echo = F}
+```{r Question4-1-2, echo = T}
 ```
 
-```{r Question4-1-3, echo = F}
+```{r Question4-1-3, echo = T}
 ```
 
 
@@ -128,10 +128,10 @@ opts_knit$set(root.dir = './data')
 **Conduct a bivariate analysis (using tables, graphs, descriptive statistics found in the last 7 lectures) of `wage` and `logWage` and all the other variables in the datasets.**
 
 
-```{r Question4-2-1, echo = F}
+```{r Question4-2-1, echo = T}
 ```
 
-```{r Question4-2-2, echo = F}
+```{r Question4-2-2, echo = T}
 ```
 
 
@@ -139,10 +139,11 @@ opts_knit$set(root.dir = './data')
 
 **Regress *log(wage)* on education, experience, age, and raceColor.**
 
-```{r Question4-3, echo = F}
-```
-
 1. **Report all the estimated coefficients, their standard errors, t-statistics, F-statistic of the regression, $\mathbf{R^2}$, $\mathbf{R_{adj}^2}$ , and degrees of freedom.**
+
+
+```{r Question4-3, echo = T, results = 'asis'}
+```
 
 2. **Explain why the degrees of freedom takes on the specific value you observe in the regression output.**
 
@@ -164,12 +165,12 @@ The coefficient on experinece is $0.035 \pm{0.008}$ which indicates that for 1 a
 
 **Regress *log(wage)* on education, experience, experienceSquare, and race-Color.**
 
-```{r Question4-4, echo = F}
+```{r Question4-4, echo = T, results = 'asis'}
 ```
 
 1. **Plot a graph of the estimated effect of experience on wage.**
 
-```{r Question4-4-1, echo = F}
+```{r Question4-4-1, echo = T}
 ```
 
 2. **What is the estimated effect of experience on wage when experience is 10 years?**
@@ -179,7 +180,7 @@ When expereience equals 10 the estimated effect on wage is about 64 percent whic
 ## Question 4.5 {#question45}
 
 **Regress `logWage` on education, experience, `experienceSquare`, `raceColor`, `dad_education`, `mom_education`, rural, city.**
-```{r Question4-5, echo = F}
+```{r Question4-5, echo = T, results = 'asis'}
 ```
 
 1. **What are the number of observations used in this regression? Are missing values a problem? Analyze the missing values, if any, and see if there is any discernible pattern with wage, education, experience, and raceColor.**
@@ -187,13 +188,13 @@ When expereience equals 10 the estimated effect on wage is about 64 percent whic
 The number of observations is only 723 out of the total 1000 so there are missing values that may be causing issues. From the code below we see that the missing values are in the dad_education and mom_education variables. Those entries are seperated out to explore any patterns. The plots that follow explore the education, experience, and raceColor for those that are not complete cases (ie have missing data). No discernible pattern is present.
 
 
-```{r Question4-5-1-1, echo = F}
+```{r Question4-5-1-1, echo = T}
 ```
 
-```{r Question4-5-1-2, echo = F}
+```{r Question4-5-1-2, echo = T}
 ```
 
-```{r Question4-5-1-3, echo = F}
+```{r Question4-5-1-3, echo = T}
 ```
 
 2. **Do you just want to "throw away" these observations?**
@@ -202,23 +203,23 @@ Ideally we would not want to just "throw away" these data points becuas they sti
 
 3. **How about blindly replace all of the missing values with the average of the observed values of the corresponding variable? Rerun the original regression using all of the observations?**
 
-```{r Question4-5-3, echo = F}
+```{r Question4-5-3, echo = T, results = 'asis'}
 ```
 
 4. **How about regress the variable(s) with missing values on education, experience, and raceColor, and use this regression(s) to predict (i.e., "impute") the missing values and then rerun the original regression using all of the observations?**
 
-```{r Question4-5-4-1, echo = F}
+```{r Question4-5-4-1, echo = T}
 ```
 
-```{r Question4-5-4-2, echo = F}
+```{r Question4-5-4-2, echo = T}
 ```
 
-```{r Question4-5-4-3, echo = F}
+```{r Question4-5-4-3, echo = T, results = 'asis'}
 ```
 
 5. **Compare the results of all of these regressions. Which one, if at all, would you prefer?**
 
-```{r Question4-5-, e5cho = F}
+```{r Question4-5-5, echo = T, results = 'asis', results = 'asis'}
 ```
 
 ## Question 4.6
@@ -241,34 +242,63 @@ Ideally we would not want to just "throw away" these data points becuas they sti
 
 1. **Begin with a parsimonious, yet appropriate, specification. Why did you choose this model? Are your results statistically significant? Based on these results, how would you answer the research question? Is there a linear relationship between wealth and electoral performance?**
 
-To start off with we need to examine the vairables and omit outliers. In this case there are some NA values in the absolute_wealth variable and there are a lot of data points very close to zero, which screw the data. This first model omits those entries. Additionally we transform the absolute_wealth into a log(absolute_wealth) to rescale the values for regression. 
+To start off with we need to examine the vairables, there is only one NA or missing value so we will omit that case. We then look for any potential outliers that we may want to omit or any anomalies in the data. 
 
-```{r Question5-1-1, echo = F}
+```{r Question5-1-1, echo = T}
 ```
 
-```{r Question5-1-2, echo = F}
+```{r Question5-1-2, echo = T}
 ```
 
-```{r Question5-1-2, echo = F}
+From the histogram of logwealth we notice there is a large number of observations near zero with the same values. We look at a scaller plot of the voteshare and logwealth to see if any patterns are visable. 
+
+```{r Question5-1-3, echo = T}
 ```
 
-```{r Question5-1-3, echo = F}
+What we see is a lot of values with the exact same logwealth value. We do a little more analysis to try and indentify if there is a commonality among these points. 
+
+```{r Question5-1-4, echo = T}
 ```
+
+Based on this analysis we can see that most of these identical values are from region 1. At this point we could omit these datapoints if we had a reason that they were inaccruate, but in continuing we will leave them in because it could be some underlying factor in region 1 that impacts this value and could be important to the end results. 
+
+Now to build a parsimonious model to try and answer the question of is wealth an electoral advantage, we will start off with the simple regression of just logweath on voteshare. We choose this model as a basic model because the other variables of urb and lit could have counding factors with wealth.
+
+```{r Question5-1-5, echo = T, results = 'asis'}
+```
+
+Based on the output results the model does show statistically significant results, however the $R^2$ is almost zero which indicates that the model does not fit the data very well at all. We would say there is not a linear relationship between wealth and voteshare. 
+
 
 2. **A team-member suggests adding a quadratic term to your regression. Based on your prior model, is such an addition warranted? Add this term and interpret the results. Do wealthier candidates fare better in elections?**
 
-```{r Question5-2, echo = F}
+Based on the above results, it is unlikley that the square term will make much difference.
+
+```{r Question5-2, echo = T, results = 'asis'}
 ```
 
 3. **Another team member suggests that it is important to take into account the fact that different regions have different electoral contexts. In particular, the relationship between candidate wealth and electoral performance might be different across states. Modify your model and report your results. Test the hypothesis that this addition is not needed.**
 
-```{r Question5-3, echo = F}
+```{r Question5-3, echo = T, results = 'asis'}
 ```
 
 4. **Return to your parsimonious model. Do you think you have found a causal and unbiased estimate? Please state the conditions under which you would have an unbiased and causal estimates. Do these conditions hold?**
+It is unlikely that we have a causal and unbiased estimate because there are likely omitted variables in our linear model. 
 
-```{r Question5-4, echo = F}
-```
+To have an unbiased and causal estimate we would first need to statisfy the assumptions for OLS which are:
+1. (the model is) linear in parameters
+2. random sampling
+3. no perfect collinearity (among the independent variables)
+3. zero mean (of the errors) and zero correlation (with any of the independent variables)
+
+Additionally, causality is about whether manipulations to the independent variable influence the dependent variable but not the error term. For a model to be causal, we need to be able to introduce a manipulation in $x$, $dx$, that (we expect) will cause a change in $y$, $dy$, while the error term $u$ (that includes both the idiosyncratic error and the individual time-constant or fixed effect) needs to stay unchanged as we manipulate $x$. I.e., as long as
+
+$$\frac{\partial u}{\partial x} = 0$$
+
+we can claim that the effect of $x$ is
+
+$$\frac{\partial y}{\partial x} = \beta_1.$$ 
+
 
 5. **Someone proposes a difference in difference design. Please write the equation for such a model. Under what circumstances would this design yield a causal effect?**
 

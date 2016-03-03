@@ -313,11 +313,13 @@ multiplot(p2.17, p2.18, cols=2)
 model4.3<-lm(logWage~education + experience + age + raceColor, d)
 stargazer(model4.3, type="latex", title="Question 4.3-1")
 
-## @knitr Questions4-4
+
+## @knitr Question4-4
 model4.4<-lm(logWage~education + experience + experienceSquare + raceColor, data=d)
 stargazer(model4.3, model4.4, type="latex", title="Question 4.4")
 
-## @knitr Questions4-4-1
+
+## @knitr Question4-4-1
 #pull out the coefficients from the model
 coefs<-coef(model4.4)
 #set x values to be the experence data
@@ -330,15 +332,15 @@ dat<-data.frame(x,y)
 #plot the estimated effect of expereience (with the squared term) on the log(wage)
 ggplot(dat, aes(x,y))+
   geom_smooth(na.rm=T) +
-  labs(x="experience", y="log(wage)"))
+  labs(x="experience", y="log(wage)")
 
 
-## @knitr Questions4-5
+## @knitr Question4-5
 model4.5<-lm(logWage~education + experience + experienceSquare + raceColor +
                dad_education + mom_education + rural + city, data=d)
 stargazer(model4.3, model4.4, model4.5, type="latex", title="Question 4.5")
 
-## @knitr Questions4-5-1-1
+## @knitr Question4-5-1-1
 #check which variables have the missing data
 sum(is.na(d$education))
 sum(is.na(d$experience))
@@ -349,14 +351,14 @@ sum(is.na(d$mom_education))
 sum(is.na(d$rural))
 sum(is.na(d$city))
 
-## @knitr Questions4-5-1-2
+## @knitr Question4-5-1-2
 #identify rows that have an NA value
 row.has.na <- apply(d, 1, function(x){any(is.na(x))})
 #make a dataframe of only those rows with missing values to look at
 d_missing<-d[row.has.na,]
 
 
-## @knitr Questions4-5-1-3
+## @knitr Question4-5-1-3
 #create plots to try and identify any patterns
 p4.1<-ggplot(d_missing, aes(wage, education)) + 
   geom_point() +
@@ -398,7 +400,7 @@ multiplot(p4.1, p4.2, p4.3, p4.4, p4.5, p4.6, cols=2)
 
 
 
-## @knitr Questions4-5-3
+## @knitr Question4-5-3
 #create a copy of the dataset for this problem
 d4.3<-d
 #replace the missing values with the means of those values
@@ -409,7 +411,7 @@ model4.5.3<-lm(logWage~education + experience + experienceSquare + raceColor +
                  dad_education + mom_education + rural + city, data=d4.3)
 stargazer(model4.5, model4.5.3, type="latex", title="Question 4.5-3")
 
-## @knitr Questions4-5-4-1
+## @knitr Question4-5-4-1
 #copy data to replace values for the part of the question
 d4<-d
 #regress dad_education and mom_education on selected variables
@@ -419,72 +421,80 @@ model_mom<-lm(mom_education~education+experience+raceColor, data=d4)
 coef_dad<-coef(model_dad)
 coef_mom<-coef(model_mom)
 
-## @knitr Questions4-5-4-2
-#create a function
-rep<-function(d) {
-  for (i in 1:nrow(d)) {
-    if (is.na(d$dad_education[i])==TRUE) {
-      d$dad_education[i]= coef_dad[1]+coef_dad[2]*d$education[i]+
-        coef_dad[3]*d$experience[i]+coef_dad[4]*d$raceColor[i]
-    }
-    if (is.na(d$mom_education[i])==TRUE) {
-      d$mom_education[i]= coef_mom[1]+coef_mom[2]*d$education[i]+
-        coef_mom[3]*d$experience[i]+coef_mom[4]*d$raceColor[i]
-    }
+## @knitr Question4-5-4-2
+#create a for loop to replace the values with the estimates 
+for (i in 1:nrow(d)) {
+  if (is.na(d$dad_education[i])==TRUE) {
+    d$dad_education[i]= coef_dad[1]+coef_dad[2]*d$education[i]+
+      coef_dad[3]*d$experience[i]+coef_dad[4]*d$raceColor[i]
+  }
+  if (is.na(d$mom_education[i])==TRUE) {
+    d$mom_education[i]= coef_mom[1]+coef_mom[2]*d$education[i]+
+      coef_mom[3]*d$experience[i]+coef_mom[4]*d$raceColor[i]
   }
 }
-#call the function
-rep(d4)
 
-## @knitr Questions4-5-4-3
+
+## @knitr Question4-5-4-3
 #re-run the origional regression
 model4.5.4<-lm(logWage~education + experience + experienceSquare + raceColor +
                  dad_education + mom_education + rural + city, data=d4)
 #show the results of the the origional regression the final regression and the two sub regressions
 stargazer(model4.5, model4.5.4, model_dad, model_mom, type="latex", title="Question 4.5-4")
 
-## @knitr Questions4-5-5
+## @knitr Question4-5-5
 stargazer(model4.5, model4.5.3, model4.5.4, type="latex", title="Question 4.5-5")
 
 
 ## @knitr Question5
 # QUESTION 5 --------------------------------------------------------------
 
-## @knitr Questions5-1-1
+## @knitr Question5-1-1
 data<-read.csv('wealthy_candidates.csv')
 summary(data)
 head(data)
 #look at the variables
-hist(data$voteshare)
-hist(data$absolute_wealth)
+ggplot(data, aes(x=voteshare)) + geom_histogram()
+ggplot(data, aes(x=absolute_wealth)) + geom_histogram()
+#find any missing values
+sum(is.na(data$voteshare))
+sum(is.na(data$absolute_wealth))
+sum(is.na(data$urb))
+sum(is.na(data$lit))
+sum(is.na(data$region))
 
-## @knitr Questions5-1-2
-#subset the data and only keep the complete cases 
-data2<-data[, c("voteshare", "absolute_wealth", "region")]
-data2<-data2[complete.cases(data),]
-data2$logwealth<-log(data2$absolute_wealth)
-min(data2$logwealth)
-hist(data2$logwealth, breaks=20)
-#eliminate the large column on near 0 absoluate wealth
-data2<-subset(data2, logwealth>1, )
+## @knitr Question5-1-2
+#only take the complete cases
+data<-data[complete.cases(data),]
+#take the log of absoulte wealth to rescale the variable
+data$logwealth<-log(data$absolute_wealth)
+ggplot(data, aes(x=logwealth)) + geom_histogram()
 
-## @knitr Questions5-1-3
+## @knitr Question5-1-3
 #plot the data to get a sense if there might be a linear relationship
-scatter1<-ggplot(data2, aes(voteshare, logwealth))
-scatter1+geom_point()
+ggplot(data, aes(logwealth, voteshare)) + geom_point()
 
-## @knitr Questions5-1-4
+## @knitr Question5-1-4
+#test the subset of data that has identical values
+test<-subset(data, logwealth<1, )
+head(test)
+ggplot(test, aes(voteshare)) + geom_histogram()
+ggplot(test, aes(region)) + geom_histogram()
+ggplot(test, aes(urb)) + geom_histogram()
+ggplot(test, aes(lit)) + geom_histogram()
+
+## @knitr Question5-1-5
 #run the basic model
-model1<-lm(voteshare~logwealth, data=data2)
+model1<-lm(voteshare~logwealth, data=data)
 stargazer(model1, type="latex", title="Question 5.1")
 
-## @knitr Questions5-2
+## @knitr Question5-2
 #run the model with the squared term added in
-model2<-lm(voteshare~logwealth+ logwealth*logwealth, data=data2)
+model2<-lm(voteshare~logwealth+ logwealth*logwealth, data=data)
 stargazer(model1, model2, type="latex", title="Question 5.2")
 
-## @knitr Questions5-3
-model3<-lm(voteshare~logwealth+factor(region), data=data2)
+## @knitr Question5-3
+model3<-lm(voteshare~logwealth+factor(region), data=data)
 stargazer(model1, model2, model3, type="latex", omit="region", 
           add.lines = list(c("Region Fixed effects", "No", "No", "Yes")), title="Question 5.3")
 
