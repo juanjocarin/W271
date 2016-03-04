@@ -222,9 +222,11 @@ abline(h = theta, col = 'red', lty = 2)
 
 ## @knitr Question5
 # QUESTION 5 --------------------------------------------------------------
-# Simulate (with 1000 random draws) the following 3 models:
-# 1. A deterministic linear (time) trend of the form: yt = 10 + 0.5t
-# 2. Random walk without drift
-# 3. Random walk with drift = 0.5
-# Plot a time plot for each of the simulated series. 
-# Graph a histogram for each of the simulated series.
+# setwd('Lab2/data')
+load("retailSales.Rdata")
+wealthy_candidates <- head(read.csv('wealthy_candidates.csv')[, -1])
+
+## @knitr Question6
+# QUESTION 6 --------------------------------------------------------------
+# setwd('Lab2/data')
+load("retailSales.Rdata")

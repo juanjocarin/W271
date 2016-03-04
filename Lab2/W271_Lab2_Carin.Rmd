@@ -193,9 +193,9 @@ c=3\lambda/2\\
 \cfrac{\lambda}{2}+\lambda+\cfrac{3\lambda}{2}=3\lambda=1
 \end{matrix}\right.
 \Rightarrow \left\{\begin{matrix}
-\mathbf{\color{red}{a=\cfrac{1}{6}}}\\ 
-\mathbf{\color{red}{b=\cfrac{1}{3}}}\\ 
-\mathbf{\color{red}{c=\cfrac{1}{2}}}
+\mathbf{\color{red}{a=\cfrac{1}{6}=`r formatC(1/6)`}}\\ 
+\mathbf{\color{red}{b=\cfrac{1}{3}=`r formatC(1/3)`}}\\ 
+\mathbf{\color{red}{c=\cfrac{1}{2}=`r formatC(1/2)`}}
 \end{matrix}\right.$$
 
 Let's prove the result in R:
@@ -285,8 +285,8 @@ $$\Pr\left(|\hat{\theta}_{ml} - \theta|>\varepsilon\right) = \Pr\left(\cfrac{\th
 
 \small
 
-```{r Question3, echo = c(2:11), fig.cap = "Trend of the MLE of $\\theta$ depending on the sample size"}
-```
+> ```{r Question3, echo = c(2:11), fig.cap = "Trend of the MLE of $\\theta$ depending on the sample size"}
+> ```
 
 \normalsize
 
