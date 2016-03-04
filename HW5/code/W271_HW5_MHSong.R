@@ -130,22 +130,26 @@ str(EQ5)
 str(flu)
 str(gas)
 
-## @knitr Question1-4
-# Time series plot and histogram of EQ5 seismic trace
+## @knitr Question1-4-1
+# Time series and histogram Plots for the EQ5 seismic trace
 autoplot(EQ5, main='Seismic Trace of EQ5', ts.colour= 'dodgerblue2', 
          xlab='Time', ylab='Amplititue')
-qplot(EQ5, geom="histogram",  main='Histogram of EQ5',
-      xlab='Amplitude', ylab='Frequency', fill=I("dodgerblue2"))
-# Time series plot and histogram of flu
-autoplot(flu, main='Monthly Pneumonia/influenza Deaths', ts.colour = 'dodgerblue2',
-         xlab='Time', ylab='Deaths Per 10,000 People')
-qplot(flu, geom="histogram",  main='Histogram of Flu',
-      xlab='Monthly Deaths per 10000 People', ylab='Frequency', fill=I("dodgerblue2"))
-# Time series plot and histogram of gas price
-autoplot(gas, main='Gas Prices',  ts.colour = 'dodgerblue2', xlab='Weeks in 2000-2010',
+qplot(EQ5, geom="histogram",  main='Histogram of EQ5', xlab='Amplitude',
+      ylab='Frequency', colour = I('dodgerblue3'), fill = I("white") )
+
+## @knitr Question1-4-2
+# Time series and histogram Plots for the flu data series
+autoplot(flu, main='Flu Time Series Plot', ts.colour = 'dodgerblue2',
+         xlab='Time', ylab='Deaths Per 10,000 People' )
+qplot(flu, geom="histogram",  main='Histogram of Flu Series', xlab='Monthly Deaths per 10000 People',
+      ylab='Frequency', colour = I('dodgerblue3'), fill = I("white") )
+
+## @knitr Question1-4-3
+# Time series and histogram plots for the gas price series 
+autoplot(gas, main='Gas Prices Time Series Plot',  ts.colour = 'dodgerblue2', xlab='Weeks in 2000-2010',
          ylab='Gasoline Price (cents per gallon)')
-qplot(gas, geom="histogram",  main='Histogram of Gas',
-      xlab='Weeks in 2000-2010', ylab='Frequency', fill=I("dodgerblue2"))
+qplot(gas, geom="histogram",  main='Histogram of Gas Series', xlab='Weeks in 2000-2010',
+      ylab='Frequency', colour = I('dodgerblue3'), fill = I("white") )
 
 
 ## @knitr Question1-5
@@ -201,7 +205,8 @@ ggplot(biogen,aes(Date,Close)) +
   scale_colour_manual("", breaks = c("biogen", "medivation","lexicon","gilead","enanta","celgen"),
                       values = c("red", "brown", "green", "blue","purple","black")) +
   ggtitle("Biotech. Stocks to Watch in 2016") +
-  theme(plot.title = element_text(lineheight=.7, face="bold")) 
+  theme(plot.title = element_text(lineheight=.7, face="bold")) +
+  labs(y = "Stock Closing Price ($)")
 
 ## @knitr Question2-2
 # the daily tempreture of 2015 at JFK airport.
@@ -209,9 +214,9 @@ ggplot(biogen,aes(Date,Close)) +
 W_KJFK_2015 <- getWeatherForYear("KJFK",2015)
 W_KJFK_2015$Date <- as.Date(W_KJFK_2015$Date,format="%y-%m-%d")
 
-ggplot(W_KJFK_2015, aes(Date, Mean_TemperatureF)) + geom_line() +
+ggplot(W_KJFK_2015, aes(Date, Mean_TemperatureF)) + geom_line(colour = 'dodgerblue2') +
   scale_x_date(labels=date_format("%y/%m/%d")) + xlab("") + ylab("Mean Temp deg F") +
-  ggtitle("2015 Averaged Daily Temperature at JFK")
+  ggtitle("2015 Averaged Daily Temp. at JFK")
 
 ## @knitr Question2-3
 # the daily electricity usage for every month during 2014 Jan. and 2015 Dec.
@@ -220,13 +225,9 @@ elec_usage = c(35.94, 29.68, 31.83, 31.36, 24.61, 17.91, 18.29, 17.74, 15.70,
               +19.33, 23.90, 23.39, 23.30, 28.63, 29.07, 24.27, 20.68, 18.33,
               +18.42, 18.41, 24.66, 18.93, 23.03, 23.18)
 elec_usage_ts <- ts(elec_usage, start=c(2014, 1), end=c(2015, 12), frequency=12) 
-autoplot(elec_usage_ts, main='Monthyl Electricity Usage in 2014 & 2015', geom = "bar",
-         xlab='Time', ylab='Daily Electricity Usage (KWh)')
+autoplot(elec_usage_ts, main='Monthyl Electricity Usage in 2014 & 2015',geom = "bar",xlab='Time',
+        ylab='Daily Electricity Usage (KWh)',colour = I('dodgerblue3'),fill = I("white"))
 
-## @knitr Question2-4
-# Plot the fMRI data example within the astsa package 
-autoplot(fmri1[,2:5],  ylab="Blood Oxygenationlevel Dependent
-         (BOLD) Signal Intensity", xlab="",main="Cortex",  ts.colour = 'dodgerblue3')
 
 
 ## @knitr Question3
@@ -237,12 +238,12 @@ autoplot(fmri1[,2:5],  ylab="Blood Oxygenationlevel Dependent
 rand_draw <- rnorm(1000) # 1000 random draw
 rand_draw_ts <- ts(rand_draw)
 autoplot(rand_draw_ts , xlab = "Simulated Time Period", ylab = "Simulated Values", 
-         main="Simulated White Noise", ts.colour = 'dodgerblue2')
-qplot(rand_draw_ts, geom="histogram",  main='Histogram of Simulated White Noise',
-      xlab='Simulated Values', ylab='Frequency', fill=I("dodgerblue2"))
+         main="Simulated White Noise", ts.colour = 'dodgerblue2', ylim=c(-6,6) )
+qplot(rand_draw_ts, geom="histogram",  main='Histogram of Simulated White Noise',ylab='Frequency',
+      xlab='Simulated Values', colour = I('dodgerblue3'), fill = I("white"), xlim=c(-6,6) )
 
 
-## @knitr Question4
+## @knitr Question4-1
 # QUESTION 4 --------------------------------------------------------------
 # Simulate (with 1000 random draws) the following two zero-mean 
 # autoregressive model with order 1 (i.e. AR(1)) models:
@@ -251,6 +252,33 @@ qplot(rand_draw_ts, geom="histogram",  main='Histogram of Simulated White Noise'
 # Plot a time plot for each of the simulated series. 
 # Graph a histogram for each of the simulated series.
 
+# Generate two simulated time series
+z1 <- rand_draw 
+for (t in 2:length(rand_draw)){ 
+  z1[t] <- 0.9 * z1[t-1] + z1[t] # use the same random normal sequence generated above
+}
+z1_ts <- ts(z1)
+z2 <- rand_draw 
+for (t in 2:length(rand_draw)){ 
+  z2[t] <- 0.2 * z2[t-1] + z2[t] # use the same random normal sequence generated above
+}
+z2_ts <- ts(z2)
+
+## @knitr Question4-2
+# the time series plot and histogram of 1st series 
+#par(mfrow=c(1,2))
+autoplot(z1_ts , xlab = "Simulated Time Period", ylab = "Simulated Values", 
+         main="AR(1) with alpha=0.9 ", ts.colour = 'dodgerblue2', ylim=c(-6,6) )
+qplot(z1, geom="histogram",  main='Histogram of AR(1) with alpha=0.9', ylab='Frequency',
+      xlab='Simulated Values', colour = I('dodgerblue3'), fill = I("white"), xlim=c(-6,6)) 
+
+## @knitr Question4-3
+# the time series plot and histogram of 2nd series
+#par(mfrow=c(1,2))
+autoplot(z2_ts , xlab = "Simulated Time Period", ylab = "Simulated Values", 
+         main="AR(1) with alpha=0.2", ts.colour = 'dodgerblue2', ylim=c(-6,6))
+qplot(z2_ts, geom="histogram",  main='Histogram of AR(1) with alpha=0.2', ylab='Frequency',
+      xlab='Simulated Values', colour = I('dodgerblue3'), fill = I("white"),xlim=c(-6,6) ) 
 
 
 ## @knitr Question5

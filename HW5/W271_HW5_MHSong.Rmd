@@ -13,6 +13,8 @@ fontsize: 10pt
 linkcolor: blue
 header-includes:
 - \usepackage{fancyhdr}
+- \usepackage{subcaption}
+- \usepackage{graphics}
 - \pagestyle{fancy}
 - \fancyhead[LO,LE]{Carin, Davis, Levato, Song}
 - \fancyhead[CE,CO]{W271 -- HW 5 -- \leftmark}
@@ -65,20 +67,25 @@ According to that [package documentation](https://cran.r-project.org/web/package
 
 4. **Plot the time series plots and histograms of the following 3 series. Feel free to use the codes provided in the R scripts. Make sure that each of your graph has a title, the axis ticks are clear, the axes are well-labelled, and use color intelligently.**
 
-```{r Question1-4, echo = TRUE, fig.width = 3.5, fig.height = 2.5}
+```{r Question1-4-1, echo = TRUE, fig.width = 3.5, fig.height = 2.5,  fig.cap='Time Series and Histogram Plots for EQ5', fig.subcap=c('Time Series Plot', 'Histrogram')}
 ```
 
+```{r Question1-4-2, echo = TRUE, fig.width = 3.5, fig.height = 2.5,  fig.cap='Time Series and Histogram Plots for EQ5', fig.subcap=c('Time Series Plot', 'Histrogram')}
+```
+
+```{r Question1-4-3, echo = TRUE, fig.width = 3.5, fig.height = 2.5,  fig.cap='Time Series and Histogram Plots for EQ5', fig.subcap=c('Time Series Plot', 'Histrogram')}
+```
 
 5. **Write a few sentences to describe each of the series.**
 
   + **EQ5:**
-  The EQ5 data encodes the seismic trace of an earthquake saved as the ts data class. It include two arrive phases: primary wave or P phase (t=1, ... ,1024) and the shear wave or S phase (t= 1025, ..., 2048)]. In this series, the amplitude of the P phase is much smaller than the amplitude of the S phase.  In addition, as shown in the above time series plot, it seems that the S phase of EQ5 series is periodic as well because it contains several similar segments with the equal length.  
+  The EQ5 data encodes the seismic trace of an earthquake saved as the ts data class. It include two arrive phases: primary wave or P phase (t=1, ... ,1024) and the shear wave or S phase (t= 1025, ..., 2048)]. In this series, the amplitude of the P phase is much smaller than the amplitude of the S phase.  The amplitude mean of P phase appears to be around 0.  S phase is quite volatility.  In addition, as shown in the above time series plot, it seems that the S phase of EQ5 series is periodic as well because it contains several similar segments with the equal length.  The whole distribution of EQ5 data follows a normal distribution. 
 
   + **flu:**
-  The flu data records monthly deaths per 10,000 people due to pneumonia and influenza in the United States for a period of 132 months(1968-1978). This series also exhibits a periodic pattern that the death rate tends to be the highest in January and then decreases gradually till next year.  
+  The flu data records monthly deaths per 10,000 people due to pneumonia and influenza in the United States for a period of 132 months(1968-1978). This series also exhibits an annually seasonal pattern that the death rate tends to be the highest in January or spring, ten decreases gradually till October or Noverber, and finall start to level up in the last three months. it distribution shows postive skew with longer right tail.  
 
   + **gas:**
-  The gas data collects the weekly price of gasoline in cents per gallon at New York Harbor from 2000 to mid-2010.  According to the data, gas price fist gradually go up, but drop suddently around the 4th quarter of 2009.   
+  The gas data collects the weekly price of gasoline in cents per gallon at New York Harbor from 2000 to mid-2010.  According to the data, the gas price first slight leveled off in the first two years and then started to gradually level up from 2002 to 2008.  In 2009 the price dropped significantly around the 4th quarter of 2009 and then gradualy recovered..  
 
 
 **********
@@ -88,30 +95,24 @@ According to that [package documentation](https://cran.r-project.org/web/package
 **Describe 3 examples you have used in your work or encounter in real life. Ideally, you can even load at least one of these time series, plot it, and the write a few statements to describe its characteristics.**
 
 + **the Example of Biotech Stocks:**
-Stock closing data is one kind of Non-regular time series and they will change every day as a result of market forces.  We use Biogen as the example here. Its closing stock price went up and down significantly in 2015 due to the promising clinical results of aducanumab for Alzheimer treatment in March as well as later unexpected slowing sales of its multiple sclerosis drug, Tecfidera.  
+In the first example, we pull out the stock data (from August 2010 to August 2015) of some biotech companie from yahoo financial web links. Biogen's closing stock price is used as the example here. Starting from 2010, it started to gradually go up because of the promising clinical results of aducanumab for Alzheimer treatment in March, 2013. However, the stock began to drop in 2015 due to slowing sales of its multiple sclerosis drug, Tecfidera.  
    
-```{r Question2-1, echo = -c(1:1)}
+```{r Question2-1, echo = -c(1:1),fig.align='center', fig.width = 5, fig.height = 3}
 ```
 
 + **the Example of Daily Averaged Tempreture  at JFK airport:**
-The 2nd data is the daily averaged tempretaure recorded at JFK airport weather station.  The data is directly pulled out through the WeatherData package. Similar to stock price, it is also non-regular time series data.         
+The 2nd data is the daily averaged tempretaure recorded at JFK airport weather station.  The data is directly pulled out through the WeatherData package. Similar to stock price, it is also non-regular time series data.  But the tempreture at a centain time point would be highly relevant to the tempreture of previous times.         
 
-```{r Question2-2, echo = -c(1:1)}
+```{r Question2-2, echo = -c(1:1), results='hide', fig.align='center', fig.width = 3.5, fig.height = 2.5}
 ```
 
 + **the Example Monthly Averaged Electricity Usage Example:**
-The 3rd examples show the monthly averaged electricity usage of my house between 2014 and 2015.  This data shown summers, in general, tended to have lower monthly averaged electricity usage (<20KWh) than the other seasons.  
+The 3rd example shows the monthly averaged electricity usage of my house between 2014 and 2015.  This periodic series shows that summers, in general, tended to have lower monthly averaged electricity usage (<20KWh) than the other seasons, e.g. winter.  
 
-```{r Question2-3, echo = -c(1:1)}
+```{r Question2-3, echo = -c(1:1),fig.align='center', fig.width = 3.5, fig.height = 2.5}
 ```
 
-+ **the fMRI Example:**
-Functional Magnetic Resonance Imaging (fMRI) is a powerful technique to address the functional connectivity within brain. We used the fMRI data in the astsa package as the illustrating example here. The plot below shows the fMRI spectrum measuring the blood oxygenationlevel
-dependent (BOLD) signal intensity from the cortex of four differnt subjects. For each subject, singals were sampled every 2 seconds for 256 seconds totally(n=128).  During the sampling process, the stimulus was first applied for 32 seconds and then stopped for the subsequent 32 seconds. Therefore, the whole sampling process (256 seconds) covers four periodic components.  
 
-
-```{r Question2-3, echo = -c(1:1)}
-```
 
 **********
 
@@ -119,7 +120,7 @@ dependent (BOLD) signal intensity from the cortex of four differnt subjects. For
 
 **Simulate a white noise series with 1000 random draws and plot (1) a time series plot and (2) a histogram. The usual reqirements on graphics (described) in Question 1) applied.**
 
-```{r Question3,echo = -c(1:4), fig.width = 3.5, fig.height = 2.5}
+```{r Question3,echo = -c(1:4), fig.width = 3.5, fig.height = 2.5, fig.show='hold'}
 ```
 
 
@@ -136,10 +137,17 @@ $$\mathbf{y_t = 0.2y_{t1} + w}$$
 
 **Plot a time plot for each of the simulated series. Graph a histogram for each of the simulated series. Write a few statements to compare the two series.**
 
-```{r Question4, echo = -c(1:7)}
+```{r Question4-1, echo = -c(1:7)}
 ```
 
+```{r Question4-2, echo=TRUE, fig.width = 3.5, fig.height = 2.5, fig.cap='Time Series and Histogram Plots for Two Smulated AR(1) Series', fig.subcap=c('y_t= 0.9 * y_t-1 + w', 'y_t= 0.2 * y_t-1 + w')}
+```
 
+```{r Question4-3, echo=TRUE, fig.width = 3.5, fig.height = 2.5,fig.show='hold'}
+```
+
++ **The Comparision between Two Simulated synthetic Series:**
+The first synthetic series ( AR(1) with $alpha=0.9$ ) is more volatile than the second series ( AR(1) with $alpha=0.2$ ). Due to the larger model parameter,  the value  at certain time t in the first series tend to be more statistically dependent on (or corrlated with) values at preceding times.  In addition, although both series follow the normal distrubution, the first sereis have a larger standand deviation. 
 
 **********
 
