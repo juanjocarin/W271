@@ -128,7 +128,7 @@ lines(density(y), col = 'red')
 y1 <- y[x > 0.2 - 1e-2 & x < 0.2 + 1e-2] # Using previous simulation
 hist(y1, main = 'pdf(y|x=0.2)', freq = FALSE)
 lines(density(y1), xlim = c(0, 1), main = 'pdf(y|x=0.2)', col = 'red')
-abline(v = mean(y1), col = 'green', lty	= 2, lwd = 4)
+abline(v = mean(y1), col = 'green', lty = 2, lwd = 4)
 # legend("topright", "E(Y|X=0.2)", lty = 1, bty="n", col = 'red')
 
 ## @knitr Question1-3
@@ -270,6 +270,11 @@ var_level <- sapply(data, is.factor)
 non_binary_vars <- names(data)[var_level == FALSE]
 data_reduced <- data %>% 
   select(which(names(data) %in% non_binary_vars))
+
+data_reduced <- data %>% 
+  select(which(names(data) %in% names(data)[!sapply(data, is.factor)]))
+
+dim(data%>%sample_n(100))
 
 data_melt <- data_reduced %>% gather(variable, value)
 ggplot(data_melt, aes(value)) + 
