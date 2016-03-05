@@ -16,8 +16,10 @@ library(car)
 library(sandwich)
 library(lmtest)
 library(dplyr)
+library(tidyr)
 library(stargazer)
 library(texreg)
+library(GGally)
 
 # Define functions
 
@@ -211,22 +213,84 @@ abline(h = theta, col = 'red', lty = 2)
 
 ## @knitr Question4
 # QUESTION 4 --------------------------------------------------------------
-# Simulate (with 1000 random draws) the following two zero-mean 
-# autoregressive model with order 1 (i.e. AR(1)) models:
-# yt = 0.9yt1 + w
-# yt = 0.2yt1 + w
-# Plot a time plot for each of the simulated series. 
-# Graph a histogram for each of the simulated series.
+# setwd('Lab2/data')
+data <- read.csv('WageData2.csv')
+data <- data %>% select(-X)
+data_melt <- data %>% gather(variable, value)
+ggplot(data_melt, aes(value)) + 
+  geom_histogram(aes(y = ..count..), color = "black", fill = "white", 
+                 bins = 20) + 
+  facet_wrap(~ variable, scales = "free") + 
+  labs(x = "Variable Value", y = "Number of observations", 
+       title = "Histogram of all variables in the dataset")
+
+var_level <- apply(data, 2, function(x) length(levels(as.factor(x))))
+non_binary_vars <- names(data)[var_level > 2]
+data_reduced <- data %>% 
+  select(which(names(data) %in% non_binary_vars))
+pairs(data_reduced)
+
+ggpairs(data_reduced)
 
 
 
 ## @knitr Question5
 # QUESTION 5 --------------------------------------------------------------
 # setwd('Lab2/data')
-load("retailSales.Rdata")
-wealthy_candidates <- head(read.csv('wealthy_candidates.csv')[, -1])
+data <- read.csv('wealthy_candidates.csv')
+data <- data %>% select(-X)
+data_melt <- data %>% gather(variable, value, - region)
+ggplot(data_melt, aes(x=value, fill=region, color = region)) + 
+  geom_histogram(aes(y = ..count..), alpha=0.6, 
+                 bins = 20, position = "dodge") + 
+  facet_wrap(~ variable, scales = "free") + 
+  labs(x = "Variable Value", y = "Number of observations", 
+       title = "Histogram of all variables in the dataset")
+ggplot(data_melt, aes(x=value)) + 
+  geom_histogram(aes(y = ..count..), alpha=0.6, 
+                 bins = 20, position = "dodge", fill = "white", color = "black") + 
+  facet_wrap(~ variable, scales = "free") 
+
+data_reduced <- data %>% 
+  select(-region)
+pairs(data_reduced)
+ggpairs(data_reduced)
+
+
 
 ## @knitr Question6
 # QUESTION 6 --------------------------------------------------------------
 # setwd('Lab2/data')
 load("retailSales.Rdata")
+data <- retailSales
+data <- data %>% 
+  mutate(Year = as.factor(Year))
+
+var_level <- sapply(data, is.factor)
+non_binary_vars <- names(data)[var_level == FALSE]
+data_reduced <- data %>% 
+  select(which(names(data) %in% non_binary_vars))
+
+data_melt <- data_reduced %>% gather(variable, value)
+ggplot(data_melt, aes(value)) + 
+  geom_histogram(aes(y = ..count..), color = "black", fill = "white", 
+                 bins = 20) + 
+  facet_wrap(~ variable, scales = "free") + 
+  labs(x = "Variable Value", y = "Number of observations", 
+       title = "Histogram of all variables in the dataset")
+
+ggplot(data_melt, aes(x=value, fill=region, color = region)) + 
+  geom_histogram(aes(y = ..count..), alpha=0.6, 
+                 bins = 20, position = "dodge") + 
+  facet_wrap(~ variable, scales = "free") + 
+  labs(x = "Variable Value", y = "Number of observations", 
+       title = "Histogram of all variables in the dataset")
+ggplot(data_melt, aes(x=value)) + 
+  geom_histogram(aes(y = ..count..), alpha=0.6, 
+                 bins = 20, position = "dodge", fill = "white", color = "black") + 
+  facet_wrap(~ variable, scales = "free") 
+
+data_reduced <- data %>% 
+  select(-region)
+pairs(data_reduced)
+ggpairs(data_reduced)
