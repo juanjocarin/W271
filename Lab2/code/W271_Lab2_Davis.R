@@ -5,6 +5,7 @@
 ## @knitr Libraries-Functions-Constants
 # LIBRARIES, FUNCTIONS AND CONSTANTS -------------------------------------------------
 # Load libraries
+library(plot3D)
 library(e1071)
 library(ggplot2)
 library(ggfortify)
@@ -18,6 +19,7 @@ library(dplyr)
 library(stargazer)
 library(texreg)
 library(reshape2)
+library(GGally)
 
 # Define functions
 
@@ -111,23 +113,101 @@ tableCount <- c(`_` = 0)
 ## @knitr Question1-1-1
 # QUESTION 1 --------------------------------------------------------------
 # Find the conditional expectation of Y given X, E(Y|X)
+simulations <- 1e4 # number of simulations
+set.seed(123)
+x <- runif(simulations, min=0, max=1) # X ~ U(0,1)
+y <- runif(simulations, min=0, max=x) # Y|X ~ U(0,X)
+par(mfrow = c(1, 2))
+hist(x, main = "pdf(x)", freq = FALSE)
+lines(density(x), col = 'red')
+hist(y, main = "pdf(y)", freq = FALSE)
+lines(density(y), col = 'red')
 
 ## @knitr Question1-1-2
+# y1 <- runif(simulations, min = 0, max = 0.2) # Fix X to 0.2
+y1 <- y[x > 0.2 - 1e-2 & x < 0.2 + 1e-2] # Using previous simulation
+hist(y1, main = 'pdf(y|x=0.2)', freq = FALSE)
+lines(density(y1), xlim = c(0, 1), main = 'pdf(y|x=0.2)', col = 'red')
+abline(v = mean(y1), col = 'green', lty = 2, lwd = 4)
+# legend("topright", "E(Y|X=0.2)", lty = 1, bty="n", col = 'red')
 
 ## @knitr Question1-3
+pdf_x <- function(x) ifelse(x<1 & x>0, 1, 0) # f(x)
+integrate(pdf_x, -Inf, Inf) # integral
+pdf_y_given_x <- function(x,y) ifelse(y<x & y>0 & x<1 & x>0, 1/x, 0) # f(y|x)
+pdf_xy <- function(x,y) pdf_x(x)*pdf_y_given_x(x,y) # f(x,y)
+# integral
+integrate(function(y) sapply(y, function(y) integrate(function(x) 
+  pdf_xy(x,y), 0, 1)$value), -Inf, Inf)
+# Plot f(x,y)
+x0 <- y0 <- seq(0, 1, by = 0.01)
+grid <- mesh(x0, y0)
+z0 <- with(grid, pdf_x(x)*pdf_y_given_x(x,y))
+# contour(x0, y0, z0, asp=1)
+# par(mfrow = c(1, 2))
+persp3D(z = z0, x = x0, y = y0)
+# Confirm that f(x,y) = 1/x
+# z2 <- with(grid, ifelse(x<=y | x==0 | y == 0, 0, 1/x))
+# persp3D(z = z2, x = x0, y = y0)
 
 ## @knitr Question1-4
+# f(y)
+pdf_y <- function(y) 
+  sapply(y, function(y) integrate(function(x) 
+    pdf_y_given_x(x,y)*pdf_x(x), 0, 1)$value)
+integrate(pdf_y, -Inf, Inf) # integral
+plot(sort(y), pdf_y(sort(y)), type = 'l', main = 'pdf(y)', xlab = 'y')
+# Confirm that f(y) = log(1/y)
+lines(sort(y), log(1/sort(y)), type = 'l', main = 'pdf(y)')
+
 
 ## @knitr Question1-5
+# Confirm E(X|Y=0.5) (use values of Y around 0.5 in the previous simulation)
+mean(x[y > 0.5 - 1e-2 & y < 0.5 + 1e-2])
+1/(2*log(2))
+
+
 
 ## @knitr Question2
 # QUESTION 2 --------------------------------------------------------------
 # Find, the values of a, b, and c that minimize the variance of total payoff
+payoff <- function(x) {
+  a <- x[1]
+  b <- x[2]
+  c <- x[3]
+  a^2 + b^2/2 + c^2/3
+}
+gradient_payoff <- function(x) {
+  a <- x[1]
+  b <- x[2]
+  c <- x[3]
+  c(2*a, b, 2*c/3)
+}
+sol <- constrOptim(theta = c(.3, .3, .4), f = payoff, grad = gradient_payoff, 
+                   ui = rbind(c(1, 0, 0), c(0, 1, 0), c(0, 0, 1), 
+                              c(-1, 0, 0), c(0, -1, 0), c(0, 0, -1), 
+                              c(1, 1, 1), c(-1, -1, -1)), 
+                   ci = c(0, 0, 0, -1, -1, -1, 1-1e-6, -1-1e-6))
+sol$par
 
 
 
 ## @knitr Question3
 # QUESTION 3 --------------------------------------------------------------
+simulations <- 1e3 # number of simulations
+theta <- 100 # an arbitrary value of theta
+y <- runif(n = simulations, min = 0, max = theta) # Y ~ U(0,theta)
+# any(y == theta); all(y < theta) # FALSE and TRUE, respectively
+# No matter how large is the sample, Yi is always lower than 1
+set.seed(1)
+num_simulations <- sort(c(1, sample(c(2:simulations), 49)))
+theta_mle <- unlist(lapply(num_simulations, function(n) 
+  mean(max(runif(n = n, min = 0, max = theta)))))
+plot(num_simulations, theta_mle, ylim = c(floor(min(theta_mle)), theta),
+     xlab = "Number of simulations", ylab = "MLE of theta", pch = '*')
+lines(num_simulations, theta_mle, lwd = 0.5, col = 'blue')
+lines(num_simulations, theta*num_simulations/(num_simulations+1), col = 'green')
+abline(h = theta, col = 'red', lty = 2)
 
 
 ## @knitr Question4
@@ -140,7 +220,7 @@ data$experienceSquare = data$experience^2
 #round(stat.desc(data, desc = TRUE, basic = TRUE), 2)
 
 ## @knitr Question4-1-1a
-stargazer(data, header = F,
+stargazer(data, header = F, title ="Summary Statistics of Wage Data",
           summary.stat = c("n", "mean", "sd", "min", "p25", "median", "p75", "max"))
 
 ## @knitr Question4-1-2
@@ -165,13 +245,14 @@ ggplot(data3, aes(x= value)) +
   labs(title = "Histogram of Education, Age, and Experience Variables") 
 
 ## @knitr Question4-2-1
-cor.matrix1 <- as.data.frame(cor(data$wage, data[,c(3:15)], use="pairwise.complete.obs"),
+# Calculate correlations for wage and log(wage)
+cor.matrix1 <- as.data.frame(cor(data$wage, data[,c(2:15)], use="pairwise.complete.obs"),
                              row.names = "Wage")
-stargazer(cor.matrix1, title="Correlations for Wage", flip=T, summary = F, header = F)
-
-cor.matrix2 <- as.data.frame(cor(data$logWage, data[,c(2:13,15)], use="pairwise.complete.obs"),
+cor.matrix2 <- as.data.frame(cor(data$logWage, data[,c(2:15)], use="pairwise.complete.obs"),
                              row.names = "log(Wage)")
-stargazer(cor.matrix2, title="Correlations for log(Wage)", flip=T, summary=F, header = F)
+cor.matrix <- bind_rows(cor.matrix1, cor.matrix2)
+rownames(cor.matrix) <- c("Wage", "log(Wage)")
+stargazer(cor.matrix, title="Correlations for Wage and log(Wage)", flip=T, summary = F, header = F)
 
 
 ## @knitr Question4-2-2
@@ -190,7 +271,7 @@ ggplot(data6, aes(logWage, value)) +
 
 ## @knitr Question4-3-1
 model <- lm(logWage ~ education + experience+ age + raceColor, data = data)
-stargazer(model, type="latex", title="Regression Summary",
+stargazer(model, type="latex", title="Regression Summary", report = "vc*st",
           header = FALSE, table.placement = "h!")
 
 ## @knitr Question4-3-2
@@ -303,14 +384,7 @@ second_stage_b <- lm(data$logWage ~ first_stage_b$fitted + data$experience +
                        data$experienceSquare + data$raceColor + data$dad_education + 
                        data$mom_education + data$rural + data$city)
 stargazer2(list(first_stage_a, first_stage_b), dep.var.labels = 'education', 
-           covariate.labels = c('IV 1', 'IV 2'))
-
-## @knitr Question4-6-2
-stargazer2(second_stage_a, dep.var.labels = 'log(Wages)', 
-           covariate.labels = c("Education ($z_1$)", "Experience", "$\\text{Expereince}^{2}$",
-                                "Race (White or Non-white)", "Father's Education",
-                                "Mother's Education", "Rural (Yes or No)", "City (Yes or No)"),
-           title = "Two One Regression summary")
+           covariate.labels = c('IV 1', 'IV 2'), title="Step One Regression Summary")
 
 ## @knitr Question4-6-3
 stargazer2(second_stage_b, dep.var.labels = 'log(Wages)', 
@@ -331,7 +405,8 @@ d$logWealth <- log(d$absolute_wealth)
 d$hasWealth <- ifelse(d$absolute_wealth == 2,0,1)
 d$hasWealth <- factor(d$hasWealth, labels=c("No", "Yes"))
 stargazer(d, header = F, flip=T,
-          summary.stat = c("n", "mean", "sd", "min", "p25", "median", "p75", "max"))
+          summary.stat = c("n", "mean", "sd", "min", "p25", "median", "p75", "max"),
+          title="Summary Statistics for Voting Data")
 
 # noWealth <- d[d$hasWealth=="No",]
 # Wealth <- d[d$hasWealth=="Yes",]
@@ -370,7 +445,7 @@ ggplot(d3, aes(voteshare, value)) +
 m1 <- lm(voteshare~  logWealth + hasWealth, data = d)
 stargazer2(m1, dep.var.labels = 'Voteshare', 
            covariate.labels = c("log(Wealth)", "Has Wealth = Yes"),
-           title = "Regression summary")
+           title = "Regression summary - Parsimonious Model")
 
 ## @knitr Question5-1-8
 d$wealthSqr <- d$logWealth**2
@@ -378,7 +453,7 @@ m2 <- lm(voteshare~ logWealth + wealthSqr + hasWealth , data = d)
 stargazer2(m1, dep.var.labels = 'Voteshare', 
            covariate.labels = c("log(Wealth)", "$\\text{log(Wealth)}^{2}$",
                                 "Has Wealth = Yes"),
-           title = "Regression summary")
+           title = "Regression summary - Quadratic Model")
 
 ## @knitr Question5-3-1
 ggplot(d, aes(logWealth)) + geom_histogram(aes(fill=region)) +
@@ -416,22 +491,12 @@ ggplot(d, aes(x=voteshare, y=as.numeric(hasWealth))) + geom_point(aes(color=regi
 m3 <- lm(voteshare~ logWealth + hasWealth + region, data = d)
 stargazer2(m3, dep.var.labels = 'Voteshare', 
            covariate.labels = c("log(Wealth)", "Has Wealth = Yes", "Region = 2", "Region = 3"),
-           title = "Regression summary")
+           title = "Regression summary - Region Model")
 
 ## @knitr Question5-3-6
 model_comp <- anova(m1, m3)
-rownames(model_comp) <- c("Parsimonious Model", "Regions Model")
+rownames(model_comp) <- c("Parsimonious Model", "Region Model")
 stargazer(model_comp, header = F, summary=F, title = "Model Comparison")
-
-# 
-# 
-# m <- lm(voteshare~  hasWealth, data = d)
-# m1 <- lm(voteshare~  logWealth + hasWealth, data = d)
-# m2 <- lm(voteshare~logWealth, data=d)
-
-# m4 <- lm(voteshare~ logWealth + region, data = d)
-# 
-# 
 
 # autoplot(m)
 # autoplot(m2)
@@ -440,8 +505,8 @@ stargazer(model_comp, header = F, summary=F, title = "Model Comparison")
 # summary.lm(m1)
 # summary.lm(m2)
 # summary.lm(m3)
-# summary.lm(m4)
-# summary.lm(m5)
+
+
 ## @knitr Question
 # QUESTION 6 --------------------------------------------------------------
 load("retailSales.Rdata")
