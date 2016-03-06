@@ -396,9 +396,23 @@ The regression output shows that the model including regions accounts for a grea
 
 4. **Return to your parsimonious model. Do you think you have found a causal and unbiased estimate? Please state the conditions under which you would have an unbiased and causal estimates. Do these conditions hold?**
 
+In order for OLS to make unbiased estimates of the OLS parameters, 4 conditions must hold:
+
+1. The parameters have a linear relationship
+2. Observations are observed through random sampling
+3. There is no perfect collinearity among the independent variables
+4. Ther is zero conditional mean of the error term and zero correlation of the error with any of the independent variables
+
+And in order for our coefficients to represent causual effects, changes in the independent variable must not change the expected value of the error term. Ie.
+
+$$\frac{\partial u}{\partial x} = 0$$
+
+Two primary issues that lead me to conclude that we have not found a causal and unbiased estimate. The first is the lack of apparent linearity in the relationship between voteshare and wealth. This is supported by the low explanatory power of our model, as well as the scatter plot of wealth and voteshare that seems to imply non linear factors may be more important than linear. The second issue is that wealth is probably not exogenous, but are in fact correlated with a host of measures that are contained in the error term. For example, having more money may be correlated with being a well-known public figure, which may influence voteshare. 
+
 
 
 5. **Someone proposes a difference in difference design. Please write the equation for such a model. Under what circumstances would this design yield a causal effect?**
+
 
 
 
