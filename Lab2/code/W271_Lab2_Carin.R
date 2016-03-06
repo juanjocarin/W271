@@ -211,10 +211,19 @@ abline(h = theta, col = 'red', lty = 2)
 
 
 
-## @knitr Question4
+## @knitr Question4-1
 # QUESTION 4 --------------------------------------------------------------
 # setwd('Lab2/data')
 data <- read.csv('WageData2.csv')
+summary(data)
+round(stat.desc(data, desc = TRUE, basic = TRUE), 2)
+# Lots of NAs, and some binary variables (raceColor, rural, city, z1, z2)
+ggplot(data, aes(X)) + 
+  geom_histogram(aes(y = ..count..), color = "black", fill = "white", 
+                 bins = 20) + 
+  labs(x = "Value", y = "Number of observations", 
+       title = "Histogram of unnamed variable")
+## @knitr Question4-2
 data <- data %>% select(-X)
 data_melt <- data %>% gather(variable, value)
 ggplot(data_melt, aes(value)) + 
@@ -224,78 +233,89 @@ ggplot(data_melt, aes(value)) +
   labs(x = "Variable Value", y = "Number of observations", 
        title = "Histogram of all variables in the dataset")
 
-var_level <- apply(data, 2, function(x) length(levels(as.factor(x))))
-non_binary_vars <- names(data)[var_level > 2]
+## @knitr Question4-3
 data_reduced <- data %>% 
-  select(which(names(data) %in% non_binary_vars))
+  select(which(names(data) %in% names(data)[sapply(data, function(x) 
+    length(levels(as.factor(x)))) > 2]))
 pairs(data_reduced)
 
-ggpairs(data_reduced)
+## @knitr Question4-4
+ggpairs(data_reduced %>% na.omit()) + 
+  theme(axis.ticks = element_blank(), axis.text =  element_blank()) 
+
+## @knitr Question4-5
+# Create two variables:
+# (1) natural log of wage (name it `logWage`)
+# (2) square of experience (name it `experienceSquare`)**
+data <- data %>% 
+  mutate(logWage = log(wage), experienceSquare = experience^2)
 
 
 
-## @knitr Question5
+## @knitr Question5-1
 # QUESTION 5 --------------------------------------------------------------
 # setwd('Lab2/data')
 data <- read.csv('wealthy_candidates.csv')
+ggplot(data, aes(X)) + 
+  geom_histogram(aes(y = ..count..), color = "black", fill = "white", 
+                 bins = 20) + 
+  labs(x = "Value", y = "Number of observations", 
+       title = "Histogram of unnamed variable")
+## @knitr Question5-2
 data <- data %>% select(-X)
+summary(data)
+# Only 1 NA in absolute_wealth
+data[is.na(data$absolute_wealth), ]
+# The values of the other variables for that observations are not outliers
+# We can omit that observation from our sample
+data <- data %>% filter(!is.na(absolute_wealth))
+# Region is categorical (3 possible values)
+round(stat.desc(data[, names(sapply(data, 
+                                    is.factor))[!sapply(data, is.factor)]], 
+                desc = TRUE, basic = TRUE), 2)
 data_melt <- data %>% gather(variable, value, - region)
+ggplot(data_melt, aes(x=value)) + 
+  geom_histogram(aes(y = ..count..), alpha=0.6, 
+                 bins = 20, position = "dodge", fill = "white", color = "black") + 
+  facet_wrap(~ variable, scales = "free") 
+## @knitr Question5-3
 ggplot(data_melt, aes(x=value, fill=region, color = region)) + 
   geom_histogram(aes(y = ..count..), alpha=0.6, 
                  bins = 20, position = "dodge") + 
   facet_wrap(~ variable, scales = "free") + 
   labs(x = "Variable Value", y = "Number of observations", 
-       title = "Histogram of all variables in the dataset")
-ggplot(data_melt, aes(x=value)) + 
-  geom_histogram(aes(y = ..count..), alpha=0.6, 
-                 bins = 20, position = "dodge", fill = "white", color = "black") + 
-  facet_wrap(~ variable, scales = "free") 
-
+       title = "Histogram of all variables in the dataset per Region")
+## @knitr Question5-4
 data_reduced <- data %>% 
   select(-region)
 pairs(data_reduced)
-ggpairs(data_reduced)
+## @knitr Question5-5
+ggpairs(data_reduced %>% sample_n(500)) + 
+  theme(axis.ticks = element_blank(), axis.text =  element_blank()) 
 
 
 
-## @knitr Question6
+## @knitr Question6-1
 # QUESTION 6 --------------------------------------------------------------
 # setwd('Lab2/data')
 load("retailSales.Rdata")
 data <- retailSales
 data <- data %>% 
   mutate(Year = as.factor(Year))
-
-var_level <- sapply(data, is.factor)
-non_binary_vars <- names(data)[var_level == FALSE]
-data_reduced <- data %>% 
-  select(which(names(data) %in% non_binary_vars))
-
-data_reduced <- data %>% 
+data_non_categorical <- data %>% 
   select(which(names(data) %in% names(data)[!sapply(data, is.factor)]))
-
-dim(data%>%sample_n(100))
-
-data_melt <- data_reduced %>% gather(variable, value)
+data_melt <- data_non_categorical %>% gather(variable, value)
 ggplot(data_melt, aes(value)) + 
   geom_histogram(aes(y = ..count..), color = "black", fill = "white", 
-                 bins = 20) + 
-  facet_wrap(~ variable, scales = "free") + 
+                 bins = 40) + 
+  facet_wrap(~ variable, scales = "free", ncol = 4) + 
   labs(x = "Variable Value", y = "Number of observations", 
        title = "Histogram of all variables in the dataset")
-
-ggplot(data_melt, aes(x=value, fill=region, color = region)) + 
-  geom_histogram(aes(y = ..count..), alpha=0.6, 
-                 bins = 20, position = "dodge") + 
-  facet_wrap(~ variable, scales = "free") + 
-  labs(x = "Variable Value", y = "Number of observations", 
-       title = "Histogram of all variables in the dataset")
-ggplot(data_melt, aes(x=value)) + 
-  geom_histogram(aes(y = ..count..), alpha=0.6, 
-                 bins = 20, position = "dodge", fill = "white", color = "black") + 
-  facet_wrap(~ variable, scales = "free") 
-
-data_reduced <- data %>% 
-  select(-region)
+## @knitr Question6-2
+data_reduced <- data_non_categorical %>% 
+  na.omit() %>% 
+  sample_n(500)
 pairs(data_reduced)
-ggpairs(data_reduced)
+## @knitr Question6-3
+ggpairs(data_reduced) + 
+  theme(axis.ticks = element_blank(), axis.text =  element_blank()) 

@@ -312,7 +312,23 @@ $$\Pr\left(|\hat{\theta}_{ml} - \theta|>\varepsilon\right) = \Pr\left(\cfrac{\th
 
 **Conduct an univariate analysis (using tables, graphs, and descriptive statistics found in the last 7 lectures) of all of the variables in the dataset.**
 
+```{r Question4-1, fig.cap = "Histogram of unnamed variable $X$"}
+```
+
+```{r Question4-2, fig.width = 6, fig.height = 4.5, fig.cap = "Histogram of all variables in the dataset"}
+```
+
+```{r Question4-3, fig.width = 6, fig.height = 6, fig.cap = "Scatterplot matrix"}
+```
+
+```{r Question4-4, fig.width = 6, fig.height = 6, fig.cap = "Scatterplot matrix omitting missing values (with correlations)"}
+```
+
 **Also, create two variables: (1) natural log of wage (name it `logWage`) (2) square of experience (name it `experienceSquare`)**
+
+```{r Question4-5}
+```
+
 
 ## Question 4.2
 
@@ -374,6 +390,21 @@ $$\Pr\left(|\hat{\theta}_{ml} - \theta|>\varepsilon\right) = \Pr\left(\cfrac{\th
 
 1. **Begin with a parsimonious, yet appropriate, specification. Why did you choose this model? Are your results statistically significant? Based on these results, how would you answer the research question? Is there a linear relationship between wealth and electoral performance?**
 
+```{r Question5-1, fig.cap = "Histogram of unnamed variable $X$"}
+```
+
+```{r Question5-2, fig.width = 6, fig.height = 4.5, fig.cap = "Histogram of all variables in the dataset"}
+```
+
+```{r Question5-3, fig.width = 6, fig.height = 4.5, fig.cap = "Histogram of all variables in the dataset per Region"}
+```
+
+```{r Question5-4, fig.width = 6, fig.height = 6, fig.cap = "Scatterplot matrix"}
+```
+
+```{r Question5-5, fig.width = 6, fig.height = 6, fig.cap = "Scatterplot matrix of a sample of the dataset (with correlations)"}
+```
+
 2. **A team-member suggests adding a quadratic term to your regression. Based on your prior model, is such an addition warranted? Add this term and interpret the results. Do wealthier candidates fare better in elections?**
 
 3. **Another team member suggests that it is important to take into account the fact that different regions have different electoral contexts. In particular, the relationship between candidate wealth and electoral performance might be different across states. Modify your model and report your results. Test the hypothesis that this addition is not needed.**
@@ -399,6 +430,15 @@ $$\Pr\left(|\hat{\theta}_{ml} - \theta|>\varepsilon\right) = \Pr\left(\cfrac{\th
 **Your analysis should address the following:**
 
 + **Exploratory Data Analysis: focus on bivariate and multivariate relationships.**
+
+```{r Question6-1, fig.width = 6, fig.height = 4.5, fig.cap = "Histogram of all non-categorical variables in the dataset"}
+```
+
+```{r Question6-2, fig.width = 6, fig.height = 6, fig.cap = "Scatterplot matrix of a sample of the dataset, after omitting missin values"}
+```
+
+```{r Question6-3, fig.width = 6, fig.height = 6, fig.cap = "Scatterplot matrix of a sample of the dataset, after omitting missin values (with correlations)"}
+```
 
 + **Be sure to assess conditions and identify unusual observations.**
 

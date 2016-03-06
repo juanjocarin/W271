@@ -1,0 +1,106 @@
+---
+title: "**W271**-2 -- Spring 2016 -- **Lab 2**"
+author: "***Juanjo Carin, Kevin Davis, Ashley Levato, Minghu Song***"
+date: "*March 7, 2016*"
+output:
+   pdf_document:
+     fig_caption: yes
+     toc: yes
+numbersections: false
+geometry: margin=1in
+options: width=30
+fontsize: 10pt
+linkcolor: blue
+header-includes:
+- \usepackage{fancyhdr}
+- \pagestyle{fancy}
+- \fancyhead[LO,LE]{Carin, Davis, Levato, Song}
+- \fancyhead[CE,CO]{W271 -- Lab 2}
+- \fancyhead[RE,RO]{\leftmark}
+- \fancyfoot[LO,LE]{UC Berkeley -- MIDS}
+- \fancyfoot[CO,CE]{Spring semester 2016}
+- \fancyfoot[RE,RO]{\thepage}
+- \renewcommand{\headrulewidth}{0.5pt}
+- \renewcommand{\footrulewidth}{0.5pt}
+---
+
+**********
+
+\pagebreak
+
+```{r, echo = FALSE}
+require(knitr, quietly = TRUE)
+read_chunk('code/W271_Lab2_Carin - Q6 only.R')
+opts_chunk$set(message = FALSE, warning = FALSE)
+opts_chunk$set(fig.width = 4, fig.height = 3)
+# Set path to data here (don't use setwd() inside a chunk!!!)
+opts_knit$set(root.dir = './data')
+```
+
+```{r Libraries-Functions-Constants, echo = FALSE}
+```
+
+# Question 6: CLM 3
+
+**Your analytics team has been tasked with analyzing aggregate revenue, cost and sales data, which have been provided to you in the R workspace/data frame `retailSales.Rdata`.**
+
+**Your task is two fold. First, your team is to develop a model for predicting (forecasting) revenues. Part of the model development documentation is a backtesting exercise where you train your model using data from the first two years and evaluate the model's forecasts using the last two years of data.**
+
+**Second, management is equally interested in understanding variables that might affect revenues in support of management adjustments to operations and revenue forecasts. You are also to identify factors that affect revenues, and discuss how useful management's planned revenue is for forecasting revenues.**
+
+**Your analysis should address the following:**
+
++ **Exploratory Data Analysis: focus on bivariate and multivariate relationships.**
+
+First we explore the whole dataset.
+
+```{r Question6-1, echo = -c(1:2)}
+```
+
+The dataset contains `r frmt(dim(data)[1], 0)` observations of `r dim(data)[2]` variables. `r sum(sapply(data, is.factor))` of them are categorical (``r paste(names(data)[sapply(data, is.factor)], collapse=", ")``), and `Year` should also be considered as categorical, since there are data from only `r max(data$Year) - min(data$Year) + 1` years (from `r min(data$Year)` to `r max(data$Year)`).
+
+```{r Question6-2}
+```
+
+We also notice (from the output of `summary`) that some of the variables (all of them numerical) has a high number of `NA`s, the same in all cases (`r sum(is.na(data$Revenue))`, i.e., $`r frmt(sum(is.na(data$Revenue))/dim(data)[1]*100, 2)`\%$ of the total number of observations). Do the `NA`s appear in the same observations for all those variables? Yes, they do.
+
+```{r Question6-3}
+```
+
+ And the amount of `NA`s per category is roughly the same for all categorical values (or at least there are non-missing data for all categories; below we just show the percentage per category for three of the numerical variables).
+
+```{r Question6-4, echo = c(1:3)}
+```
+
+So we can ommit all those missing observations (reducing our sample size to `r dim(data)[1] - sum(is.na(data$Revenue))`), and continue with a further analysis of the numerical variables:
+
+```{r Question6-5}
+```
+
+All numerical variables are right-skewed, with long right tails (i.e., with several observations more than 2 standard deviations far from the mean), especially the ones corresponding to aggregate---non-unit---results.
+
+```{r Question6-6, echo = FALSE, fig.width = 6, fig.height = 4.5, fig.cap = "Histogram of all non-categorical variables in the dataset"}
+```
+
+Below we show the correlation matrix of the numerical variables, as well as two different representations of the scatterplot matrix (where we've used a sample of the data of size 500 because the plotting functions consume a lot of resources; that's why the correlations shown in the second Figure, only approximate, differ from the ones shown right below). As we might have expected, the correlations between `Revenue`, `Planned.revenue`, `Product.cost`, and `Gross.profit` (i.e., the aggregate values), as well as those between `Unit.cost`, `Unit.price`, and `Unit.sale.price` (i.e., the values per unit), are positive and very high. `Quantity` is negatively correlated with the unitary variables (but that correlation is negligible in absolute value), and is moderately correlated ($\rho \simeq 0.5$) with the aggregate values.
+
+```{r Question6-7, echo = 1, fig.width = 6, fig.height = 6, fig.cap = "Scatterplot matrix of a sample of the dataset"}
+```
+
+```{r Question6-8, echo = FALSE, fig.width = 6, fig.height = 6, fig.cap = "Scatterplot matrix of a sample of the dataset (with correlations)"}
+```
+
++ **Be sure to assess conditions and identify unusual observations.**
+
++ **Is the change in the average revenue different from 95 cents when the planned revenue increases by $1?**
+
+
+
++ **Explain what interaction terms in your model mean in context supported by data visualizations.**
+
++ **Give two reasons why the OLS model coefficients may be biased and/or not consistent, be specific.**
+
++ **Propose (but do not actually implement) a plan for an IV approach to improve your forecasting model.**
+
+
+**********
