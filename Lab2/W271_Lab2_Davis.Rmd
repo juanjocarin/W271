@@ -153,22 +153,16 @@ $$L(\theta) = \begin{cases}
 ```{r Question4-1-1, echo = F}
 ```
 
-```{r Question4-1-1-1, echo = F, fig.width = 7, fig.height = 10}
+```{r Question4-1-1a, results = 'asis', echo = F}
 ```
 
-```{r Question4-1-2, echo = F}
+```{r Question4-1-2, echo = F, fig.width = 8, fig.height = 4}
 ```
 
-```{r Question4-1-3, echo = F}
+```{r Question4-1-3, echo = F, fig.width = 8, fig.height = 4}
 ```
 
-```{r Question4-1-4, echo = F}
-```
-
-```{r Question4-1-5, echo = F}
-```
-
-```{r Question4-1-6, echo = F}
+```{r Question4-1-4, echo = F, fig.width = 8, fig.height = 11}
 ```
 
 
@@ -176,63 +170,17 @@ $$L(\theta) = \begin{cases}
 
 **Conduct a bivariate analysis (using tables, graphs, descriptive statistics found in the last 7 lectures) of `wage` and `logWage` and all the other variables in the datasets.**
 
-```{r Question4-2-1, echo = F}
+```{r Question4-2-1, results = 'asis', echo = F}
+```
+    
+
+```{r Question4-2-2, echo = F, fig.width = 8, fig.height = 11}
 ```
 
-```{r Question4-2-2, echo = F}
-```
+\pagebreak
 
-```{r Question4-2-3, echo = F}
+```{r Question4-2-3, echo = F, fig.width = 8, fig.height = 11}
 ```
-
-```{r Question4-2-4, echo = F}
-```
-
-```{r Question4-2-5, echo = F}
-```
-
-```{r Question4-2-6, echo = F}
-```
-
-```{r Question4-2-7, echo = F}
-```
-
-```{r Question4-2-8, echo = F}
-```
-
-```{r Question4-2-9, echo = F}
-```
-
-```{r Question4-2-10, echo = F}
-```
-
-```{r Question4-2-11, echo = F}
-```
-
-```{r Question4-2-12, echo = F}
-```
-
-```{r Question4-2-13, echo = F}
-```
-
-```{r Question4-2-14, echo = F}
-```
-
-```{r Question4-2-15, echo = F}
-```
-
-```{r Question4-2-16, echo = F}
-```
-
-```{r Question4-2-17, echo = F}
-```
-
-```{r Question4-2-18, echo = F}
-```
-
-```{r Question4-2-19, echo = F}
-```
-
 
 
 ## Question 4.3
@@ -241,44 +189,120 @@ $$L(\theta) = \begin{cases}
 
 1. **Report all the estimated coefficients, their standard errors, t-statistics, F-statistic of the regression, $\mathbf{R^2}$, $\mathbf{R_{adj}^2}$ , and degrees of freedom.**
 
+```{r Question4-3-1, results='asis', echo = F}
+```
+
 2. **Explain why the degrees of freedom takes on the specific value you observe in the regression output.**
+
+The overall degrees of freedom (F(`r round(summary(model)$fstatistic[2],0)`, `r round(summary(model)$fstatistic[3],0)`) is one smaller than we might expect otherwise. This is because the paramter for age is a linearly dependent combination of the other parameters and it's coefficient cannot be estimated. R automatically removes this variable from the model, and thus our regression output reflects the degrees of freedom for a model with 3 parameters rather than 4. Thus estimating this model is equivalent to estimating $log(wage) = education + experience + raceColor$.
+
+
+```{r Question4-3-2, results='asis', echo = F}
+```
+
+
+```{r Question4-3-3, echo = F, fig.width = 8, fig.height = 6}
+```
+
+\pagebreak
 
 3. **Describe any unexpected results from your regression and how you would resolve them (if the intent is to estimate return to education, condition on race and experience).**
 
+The inability to estimate the age coefficient is an unexpected result. Looking at the corelation matrix from above, we don't see that any variable is perfectly correlated with $log(wage)$. However, if we take the correlation of $age$ with the sum of $education$ and $experience$, we see that $age$ is perfectly correlated with the two variables. Since the model already incorporates all of the information contained in the age variable, we can simply remove it from the model and not lose anything. 
+
 4. **Interpret the coefficient estimate associated with education.**
 
+Holding other covariates constant, a one year increase in $education$ was associated with a statistically significant increase in $log(wage)$, ($\beta$ = `r formatC(round(model2$coefficients[2], 3), format = 'f', digits = 3)`, std. error = `r round(coeftest(model2, vcov = vcovHC)[6],3)`,  t = `r round(coeftest(model2, vcov=vcovHC)[10],3)`, p < .001). This effect also represents a practically significant wage return on education. 
+
+
 5. **Interpret the coefficient estimate associated with experience.**
+
+Holding other covariates constant, a one year increase in $experience$ was associated with a statistically significant increase in $log(wage)$, ($\beta$ = `r formatC(round(coeftest(model2, vcov = vcovHC)[3],3), format = 'f', digits = 3)`, std. error = `r round(coeftest(model2, vcov = vcovHC)[7],3)`,  t = `r round(coeftest(model2, vcov=vcovHC)[11],3)`, p < .001). This effect also represents a practically significant wage return on experience. 
+
 
 ## Question 4.4
 
 **Regress *log(wage)* on education, experience, experienceSquare, and race-Color.**
 
+```{r Question4-4-1, results = 'asis', echo = F}
+```
+
 1. **Plot a graph of the estimated effect of experience on wage.**
 
+```{r Question4-4-2, echo = F}
+```
+
 2. **What is the estimated effect of experience on wage when experience is 10 years?**
+
+The estimated effect of experience at 10 years on wages is 10 $\cdot$ `r round(coeftest(model3, vcovHC)[3], 3)` + 10^2 $\cdot$ `r round(coeftest(model3, vcovHC)[4],3)` = `r round(10 * coeftest(model3, vcovHC)[3] + 10**2*coeftest(model3, vcovHC)[4], 3)`
+
+\pagebreak
 
 ## Question 4.5 {#question45}
 
 **Regress `logWage` on education, experience, `experienceSquare`, `raceColor`, `dad_education`, `mom_education`, rural, city.**
 
+```{r Question4-5-1, results = 'asis', echo = F}
+```
+
 1. **What are the number of observations used in this regression? Are missing values a problem? Analyze the missing values, if any, and see if there is any discernible pattern with wage, education, experience, and raceColor.**
+
+There are 723 observations in the regression. A comparision of the original data and the observations in the regression reveals that the missing observations tend to have lower wages and education, and are less likely to live in the city. The missing observations have more experienceand, and are more likely to be non-white and live in rural areas. 
+
+```{r Question4-5-2, results = 'asis', echo = F}
+```
 
 2. **Do you just want to "throw away" these observations?**
 
+The clear pattern of missing values representing more rural, non-white observations with lower education indicates that these values should not simply be discarded from the model. In order to accurately assess the effect of covariates these values are important for the regression. 
+
 3. **How about blindly replace all of the missing values with the average of the observed values of the corresponding variable? Rerun the original regression using all of the observations?**
+
+```{r Question4-5-3, results = 'asis', echo = c(1:5)}
+```
 
 4. **How about regress the variable(s) with missing values on education, experience, and raceColor, and use this regression(s) to predict (i.e., "impute") the missing values and then rerun the original regression using all of the observations?**
 
+```{r Question4-5-4, results = 'asis', echo = c(1:7)}
+```
+
+\pagebreak
+
 5. **Compare the results of all of these regressions. Which one, if at all, would you prefer?**
+
+```{r Question4-5-5, results = 'asis', echo = F}
+```
+
+Comparing the regression results, it's worth noting that the magnitude and significance of the coefficients are broadly similar. However, given that the values that we imputed are for covariates that are neither statistically nor practically significant, I would prefer a model that used all of the observations and did not include the covariates for parent's education. 
+
 
 ## Question 4.6
 
 1. **Consider using $\mathbf{z_1}$ as the instrumental variable (IV) for education. What assumptions are needed on $\mathbf{z_1}$ and the error term (call it, $\mathbf{u}$)?**
 
+Formally, we need to assume that the instrumental variable is uncorrelated with the error term. Ie.
+
+$$ Cov(z_{1j}, u) = 0 \ \forall j=1,2,\dots,k $$
+
 2. **Suppose $\mathbf{z_1}$ is an indicator representing whether or not an individual lives in an area in which there was a recent policy change to promote the importance of education. Could $\mathbf{z_1}$ be correlated with other unobservables captured in the error term?**
+
+Yes. Living in an area with recent education policy changes could correlate to a number of variables that relate to the earnings in that area, such as a person's trust in educational and governmental institutions, or the willingness of people to pay taxes to support education spending. As with most instrumental variables, the assumption that it is truly uncorrelated with the error term can always be questioned, although it may represent an improvement in estimating coefficients over straightforward OLS.  
 
 3. **Using the same specification as that in [Question 4.5](#question45), estimate the equation by 2SLS, using both $\mathbf{z_1}$ and $\mathbf{z_2}$ as instrument variables. Interpret the results. How does the coefficient estimate on education change?**
 
+```{r Question4-6-1, results = 'asis', echo = c(1:4)}
+```
+
+
+Note that $z_1$ is not correlated with education, and is thus not an appropriate instrumental variable to estimate the effect of education on wages. 
+
+\pagebreak
+
+```{r Question4-6-3, results = 'asis', echo = F}
+```
+
+
+The results of the regression show that the magnitude of the covariate coefficients is similar using the instrumental variable approach. The coefficient for education has dramatically decreased and is no longer statistically significant. 
 
 
 **********
@@ -291,7 +315,40 @@ $$L(\theta) = \begin{cases}
 
 1. **Begin with a parsimonious, yet appropriate, specification. Why did you choose this model? Are your results statistically significant? Based on these results, how would you answer the research question? Is there a linear relationship between wealth and electoral performance?**
 
+```{r Question5-1-1, results = 'asis', echo = F}
+```
+
+\pagebreak
+
+```{r Question5-1-2, echo = F, fig.width = 8, fig.height = 6}
+```
+
+```{r Question5-1-3, echo = F}
+```
+
+```{r Question5-1-4, echo = F}
+```
+
+```{r Question5-1-5, echo = F, fig.width = 5}
+```
+
+```{r Question5-1-6, echo = F, fig.width = 8, fig.height = 6}
+```
+
+Examining the absolute_wealth and log(absolute_wealth) variables reveals that a large number of observations have the same value. It seems likely that this value codes for having zero absolute wealth. Because we interested in the effect of wealth on voteshare, it seems reasonable to look at this effect among those with wealth greater than zero. By creating a factor variable representing wealth greater than zero, the equation for our parsimonious model will be
+
+$$voteshare = \beta_0 + \beta_1 log(wealth) + \beta_2 hasWealth$$
+
+\pagebreak
+
+```{r Question5-1-7, results='asis', echo = F}
+```
+
+The parsimonious model reveals a very weak positive effect of wealth on voteshare. The effect is not of practical significance and suggests that there may not be a linear relationship between wealth and voteshare. 
+
 2. **A team-member suggests adding a quadratic term to your regression. Based on your prior model, is such an addition warranted? Add this term and interpret the results. Do wealthier candidates fare better in elections?**
+
+Theoretically, the addition of a quadratic seems questionable because it suggests there is a point at which the returns to wealth stop increasing. It is unclear why this would necessarily be the case.  
 
 3. **Another team member suggests that it is important to take into account the fact that different regions have different electoral contexts. In particular, the relationship between candidate wealth and electoral performance might be different across states. Modify your model and report your results. Test the hypothesis that this addition is not needed.**
 

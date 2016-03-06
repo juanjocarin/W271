@@ -136,310 +136,287 @@ tableCount <- c(`_` = 0)
 ## @knitr Question4-1-1
 # Load data and summarize
 data <- read.csv("WageData2.csv", header = T)
-round(stat.desc(data, desc = TRUE, basic = TRUE), 2)
+data$experienceSquare = data$experience^2
+#round(stat.desc(data, desc = TRUE, basic = TRUE), 2)
 
-## @knitr Question4-1-1-1
-data2 <- melt(data[, c(2,3,4,5,7,8,13,14)])
-ggplot(data2, aes(x= value)) +
-  facet_wrap(~variable, scales = "free", ncol = 2) + geom_histogram() +
-  labs(title = "Histogram of Wage, Education, and Demogographic Variables")
-
-# ## @knitr Question4-1-2
-# ggplot(data, aes(wage)) + 
-#   geom_histogram(aes(y = (..count..)/sum(..count..)), colour = 'black',
-#                  fill = 'white', binwidth = 100) +
-#   scale_y_continuous(labels = percent_format()) + 
-#   labs(x = "Wage",
-#        y = "Relative frequency",
-#        title = "Histogram of Wage")
-# figCount <- incCount(figCount, "hist-Q4-1-1")
-# 
-# ## @knitr Question4-1-3
-# ggplot(data, aes(log(wage))) + 
-#   geom_histogram(aes(y = (..count..)/sum(..count..)), colour = 'black',
-#                  fill = 'white', binwidth = .1) +
-#   scale_y_continuous(labels = percent_format()) + 
-#   labs(x = "Log(Wage)",
-#        y = "Relative frequency",
-#        title = "Histogram of Log(Wage)")
-# figCount <- incCount(figCount, "hist-Q4-1-2")
-# 
-# ## @knitr Question4-1-4
-# ggplot(data, aes(education)) + 
-#   geom_histogram(aes(y = (..count..)/sum(..count..)), colour = 'black',
-#                  fill = 'white', binwidth = 1) +
-#   scale_y_continuous(labels = percent_format()) + 
-#   labs(x = "Education in Years",
-#        y = "Relative frequency",
-#        title = "Histogram of Education")
-# figCount <- incCount(figCount, "hist-Q4-1-3")
-# 
-# ## @knitr Question4-1-5
-# ggplot(data, aes(experience)) + 
-#   geom_histogram(aes(y = (..count..)/sum(..count..)), colour = 'black',
-#                  fill = 'white', binwidth = 1) +
-#   scale_y_continuous(labels = percent_format()) + 
-#   labs(x = "Experience",
-#        y = "Relative frequency",
-#        title = "Histogram of Experience")
-# figCount <- incCount(figCount, "hist-Q4-1-4")
-# 
-# ## @knitr Question4-1-6
-# ggplot(data, aes(experience^2)) + 
-#   geom_histogram(aes(y = (..count..)/sum(..count..)), colour = 'black',
-#                  fill = 'white', binwidth = 25) +
-#   scale_y_continuous(labels = percent_format()) + 
-#   labs(x = "Experience^2",
-#        y = "Relative frequency",
-#        title = "Histogram of Experience")
-# figCount <- incCount(figCount, "hist-Q4-1-5")
-# 
-# ## @knitr Question4-1-7
-# ggplot(data, aes(age)) + 
-#   geom_histogram(aes(y = (..count..)/sum(..count..)), colour = 'black',
-#                  fill = 'white', binwidth = 1) +
-#   scale_y_continuous(labels = percent_format()) + 
-#   labs(x = "Age",
-#        y = "Relative frequency",
-#        title = "Histogram of Age")
-# figCount <- incCount(figCount, "hist-Q4-1-6")
+## @knitr Question4-1-1a
+stargazer(data, header = F,
+          summary.stat = c("n", "mean", "sd", "min", "p25", "median", "p75", "max"))
 
 ## @knitr Question4-1-2
-ggplot(data, aes(factor(raceColor, labels = c('White',
-                                         'Non-White')))) +
-  geom_bar(colour='black', fill = 'white') + 
-  labs(title = "Race of Respondents", x = element_blank())
-figCount <- incCount(figCount, "hist-Q4-1-7")
-
-# ## @knitr Question4-1-9
-# ggplot(data, aes(dad_education)) + 
-#   geom_histogram(aes(y = (..count..)/sum(..count..)), colour = 'black',
-#                  fill = 'white', na.rm = T, binwidth = 1) +
-#   scale_y_continuous(labels = percent_format()) + 
-#   labs(x = "Father's Education in Years",
-#        y = "Relative frequency",
-#        title = "Histogram of Father's Education")
-# figCount <- incCount(figCount, "hist-Q4-1-8")
-
-# ## @knitr Question4-1-10
-# ggplot(data, aes(mom_education)) + 
-#   geom_histogram(aes(y = (..count..)/sum(..count..)), colour = 'black',
-#                  fill = 'white', na.rm = T, binwidth = 1) +
-#   scale_y_continuous(labels = percent_format()) + 
-#   labs(x = "Mother's Education in Years",
-#        y = "Relative frequency",
-#        title = "Histogram of Mother's Education")
-# figCount <- incCount(figCount, "hist-Q4-1-9")
+data2 <- melt(data[, c(2,13,14)])
+ggplot(data2, aes(x= value)) +
+  facet_wrap(~variable, scales = "free", ncol = 3) +
+  geom_histogram(bins = 25, color = 'black', fill = 'white') +
+  labs(title = "Histogram of Wage And IQ Variables") 
 
 ## @knitr Question4-1-3
-ggplot(data, aes(factor(rural, labels = c('Non-rural',
-                                              'Rural')))) +
+data4 <- melt(data[, c(6, 9:12)])
+ggplot(data4, aes(factor(value))) + 
   geom_bar(colour='black', fill = 'white') + 
-  labs(title = "Respondant Location - Rural", x = element_blank())
-figCount <- incCount(figCount, "hist-Q4-1-10")
+  facet_grid(~variable) +
+  labs(title = "Histogram of Race, Location, and Instrumental Variables") 
 
 ## @knitr Question4-1-4
-ggplot(data, aes(factor(city, labels = c('Non-Urban',
-                                          'City')))) +
-  geom_bar(colour='black', fill = 'white') + 
-  labs(title = "Respondant Location - City", x = element_blank())
-figCount <- incCount(figCount, "hist-Q4-1-11")
-
-## @knitr Question4-1-5
-ggplot(data, aes(factor(z1, labels = c('1',
-                                         '0')))) +
-  geom_bar(colour='black', fill = 'white') + 
-  labs(title = "Indicator Variable 1", x = element_blank())
-figCount <- incCount(figCount, "hist-Q4-1-12")
-
-## @knitr Question4-1-6
-ggplot(data, aes(factor(z2, labels = c('1',
-                                       '0')))) +
-  geom_bar(colour='black', fill = 'white') + 
-  labs(title = "Indicator Variable 2", x = element_blank())
-figCount <- incCount(figCount, "hist-Q4-1-13")
-
-# ## @knitr Question4-1-15
-# ggplot(data, aes(IQscore)) + 
-#   geom_histogram(aes(y = (..count..)/sum(..count..)), colour = 'black',
-#                  fill = 'white', na.rm = T, binwidth = 5) +
-#   scale_y_continuous(labels = percent_format()) + 
-#   labs(x = "IQ Score",
-#        y = "Relative frequency",
-#        title = "Histogram of IQ Score")
-# figCount <- incCount(figCount, "hist-Q4-1-14")
-
-data$experienceSquare <- data$experience^2
+data3 <- melt(data[, c(3,4,5,7,8)])
+ggplot(data3, aes(x= value)) +
+  facet_wrap(~variable, scales = "free", ncol = 2) +
+  geom_histogram(binwidth = 1, color = 'black', fill = 'white') +
+  labs(title = "Histogram of Education, Age, and Experience Variables") 
 
 ## @knitr Question4-2-1
-cor(data$wage, data, use="pairwise.complete.obs")
-cor(data$logWage, data, use="pairwise.complete.obs")
+cor.matrix1 <- as.data.frame(cor(data$wage, data[,c(3:15)], use="pairwise.complete.obs"),
+                             row.names = "Wage")
+stargazer(cor.matrix1, title="Correlations for Wage", flip=T, summary = F, header = F)
+
+cor.matrix2 <- as.data.frame(cor(data$logWage, data[,c(2:13,15)], use="pairwise.complete.obs"),
+                             row.names = "log(Wage)")
+stargazer(cor.matrix2, title="Correlations for log(Wage)", flip=T, summary=F, header = F)
+
 
 ## @knitr Question4-2-2
-ggplot(data, aes(wage, education)) + 
-  geom_point() +
-  labs(x = "Wage", 
-       y = "Education", 
-       title = "Scatterplot of Wage Against Education") + 
-  geom_smooth(method = "lm")
-figCount <- incCount(figCount, "scatter-Q4-2-1")
+data5 <- melt(data[, c(2:13, 15)], id.vars="wage")
+ggplot(data5, aes(wage, value)) +
+  geom_point() + geom_smooth(method = "lm") +
+  facet_wrap(~variable,  scales = "free", ncol = 2) + 
+  labs(title = "Scatterplot of Wage Against Variables of Interest") 
 
 ## @knitr Question4-2-3
-ggplot(data, aes(log(wage), education)) + 
-  geom_point() +
-  labs(x = "Log(Wage)", 
-       y = "Education", 
-       title = "Scatterplot of Log(Wage) Against Education") + 
-  geom_smooth(method = "lm")
-figCount <- incCount(figCount, "scatter-Q4-2-2")
+data6 <- melt(data[, c(3:15)], id.vars="logWage")
+ggplot(data6, aes(logWage, value)) +
+  geom_point() + geom_smooth(method = "lm") +
+  facet_wrap(~variable,  scales = "free", ncol = 2) + 
+  labs(title = "Scatterplot of log(Wage) Against Variables of Interest") 
 
-## @knitr Question4-2-4
-ggplot(data, aes(wage, experience)) + 
-  geom_point() +
-  labs(x = "Wage", 
-       y = "Experience", 
-       title = "Scatterplot of Wage Against Experience") + 
-  geom_smooth(method = "lm")
-figCount <- incCount(figCount, "scatter-Q4-2-3")
+## @knitr Question4-3-1
+model <- lm(logWage ~ education + experience+ age + raceColor, data = data)
+stargazer(model, type="latex", title="Regression Summary",
+          header = FALSE, table.placement = "h!")
 
-## @knitr Question4-2-5
-ggplot(data, aes(log(wage), experience)) + 
-  geom_point() +
-  labs(x = "Log(Wage)", 
-       y = "Experience", 
-       title = "Scatterplot of Log(Wage) Against Experience") + 
-  geom_smooth(method = "lm")
-figCount <- incCount(figCount, "scatter-Q4-2-4")
+## @knitr Question4-3-2
+model2 <-  lm(logWage ~ education + experience + raceColor, data = data)
+stargazer2(model2, title = "Regression summary", digits = 3, digits.extra = 6, 
+           dep.var.labels = 'log(Wages)', 
+           covariate.labels = c("Education", "Experience", "Race (White or Non-white)"))
 
-## @knitr Question4-2-6
-ggplot(data, aes(wage, age)) + 
-  geom_point() +
-  labs(x = "Wage", 
-       y = "Age", 
-       title = "Scatterplot of Wage Against Age") + 
-  geom_smooth(method = "lm")
-figCount <- incCount(figCount, "scatter-Q4-2-5")
+## @knitr Question4-3-3
+autoplot(model2)
 
-## @knitr Question4-2-7
-ggplot(data, aes(log(wage), age)) + 
-  geom_point() +
-  labs(x = "Log(Wage)", 
-       y = "Age", 
-       title = "Scatterplot of Log(Wage) Against Age") + 
-  geom_smooth(method = "lm")
-figCount <- incCount(figCount, "scatter-Q4-2-6")
+## @knitr Question4-4-1
+model3 <- lm(logWage ~ education + experience + experienceSquare + raceColor, data = data)
+stargazer2(model3, title = "Regression summary", digits = 3, digits.extra = 6, 
+           dep.var.labels = 'log(Wages)', 
+           covariate.labels = c("Education", "Experience", "$\\text{Expereince}^{2}$",
+                                "Race (White or Non-white)"))
 
-## @knitr Question4-2-8
-ggplot(data, aes(wage, raceColor)) + 
-  geom_point() +
-  labs(x = "Wage", 
-       y = "Race", 
-       title = "Scatterplot of Wage Against Race") + 
-  geom_smooth(method = "lm")
-figCount <- incCount(figCount, "scatter-Q4-2-7")
+## @knitr Question4-4-2
+# model4 <- lm(wage ~ education + experience + experienceSquare + raceColor, data = data)
+x <- data$experience
+y <- coeftest(model3, vcovHC)[1] + x*coeftest(model3, vcovHC)[3] + x**2*coeftest(model3, vcovHC)[4]
+plt_df <- data.frame(x,y)
+ggplot(plt_df, aes(x,y)) + geom_smooth(na.rm=T) +
+  labs(x = "Experience", y = "log(Wage) ($)", title = "Effect of Experience on log(Wages)")
 
-## @knitr Question4-2-9
-ggplot(data, aes(log(wage), raceColor)) + 
-  geom_point() +
-  labs(x = "Log(Wage)", 
-       y = "Race", 
-       title = "Scatterplot of Log(Wage) Against Race") + 
-  geom_smooth(method = "lm")
-figCount <- incCount(figCount, "scatter-Q4-2-8")
+## @knitr Question4-5-1
+model5 <- lm(logWage ~ education + experience + experienceSquare + raceColor + 
+               dad_education + mom_education + rural + city, data = data)
+# coeftest(model5, vcovHC)
+stargazer2(model5, title = "Regression summary", digits = 3, digits.extra = 6,
+           dep.var.labels = 'log(Wages)', 
+           covariate.labels = c("Education", "Experience", "$\\text{Expereince}^{2}$",
+                                "Race (White or Non-white)", "Father's Education",
+                                "Mother's Education", "Rural (Yes or No)", "City (Yes or No)"))
 
-## @knitr Question4-2-10
-ggplot(data, aes(wage, dad_education)) + 
-  geom_point(na.rm = T) +
-  labs(x = "Wage", 
-       y = "Father's Education", 
-       title = "Scatterplot of Wage Against Father's Edication") + 
-  geom_smooth(method = "lm", na.rm = T)
-figCount <- incCount(figCount, "scatter-Q4-2-9")
+## @knitr Question4-5-2 
+dad_edu_na <- data[is.na(data$dad_education),]
+mom_edu_na <- data[is.na(data$mom_education),]
+actual_obs <- data[!is.na(data$mom_education) &
+                       !is.na(data$dad_education),]
 
-## @knitr Question4-2-11
-ggplot(data, aes(log(wage), dad_education)) + 
-  geom_point(na.rm = T) +
-  labs(x = "Log(Wage)", 
-       y = "Father's Education", 
-       title = "Scatterplot of Log(Wage) Against Father's Edication") + 
-  geom_smooth(method = "lm", na.rm = T)
-figCount <- incCount(figCount, "scatter-Q4-2-10")
+stargazer(data, header = F,
+          summary.stat = c("n", "mean", "sd", "min", "p25", "median", "p75", "max"),
+          title="All Observations")
+stargazer(dad_edu_na, header = F,
+          summary.stat = c("n", "mean", "sd", "min", "p25", "median", "p75", "max"),
+          title="Missing Father's Education")
+stargazer(mom_edu_na, header = F,
+          summary.stat = c("n", "mean", "sd", "min", "p25", "median", "p75", "max"),
+          title="Missing Mother's Education")
+stargazer(actual_obs, header = F,
+          summary.stat = c("n", "mean", "sd", "min", "p25", "median", "p75", "max"),
+          title="Actual Observations")
 
-## @knitr Question4-2-12
-ggplot(data, aes(wage, mom_education)) + 
-  geom_point(na.rm = T) +
-  labs(x = "Wage", 
-       y = "Mother's Education", 
-       title = "Scatterplot of Wage Against Mother's Edication") + 
-  geom_smooth(method = "lm", na.rm = T)
-figCount <- incCount(figCount, "scatter-Q4-2-11")
+## @knitr Question4-5-3
+data7 <- data
+data7$dad_education <- na.fill(data7$dad_education, mean(data7$dad_education, na.rm=T))
+data7$mom_education <- na.fill(data7$mom_education, mean(data7$mom_education, na.rm=T))
+model6 <- lm(logWage ~ education + experience + experienceSquare + raceColor + 
+               dad_education + mom_education + rural + city, data = data7)
 
-## @knitr Question4-2-13
-ggplot(data, aes(log(wage), mom_education)) + 
-  geom_point(na.rm = T) +
-  labs(x = "Log(Wage)", 
-       y = "Mother's Education", 
-       title = "Scatterplot of Log(Wage) Against Mother's Edication") + 
-  geom_smooth(method = "lm", na.rm = T)
-figCount <- incCount(figCount, "scatter-Q4-2-12")
+stargazer2(model6, title = "Regression summary", digits = 3, digits.extra = 6,
+dep.var.labels = 'log(Wages)', 
+covariate.labels = c("Education", "Experience", "$\\text{Expereince}^{2}$",
+                     "Race (White or Non-white)", "Father's Education",
+                     "Mother's Education", "Rural (Yes or No)", "City (Yes or No)"))
 
-## @knitr Question4-2-14
-ggplot(data, aes(wage, rural)) + 
-  geom_point(na.rm = T) +
-  labs(x = "Wage", 
-       y = "Location - Rural", 
-       title = "Scatterplot of Wage Against Location - Rural") + 
-  geom_smooth(method = "lm", na.rm = T)
-figCount <- incCount(figCount, "scatter-Q4-2-13")
+## @knitr Question4-5-4
+data8 <-data
+model_dad<-lm(dad_education~education+experience+raceColor, data=data8)
+model_mom<-lm(mom_education~education+experience+raceColor, data=data8)
+coef_dad<-coef(model_dad)
+coef_mom<-coef(model_mom)
+# Impute values for missing observations
+for (i in 1:nrow(data8)) {
+  if (is.na(data8$dad_education[i])==TRUE) {
+    data8$dad_education[i]= coef_dad[1]+coef_dad[2]*data8$education[i]+
+      coef_dad[3]*data8$experience[i]+coef_dad[4]*data8$raceColor[i]
+  }
+  if (is.na(data8$mom_education[i])==TRUE) {
+    data8$mom_education[i]= coef_mom[1]+coef_mom[2]*data8$education[i]+
+      coef_mom[3]*data8$experience[i]+coef_mom[4]*data8$raceColor[i]
+  }
+}
 
-## @knitr Question4-2-15
-ggplot(data, aes(log(wage), rural)) + 
-  geom_point(na.rm = T) +
-  labs(x = "Log(Wage)", 
-       y = "Location - Rural", 
-       title = "Scatterplot of Log(Wage) Against Location - Rural") + 
-  geom_smooth(method = "lm", na.rm = T)
-figCount <- incCount(figCount, "scatter-Q4-2-14")
+model7 <- lm(logWage ~ education + experience + experienceSquare + raceColor + 
+               dad_education + mom_education + rural + city, data = data8)
 
-## @knitr Question4-2-16
-ggplot(data, aes(wage, city)) + 
-  geom_point(na.rm = T) +
-  labs(x = "Wage", 
-       y = "Location - City", 
-       title = "Scatterplot of Wage Against Location - City") + 
-  geom_smooth(method = "lm", na.rm = T)
-figCount <- incCount(figCount, "scatter-Q4-2-15")
+stargazer2(model7, title = "Regression summary", digits = 3, digits.extra = 6,
+           dep.var.labels = 'log(Wages)', 
+           covariate.labels = c("Education", "Experience", "$\\text{Expereince}^{2}$",
+                                "Race (White or Non-white)", "Father's Education",
+                                "Mother's Education", "Rural (Yes or No)", "City (Yes or No)"))
 
-## @knitr Question4-2-17
-ggplot(data, aes(log(wage), city)) + 
-  geom_point(na.rm = T) +
-  labs(x = "Log(Wage)", 
-       y = "Location - City", 
-       title = "Scatterplot of Log(Wage) Against Location - City") + 
-  geom_smooth(method = "lm", na.rm = T)
-figCount <- incCount(figCount, "scatter-Q4-2-16")
 
-## @knitr Question4-2-18
-ggplot(data, aes(wage, IQscore)) + 
-  geom_point(na.rm = T) +
-  labs(x = "Wage", 
-       y = "IQ", 
-       title = "Scatterplot of Wage Against IQ") + 
-  geom_smooth(method = "lm", na.rm = T)
-figCount <- incCount(figCount, "scatter-Q4-2-17")
+## @knitr Question4-5-5
+stargazer2(list(model5, model6, model7), dep.var.labels = 'log(Wages)', 
+           covariate.labels = c("Education", "Experience", "$\\text{Expereince}^{2}$",
+                                "Race (White or Non-white)", "Father's Education",
+                                "Mother's Education", "Rural (Yes or No)", "City (Yes or No)"))
 
-## @knitr Question4-2-19
-ggplot(data, aes(log(wage), IQscore)) + 
-  geom_point(na.rm = T) +
-  labs(x = "Log(Wage)", 
-       y = "IQ", 
-       title = "Scatterplot of Log(Wage) Against IQ") + 
-  geom_smooth(method = "lm", na.rm = T)
-figCount <- incCount(figCount, "scatter-Q4-2-18")
+## @knitr Question4-6-1
+first_stage_a <- lm(education ~ z1, data = data )
+first_stage_b <- lm(education ~ z2, data = data)
+second_stage_a <- lm(data$logWage ~ first_stage_a$fitted + data$experience +
+                     data$experienceSquare + data$raceColor + data$dad_education + 
+                     data$mom_education + data$rural + data$city)
+second_stage_b <- lm(data$logWage ~ first_stage_b$fitted + data$experience +
+                       data$experienceSquare + data$raceColor + data$dad_education + 
+                       data$mom_education + data$rural + data$city)
+stargazer2(list(first_stage_a, first_stage_b), dep.var.labels = 'education', 
+           covariate.labels = c('IV 1', 'IV 2'))
 
-## @knitr Question5
+## @knitr Question4-6-2
+stargazer2(second_stage_a, dep.var.labels = 'log(Wages)', 
+           covariate.labels = c("Education ($z_1$)", "Experience", "$\\text{Expereince}^{2}$",
+                                "Race (White or Non-white)", "Father's Education",
+                                "Mother's Education", "Rural (Yes or No)", "City (Yes or No)"),
+           title = "Two One Regression summary")
+
+## @knitr Question4-6-3
+stargazer2(second_stage_b, dep.var.labels = 'log(Wages)', 
+           covariate.labels = c("Education ($z_2$)", "Experience", "$\\text{Expereince}^{2}$",
+                                "Race (White or Non-white)", "Father's Education",
+                                "Mother's Education", "Rural (Yes or No)", "City (Yes or No)"),
+           title = "Step Two Regression summary")
+
+
+
+## @knitr Question5-1-1
 # QUESTION 5 --------------------------------------------------------------
+# Load data
+d <- read.csv('wealthy_candidates.csv', header=T)
+# Remove missing observation
+d <- d[complete.cases(d$absolute_wealth),]
+d$logWealth <- log(d$absolute_wealth)
+d$hasWealth <- ifelse(d$absolute_wealth == 2,0,1)
+d$hasWealth <- factor(d$hasWealth, labels=c("No", "Yes"))
+stargazer(d, header = F, flip=T,
+          summary.stat = c("n", "mean", "sd", "min", "p25", "median", "p75", "max"))
 
+# noWealth <- d[d$hasWealth=="No",]
+# Wealth <- d[d$hasWealth=="Yes",]
+# mean(noWealth$voteshare)
+# mean(Wealth$voteshare)
+
+## @knitr Question5-1-2
+d2 <- melt(d[,c(3:7)])
+ggplot(d2, aes(x=value)) + facet_wrap(~variable, scales = "free", ncol = 3) +
+  geom_histogram(bins = 20, color = 'black', fill = 'white') +
+  labs(title = "Histogram of Weath, Vote share, and Covariates")
+
+## @knitr Question5-1-3
+ggplot(d, aes(hasWealth)) +
+  geom_bar(color = 'black', fill = 'white') +
+  labs(x= 'Weath Greater than Zero', title = "Wealth (Yes/No)")
+
+## @knitr Question5-1-4
+ggplot(d, aes(region)) +
+  geom_bar(color = 'black', fill = 'white') +
+  labs( title = "Region")
+
+## @knitr Question5-1-5
+ggplot(d[d$hasWealth=="Yes",], aes(logWealth)) +
+  geom_histogram(bins = 20, color = 'black', fill = 'white') +
+  labs(title = "Histogram of Weath Among Those With Wealth")
+
+## @knitr Question5-1-6
+d3 <- melt(d[, c(3:7)], id.vars="voteshare")
+ggplot(d3, aes(voteshare, value)) +
+  geom_point() + geom_smooth(method = "lm") +
+  facet_wrap(~variable,  scales = "free", ncol = 2) + 
+  labs(title = "Scatterplot of Voteshare Against Variables of Interest")
+
+## @knitr Question5-1-7
+m1 <- lm(voteshare~  logWealth + hasWealth, data = d)
+stargazer2(m1, dep.var.labels = 'Voteshare', 
+           covariate.labels = c("log(Wealth)", "Has Wealth = Yes"),
+           title = "Regression summary")
+
+# ggplot(d, aes(logWealth)) + geom_histogram(aes(fill=region)) +
+#   facet_wrap(~region,ncol=1) + scale_fill_brewer(palette="Set3") +
+#   labs( title = "Wealth by Region")
+# 
+# ggplot(d, aes(voteshare)) + geom_histogram(aes(fill=region)) +
+#   facet_wrap(~region,ncol=1) + scale_fill_brewer(palette="Set3") +
+#   labs( title = "Voteshare by Region")
+# 
+# ggplot(d, aes(urb)) + geom_histogram(aes(fill=region)) +
+#   facet_wrap(~region,ncol=1) + scale_fill_brewer(palette="Set3") +
+#   labs( title = "Urb by Region")
+# 
+# ggplot(d, aes(lit)) + geom_histogram(aes(fill=region)) +
+#   facet_wrap(~region,ncol=1) + scale_fill_brewer(palette="Set3") +
+#   labs( title = "Lit by Region")
+# 
+# ggplot(d, aes(x=voteshare, y=logWealth)) + geom_point(aes(color=region)) +
+#   geom_smooth(method = "lm") +
+#   facet_wrap(~region, ncol=1) + 
+#   labs(title = "Scatterplot of Voteshare Against Wealth by Region")
+# 
+# ggplot(d, aes(x=voteshare, y=as.numeric(hasWealth))) + geom_point(aes(color=region)) +
+#   geom_smooth(method = "lm") +
+#   facet_wrap(~region, ncol=1) + 
+#   labs(title = "Scatterplot of Voteshare Against Wealth by Region")
+# 
+# 
+# m <- lm(voteshare~  hasWealth, data = d)
+# m1 <- lm(voteshare~  logWealth + hasWealth, data = d)
+# m2 <- lm(voteshare~logWealth, data=d)
+# m3 <- lm(voteshare~ logWealth + hasWealth + region, data = d)
+# m4 <- lm(voteshare~ logWealth + region, data = d)
+# 
+# 
+# d$wealthSqr <- d$logWealth**2
+# m5 <- lm(voteshare~ logWealth + wealthSqr + hasWealth , data = d)
+# autoplot(m)
+# autoplot(m2)
+# autoplot(m3)
+# summary.lm(m)
+# summary.lm(m1)
+# summary.lm(m2)
+# summary.lm(m3)
+# summary.lm(m4)
+# summary.lm(m5)
 ## @knitr Question
 # QUESTION 6 --------------------------------------------------------------
-
+load("retailSales.Rdata")
