@@ -112,6 +112,10 @@ opts_knit$set(root.dir = './data')
 
 **Also, create two variables: (1) natural log of wage (name it `logWage`) (2) square of experience (name it `experienceSquare`)**
 
+
+We start by conducting univariate analysis on the dataset to look for any issues in the data that may violate the assumptions for regression models and to intendify and make decisions about missing values or potential outliers. We also can create new transform variables that rescale the data such as creating the logwage varaible.  
+
+
 ```{r Question4-1-1, echo = T}
 ```
 
@@ -126,6 +130,8 @@ opts_knit$set(root.dir = './data')
 ## Question 4.2
 
 **Conduct a bivariate analysis (using tables, graphs, descriptive statistics found in the last 7 lectures) of `wage` and `logWage` and all the other variables in the datasets.**
+
+We also conduct bivariate analysis to be able to identify potential patterns to inform our model and any additional outliers.
 
 
 ```{r Question4-2-1, echo = T}
@@ -302,6 +308,9 @@ $$\frac{\partial y}{\partial x} = \beta_1.$$
 
 5. **Someone proposes a difference in difference design. Please write the equation for such a model. Under what circumstances would this design yield a causal effect?**
 
+In order to run a difference-in-difference design we need to have a time component. In this situation if we had data from two different election years we would be able to run a difference-in-difference design. The equation would be similar to the one shown below where we take the difference in the data between the two measurements and the difference in the error and run the regression model on the differenced equation. 
+
+$$\Delta voteshare = \delta_0 + \beta_1 \Delta logwealth + \Delta u$$ 
 
 
 **********
