@@ -372,42 +372,67 @@ stargazer2(m1, dep.var.labels = 'Voteshare',
            covariate.labels = c("log(Wealth)", "Has Wealth = Yes"),
            title = "Regression summary")
 
-# ggplot(d, aes(logWealth)) + geom_histogram(aes(fill=region)) +
-#   facet_wrap(~region,ncol=1) + scale_fill_brewer(palette="Set3") +
-#   labs( title = "Wealth by Region")
-# 
-# ggplot(d, aes(voteshare)) + geom_histogram(aes(fill=region)) +
-#   facet_wrap(~region,ncol=1) + scale_fill_brewer(palette="Set3") +
-#   labs( title = "Voteshare by Region")
-# 
+## @knitr Question5-1-8
+d$wealthSqr <- d$logWealth**2
+m2 <- lm(voteshare~ logWealth + wealthSqr + hasWealth , data = d)
+stargazer2(m1, dep.var.labels = 'Voteshare', 
+           covariate.labels = c("log(Wealth)", "$\\text{log(Wealth)}^{2}$",
+                                "Has Wealth = Yes"),
+           title = "Regression summary")
+
+## @knitr Question5-3-1
+ggplot(d, aes(logWealth)) + geom_histogram(aes(fill=region)) +
+  facet_wrap(~region,ncol=1) + scale_fill_brewer(palette="Set3") +
+  labs( title = "Wealth by Region")
+
+## @knitr Question5-3-2
+ggplot(d, aes(voteshare)) + geom_histogram(aes(fill=region)) +
+  facet_wrap(~region,ncol=1) + scale_fill_brewer(palette="Set3") +
+  labs( title = "Voteshare by Region")
+
+# ## @knitr Question5-1-9
 # ggplot(d, aes(urb)) + geom_histogram(aes(fill=region)) +
 #   facet_wrap(~region,ncol=1) + scale_fill_brewer(palette="Set3") +
 #   labs( title = "Urb by Region")
 # 
+# ## @knitr Question5-1-9
 # ggplot(d, aes(lit)) + geom_histogram(aes(fill=region)) +
 #   facet_wrap(~region,ncol=1) + scale_fill_brewer(palette="Set3") +
 #   labs( title = "Lit by Region")
-# 
-# ggplot(d, aes(x=voteshare, y=logWealth)) + geom_point(aes(color=region)) +
-#   geom_smooth(method = "lm") +
-#   facet_wrap(~region, ncol=1) + 
-#   labs(title = "Scatterplot of Voteshare Against Wealth by Region")
-# 
-# ggplot(d, aes(x=voteshare, y=as.numeric(hasWealth))) + geom_point(aes(color=region)) +
-#   geom_smooth(method = "lm") +
-#   facet_wrap(~region, ncol=1) + 
-#   labs(title = "Scatterplot of Voteshare Against Wealth by Region")
+
+## @knitr Question5-3-3
+ggplot(d, aes(x=voteshare, y=logWealth)) + geom_point(aes(color=region)) +
+  geom_smooth(method = "lm") +
+  facet_wrap(~region, ncol=1) + 
+  labs(title = "Scatterplot of Voteshare Against Wealth by Region")
+
+## @knitr Question5-3-4
+ggplot(d, aes(x=voteshare, y=as.numeric(hasWealth))) + geom_point(aes(color=region)) +
+  geom_smooth(method = "lm") +
+  facet_wrap(~region, ncol=1) + 
+  labs(title = "Scatterplot of Voteshare Against Having Wealth by Region")
+
+## @knitr Question5-3-5
+m3 <- lm(voteshare~ logWealth + hasWealth + region, data = d)
+stargazer2(m3, dep.var.labels = 'Voteshare', 
+           covariate.labels = c("log(Wealth)", "Has Wealth = Yes", "Region = 2", "Region = 3"),
+           title = "Regression summary")
+
+## @knitr Question5-3-6
+model_comp <- anova(m1, m3)
+rownames(model_comp) <- c("Parsimonious Model", "Regions Model")
+stargazer(model_comp, header = F, summary=F, title = "Model Comparison")
+
 # 
 # 
 # m <- lm(voteshare~  hasWealth, data = d)
 # m1 <- lm(voteshare~  logWealth + hasWealth, data = d)
 # m2 <- lm(voteshare~logWealth, data=d)
-# m3 <- lm(voteshare~ logWealth + hasWealth + region, data = d)
+
 # m4 <- lm(voteshare~ logWealth + region, data = d)
 # 
 # 
-# d$wealthSqr <- d$logWealth**2
-# m5 <- lm(voteshare~ logWealth + wealthSqr + hasWealth , data = d)
+
 # autoplot(m)
 # autoplot(m2)
 # autoplot(m3)

@@ -315,6 +315,8 @@ The results of the regression show that the magnitude of the covariate coefficie
 
 1. **Begin with a parsimonious, yet appropriate, specification. Why did you choose this model? Are your results statistically significant? Based on these results, how would you answer the research question? Is there a linear relationship between wealth and electoral performance?**
 
+In order to decide on a parsimonious model and dsicover any potential issues with data quality or variable distributions, we will first explore summary statistics and conduct a univariate analysis. 
+
 ```{r Question5-1-1, results = 'asis', echo = F}
 ```
 
@@ -348,11 +350,53 @@ The parsimonious model reveals a very weak positive effect of wealth on voteshar
 
 2. **A team-member suggests adding a quadratic term to your regression. Based on your prior model, is such an addition warranted? Add this term and interpret the results. Do wealthier candidates fare better in elections?**
 
-Theoretically, the addition of a quadratic seems questionable because it suggests there is a point at which the returns to wealth stop increasing. It is unclear why this would necessarily be the case.  
+Theoretically, the addition of a quadratic seems questionable because it suggests there is a point at which the returns to wealth stop increasing. Even if the quadratic model resulted in an improvement in the R^2 value, it may be difficult to justify the inclusion of a quadratic term without a theoretical reason. 
+
+```{r Question5-1-8, results='asis', echo = F}
+```
+
+\pagebreak
 
 3. **Another team member suggests that it is important to take into account the fact that different regions have different electoral contexts. In particular, the relationship between candidate wealth and electoral performance might be different across states. Modify your model and report your results. Test the hypothesis that this addition is not needed.**
 
+First, we will look at how the variables of interest are distributed across regions. 
+
+```{r Question5-3-1, echo = F, fig.width = 6, fig.height = 5}
+```
+
+\pagebreak
+
+
+```{r Question5-3-2, echo = F, fig.width = 6, fig.height = 4}
+```
+
+The histograms of wealth by region and voteshare by region do seem to reveal some geniune structural differences between the regions. The first region has much greater wealth inequality, with a large share of the observations having no wealth and greater average wealth among the wealthy than regions 2 and 3. The voteshare histogram for region one also suggests a difference in election structure, as voteshare percentages tend to be clusered between 15% and 40%, while regions two and three have relatively uniform voteshare distributions between 5% and 60%. 
+
+\pagebreak
+
+
+```{r Question5-3-3, echo = F, fig.width = 6, fig.height = 4}
+```
+
+```{r Question5-3-4, echo = F, fig.width = 6, fig.height = 4}
+```
+
+The scatterplots of voteshare against the wealth variables reveal that is all regions, there does not seem to be a strong linear relationship between wealth amd voteshare. There seems to be a level of $log(wealth)$ around 10, below which there are few observations, but once that floor is cleared, there doesn't seem to be a strong relationship between additional wealth and additional voteshare. 
+
+\pagebreak
+
+
+```{r Question5-3-5, results='asis', echo = F}
+```
+
+```{r Question5-3-6, results='asis', echo = F}
+```
+
+The regression output shows that the model including regions accounts for a greater share of the overall variation than the parsimonious model, with the difference between the two models being practically and statistically significant (F(`r model_comp[2,3]`, `r model_comp[2,1]`) = `r round(model_comp[2,5],3)`, p < 0.001). This supports the notion that the structural differences in voteshare and wealth between the regions are important to take into account when estimating the effect of wealth on voteshare.  
+
 4. **Return to your parsimonious model. Do you think you have found a causal and unbiased estimate? Please state the conditions under which you would have an unbiased and causal estimates. Do these conditions hold?**
+
+
 
 5. **Someone proposes a difference in difference design. Please write the equation for such a model. Under what circumstances would this design yield a causal effect?**
 
