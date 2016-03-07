@@ -163,7 +163,11 @@ The first synthetic series ( AR(1) with $alpha=0.9$ ) is more volatile than the 
 
 **Plot a time plot for each of the simulated series. Graph a histogram for each of the simulated series. Write a few statements to compare the two series.**
 
-```{r Question5, echo = -c(1:7)}
+```{r Question5-1, echo = -c(1:1),fig.width = 9, fig.height = 5 }
+```
+
+
+```{r Question5-2, echo= FALSE, results='hide', fig.width = 4.5, fig.height = 2.5, fig.align='center' }
 ```
 
 **********

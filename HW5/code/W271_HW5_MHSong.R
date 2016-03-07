@@ -225,8 +225,9 @@ elec_usage = c(35.94, 29.68, 31.83, 31.36, 24.61, 17.91, 18.29, 17.74, 15.70,
               +19.33, 23.90, 23.39, 23.30, 28.63, 29.07, 24.27, 20.68, 18.33,
               +18.42, 18.41, 24.66, 18.93, 23.03, 23.18)
 elec_usage_ts <- ts(elec_usage, start=c(2014, 1), end=c(2015, 12), frequency=12) 
-autoplot(elec_usage_ts, main='Monthyl Electricity Usage in 2014 & 2015',geom = "bar",xlab='Time',
-        ylab='Daily Electricity Usage (KWh)',colour = I('dodgerblue3'),fill = I("white"))
+autoplot(elec_usage_ts, main='Monthyl Electricity Usage in 2014 & 2015',geom = "bar",
+         xlab='Time', ylab='Daily Electricity Usage (KWh)',colour = I('dodgerblue3'),
+         fill = I("white"))
 
 
 
@@ -239,8 +240,9 @@ rand_draw <- rnorm(1000) # 1000 random draw
 rand_draw_ts <- ts(rand_draw)
 autoplot(rand_draw_ts , xlab = "Simulated Time Period", ylab = "Simulated Values", 
          main="Simulated White Noise", ts.colour = 'dodgerblue2', ylim=c(-6,6) )
-qplot(rand_draw_ts, geom="histogram",  main='Histogram of Simulated White Noise',ylab='Frequency',
-      xlab='Simulated Values', colour = I('dodgerblue3'), fill = I("white"), xlim=c(-6,6) )
+qplot(rand_draw_ts, geom="histogram",  main='Histogram of Simulated White Noise',
+      ylab='Frequency', xlab='Simulated Values', colour = I('dodgerblue3'),
+      fill = I("white"), xlim=c(-6,6) )
 
 
 ## @knitr Question4-1
@@ -269,19 +271,21 @@ z2_ts <- ts(z2)
 #par(mfrow=c(1,2))
 autoplot(z1_ts , xlab = "Simulated Time Period", ylab = "Simulated Values", 
          main="AR(1) with alpha=0.9 ", ts.colour = 'dodgerblue2', ylim=c(-6,6) )
-qplot(z1, geom="histogram",  main='Histogram of AR(1) with alpha=0.9', ylab='Frequency',
-      xlab='Simulated Values', colour = I('dodgerblue3'), fill = I("white"), xlim=c(-6,6)) 
+qplot(z1, geom="histogram",  main='Histogram of AR(1) with alpha=0.9',
+      ylab='Frequency', xlab='Simulated Values', colour = I('dodgerblue3'),
+      fill = I("white"), xlim=c(-6,6)) 
 
 ## @knitr Question4-3
 # the time series plot and histogram of 2nd series
 #par(mfrow=c(1,2))
 autoplot(z2_ts , xlab = "Simulated Time Period", ylab = "Simulated Values", 
          main="AR(1) with alpha=0.2", ts.colour = 'dodgerblue2', ylim=c(-6,6))
-qplot(z2_ts, geom="histogram",  main='Histogram of AR(1) with alpha=0.2', ylab='Frequency',
-      xlab='Simulated Values', colour = I('dodgerblue3'), fill = I("white"),xlim=c(-6,6) ) 
+qplot(z2_ts, geom="histogram",  main='Histogram of AR(1) with alpha=0.2',
+      ylab='Frequency', xlab='Simulated Values', colour = I('dodgerblue3'),
+      fill = I("white"),xlim=c(-6,6) ) 
 
 
-## @knitr Question5
+## @knitr Question5-1
 # QUESTION 5 --------------------------------------------------------------
 # Simulate (with 1000 random draws) the following 3 models:
 # 1. A deterministic linear (time) trend of the form: yt = 10 + 0.5t
@@ -289,3 +293,43 @@ qplot(z2_ts, geom="histogram",  main='Histogram of AR(1) with alpha=0.2', ylab='
 # 3. Random walk with drift = 0.5
 # Plot a time plot for each of the simulated series. 
 # Graph a histogram for each of the simulated series.
+
+# Generate a deterministic linear series
+Linear_trend <- seq(1, 1000) * 0.5 + 10
+Linear_trend <-ts(Linear_trend)
+mod1 <- data.frame( x=as.integer(time(Linear_trend)), y=as.matrix(Linear_trend) )
+
+# Generate a random walk without drift
+randwalk=cumsum(rand_draw)
+randwalk=ts(randwalk)
+mod2 <- data.frame( x=as.integer(time(randwalk)), y=as.matrix(randwalk) )
+
+# Generate a Random walk with drift = 0.5
+randwalk_d = 0.5 + rand_draw; 
+randwalk_d = cumsum(randwalk_d)
+mod3 <- data.frame( x=as.yearqtr(time(randwalk_d)), y=as.matrix(randwalk_d) )
+
+ggplot(mod1,aes(x,y)) +  
+  geom_line(aes(color="deterministic trend")) +
+  geom_line(data=mod2,aes(color="random walk without drift")) +
+  geom_line(data=mod3,aes(color="Random walk with drift=0.5")) +
+  labs(color="Legend") +
+  scale_colour_manual("", breaks = c("the deterministic trend", 
+                      "random walk without drift", "Random walk with drift=0.5"),
+                      values = c("black", "blue", "red")) +
+  ggtitle("Random Walk with Drift, Random Walk without Drift & Deterministic Trend") +
+  theme(plot.title = element_text(lineheight=.7, face="bold")) +
+  labs(y = "Simulated Values from Three Models ")
+
+## @knitr Question5-2
+# Histograms for three simulated models
+qplot(Linear_trend, geom="histogram",  main='Histogram of the Deterministic trend',
+      ylab='Frequency', xlab='Simulated Values', colour = I('dodgerblue3'),
+      fill = I("white") ) 
+qplot(randwalk, geom="histogram",  main='Histogram of Random Walk without drift',
+      ylab='Frequency', xlab='Simulated Values', colour = I('dodgerblue3'), 
+      fill = I("white") )
+qplot(randwalk_d, geom="histogram",  main='Histogram of Random Walk with drift=0.5',
+      ylab='Frequency', xlab='Simulated Values', colour = I('dodgerblue3'),
+      fill = I("white") )
+
