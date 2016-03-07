@@ -310,7 +310,7 @@ randwalk_d = cumsum(randwalk_d)
 mod3 <- data.frame( x=as.yearqtr(time(randwalk_d)), y=as.matrix(randwalk_d) )
 
 ggplot(mod1,aes(x,y)) +  
-  geom_line(aes(color="deterministic trend")) +
+  geom_line(aes(color="the deterministic trend")) +
   geom_line(data=mod2,aes(color="random walk without drift")) +
   geom_line(data=mod3,aes(color="Random walk with drift=0.5")) +
   labs(color="Legend") +
