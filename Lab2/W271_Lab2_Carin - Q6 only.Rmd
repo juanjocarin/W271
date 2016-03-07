@@ -52,49 +52,84 @@ opts_knit$set(root.dir = './data')
 
 + **Exploratory Data Analysis: focus on bivariate and multivariate relationships.**
 
++ **Be sure to assess conditions and identify unusual observations.**
+
 First we explore the whole dataset.
 
-```{r Question6-1, echo = -c(1:2)}
-```
+> ```{r Question6-1, echo = -c(1:2)}
+> ```
 
 The dataset contains `r frmt(dim(data)[1], 0)` observations of `r dim(data)[2]` variables. `r sum(sapply(data, is.factor))` of them are categorical (``r paste(names(data)[sapply(data, is.factor)], collapse=", ")``), and `Year` should also be considered as categorical, since there are data from only `r max(data$Year) - min(data$Year) + 1` years (from `r min(data$Year)` to `r max(data$Year)`).
 
-```{r Question6-2}
-```
+> ```{r Question6-2}
+> ```
 
 We also notice (from the output of `summary`) that some of the variables (all of them numerical) has a high number of `NA`s, the same in all cases (`r sum(is.na(data$Revenue))`, i.e., $`r frmt(sum(is.na(data$Revenue))/dim(data)[1]*100, 2)`\%$ of the total number of observations). Do the `NA`s appear in the same observations for all those variables? Yes, they do.
 
-```{r Question6-3}
-```
+> ```{r Question6-3}
+> ```
 
- And the amount of `NA`s per category is roughly the same for all categorical values (or at least there are non-missing data for all categories; below we just show the percentage per category for three of the numerical variables).
+And the amount of `NA`s per category is roughly the same for all categorical values (or at least there are non-missing data for all categories; below we just show the percentage per category for three of the numerical variables).
 
-```{r Question6-4, echo = c(1:3)}
-```
+> ```{r Question6-4, echo = c(1:3)}
+> ```
 
 So we can ommit all those missing observations (reducing our sample size to `r dim(data)[1] - sum(is.na(data$Revenue))`), and continue with a further analysis of the numerical variables:
 
-```{r Question6-5}
-```
+> ```{r Question6-5}
+> ```
 
 All numerical variables are right-skewed, with long right tails (i.e., with several observations more than 2 standard deviations far from the mean), especially the ones corresponding to aggregate---non-unit---results.
 
-```{r Question6-6, echo = FALSE, fig.width = 6, fig.height = 4.5, fig.cap = "Histogram of all non-categorical variables in the dataset"}
-```
+> ```{r Question6-6, echo = FALSE, fig.width = 6, fig.height = 4.5, fig.cap = "Histogram of all non-categorical variables in the dataset"}
+> ```
 
 Below we show the correlation matrix of the numerical variables, as well as two different representations of the scatterplot matrix (where we've used a sample of the data of size 500 because the plotting functions consume a lot of resources; that's why the correlations shown in the second Figure, only approximate, differ from the ones shown right below). As we might have expected, the correlations between `Revenue`, `Planned.revenue`, `Product.cost`, and `Gross.profit` (i.e., the aggregate values), as well as those between `Unit.cost`, `Unit.price`, and `Unit.sale.price` (i.e., the values per unit), are positive and very high. `Quantity` is negatively correlated with the unitary variables (but that correlation is negligible in absolute value), and is moderately correlated ($\rho \simeq 0.5$) with the aggregate values.
 
-```{r Question6-7, echo = 1, fig.width = 6, fig.height = 6, fig.cap = "Scatterplot matrix of a sample of the dataset"}
-```
+> ```{r Question6-7, echo = 1, fig.width = 6, fig.height = 6, fig.cap = "Scatterplot matrix of a sample of the dataset"}
+> ```
 
-```{r Question6-8, echo = FALSE, fig.width = 6, fig.height = 6, fig.cap = "Scatterplot matrix of a sample of the dataset (with correlations)"}
-```
+> ```{r Question6-8, echo = FALSE, fig.width = 6, fig.height = 6, fig.cap = "Scatterplot matrix of a sample of the dataset (with correlations)"}
+> ```
 
-+ **Be sure to assess conditions and identify unusual observations.**
+\pagebreak
+
+  After our EDA, we can divide the dataset into two separate ones, to train and evaluate the model. Now we can convert `Year` back to a numerical variable (subtracting 2004 so the baseline is 0; that will make the intercept more intuitive when including `Year` in the regression model).
+
+> ```{r Question6-9}
+> ```
+
+Not all products appear in both periods so some re-factoring is needed:
+
+> ```{r Question6-10}
+> ```
+
+There are some variables that are calculated from `Revenue` (or vice versa) so including them in any regression model would lead to a perfect fit. In particular, `Gross.profit` = `Revenue` - `Product.cost`. And `Revenue` should be equal to `Unit.sale.price` times `Quantity`, though this is not always the case, and there are differences in many cases ($`r frmt(100*sum(data$Unit.sale.price * data$Quantity != data$Revenue) / dim(data)[1], 1)` \%$ of the total number of observations).
+
+> ```{r Question6-11}
+> ```
+
+So `Revenue` and `Product.cost` should definitely not be included in the regression model, but `Unit.sale.price` and `Quantity` might.
+
+Let's start with the simplest model:
+
+> ```{r Question6-12, echo = c(1:5), fig.cap = "Planned Revenue vs. Revenue (observed and predicted) in 2006 and 2007"}
+> ```
+
+We'll use the RMSE to compare different models:
+
+> ```{r Question6-13}
+> ```
 
 + **Is the change in the average revenue different from 95 cents when the planned revenue increases by $1?**
 
+As shown below, the change in the average revenue is significantly different from $0.95 when the revenue increases by $1 (while the *F* statistic of the exact value, which is quite close to $0.95, has a *p* value equal to 1):
 
+> ```{r Question6-14}
+> ```
+
+> ```{r Question6-15, echo = c(1:5), fig.cap = "Planned Revenue vs. Revenue (observed and predicted) in 2006 and 2007"}
+> ```
 
 + **Explain what interaction terms in your model mean in context supported by data visualizations.**
 
