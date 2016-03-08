@@ -475,18 +475,16 @@ data %>% group_by(Order.method.type) %>%
 
 # Full model (without interaction terms)
 params = names(data)[-which(names(data) == "Revenue")]
-params = c("Year", "Planned.revenue", "Retailer.country", "Product.cost", 
-           "Quantity", "Unit.cost", "Unit.price", "Gross.profit", "Product", 
-           "Unit.sale.price")
+params = c("Year", "Planned.revenue", "Retailer.country", "Product")
 params = names(data)[which(!names(data) %in% c("Revenue", "Gross.profit", 
                                                "Product.cost", 
                                                "Unit.sale.price"))]
 model3 <- lm(as.formula(paste("Revenue", paste(params, sep = "", 
                                                collapse = " + "), 
                               sep = " ~ ")), data_200405)
-new_data <- data.frame(data_200607[, params])
-names(new_data) <- params
-model3_predictions <- predict(model3, new_data, interval = "prediction")
+coeftest(model3, vcov = vcovHC)
+model3_predictions <- predict(model3, data_200607[, params], 
+                              interval = "prediction")
 matplot(data_200607[order(data_200607$Planned.revenue) , c("Planned.revenue")], 
         cbind(model3_predictions[order(data_200607$Planned.revenue), ], 
               sort(data_200607$Revenue)), lty = c(2,3,3,1), type = "l", 
@@ -495,6 +493,7 @@ matplot(data_200607[order(data_200607$Planned.revenue) , c("Planned.revenue")],
 RMSE <- sqrt(sum((model3_predictions[, 1] - data_200607$Revenue)^2) / 
                dim(data_200607)[1])
 RMSE
+
 
 
 
