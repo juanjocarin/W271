@@ -21,6 +21,7 @@ library(stargazer)
 library(texreg)
 library(reshape2)
 library(GGally)
+library(forecast)
 
 # Define functions
 
@@ -543,7 +544,6 @@ stargazer(model_comp, header = F, summary=F, title = "Model Comparison")
 # setwd('Lab2/data')
 load("retailSales.Rdata")
 data <- retailSales; rm(retailSales)
-data$logRev <- log(data$Revenue + 1)
 summary(data)
 
 ## @knitr Question6-2
@@ -626,32 +626,29 @@ ggpairs(data_subsample) +
 
 ## @knitr Question6-9
 # Year back to integer (factor only useful for vizs)
-data <- data %>% mutate(Year = as.numeric(levels(Year))[Year] - 2004)
+data <- data %>% mutate(Year2 = as.numeric(levels(Year))[Year] - 2004)
 # One dataset per couple of years
-# train <- data %>% filter(Year <= 2005)
-# test <- data %>% filter(Year > 2005)
-
-train <- data %>% filter(Year <= 1)
-test <- data %>% filter(Year > 1)
+# data_200405 <- data %>% filter(Year <= 2005)
+# data_200607 <- data %>% filter(Year > 2005)
+data_200405 <- data %>% filter(Year2 <= 1)
+data_200607 <- data %>% filter(Year2 > 1)
 
 ## @knitr Question6-10
 # Re-factor Product (since the levels differ by period)
-train$Product <- factor(train$Product)
-test$Product <- factor(test$Product)
-train_levels <- levels(train$Product)
-test_levels <- levels(test$Product)
-drop_levels <- setdiff(train_levels, test_levels)
-train <- train[!train$Product %in% drop_levels,]
-test <- test[!test$Product %in% drop_levels,]
-train$Product <- factor(train$Product)
-test$Product <- factor(test$Product)
-train_levels <- levels(train$Product)
-test_levels <- levels(test$Product)
-drop_levels <- setdiff(test_levels, train_levels)
-train <- train[!train$Product %in% drop_levels,]
-test <- test[!test$Product %in% drop_levels,]
-train$Product <- factor(train$Product)
-test$Product <- factor(test$Product)
+products_200405 <- data.frame(Product = levels(droplevels(data_200405$Product)))
+products_200607 <- data.frame(Product = levels(droplevels(data_200607$Product)))
+continuing_products <- intersect(products_200405, products_200607)
+(new_or_discontinuted_products <- union(products_200405, products_200607) %>% 
+  setdiff(continuing_products))
+# Products present in one period and not the other are labelled as "Other"
+data_200405 <- data_200405 %>% 
+  mutate(Product = ifelse(Product %in% new_or_discontinuted_products$Product, 
+                          "Other", as.character(Product))) %>% 
+  mutate(Product = factor(Product))
+data_200607 <- data_200607 %>% 
+  mutate(Product = ifelse(Product %in% new_or_discontinuted_products$Product, 
+                          "Other", as.character(Product))) %>% 
+  mutate(Product = factor(Product))
 
 ## @knitr Question6-11
 head(data %>% select(Revenue, Product.cost, Gross.profit) %>% 
@@ -661,159 +658,135 @@ head(data %>% select(Revenue, Unit.sale.price, Quantity) %>%
        mutate(Revenue2 = Unit.sale.price * Quantity))
 
 ## @knitr Question6-12
-# Looking at Correlations with log(Revenue)
-train_num <- train %>% 
-  select(which(names(train) %in% names(train)[!sapply(train, is.factor)]))
-cor(train_num$Revenue, train_num)
+data %>% filter(Product == "TX") %>% group_by(Year) %>% 
+  summarize(mean.Unit.Cost.TX = mean(Unit.cost), 
+            sd.Unit.Cost.TX = sd(Unit.cost), 
+            mean.Unit.price.TX = mean(Unit.price), 
+            sd.Unit.price.TX = sd(Unit.price))
 
 ## @knitr Question6-13
-# Examine One factor models
-params2 <- c("Product")
-model2 <- lm(as.formula(paste("logRev", paste(params2, sep = "", 
-                                              collapse = " + "), 
-                              sep = " ~ ")), train)
-params3 <- c("Product.line")
-model3 <- lm(as.formula(paste("logRev", paste(params3, sep = "", 
-                                              collapse = " + "), 
-                              sep = " ~ ")), train)
-params4 <- c("Order.method.type")
-model4 <- lm(as.formula(paste("logRev", paste(params4, sep = "", 
-                                              collapse = " + "), 
-                              sep = " ~ ")), train)
-params5 <- c("Retailer.country")
-model5 <- lm(as.formula(paste("logRev", paste(params5, sep = "", 
-                                              collapse = " + "), 
-                              sep = " ~ ")), train)
-params6 <- c("Product.type")
-model6 <- lm(as.formula(paste("logRev", paste(params6, sep = "", 
-                                              collapse = " + "), 
-                              sep = " ~ ")), train)
-params7 <- c("Product", "Order.method.type")
-model7 <- lm(as.formula(paste("logRev", paste(params7, sep = "", 
-                                              collapse = " + "), 
-                              sep = " ~ ")), train)
-params8 <- c("Product", "Order.method.type", "Retailer.country")
-model8 <- lm(as.formula(paste("logRev", paste(params8, sep = "", 
-                                              collapse = " + "), 
-                              sep = " ~ ")), train)
-AIC(model7)
-AIC(model8)
-
+table <- data %>% 
+  group_by(Year, Order.method.type) %>% 
+  summarise(Total.Revenue = sum(Revenue)) %>% 
+  group_by(Year) %>% 
+  mutate(Percentage.of.Revenue = 100*Total.Revenue/sum(Total.Revenue)) %>% 
+  xtabs(Percentage.of.Revenue ~ Order.method.type + Year, .) %>% 
+  round(1)
+table2 <- paste0(formatC(table, format = "f", digits = 1), "%")
+attributes(table2) <- attributes(table)
+kable(table2, caption = "Percentage of Revenue per order method type by year", 
+      align = "r")
 
 ## @knitr Question6-14
-# Examine One factor models
-ggplot(train, aes(logRev)) + geom_histogram(aes(fill=Order.method.type)) + 
-  facet_wrap(~Retailer.country, ncol=3) +
-  labs(title="Histogram of Revenuew By Country and Order Type", 
-       x="log(Revenue" )
-
-
-## @knitr Question6-15
-params9 <- c("Product", "Order.method.type", "Retailer.country")
-params_plus_interaction <- c(params9, 'Order.method.type*Retailer.country')
-vars_of_interest <- c('logRev', params9)
-model9 <- lm(as.formula(paste(vars_of_interest[!vars_of_interest %in% params9], 
-                              paste(params_plus_interaction, sep = "", 
-                                    collapse = " + "), sep = " ~ ")), train)
-summary.lm(model9)
-AIC(model9)
-
-## @knitr Question6-16
-predictions = predict.lm(model8, test[,params8])
-test$predictions <- predictions
-summary.lm(lm(logRev~predictions, test))
-
-## @knitr Question6-17
-params = c("Planned.revenue")
-model1 <- lm(as.formula(paste("Revenue", paste(params, sep = "",
-                                               collapse = " + "),
-                              sep = " ~ ")), train)
-model1_full <- lm(as.formula(paste("Revenue", paste(params, sep = "", 
-                                                    collapse = " + "), 
-                                   sep = " ~ ")), data)
-coeftest(model1_full, vcov = vcovHC)
-linearHypothesis(model1_full, "Planned.revenue = 0.95", vcov = vcovHC)
-linearHypothesis(model1_full, paste("Planned.revenue =", 
-                                    coeftest(model1, vcov = vcovHC)[2, 1]), 
-                 vcov = vcovHC)
-
-## @knitr Question6-1000
-params = c("Year", "Planned.revenue")
-model2 <- lm(as.formula(paste("Revenue", paste(params, sep = "", 
-                                               collapse = " + "), 
-                              sep = " ~ ")), train)
-coeftest(model2, vcov = vcovHC)
-model2_predictions <- predict(model2, test[, params], 
-                              interval = "prediction")
-matplot(test[order(test$Planned.revenue) , c("Planned.revenue")], 
-        cbind(model2_predictions[order(test$Planned.revenue), ], 
-              sort(test$Revenue)), lty = c(2,3,3,1), type = "l", 
-        xlab = "Planned Revenue", 
-        ylab = "Revenue (observed and predicted)")
-(RMSE <- sqrt(sum((model2_predictions[, 1] - test$Revenue)^2) / 
-                dim(test)[1]))
-
-
-
-
-data %>% group_by(Year, Order.method.type) %>% 
-  summarise(Total.Revenue = sum(Revenue)) %>% 
-  mutate("Percentage of Revenue" = 100*Total.Revenue/sum(Total.Revenue)) %>% 
-  print(n = Inf)
-data %>% group_by(Order.method.type) %>% 
-  summarise(Total.Revenue = sum(Revenue)) %>% 
-  mutate("Percentage of Revenue" = 100*Total.Revenue/sum(Total.Revenue)) %>% 
-  print(n = Inf)
-
-
-
-# Full model (without interaction terms)
-params = names(data)[-which(names(data) == "Revenue")]
-params = c("Year", "Planned.revenue", "Retailer.country", "Product")
-params = names(data)[which(!names(data) %in% c("Revenue", "Gross.profit", 
-                                               "Product.cost", 
-                                               "Unit.sale.price"))]
-model3 <- lm(as.formula(paste("Revenue", paste(params, sep = "", 
-                                               collapse = " + "), 
-                              sep = " ~ ")), train)
-coeftest(model3, vcov = vcovHC)
-model3_predictions <- predict(model3, test[, params], 
-                              interval = "prediction")
-matplot(test[order(test$Planned.revenue) , c("Planned.revenue")], 
-        cbind(model3_predictions[order(test$Planned.revenue), ], 
-              sort(test$Revenue)), lty = c(2,3,3,1), type = "l", 
-        xlab = "Planned Revenue in 2006 and 2007", 
-        ylab = "Revenue in 2006 and 2007 (observed and predicted)")
-RMSE <- sqrt(sum((model3_predictions[, 1] - test$Revenue)^2) / 
-               dim(test)[1])
-RMSE
-
-
-
-
-
-coeftest(model1, vcov = vcovHC)
-linearHypothesis(model1, "Planned.revenue = 0.95", vcov = vcovHC)
-linearHypothesis(model1, 
-                 paste("Planned.revenue =", coeftest(model1, vcov = vcovHC)[2, 1]), 
-                 vcov = vcovHC)
-
-
-
-
-
-
-ggplot(data, aes(Year, Revenue, fill = Product.line)) + 
-  stat_summary(fun.y = mean, geom = "bar", position = "dodge") + 
-  stat_summary(fun.data = mean_cl_normal, geom = "errorbar", 
-               position = position_dodge(width = 0.9), width = 0.2) + 
-  facet_wrap(~ Product.line, ncol = 3, scales = "free")
-
 ggplot(data, aes(Year, Revenue, fill = Order.method.type)) + 
   stat_summary(fun.y = mean, geom = "bar", position = "dodge") + 
   stat_summary(fun.data = mean_cl_normal, geom = "errorbar", 
                position = position_dodge(width = 0.9), width = 0.2) + 
-  facet_wrap(~ Order.method.type, ncol = 3)
+  facet_wrap(~ Order.method.type, scales = "free")
+# data <- data %>% 
+#   group_by(Year) %>% 
+#   mutate(p = sum(Revenue)) %>% 
+#   group_by(Order.method.type, add = TRUE) %>% 
+#   mutate(p2 = 100*Revenue/p)
+# ggplot(data, aes(Order.method.type, p2/100, fill = Year)) + 
+#   stat_summary(fun.y = sum, geom = "bar", position = "dodge") + 
+#   facet_wrap(~ Year, scales = "free") + labs(y = "Percentage of revenue") + 
+#   scale_y_continuous(labels = scales::percent)
 
-ggplot(data, aes(Product.type, Revenue)) + geom_boxplot()
-summary(data$Revenue)
+## @knitr Question6-15
+params = c("Year2", "Order.method.type", "Planned.revenue")
+model1 <- lm(as.formula(paste("Revenue", paste(params, sep = "", 
+                                               collapse = " * "), 
+                              sep = " ~ ")), data_200405)
+model1 <- lm(Revenue ~ Planned.revenue + Year2 * Order.method.type, 
+             data_200405)
+# coeftest(model1, vcov = vcovHC)
+model1_predictions <- predict(model1, data_200607[, params], 
+                              interval = "prediction")
+
+## @knitr Question6-15-1
+stargazer2(model1, 
+           title = paste("Summary of the regression model of revenue on year", 
+                         "and order method type"))
+
+## @knitr Question6-16
+cbind(BIC = BIC(model1), AIC = AIC(model1))
+rbind("model1" = accuracy(model1_predictions[, 1], 
+                          data_200607$Revenue)[, c("RMSE", "MAE")])
+
+## @knitr Question6-17
+ggplot(data[data$Retailer.country %in% levels(data$Retailer.country)[1:6], ], 
+       aes(Product.line, Revenue, fill = Retailer.country)) + 
+  stat_summary(fun.y = mean, geom = "bar", position = "dodge") + 
+  stat_summary(fun.data = mean_cl_normal, geom = "errorbar", 
+               position = position_dodge(width = 0.9), width = 0.2) + 
+  facet_wrap(~ Retailer.country, scales = "free")
+
+## @knitr Question6-18
+params = c("Year2", "Order.method.type", "Planned.revenue", "Retailer.country", 
+           "Product.line")
+model2 <- lm(as.formula(paste("Revenue", paste(params[3], "+", params[1], "*", 
+                                               params[2], "+", params[4], "+", 
+                                               params[5]), sep = " ~ ")), 
+             data_200405)
+coeftest(model2, vcov = vcovHC)[, c(1, 4)]
+model2_predictions <- predict(model2, data_200607[, params], 
+                              interval = "prediction")
+
+## @knitr Question6-18-1
+# stargazer2(model1, model2, 
+#            title = "Summary of the regression models")
+
+## @knitr Question6-19
+cbind(BIC(model1, model2), 
+      AIC = AIC(model1, model2)[, 2])
+rbind("model1" = accuracy(model1_predictions[, 1], 
+                          data_200607$Revenue)[, c("RMSE", "MAE")], 
+      "model2" = accuracy(model2_predictions[, 1], 
+                          data_200607$Revenue)[, c("RMSE", "MAE")])
+
+## @knitr Question6-20
+model3 <- lm(as.formula(paste("Revenue", paste(params[3], "+", params[1], "*", 
+                                               params[2], "+", params[4], "*", 
+                                               params[5]), sep = " ~ ")), 
+             data_200405)
+coeftest(model3, vcov = vcovHC)[, c(1, 4)]
+# stargazer2(model1, model2, model3)
+model3_predictions <- predict(model3, data_200607[, params], 
+                              interval = "prediction")
+cbind(BIC(model1, model2, model3), 
+      AIC = AIC(model1, model2, model3)[, 2])
+rbind("model1" = accuracy(model1_predictions[, 1], 
+                          data_200607$Revenue)[, c("RMSE", "MAE")], 
+      "model2" = accuracy(model2_predictions[, 1], 
+                          data_200607$Revenue)[, c("RMSE", "MAE")], 
+      "model3" = accuracy(model3_predictions[, 1], 
+                          data_200607$Revenue)[, c("RMSE", "MAE")])
+
+
+## @knitr Question6-21
+params = c("Planned.revenue")
+model4 <- lm(as.formula(paste("Revenue", paste(params, sep = "", 
+                                               collapse = " + "), 
+                              sep = " ~ ")), data_200405)
+coeftest(model4, vcov = vcovHC)[, 1]
+new_data <- data.frame(data_200607[, params])
+names(new_data) <- params
+model4_predictions <- predict(model4, new_data, interval = "prediction")
+matplot(data_200607[order(data_200607$Planned.revenue) , c("Planned.revenue")], 
+        cbind(model4_predictions[order(data_200607$Planned.revenue), ], 
+              sort(data_200607$Revenue)), lty = c(2,3,3,1), type = "l", 
+        xlab = "Planned Revenue", 
+        ylab = "Revenue (observed and predicted)")
+# stargazer2(model1)
+
+## @knitr Question6-22
+BIC(model4); AIC(model4)
+(RMSE <- sqrt(mean((model4_predictions[, 1] - data_200607$Revenue)^2)))
+accuracy(model4_predictions[, 1], data_200607$Revenue)[, c("RMSE", "MAE")]
+
+## @knitr Question6-23
+linearHypothesis(model4, "Planned.revenue = 0.95", vcov = vcovHC)
+linearHypothesis(model4, paste("Planned.revenue =", 
+                               coeftest(model4, vcov = vcovHC)[2, 1]), 
+                 vcov = vcovHC)

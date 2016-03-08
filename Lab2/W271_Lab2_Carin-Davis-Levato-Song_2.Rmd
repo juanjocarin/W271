@@ -1,0 +1,723 @@
+---
+title: "**W271**-2 -- Spring 2016 -- **Lab 2**"
+author: "***Juanjo Carin, Kevin Davis, Ashley Levato, Minghu Song***"
+date: "*March 7, 2016*"
+output:
+   pdf_document:
+     fig_caption: yes
+     toc: yes
+numbersections: false
+geometry: margin=1in
+options: width=30
+fontsize: 10pt
+linkcolor: blue
+header-includes:
+- \usepackage{fancyhdr}
+- \pagestyle{fancy}
+- \fancyhead[LO,LE]{Carin, Davis, Levato, Song}
+- \fancyhead[CE,CO]{W271 -- Lab 2}
+- \fancyhead[RE,RO]{\leftmark}
+- \fancyfoot[LO,LE]{UC Berkeley -- MIDS}
+- \fancyfoot[CO,CE]{Spring semester 2016}
+- \fancyfoot[RE,RO]{\thepage}
+- \renewcommand{\headrulewidth}{0.5pt}
+- \renewcommand{\footrulewidth}{0.5pt}
+---
+
+**********
+
+\pagebreak
+
+```{r, echo = FALSE}
+require(knitr, quietly = TRUE)
+read_chunk('code/W271_Lab2_Carin-Davis-Levato-Song.R')
+opts_chunk$set(message = FALSE, warning = FALSE)
+opts_chunk$set(fig.width = 4, fig.height = 3)
+# Set path to data here (don't use setwd() inside a chunk!!!)
+opts_knit$set(root.dir = './data')
+```
+
+```{r Libraries-Functions-Constants, echo = FALSE}
+```
+
+# Question 1: Broken Rulers
+
+**You have a ruler of length 1 and you choose a place to break it using a uniform probability distribution. Let random variable $\mathbf{X}$ represent the length of the left piece of the ruler. $\mathbf{X}$ is distributed uniformly in $\mathbf{[0, 1]}$. You take the left piece of the ruler and once again choose a place to break it using a uniform probability distribution. Let random variable $\mathbf{Y}$ be the length of the left piece from the second break.**
+
+1. **Find the conditional expectation of $\mathbf{Y}$ given $\mathbf{X}$, $\mathbf{E(Y|X)}$.**
+
+$f_X = U(0,1)$ and $f_{Y|X}=U(0,X)$ (because the maximum length of the second left piece cannot be greater than the length of the first left piece). As we know, the probability density function for a variable $Z$ that follows a uniform distribution $U(a,b)$ is:
+
+$$f_Z(z) = \begin{cases}
+\cfrac{1}{b-a} & a \leq z \leq b \\
+0 & \text{otherwise}
+\end{cases}$$
+
+So:
+
+$$f_{Y|X}(y|x) = \begin{cases}
+\cfrac{1}{x} & 0 \leq z \leq x \\
+0 & \text{otherwise}
+\end{cases}$$
+
+And:
+
+$$\mathbf{\color{red}{E(Y|X)}} = \displaystyle\int_\mathbb{Y} y \cdot f_{Y|X}(y|x) \cdot dy = \displaystyle\int_{y=0}^x y \cdot \cfrac{1}{x} \cdot dy = \cfrac{1}{x}\left[ \cfrac{y^2}{2}\right]_{y=0}^x = \cfrac{x^2}{2x} = \mathbf{\color{red}{\cfrac{x}{2}}}$$
+
+We'll make use of some simulations through this Question to confirm the results.
+
+\small
+
+```{r Question1-1-1, echo = -c(1:2), fig.cap = "Histogram and approximate pdf of $X$ and $Y$"}
+```
+
+\pagebreak
+
+```{r Question1-1-2, echo = TRUE, fig.cap = "Histogram and approximate pdf of $Y$ conditional on $X$ for a given value of $X$ (0.2)"}
+```
+
+\normalsize
+
+
+\pagebreak
+
+2. **Find the unconditional expectation of $\mathbf{Y}$. One way to do this is to apply the law of iterated expectations, which states that $\mathbf{E(Y) = E(E(Y|X))}$. The inner expectation is the conditional expectation computed above, which is a function of $\mathbf{X}$. The outer expectation finds the expected value of this function.**
+
+$$\mathbf{\color{red}{E(Y)}} = E\left[E(Y|X)\right] = \displaystyle\int_\mathbb{X} E(Y|X) \cdot f_X(x) \cdot dx = \int_{x=0}^1 \cfrac{x}{2} \cdot 1 \cdot dx = \left[ \cfrac{x^2}{4}\right]_{x=0}^1 = \mathbf{\color{red}{\cfrac{1}{4} = 0.25}}$$
+
+
+3. **Write down an expression for the joint probability density function of $\mathbf{X}$ and $\mathbf{Y}$, $\mathbf{f_{X,Y}(x,y)}$.**
+
+$\mathbf{\color{red}{f_{X,Y}(x,y)}} = f_{Y|X}(y|x) \cdot f_X(x) = \mathbf{\color{red}{\begin{cases}
+\mathbf{\cfrac{1}{x}} & \mathbf{x \in (0,1), y \in (0,x)} \\
+\mathbf{0} & \textbf{otherwise}
+\end{cases}}}$
+
+Let's check that this is a valid joint *pdf*:
+
+$$\displaystyle\int_{\mathbb{X}} \displaystyle\int_{\mathbb{Y}} f_{X,Y}(x,y) \cdot dx \cdot dy = \displaystyle\int_{x=0}^1 \displaystyle\int_{y=0}^x\cfrac{1}{x} \cdot dy \cdot dx = \displaystyle\int_{x=0}^1 \left[\cfrac{y}{x}\right]_{y=0}^x dx = \displaystyle\int_{x=0}^1 dx = \left[x\right]_{x=0}^1 = 1$$
+
+Simulations:
+
+\small
+
+```{r Question1-3, echo = TRUE, fig.width = 6, fig.height = 4.5, fig.cap = "Approximate joint pdf of $X$ and $Y$"}
+```
+
+\normalsize
+
+
+\pagebreak
+
+4. **Find the conditional probability density function of $\mathbf{X}$ given $\mathbf{Y}$, $\mathbf{f_{X|Y}}$.**
+
+In order to find $f_{X|Y}$ we need the marginal pdf of $Y$.
+
+$$f_Y(y) = \displaystyle\int_{\mathbb{X}} f_{X,Y}(x,y) \cdot dx = \displaystyle\int_{y=0}^x \cfrac{1}{x} \cdot dx = \displaystyle\int_{x=y}^1 \cfrac{dx}{x} = \left[\log(x)\right]_{x=y}^1 dx = -\log(y)=\log\left(\cfrac{1}{y}\right)$$
+
+This result confirms what the shape of $f_Y(y)$ in Figure 1 suggested.
+
+\small
+
+```{r Question1-4, echo = TRUE, fig.cap = "Approximate pdf of $Y$ conditional on $X$ for two values of $X$"}
+```
+
+\normalsize
+
+$$\mathbf{\color{red}{f_{X|Y}(x|y)}}=\cfrac{f_{X,Y}(x,y)}{f_Y(y)} = \mathbf{\color{red}{\cfrac{-1}{x \cdot \log(y)}}}$$
+
+
+\pagebreak
+
+5. **Find the expectation of $\mathbf{X}$, given that $\mathbf{Y}$ is $\mathbf{1/2}$, $\mathbf{E(X|Y = 1/2)}$.**
+
+$$\begin{aligned}\mathbf{\color{red}{E(X|Y=1/2)}} &= \displaystyle\int_\mathbb{X} x \cdot f_{X|Y}(x|y=1/2) \cdot dx = \displaystyle\int_{x=1/2}^1 x \cdot \left(\cfrac{-1}{x \cdot \log(1/2)}\right) \cdot dx \\
+& = \cfrac{1}{\log(2)} \displaystyle\int_{x=1/2}^1 dx = \cfrac{1}{\log(2)}\left[x \right]_{x=1/2}^1 = \mathbf{\color{red}{\cfrac{1}{2\cdot\log(2)} = `r frmt(1/(2*log(2)))`}}\end{aligned}$$
+
+\small
+
+```{r Question1-5, echo = TRUE}
+```
+
+\normalsize
+
+
+
+**********
+
+\pagebreak
+
+# Question 2: Investing
+
+**Suppose that you are planning an investment in three different companies. The payoff per unit you invest in each company is represented by a random variable. $\mathbf{A}$ represents the payoff per unit invested in the first company, $\mathbf{B}$ in the second, and $\mathbf{C}$ in the third. $\mathbf{A}$, $\mathbf{B}$, and $\mathbf{C}$ are independent of each other. Furthermore, $\mathbf{Var(A) = 2Var(B) = 3Var(C)}$.**
+
+**You plan to invest a total of one unit in all three companies. You will invest amount $\mathbf{a}$ in the first company, $\mathbf{b}$ in the second, and $\mathbf{c}$ in the third, where $\mathbf{a,b, c \in [0,1]}$ and $\mathbf{a + b + c = 1}$. Find, the values of $\mathbf{a}$, $\mathbf{b}$, and $\mathbf{c}$ that minimize the variance of your total payoff.**
+
+Let's call $P$ the total payoff:
+
+$$Var(P) = Var(aA+bB+cC) = a^2Var(A) + b^2Var(B) + c^2Var(C)$$
+
+because $A$, $B$, and $C$ are independent of each other. And since $Var(A) = 2Var(B) = 3Var(C)$, we can derive that:
+
+$$Var(P) = Var(A)\left(a^2 + \cfrac{b^2}{2} + \cfrac{c^2}{3}\right)$$
+
+We want to:
+
+$$\begin{matrix}
+\text{minimize} & P(a,b,c)\\ 
+\text{subject to} & g(a,b,c) = 0
+\end{matrix}$$
+
+where $g(a,b,c)=a+b+c-1$, so $g(a,b,c)=0$ is our constraint.
+
+Using the Lagrange multiplier method, we can define:
+
+$$\mathcal{L}(a,b,c,\lambda) = P(a,b,c)-\lambda \cdot g(a,b,c)$$
+
+So to find our local minima we need to solve:
+
+$$\nabla_{a,b,c,\lambda}\mathcal{L} = 0$$
+
+$$\left( \cfrac{\partial\mathcal{L}}{\partial a}, \cfrac{\partial\mathcal{L}}{\partial b}, \cfrac{\partial\mathcal{L}}{\partial c}, \cfrac{\partial\mathcal{L}}{\partial \lambda}\right) = \left(2a-\lambda,b-\lambda,\cfrac{2}{3}c-\lambda,-(a+b+c-1)\right)=\mathbf{0}$$
+
+$$\Rightarrow \left\{\begin{matrix}
+2a-\lambda=0\\ 
+b-\lambda=0\\ 
+2c/3-\lambda=0\\ 
+a+b+c-1=0
+\end{matrix}\right.
+\Rightarrow \left\{\begin{matrix}
+a=\lambda/2\\ 
+b=\lambda\\ 
+c=3\lambda/2\\ 
+\cfrac{\lambda}{2}+\lambda+\cfrac{3\lambda}{2}=3\lambda=1
+\end{matrix}\right.
+\Rightarrow \left\{\begin{matrix}
+\mathbf{\color{red}{a=\cfrac{1}{6}=`r formatC(1/6)`}}\\ 
+\mathbf{\color{red}{b=\cfrac{1}{3}=`r formatC(1/3)`}}\\ 
+\mathbf{\color{red}{c=\cfrac{1}{2}=`r formatC(1/2)`}}
+\end{matrix}\right.$$
+
+Let's prove the result in R:
+
+\small
+
+```{r Question2, echo = -c(1:2)}
+```
+
+\normalsize
+
+
+
+**********
+
+\pagebreak
+
+# Question 3: Turtles
+
+**Next, suppose that the lifespan of a species of turtle follows a uniform distribution over $\mathbf{[0, \theta]}$. Here, parameter $\mathbf{\theta}$ represents the unknown maximum lifespan. You have a random sample of $\mathbf{n}$ individuals, and measure the lifespan of each individual $i$ to be $\mathbf{y_i}$.**
+
+1. **Write down the likelihood function, $\mathbf{l(\theta)}$ in terms of $\mathbf{y_1, y_2, \dots, y_n}$.**
+
+<!--
+http://people.missouristate.edu/songfengzheng/Teaching/MTH541/Lecture%20notes/MLE.pdf
+http://math.stackexchange.com/questions/49543/maximum-estimator-method-more-known-as-mle-of-a-uniform-distribution
+https://en.wikipedia.org/wiki/Maximum_likelihood
+-->
+
+$$l(\theta;y_1,\dots,y_n)=f(y_1,\dots,y_n|\theta)=\displaystyle\prod_{i=1}^{n}f(y_i|\theta)=
+\begin{cases}
+\displaystyle\prod_{i=1}^{n}\cfrac{1}{\theta}=\theta^{-n} & 0\leq y_i \leq \theta \\
+0 & \text{otherwise}
+\end{cases}$$
+
+<!--We can also use the **log-likelihood** function (if the MLE exists, it will be the same regardless of whether we maximize the likelihood or the log-likelihood function):
+
+$$\ln l(\theta;y_1,\dots,y_n)=f(y_1,\dots,y_n|\theta)=\displaystyle\sum_{i=1}^{n}\ln f(x_i|\theta)=
+\begin{cases}
+n \cdot \ln \left(\cfrac{1}{\theta} \right)=-n \cdot \ln \theta & 0\leq y_i \leq \theta \\
+0 & \text{otherwise}
+\end{cases}$$-->
+
+
+2. **Based on the previous result, what is the maximum-likelihood estimator for $\mathbf{\theta}$?**
+
+The MLE of $\theta$ must be a value of $\theta$ for which $\theta \geq y_i$ for $i=1,\dots,n$ and which maximizes $1/\theta^n$ among all such values. I.e., the maximum value of $y_i$ within the sample.
+
+$$\hat{\theta}_{ml} = \text{arg}\max\limits_{\theta \in \Theta}\ \hat{l}(\theta;y_1,\dots,y_n) = \max\{y_1,\dots,y_n\}$$
+
+
+3. **Let $\mathbf{\hat{\theta}_{ml}}$ be the maximum likelihood estimator above. For the simple case that $\mathbf{n = 1}$, what is the expectation of $\mathbf{\hat{\theta}_{ml}}$, given $\mathbf{\theta}$?**
+
+$$E\left(\hat{\theta}_{ml} \mid \theta\right) = E(y_1) = E(y) = \displaystyle\int_{y=0}^{\theta}\cfrac{y}{\theta}\cdot dy = \left[\cfrac{y^2}{2\theta}\right]_{y=0}^{\theta} = \cfrac{\theta}{2}$$
+
+
+4. **Is the maximum likelihood estimator biased?**
+
+Yes, it is:
+
+$$E\left(\hat{\theta}_{ml}\right) - \theta = \cfrac{\theta}{2} \neq 0$$
+
+
+5. **For the more general case that $\mathbf{n \geq 1}$, what is the expectation of $\mathbf{\hat{\theta}_{ml}}$?**
+
+<!--https://www.physicsforums.com/threads/expectation-of-an-uniform-distribution-maximum-likelihood-estimator.380389/-->
+
+Without loss of generality, let's suppose the individual $n$ is the one with the maximum lifespan among the sample, i.e., $y_n \geq y_i$ for $i=1,\dots,n-1$. Call $z$ that maximum value of $y_i$.
+
+$$E[max\{y_1,\dots,y_n\}]=E(y_n)=E(z)=\displaystyle\int_{z=0}^{\theta}z \cdot f(z) dz$$
+
+But what is the distribution of $z$?
+
+$$F(z) = \Pr(y_n \leq z) = \Pr(y_1\leq z \cap \dots \cap y_n \leq z) \stackrel{\text{i.i.d}}{=} \displaystyle\prod_{i=1}^n\Pr(y_i\leq z)=\left(\cfrac{z}{\theta}\right)^n \Rightarrow f(z) = \cfrac{nz^{n-1}}{\theta^n}$$
+
+$$E[max\{y_1,\dots,y_n\}] = \cfrac{n}{\theta^n}\displaystyle\int_{z=0}^\theta z^ndz=\cfrac{n}{\theta^n}\left[\cfrac{z^{n+1}}{n+1}\right]_{z=0}^\theta=\cfrac{n}{n+1}\cdot\theta$$
+
+(Which confirms the previous result, for $n=1$.)
+
+6. **Is the maximum likelihood estimator consistent?**
+
+It is:
+
+$$\Pr\left(|\hat{\theta}_{ml} - \theta|>\varepsilon\right) = \Pr\left(\cfrac{\theta}{n+1}>\varepsilon\right) \to 0 \text{ as } n \to \infty$$
+
+<!--(Even though $\Pr\left(max\{y_1, \dots, y_n\} < \theta\right) = 1$.)-->
+
+\small
+
+```{r Question3, echo = c(2:11), fig.cap = "Trend of the MLE of $\\theta$ depending on the sample size"}
+```
+
+\normalsize
+
+
+
+**********
+
+\pagebreak
+
+# Question 4: CLM 1
+
+## Background
+
+**The file `WageData2.csv` contains a dataset that has been used to quantify the impact of education on wage. One of the reasons we are proving another wage-equation exercise is that this area by far has the most (and most well-known) applications of instrumental variable techniques, the endogenity problem is obvious in this context, and the datasets are easy to obtain.**
+
+## The Data
+
+**You are given a sample of 1000 individuals with their wage, education level, age, working experience, race (as an indicator), father's and mother's education level, whether the person lived in a rural area, whether the person lived in a city, IQ score, and two potential instruments, called $\mathbf{z1}$ and $\mathbf{z2}$.**
+
+**The dependent variable of interest is `wage` (or its transformation), and we are interested in measuring "return" to education, where return is measured in the increase (hopefully) in wage with an additional year of education.**
+
+## Question 4.1
+
+**Conduct an univariate analysis (using tables, graphs, and descriptive statistics found in the last 7 lectures) of all of the variables in the dataset.**
+
+**Also, create two variables: (1) natural log of wage (name it `logWage`) (2) square of experience (name it `experienceSquare`)**
+
+```{r Question4-1-1, echo = F}
+```
+
+```{r Question4-1-1a, results = 'asis', echo = F, fig.cap = "Summary Statistics of Wage Data"}
+```
+
+\pagebreak
+
+```{r Question4-1-2, echo = F, fig.width = 8, fig.height = 3.5, fig.cap = "Histogram of Wage , IQ Score, and log(Wage)"}
+```
+
+```{r Question4-1-3, echo = F, fig.width = 8, fig.height = 3.5, fig.cap = "Histogram of Race , Rural, City, Z1, and Z2"}
+```
+
+```{r Question4-1-4, echo = F, fig.width = 8, fig.height = 10, fig.cap = "Histogram of Education, Expereince, Age, Father's Education, and Mother's Education"}
+```
+
+\pagebreak
+
+
+## Question 4.2
+
+**Conduct a bivariate analysis (using tables, graphs, descriptive statistics found in the last 7 lectures) of `wage` and `logWage` and all the other variables in the datasets.**
+
+```{r Question4-2-1, results = 'asis', echo = F, fig.cap = "Correlation Matrix for Wage Variables"}
+```
+    
+
+```{r Question4-2-2, echo = F, fig.width = 8, fig.height = 10, fig.cap = "Scatterplot of Wage Against Variables of Interest"}
+```
+
+```{r Question4-2-3, echo = F, fig.width = 8, fig.height = 10, fig.cap = "Scatterplot of log(Wage) Against Variables of Interest"}
+```
+
+\pagebreak
+
+
+## Question 4.3
+
+**Regress *log(wage)* on education, experience, age, and raceColor.**
+
+1. **Report all the estimated coefficients, their standard errors, t-statistics, F-statistic of the regression, $\mathbf{R^2}$, $\mathbf{R_{adj}^2}$ , and degrees of freedom.**
+
+```{r Question4-3-1, results='asis', echo = F, fig.cap = "Regression Output for Question 4.3"}
+```
+
+2. **Explain why the degrees of freedom takes on the specific value you observe in the regression output.**
+
+The overall degrees of freedom (F(`r round(summary(model)$fstatistic[2],0)`, `r round(summary(model)$fstatistic[3],0)`) is one smaller than we might expect otherwise. This is because the parameter for age is a linearly dependent combination of the other parameters and it's coefficient cannot be estimated. R automatically removes this variable from the model, and thus our regression output reflects the degrees of freedom for a model with 3 parameters rather than 4. Thus estimating this model is equivalent to estimating $log(wage) = education + experience + raceColor$.
+
+
+```{r Question4-3-2, results='asis', echo = F, fig.cap = "Equivalent Regression Output for Question 4.3"}
+```
+
+
+```{r Question4-3-3, echo = F, fig.width = 8, fig.height = 6, fig.cap = "Regression Diagnostic Plots for Question 4.3"}
+```
+
+\pagebreak
+
+3. **Describe any unexpected results from your regression and how you would resolve them (if the intent is to estimate return to education, condition on race and experience).**
+
+The inability to estimate the age coefficient is an unexpected result. Looking at the correlation matrix from above, we don't see that any variable is perfectly correlated with $log(wage)$. However, if we take the correlation of $age$ with the sum of $education$ and $experience$, we see that $age$ is perfectly correlated with the two variables. Since the model already incorporates all of the information contained in the age variable, we can simply remove it from the model and not lose anything. 
+
+4. **Interpret the coefficient estimate associated with education.**
+
+Holding other covariates constant, a one year increase in $education$ was associated with a statistically significant increase in $log(wage)$, ($\beta$ = `r formatC(round(model2$coefficients[2], 3), format = 'f', digits = 3)`, std. error = `r round(coeftest(model2, vcov = vcovHC)[6],3)`,  t = `r round(coeftest(model2, vcov=vcovHC)[10],3)`, p < .001). This effect also represents a practically significant wage return on education. 
+
+
+5. **Interpret the coefficient estimate associated with experience.**
+
+Holding other covariates constant, a one year increase in $experience$ was associated with a statistically significant increase in $log(wage)$, ($\beta$ = `r formatC(round(coeftest(model2, vcov = vcovHC)[3],3), format = 'f', digits = 3)`, std. error = `r round(coeftest(model2, vcov = vcovHC)[7],3)`,  t = `r round(coeftest(model2, vcov=vcovHC)[11],3)`, p < .001). This effect also represents a practically significant wage return on experience. 
+
+
+## Question 4.4
+
+**Regress *log(wage)* on education, experience, experienceSquare, and race-Color.**
+
+```{r Question4-4-1, results = 'asis', echo = F, fig.cap = "Regression Output for Question 4.4"}
+```
+
+1. **Plot a graph of the estimated effect of experience on wage.**
+
+```{r Question4-4-2, echo = F, fig.cap = "Estimated Effect of Experience on Wages"}
+```
+
+2. **What is the estimated effect of experience on wage when experience is 10 years?**
+
+The estimated effect of experience at 10 years on wages is 10 $\cdot$ `r round(coeftest(model3, vcovHC)[3], 3)` + 10^2 $\cdot$ `r round(coeftest(model3, vcovHC)[4],3)` = `r round(10 * coeftest(model3, vcovHC)[3] + 10**2*coeftest(model3, vcovHC)[4], 3)`
+
+\pagebreak
+
+## Question 4.5 {#question45}
+
+**Regress `logWage` on education, experience, `experienceSquare`, `raceColor`, `dad_education`, `mom_education`, rural, city.**
+
+```{r Question4-5-1, results = 'asis', echo = F, fig.cap = "Regression Output for Question 4.5"}
+```
+
+1. **What are the number of observations used in this regression? Are missing values a problem? Analyze the missing values, if any, and see if there is any discernible pattern with wage, education, experience, and raceColor.**
+
+There are 723 observations in the regression. A comparison of the original data and the observations in the regression reveals that the missing observations tend to have lower wages and education and are less likely to live in the city. The missing observations have more experience, and are more likely to be non-white and live in rural areas. 
+
+```{r Question4-5-2, results = 'asis', echo = F, fig.cap="Summary Statistics for Missing Observations"}
+```
+
+2. **Do you just want to "throw away" these observations?**
+
+The clear pattern of missing values representing more rural, non-white observations with lower education indicates that these values should not simply be discarded from the model. In order to accurately assess the effect of covariates these values are important for the regression. 
+
+3. **How about blindly replace all of the missing values with the average of the observed values of the corresponding variable? Rerun the original regression using all of the observations?**
+
+```{r Question4-5-3, results = 'asis', echo = c(1:5), fig.cap= "Regression Output for Mean Imputation"}
+```
+
+4. **How about regress the variable(s) with missing values on education, experience, and raceColor, and use this regression(s) to predict (i.e., "impute") the missing values and then rerun the original regression using all of the observations?**
+
+```{r Question4-5-4, results = 'asis', echo = c(1:7), fig.cap= "Regression Output for Value Imputation"}
+```
+
+\pagebreak
+
+5. **Compare the results of all of these regressions. Which one, if at all, would you prefer?**
+
+```{r Question4-5-5, results = 'asis', echo = F, fig.cap= "Comparing Regression Model with Imputed Models"}
+```
+
+Comparing the regression results, it's worth noting that the magnitude and significance of the coefficients are broadly similar. However, given that the values that we imputed are for covariates that are neither statistically nor practically significant, I would prefer a model that used all of the observations and did not include the covariates for parent's education. 
+
+
+## Question 4.6
+
+1. **Consider using $\mathbf{z_1}$ as the instrumental variable (IV) for education. What assumptions are needed on $\mathbf{z_1}$ and the error term (call it, $\mathbf{u}$)?**
+
+Formally, we need to assume that the instrumental variable is uncorrelated with the error term. Ie.
+
+$$ Cov(z_{1j}, u) = 0 \ \forall j=1,2,\dots,k $$
+
+2. **Suppose $\mathbf{z_1}$ is an indicator representing whether or not an individual lives in an area in which there was a recent policy change to promote the importance of education. Could $\mathbf{z_1}$ be correlated with other unobservables captured in the error term?**
+
+Yes. Living in an area with recent education policy changes could correlate to a number of variables that relate to the earnings in that area, such as a person's trust in educational and governmental institutions, or the willingness of people to pay taxes to support education spending. As with most instrumental variables, the assumption that it is truly uncorrelated with the error term can always be questioned, although it may represent an improvement in estimating coefficients over straightforward OLS.  
+
+3. **Using the same specification as that in [Question 4.5](#question45), estimate the equation by 2SLS, using both $\mathbf{z_1}$ and $\mathbf{z_2}$ as instrument variables. Interpret the results. How does the coefficient estimate on education change?**
+
+```{r Question4-6-1, results = 'asis', echo = c(1:4), fig.cap = "First Stage Regression Output"}
+```
+
+
+Note that $z_1$ is not correlated with education, and is thus not an appropriate instrumental variable to estimate the effect of education on wages. 
+
+\pagebreak
+
+```{r Question4-6-3, results = 'asis', echo = F, fig.cap = "Second Stage Regression Output"}
+```
+
+
+The results of the regression show that the magnitude of the covariate coefficients is similar using the instrumental variable approach. The coefficient for education has dramatically decreased and is no longer statistically significant. 
+
+
+**********
+
+\pagebreak
+
+# Question 5: CLM 2
+
+**The dataset, `wealthy candidates.csv`, contains candidate level electoral data from a developing country. Politically, each region (which is a subset of the country) is divided in to smaller electoral districts where the candidate with the most votes wins the seat. This dataset has data on the financial wealth and electoral performance (voteshare) of electoral candidates. We are interested in understanding whether or not wealth is an electoral advantage. In other words, do wealthy candidates fare better in elections than their less wealthy peers?**
+
+1. **Begin with a parsimonious, yet appropriate, specification. Why did you choose this model? Are your results statistically significant? Based on these results, how would you answer the research question? Is there a linear relationship between wealth and electoral performance?**
+
+In order to decide on a parsimonious model and discover any potential issues with data quality or variable distributions, we will first explore summary statistics and conduct a univariate analysis. 
+
+```{r Question5-1-1, results = 'asis', echo = F}
+```
+
+\pagebreak
+
+```{r Question5-1-2, echo = F, fig.width = 8, fig.height = 6, fig.cap = "Histogram of Urban, Literacy, Voteshar, and Wealth Variables"}
+```
+
+```{r Question5-1-3, echo = F, fig.cap="Bar Plot of Wealth and No Wealth"}
+```
+
+```{r Question5-1-4, echo = F, fig.cap="Bar Plot of Region"}
+```
+
+```{r Question5-1-5, echo = F, fig.width = 5, fig.cap="Histogram of log(Wealth) Among Those With Wealth"}
+```
+
+```{r Question5-1-6, echo = F, fig.width = 8, fig.height = 6, fig.cap= "Scatterplots of Voteshare against Urban, Literacy, Absolute Wealth, and log(Absolute Wealth)"}
+```
+
+Examining the absolute_wealth and log(absolute_wealth) variables reveals that a large number of observations have the same value. It seems likely that this value codes for having zero absolute wealth. Because we interested in the effect of wealth on voteshare, it seems reasonable to look at this effect among those with wealth greater than zero. By creating a factor variable representing wealth greater than zero, the equation for our parsimonious model will be
+
+$$voteshare = \beta_0 + \beta_1 log(wealth) + \beta_2 hasWealth$$
+
+\pagebreak
+
+```{r Question5-1-7, results='asis', echo = F}
+```
+
+The parsimonious model reveals a very weak positive effect of wealth on voteshare. The effect is not of practical significance and suggests that there may not be a linear relationship between wealth and voteshare. 
+
+2. **A team-member suggests adding a quadratic term to your regression. Based on your prior model, is such an addition warranted? Add this term and interpret the results. Do wealthier candidates fare better in elections?**
+
+Theoretically, the addition of a quadratic seems questionable because it suggests there is a point at which the returns to wealth stop increasing. Even if the quadratic model resulted in an improvement in the R^2 value, it may be difficult to justify the inclusion of a quadratic term without a theoretical reason. 
+
+```{r Question5-1-8, results='asis', echo = F}
+```
+
+\pagebreak
+
+3. **Another team member suggests that it is important to take into account the fact that different regions have different electoral contexts. In particular, the relationship between candidate wealth and electoral performance might be different across states. Modify your model and report your results. Test the hypothesis that this addition is not needed.**
+
+First, we will look at how the variables of interest are distributed across regions. 
+
+```{r Question5-3-1, echo = F, fig.width = 6, fig.height = 5, fig.cap="Histograms of Wealth By Region"}
+```
+
+\pagebreak
+
+
+```{r Question5-3-2, echo = F, fig.width = 6, fig.height = 4, fig.cap="Histograms of Voteshare By Region"}
+```
+
+The histograms of wealth by region and voteshare by region do seem to reveal some genuine structural differences between the regions. The first region has much greater wealth inequality, with a large share of the observations having no wealth and greater average wealth among the wealthy than regions 2 and 3. The voteshare histogram for region one also suggests a difference in election structure, as voteshare percentages tend to be clustered between 15% and 40%, while regions two and three have relatively uniform voteshare distributions between 5% and 60%. 
+
+\pagebreak
+
+
+```{r Question5-3-3, echo = F, fig.width = 6, fig.height = 4, fig.cap="Scatterplots of Voteshare Against Wealth By Region"}
+```
+
+```{r Question5-3-4, echo = F, fig.width = 6, fig.height = 4, fig.cap="Scatterplots of Voteshare Against Having Wealth By Region"}
+```
+
+The scatter plots of voteshare against the wealth variables reveal that is all regions, there does not seem to be a strong linear relationship between wealth and voteshare. There seems to be a level of $log(wealth)$ around 10, below which there are few observations, but once that floor is cleared, there doesn't seem to be a strong relationship between additional wealth and additional voteshare. 
+
+\pagebreak
+
+
+```{r Question5-3-5, results='asis', echo = F}
+```
+
+```{r Question5-3-6, results='asis', echo = F}
+```
+
+The regression output shows that the model including regions accounts for a greater share of the overall variation than the parsimonious model, with the difference between the two models being practically and statistically significant (F(`r model_comp[2,3]`, `r model_comp[2,1]`) = `r round(model_comp[2,5],3)`, p < 0.001). This supports the notion that the structural differences in voteshare and wealth between the regions are important to take into account when estimating the effect of wealth on voteshare.  
+
+4. **Return to your parsimonious model. Do you think you have found a causal and unbiased estimate? Please state the conditions under which you would have an unbiased and causal estimates. Do these conditions hold?**
+
+In order for OLS to make unbiased estimates of the OLS parameters, 4 conditions must hold:
+
+1. The parameters have a linear relationship
+2. Observations are observed through random sampling
+3. There is no perfect collinearity among the independent variables
+4. There is zero conditional mean of the error term and zero correlation of the error with any of the independent variables
+
+And in order for our coefficients to represent causal effects, changes in the independent variable must not change the expected value of the error term. Ie.
+
+$$\frac{\partial u}{\partial x} = 0$$
+
+Two primary issues that lead me to conclude that we have not found a causal and unbiased estimate. The first is the lack of apparent linearity in the relationship between voteshare and wealth. This is supported by the low explanatory power of our model, as well as the scatter plot of wealth and voteshare that seems to imply non linear factors may be more important than linear. The second issue is that wealth is probably not exogenous, and is likely correlated with a host of measures that are contained in the error term. For example, having more money may be correlated with being a well-known public figure, which may influence voteshare. 
+
+
+
+5. **Someone proposes a difference in difference design. Please write the equation for such a model. Under what circumstances would this design yield a causal effect?**
+
+Supposing we had data collected at two different time periods, with $\lambda_t$ being an indicator for the fixed time effect, $a_i$ representing the time-fixed effect of being individual i, and $u_{it}$ representing the time-variable portion of the error term. Then our population model would look like: 
+
+$$ voteshare_{it} = \beta_0 + \lambda_t + \beta_{1}log(absolute\_wealth)_{it} + \beta_{2}hasWealth_{it} + a_{i} + u_{it} $$
+
+The first difference model would be obtained by subtracting the model at $t_2$ from $t_1$ and assuming parallel trends, ie that trends would have continued in the same way at $t_2$ as in $t_1$ in the absence of treatment.
+
+$$ \Delta voteshare_{i} = \lambda_t + \beta_{1} \Delta log(absolute\_wealth)_i + \beta_{2} \Delta hasWealth_{i} + \Delta u_{i}$$
+
+In order for the first difference model to be causal, changes in the difference in the independent variables must not change the expectation of changes in the error term. 
+
+$$\frac{\partial \Delta u}{\partial \Delta x} = 0$$
+
+
+
+**********
+
+\pagebreak
+
+# Question 6: CLM 3
+
+**Your analytics team has been tasked with analyzing aggregate revenue, cost and sales data, which have been provided to you in the R workspace/data frame `retailSales.Rdata`.**
+
+**Your task is two fold. First, your team is to develop a model for predicting (forecasting) revenues. Part of the model development documentation is a backtesting exercise where you train your model using data from the first two years and evaluate the model's forecasts using the last two years of data.**
+
+**Second, management is equally interested in understanding variables that might affect revenues in support of management adjustments to operations and revenue forecasts. You are also to identify factors that affect revenues, and discuss how useful management's planned revenue is for forecasting revenues.**
+
+**Your analysis should address the following:**
+
++ **Exploratory Data Analysis: focus on bivariate and multivariate relationships.**
+
++ **Be sure to assess conditions and identify unusual observations.**
+
+First we explore the whole dataset.
+
+```{r Question6-1, echo = -c(1:2)}
+```
+
+The dataset contains `r frmt(dim(data)[1], 0)` observations of `r dim(data)[2]` variables. `r sum(sapply(data, is.factor))` of them are categorical (``r paste(names(data)[sapply(data, is.factor)], collapse=", ")``), and `Year` should also be considered as categorical, since there are data from only `r max(data$Year) - min(data$Year) + 1` years (from `r min(data$Year)` to `r max(data$Year)`).
+
+```{r Question6-2}
+```
+
+We also notice (from the output of `summary`) that some of the variables (all of them numerical) has a high number of `NA`s, the same in all cases (`r sum(is.na(data$Revenue))`, i.e., $`r frmt(sum(is.na(data$Revenue))/dim(data)[1]*100, 2)`\%$ of the total number of observations). Do the `NA`s appear in the same observations for all those variables? Yes, they do.
+
+```{r Question6-3}
+```
+
+And the amount of `NA`s per category is roughly the same for all categorical values (or at least there are non-missing data for all categories; below we just show the percentage per category for three of the numerical variables).
+
+```{r Question6-4, echo = c(1:3)}
+```
+
+So we can ommit all those missing observations (reducing our sample size to `r dim(data)[1] - sum(is.na(data$Revenue))`), and continue with a further analysis of the numerical variables:
+
+```{r Question6-5}
+```
+
+All numerical variables are right-skewed, with long right tails (i.e., with several observations more than 2 standard deviations far from the mean), especially the ones corresponding to aggregate---non-unit---results.
+
+```{r Question6-6, echo = FALSE, fig.width = 6, fig.height = 4.5, fig.cap = "Histogram of all non-categorical variables in the dataset"}
+```
+
+Below we show the correlation matrix of the numerical variables, as well as two different representations of the scatterplot matrix (where we've used a sample of the data of size 500 because the plotting functions consume a lot of resources; that's why the correlations shown in the second Figure, only approximate, differ from the ones shown right below). As we might have expected, the correlations between `Revenue`, `Planned.revenue`, `Product.cost`, and `Gross.profit` (i.e., the aggregate values), as well as those between `Unit.cost`, `Unit.price`, and `Unit.sale.price` (i.e., the values per unit), are positive and very high. `Quantity` is negatively correlated with the unitary variables (but that correlation is negligible in absolute value), and is moderately correlated ($\rho \simeq 0.5$) with the aggregate values.
+
+```{r Question6-7, echo = 1, fig.width = 6, fig.height = 6, fig.cap = "Scatterplot matrix of a sample of the dataset"}
+```
+
+```{r Question6-8, echo = FALSE, fig.width = 6, fig.height = 6, fig.cap = "Scatterplot matrix of a sample of the dataset (with correlations)"}
+```
+
+\pagebreak
+
+  After our EDA, we can divide the dataset into two separate ones, to train and evaluate the model. Now we can convert `Year` back to a numerical variable (subtracting 2004 so the baseline is 0; that will make the intercept more intuitive when including `Year` in the regression model).
+
+```{r Question6-9}
+```
+
+Not all products appear in both periods so some re-factoring is needed:
+
+```{r Question6-10}
+```
+
+There are some variables that are calculated from `Revenue` (or vice versa) so including them in any regression model would lead to a perfect fit. In particular, `Gross.profit` = `Revenue` - `Product.cost`. And `Revenue` should be equal to `Unit.sale.price` times `Quantity`, though this is not always the case, and there are differences in many cases ($`r frmt(100*sum(data$Unit.sale.price * data$Quantity != data$Revenue) / dim(data)[1], 1)` \%$ of the total number of observations).
+
+```{r Question6-11}
+```
+
+So `Revenue` and `Product.cost` should definitely not be included in the regression model, but `Unit.sale.price` and `Quantity` might. More generally, the attempt to predict revenue using the raw inputs like cost and price will tend to overfit and generalize poorly because of issues with multicolinearity and endogeneity. We will start with an approach that uses the more descriptive variables in an attempt to capture more of the non endogenous variation of the model. 
+
+First we will examine the correlations of $log(Revenue)$ with the numeric variables
+```{r Question6-12}
+```
+
+Then we will explore the one factor models, and use the AIC to select further variables. 
+```{r Question6-13,  echo = c(1:15)}
+```
+
+Next we will consider using an interaction term between $Order Method$ and $Retailer Country$
+
+\pagebreak
+
+```{r Question6-14,  echo = F, fig.width = 8, fig.height = 10}
+```
+
+
++ **Explain what interaction terms in your model mean in context supported by data visualizations.**
+
+The graph suggests that there are significant differences in ordering habits between countries. For example, the coefficient for WebXFrance is 0.629. This means that the expected log(Revenue) for for web orders in France is an additional .62 larger than the coefficient for web orders, other variables held constant. From a forecasting perspective,the additional effect of order type by country may improve accuracy when predicting revenue.
+
+
+```{r Question6-15, echo=c(1:6)}
+```
+
+
+Looking at the regression output for the model with interaction effects, we see that the issue of multicolinearity is causing many parameters not to be estimated. This suggests that our model may be overfit to our data at this point, and would not be suitable for prediction. 
+
+
+Using our 3 factor model, we will estimate revenues for the following two years of data. 
+
+```{r Question6-16, echo=c(1:3)}
+```
+
+
+
++ **Is the change in the average revenue different from 95 cents when the planned revenue increases by $1?**
+
+As shown below, the change in the average revenue is significantly different from $0.95 when the revenue increases by $1 (while the *F* statistic of the exact value, which is quite close to $0.95, has a *p* value equal to 1):
+
+```{r Question6-17, echo=c(1:7)}
+```
+
++ **Give two reasons why the OLS model coefficients may be biased and/or not consistent, be specific.**
+
+The first reason that we likely have inconsistent coefficients in this case is the multicolinearity among the variables. Because the price, cost, profit, and quantity variables are all related to and determined by one another, it is not possible to constistently estimate their coefficients. We also likely have biased coefficients because the variables we are interested in are endogenous. For example, planned revenue is almost completely determined in terms of previous revenue values, and so attempting to make a causal interpretation of the effect of changes in planned revenue on revenue is incorrect. 
+
++ **Propose (but do not actually implement) a plan for an IV approach to improve your forecasting model.**
+
+To attempt to estimate an instrumental variables model, we would need to find an exogenous variable that is correlated with revenue. Since the dataset is at the level of products, we could perhaps find a substitute product for each product and measure its price. Assuming the price of a good and its substitute are correlated, we could then conduct a two step regression, first regressing unit price on the price of a substitute, and then regressing revenue on the fitted values from the first regression. This approach would give us a better approximation of the exogenous effect of unit price on revenue. Similar approaches could be used for other variables using different instrumental variables. 
+
+**********
