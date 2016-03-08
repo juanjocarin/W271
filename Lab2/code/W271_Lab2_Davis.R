@@ -510,3 +510,101 @@ stargazer(model_comp, header = F, summary=F, title = "Model Comparison")
 ## @knitr Question
 # QUESTION 6 --------------------------------------------------------------
 load("retailSales.Rdata")
+data <- retailSales; rm(retailSales)
+data <- data %>% na.omit()
+data <- data %>% 
+  mutate(Year = as.factor(Year))
+data <- data %>% mutate(Year = as.numeric(levels(Year))[Year] - 2004)
+data$logRev <- log(data$Revenue + 1)
+train <- data %>% filter(Year <= 1)
+test <- data %>% filter(Year > 1)
+
+
+train$Product <- factor(train$Product)
+test$Product <- factor(test$Product)
+train_levels <- levels(train$Product)
+test_levels <- levels(test$Product)
+drop_levels <- setdiff(train_levels, test_levels)
+train <- train[!train$Product %in% drop_levels,]
+test <- test[!test$Product %in% drop_levels,]
+train$Product <- factor(train$Product)
+test$Product <- factor(test$Product)
+train_levels <- levels(train$Product)
+test_levels <- levels(test$Product)
+drop_levels <- setdiff(test_levels, train_levels)
+train <- train[!train$Product %in% drop_levels,]
+test <- test[!test$Product %in% drop_levels,]
+train$Product <- factor(train$Product)
+test$Product <- factor(test$Product)
+
+
+
+train_num <- train %>% 
+  select(which(names(train) %in% names(train)[!sapply(train, is.factor)]))
+cor(train_num$Revenue, train_num)
+
+
+params2 <- c("Product")
+model2 <- lm(as.formula(paste("logRev", paste(params2, sep = "", 
+                                               collapse = " + "), 
+                              sep = " ~ ")), train)
+summary.lm(model2)
+params3 <- c("Product.line")
+model3 <- lm(as.formula(paste("logRev", paste(params3, sep = "", 
+                                               collapse = " + "), 
+                              sep = " ~ ")), train)
+summary.lm(model3)
+params4 <- c("Order.method.type")
+model4 <- lm(as.formula(paste("logRev", paste(params4, sep = "", 
+                                               collapse = " + "), 
+                              sep = " ~ ")), train)
+summary.lm(model4)
+params5 <- c("Retailer.country")
+model5 <- lm(as.formula(paste("logRev", paste(params5, sep = "", 
+                                               collapse = " + "), 
+                              sep = " ~ ")), train)
+summary.lm(model5)
+params6 <- c("Product.type")
+model6 <- lm(as.formula(paste("logRev", paste(params6, sep = "", 
+                                               collapse = " + "), 
+                              sep = " ~ ")), train)
+summary.lm(model6)
+
+params7 <- c("Product", "Order.method.type")
+model7 <- lm(as.formula(paste("logRev", paste(params7, sep = "", 
+                                               collapse = " + "), 
+                              sep = " ~ ")), train)
+params8 <- c("Product", "Order.method.type", "Retailer.country")
+model8 <- lm(as.formula(paste("logRev", paste(params8, sep = "", 
+                                              collapse = " + "), 
+                              sep = " ~ ")), train)
+summary.lm(model8)
+params9 <- c("Product", "Order.method.type", "Retailer.country")
+params_plus_interaction <- c(params9, 'Order.method.type*Retailer.country')
+vars_of_interest <- c('logRev', params9)
+model9 <- lm(as.formula(paste(vars_of_interest[!vars_of_interest %in% params], 
+                              paste(params_plus_interaction, sep = "", 
+                                    collapse = " + "), sep = " ~ ")), train)
+summary.lm(model9)
+
+params10 <- c("Product", "Order.method.type", "Retailer.country", "Unit.cost")
+params_plus_interaction2 <- c(params10, 'Order.method.type*Retailer.country')
+vars_of_interest <- c('logRev', params10)
+model10 <- lm(as.formula(paste(vars_of_interest[!vars_of_interest %in% params], 
+                              paste(params_plus_interaction2, sep = "", 
+                                    collapse = " + "), sep = " ~ ")), train)
+summary.lm(model10)
+
+AIC(model2)
+AIC(model7)
+AIC(model8)
+AIC(model9)
+
+
+predictions = predict.lm(model9, test[,params9])
+test$predictions = predictions
+predictions2 = predict.lm(model8, test[,params8])
+test$predictions2 <- predictions2
+
+summary.lm(lm(logRev~predictions, test))
+summary.lm(lm(logRev~predictions2, test))

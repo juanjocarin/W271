@@ -68,13 +68,13 @@ We'll make use of some simulations through this Question to confirm the results.
 
 \small
 
-> ```{r Question1-1-1, echo = -c(1:2), fig.cap = "Histogram and approximate pdf of $X$ and $Y$"}
-> ```
+```{r Question1-1-1, echo = -c(1:2), fig.cap = "Histogram and approximate pdf of $X$ and $Y$"}
+```
 
 \pagebreak
 
-> ```{r Question1-1-2, echo = TRUE, fig.cap = "Histogram and approximate pdf of $Y$ conditional on $X$ for a given value of $X$ (0.2)"}
-> ```
+```{r Question1-1-2, echo = TRUE, fig.cap = "Histogram and approximate pdf of $Y$ conditional on $X$ for a given value of $X$ (0.2)"}
+```
 
 \normalsize
 
@@ -101,8 +101,8 @@ Simulations:
 
 \small
 
-> ```{r Question1-3, echo = TRUE, fig.width = 6, fig.height = 4.5, fig.cap = "Approximate joint pdf of $X$ and $Y$"}
-> ```
+```{r Question1-3, echo = TRUE, fig.width = 6, fig.height = 4.5, fig.cap = "Approximate joint pdf of $X$ and $Y$"}
+```
 
 \normalsize
 
@@ -119,8 +119,8 @@ This result confirms what the shape of $f_Y(y)$ in Figure 1 suggested.
 
 \small
 
-> ```{r Question1-4, echo = TRUE, fig.cap = "Approximate pdf of $Y$ conditional on $X$ for two values of $X$"}
-> ```
+```{r Question1-4, echo = TRUE, fig.cap = "Approximate pdf of $Y$ conditional on $X$ for two values of $X$"}
+```
 
 \normalsize
 
@@ -136,8 +136,8 @@ $$\begin{aligned}\mathbf{\color{red}{E(X|Y=1/2)}} &= \displaystyle\int_\mathbb{X
 
 \small
 
-> ```{r Question1-5, echo = TRUE}
-> ```
+```{r Question1-5, echo = TRUE}
+```
 
 \normalsize
 
@@ -285,8 +285,8 @@ $$\Pr\left(|\hat{\theta}_{ml} - \theta|>\varepsilon\right) = \Pr\left(\cfrac{\th
 
 \small
 
-> ```{r Question3, echo = c(2:11), fig.cap = "Trend of the MLE of $\\theta$ depending on the sample size"}
-> ```
+```{r Question3, echo = c(2:11), fig.cap = "Trend of the MLE of $\\theta$ depending on the sample size"}
+```
 
 \normalsize
 
@@ -575,7 +575,7 @@ And in order for our coefficients to represent causal effects, changes in the in
 
 $$\frac{\partial u}{\partial x} = 0$$
 
-Two primary issues that lead me to conclude that we have not found a causal and unbiased estimate. The first is the lack of apparent linearity in the relationship between voteshare and wealth. This is supported by the low explanatory power of our model, as well as the scatter plot of wealth and voteshare that seems to imply non linear factors may be more important than linear. The second issue is that wealth is probably not exogenous, but are in fact correlated with a host of measures that are contained in the error term. For example, having more money may be correlated with being a well-known public figure, which may influence voteshare. 
+Two primary issues that lead me to conclude that we have not found a causal and unbiased estimate. The first is the lack of apparent linearity in the relationship between voteshare and wealth. This is supported by the low explanatory power of our model, as well as the scatter plot of wealth and voteshare that seems to imply non linear factors may be more important than linear. The second issue is that wealth is probably not exogenous, and is likely correlated with a host of measures that are contained in the error term. For example, having more money may be correlated with being a well-known public figure, which may influence voteshare. 
 
 
 
@@ -615,86 +615,109 @@ $$\frac{\partial \Delta u}{\partial \Delta x} = 0$$
 
 First we explore the whole dataset.
 
-> ```{r Question6-1, echo = -c(1:2)}
-> ```
+```{r Question6-1, echo = -c(1:2)}
+```
 
 The dataset contains `r frmt(dim(data)[1], 0)` observations of `r dim(data)[2]` variables. `r sum(sapply(data, is.factor))` of them are categorical (``r paste(names(data)[sapply(data, is.factor)], collapse=", ")``), and `Year` should also be considered as categorical, since there are data from only `r max(data$Year) - min(data$Year) + 1` years (from `r min(data$Year)` to `r max(data$Year)`).
 
-> ```{r Question6-2}
-> ```
+```{r Question6-2}
+```
 
 We also notice (from the output of `summary`) that some of the variables (all of them numerical) has a high number of `NA`s, the same in all cases (`r sum(is.na(data$Revenue))`, i.e., $`r frmt(sum(is.na(data$Revenue))/dim(data)[1]*100, 2)`\%$ of the total number of observations). Do the `NA`s appear in the same observations for all those variables? Yes, they do.
 
-> ```{r Question6-3}
-> ```
+```{r Question6-3}
+```
 
 And the amount of `NA`s per category is roughly the same for all categorical values (or at least there are non-missing data for all categories; below we just show the percentage per category for three of the numerical variables).
 
-> ```{r Question6-4, echo = c(1:3)}
-> ```
+```{r Question6-4, echo = c(1:3)}
+```
 
 So we can ommit all those missing observations (reducing our sample size to `r dim(data)[1] - sum(is.na(data$Revenue))`), and continue with a further analysis of the numerical variables:
 
-> ```{r Question6-5}
-> ```
+```{r Question6-5}
+```
 
 All numerical variables are right-skewed, with long right tails (i.e., with several observations more than 2 standard deviations far from the mean), especially the ones corresponding to aggregate---non-unit---results.
 
-> ```{r Question6-6, echo = FALSE, fig.width = 6, fig.height = 4.5, fig.cap = "Histogram of all non-categorical variables in the dataset"}
-> ```
+```{r Question6-6, echo = FALSE, fig.width = 6, fig.height = 4.5, fig.cap = "Histogram of all non-categorical variables in the dataset"}
+```
 
 Below we show the correlation matrix of the numerical variables, as well as two different representations of the scatterplot matrix (where we've used a sample of the data of size 500 because the plotting functions consume a lot of resources; that's why the correlations shown in the second Figure, only approximate, differ from the ones shown right below). As we might have expected, the correlations between `Revenue`, `Planned.revenue`, `Product.cost`, and `Gross.profit` (i.e., the aggregate values), as well as those between `Unit.cost`, `Unit.price`, and `Unit.sale.price` (i.e., the values per unit), are positive and very high. `Quantity` is negatively correlated with the unitary variables (but that correlation is negligible in absolute value), and is moderately correlated ($\rho \simeq 0.5$) with the aggregate values.
 
-> ```{r Question6-7, echo = 1, fig.width = 6, fig.height = 6, fig.cap = "Scatterplot matrix of a sample of the dataset"}
-> ```
+```{r Question6-7, echo = 1, fig.width = 6, fig.height = 6, fig.cap = "Scatterplot matrix of a sample of the dataset"}
+```
 
-> ```{r Question6-8, echo = FALSE, fig.width = 6, fig.height = 6, fig.cap = "Scatterplot matrix of a sample of the dataset (with correlations)"}
-> ```
+```{r Question6-8, echo = FALSE, fig.width = 6, fig.height = 6, fig.cap = "Scatterplot matrix of a sample of the dataset (with correlations)"}
+```
 
 \pagebreak
 
   After our EDA, we can divide the dataset into two separate ones, to train and evaluate the model. Now we can convert `Year` back to a numerical variable (subtracting 2004 so the baseline is 0; that will make the intercept more intuitive when including `Year` in the regression model).
 
-> ```{r Question6-9}
-> ```
+```{r Question6-9}
+```
 
 Not all products appear in both periods so some re-factoring is needed:
 
-> ```{r Question6-10}
-> ```
+```{r Question6-10}
+```
 
 There are some variables that are calculated from `Revenue` (or vice versa) so including them in any regression model would lead to a perfect fit. In particular, `Gross.profit` = `Revenue` - `Product.cost`. And `Revenue` should be equal to `Unit.sale.price` times `Quantity`, though this is not always the case, and there are differences in many cases ($`r frmt(100*sum(data$Unit.sale.price * data$Quantity != data$Revenue) / dim(data)[1], 1)` \%$ of the total number of observations).
 
-> ```{r Question6-11}
-> ```
+```{r Question6-11}
+```
 
-So `Revenue` and `Product.cost` should definitely not be included in the regression model, but `Unit.sale.price` and `Quantity` might.
+So `Revenue` and `Product.cost` should definitely not be included in the regression model, but `Unit.sale.price` and `Quantity` might. More generally, the attempt to predict revenue using the raw inputs like cost and price will tend to overfit and generalize poorly because of issues with multicolinearity and endogeneity. We will start with an approach that uses the more descriptive variables in an attempt to capture more of the non endogenous variation of the model. 
 
-Let's start with the simplest model:
+First we will examine the correlations of $log(Revenue)$ with the numeric variables
+```{r Question6-12}
+```
 
-> ```{r Question6-12, echo = c(1:5), fig.cap = "Planned Revenue vs. Revenue (observed and predicted) in 2006 and 2007"}
-> ```
+Then we will explore the one factor models, and use the AIC to select further variables. 
+```{r Question6-13,  echo = c(1:15)}
+```
 
-We'll use the RMSE to compare different models:
+Next we will consider using an interaction term between $Order Method$ and $Retailer Country$
 
-> ```{r Question6-13}
-> ```
+\pagebreak
+
+```{r Question6-14,  echo = F, fig.width = 8, fig.height = 10}
+```
+
+
++ **Explain what interaction terms in your model mean in context supported by data visualizations.**
+
+The graph suggests that there are significant differences in ordering habits between countries. For example, the coefficient for WebXFrance is 0.629. This means that the expected log(Revenue) for for web orders in France is an additional .62 larger than the coefficient for web orders, other variables held constant. From a forecasting perspective,the additional effect of order type by country may improve accuracy when predicting revenue.
+
+
+```{r Question6-15, echo=c(1:6)}
+```
+
+
+Looking at the regression output for the model with interaction effects, we see that the issue of multicolinearity is causing many parameters not to be estimated. This suggests that our model may be overfit to our data at this point, and would not be suitable for prediction. 
+
+
+Using our 3 factor model, we will estimate revenues for the following two years of data. 
+
+```{r Question6-16, echo=c(1:3)}
+```
+
+
 
 + **Is the change in the average revenue different from 95 cents when the planned revenue increases by $1?**
 
 As shown below, the change in the average revenue is significantly different from $0.95 when the revenue increases by $1 (while the *F* statistic of the exact value, which is quite close to $0.95, has a *p* value equal to 1):
 
-> ```{r Question6-14}
-> ```
-
-> ```{r Question6-15, echo = c(1:5), fig.cap = "Planned Revenue vs. Revenue (observed and predicted) in 2006 and 2007"}
-> ```
-
-+ **Explain what interaction terms in your model mean in context supported by data visualizations.**
+```{r Question6-17, echo=c(1:7)}
+```
 
 + **Give two reasons why the OLS model coefficients may be biased and/or not consistent, be specific.**
 
+The first reason that we likely have inconsistent coefficients in this case is the multicolinearity among the variables. Because the price, cost, profit, and quantity variables are all related to and determined by one another, it is not possible to constistently estimate their coefficients. We also likely have biased coefficients because the variables we are interested in are endogenous. For example, planned revenue is almost completely determined in terms of previous revenue values, and so attempting to make a causal interpretation of the effect of changes in planned revenue on revenue is incorrect. 
+
 + **Propose (but do not actually implement) a plan for an IV approach to improve your forecasting model.**
 
+To attempt to estimate an instrumental variables model, we would need to find an exogenous variable that is correlated with revenue. Since the dataset is at the level of products, we could perhaps find a substitute product for each product and measure its price. Assuming the price of a good and its substitute are correlated, we could then conduct a two step regression, first regressing unit price on the price of a substitute, and then regressing revenue on the fitted values from the first regression. This approach would give us a better approximation of the exogenous effect of unit price on revenue. Similar approaches could be used for other variables using different instrumental variables. 
 
 **********
