@@ -1,0 +1,223 @@
+---
+title: "**W271**-2 -- Spring 2016 -- **HW 5**"
+author: "***Juanjo Carin, Kevin Davis, Ashley Levato, Minghu Song***"
+date: "*March 9, 2016*"
+output:
+   pdf_document:
+     fig_caption: yes
+     toc: yes
+numbersections: false
+geometry: margin=1in
+options: width=30
+fontsize: 10pt
+linkcolor: blue
+header-includes:
+- \usepackage{fancyhdr}
+- \pagestyle{fancy}
+- \fancyhead[LO,LE]{Carin, Davis, Levato, Song}
+- \fancyhead[CE,CO]{W271 -- HW 5 -- \leftmark}
+- \fancyhead[RE,RO]{\rightmark}
+- \fancyfoot[LO,LE]{UC Berkeley -- MIDS}
+- \fancyfoot[CO,CE]{Spring semester 2016}
+- \fancyfoot[RE,RO]{\thepage}
+- \renewcommand{\headrulewidth}{0.5pt}
+- \renewcommand{\footrulewidth}{0.5pt}
+---
+
+**********
+
+\pagebreak
+
+# Exercises
+
+```{r, echo = FALSE}
+require(knitr, quietly = TRUE)
+read_chunk('code/W271_HW5_Carin-Davis-Levato-Song.R')
+opts_chunk$set(message = FALSE, warning = FALSE)
+opts_chunk$set(fig.width = 4, fig.height = 3)
+# Set path to data here (don't use setwd() inside a chunk!!!)
+# opts_knit$set(root.dir = './data')
+```
+
+```{r Libraries-Functions-Constants, echo = FALSE}
+```
+
+
+
+## Question 1
+
+1. **Install the library `"astsa"` using the function: `install.packages("astsa")`**
+
+```{r Question1-1, echo = -c(1:2)}
+```
+
+2. **Load the library: `library(astsa)`**
+
+```{r Question1-2, echo = TRUE}
+```
+
+3. **Use the function `str()` to see the information of a particular data series, such as `str(EQ5)` for the Seismic Trace of Earthquake number 5 series**
+
+Since we will have to plot and describe another two time series, we use `str()` for the three of them.
+
+```{r Question1-3, echo = -c(1:2)}
+```
+
+\pagebreak
+
+4. **Plot the time series plots and histograms of the following 3 series. Feel free to use the codes provided in the R scripts. Make sure that each of your graph has a title, the axis ticks are clear, the axes are well-labelled, and use color intelligently.**
+
+```{r Question1-4-1a, echo = FALSE, fig.cap = "Time series plot of seismic trace EQ5"}
+```
+
+```{r Question1-4-1b, echo = FALSE, fig.cap = "Histogram of amplitude of seismic trace"}
+```
+
+\pagebreak
+
+```{r Question1-4-2a, echo = FALSE, fig.cap = "Time series plot of pneumonia and influenza deaths per 10,000 people in the U.S. from 1968 to 1979"}
+```
+
+```{r Question1-4-2b, echo = FALSE, fig.cap = "Histogram of pneumonia and influenza deaths per 10,000 people in the U.S. from 1968 to 1979"}
+```
+
+\pagebreak
+
+```{r Question1-4-3a, echo = FALSE, fig.cap = "Time series plot of weekly gas prices (in cents per gallon) from 2000 to mid-2010"}
+```
+
+```{r Question1-4-3b, echo = FALSE, fig.cap = "Histogram of weekly gas prices (in cents per gallon) from 2000 to mid-2010"}
+```
+
+\pagebreak
+
+5. **Write a few sentences to describe each of the series.**
+
+  + **EQ5**
+
+> According to the [package documentation](https://cran.r-project.org/web/packages/astsa/astsa.pdf), this time series corresponds to the *Seismic Trace of Earthquake number 5. Seismic trace of an earthquake [two phases or arrivals along the surface, the primary wave (t = 1, . . . , 1024) and the shear wave (t = 1025, . . . , 2048)] recorded at a seismic station.* Figure 1 shows that the amplitude of the primary phase is smaller than the amplitude of the shear phase, both have means around zero, and the shear phase seems to be periodic. Figure 2 shows that the whole dataset has a distribution close to normal.
+
+  + **flu**
+
+> According to the [package documentation](https://cran.r-project.org/web/packages/astsa/astsa.pdf), this time series corresponds to the *Monthly pneumonia and influenza deaths in the U.S., 1968 to 1978. Monthly pneumonia and influenza deaths per 10,000 people in the United States for 11 years, 1968 to 1978.* Figure 3 shows a seasonal pattern: most deaths occur at the beginning of the year (January or February, depending on the year), then the pneumonia and influenza death rate decreases gradually unitl the end of Autumn. Figure 4 shows that the distribution of the time series is right-skewed 
+
+  + **gas**
+
+> According to the [package documentation](https://cran.r-project.org/web/packages/astsa/astsa.pdf), this time series corresponds to the *Gas Prices. New York Harbor conventional regular gasoline weekly spot price FOB (in cents per gallon) from 2000 to mid-2010.* Figure 5 shows a seasonal trend (with a period of about 6 months) and an increasing trend, with the exception of a significant drop in gas prices in the last half of 2008. Figure 6 shows that the distribution of gas prices is multimodal (two or three modes can be distinguished), with a long right tail.
+
+
+
+**********
+
+\pagebreak
+
+## Question 2
+
+**Describe 3 examples you have used in your work or encounter in real life. Ideally, you can even load at least one of these time series, plot it, and the write a few statements to describe its characteristics.**
+
+1. Biotech Stocks: In the first example, we pull out the stock data (from August 2010 to August 2015) of some biotech companies from yahoo financial web links. Biogen's closing stock price is used as the example here. Starting from 2010, it started to gradually go up because of the promising clinical results of aducanumab for Alzheimer treatment in March, 2013. However, the stock began to drop in 2015 due to slowing sales of its multiple sclerosis drug, Tecfidera.  
+
+\small
+
+> ```{r Question2-1, echo = c(5:26), results = 'hide', fig.cap = "Stock price of some biotech companies from mid 2010 to mid 2015"}
+> ```
+
+\normalsize
+
+\pagebreak
+
+2. **Daily Averaged Tempreture  at JFK airport**: daily averaged temperature recorded at JFK airport weather station. The data is directly pulled out through the `WeatherData` package. Similar to stock price, it is also non-regular time series data. But the temperature at a centain time point would be highly relevant to the tempreture of previous times.
+
+\small
+
+> ```{r Question2-2, echo = c(1:5), results = 'hide', fig.cap = "Daily average temperature at JFK airport in 2015"}
+> ```
+
+\normalsize
+
+\pagebreak
+
+3. **Monthly Averaged Electricity Usage**: The 3rd example shows the monthly averaged electricity usage of my house between 2014 and 2015. This periodic series shows that summers, in general, tend to have lower monthly averaged electricity usage (<20KWh) than the other seasons, e.g. winter.  
+
+\small
+
+```{r Question2-3, echo = c(1:6), results = 'hide', fig.cap = "Monthly average electricity usage in 2014 and 2015"}
+```
+
+\normalsize
+
+**********
+
+\pagebreak
+
+
+
+## Question 3
+
+**Simulate a white noise series with 1000 random draws and plot (1) a time series plot and (2) a histogram. The usual reqirements on graphics (described) in Question 1) applied.**
+
+```{r Question3-1, echo = c(5:6), fig.cap = 'Plot of 1,000 random draws of a white noise series'}
+```
+
+```{r Question3-2, echo = FALSE, fig.cap = 'Histogram of 1,000 random draws of a white noise series'}
+```
+
+
+**********
+
+## Question 4
+
+**Simulate (with 1000 random draws) the following two zero-mean autoregressive model with order 1 (i.e. AR(1)) models:**
+
+$$\mathbf{y_t = 0.9y_{t1} + w}$$
+
+$$\mathbf{y_t = 0.2y_{t1} + w}$$
+
+**Plot a time plot for each of the simulated series. Graph a histogram for each of the simulated series. Write a few statements to compare the two series.**
+
+```{r Question4-1, echo = c(8:9), fig.cap = 'Plot of 1,000 observations of a simulation of an AR(1) model with coefficient 0.9'}
+```
+
+```{r Question4-2, echo = FALSE, fig.cap = 'Histogram of 1,000 observations of a simulation of an AR(1) model with coefficient 0.9'}
+```
+
+\pagebreak
+
+```{r Question4-3, echo = 1, fig.cap = 'Plot of 1,000 observations of a simulation of an AR(1) model with coefficient 0.2'}
+```
+
+\pagebreak
+
+```{r Question4-4, echo = FALSE, fig.cap = 'Histogram of 1,000 observations of a simulation of an AR(1) model with coefficient 0.2'}
+```
+
+**********
+
+
+
+\pagebreak
+
+## Question 5
+
+**Simulate (with 1000 random draws) the following 3 models:**
+
+1. **A deterministic linear (time) trend of the form: $y_t = 10 + 0.5t$**
+
+2. **Random walk without drift**
+
+3. **Random walk with drift = 0.5**
+
+**Plot a time plot for each of the simulated series. Graph a histogram for each of the simulated series. Write a few statements to compare the two series.**
+
+```{r Question5-1, echo = c(8:13), fig.width=6, fig.height=4.5, fig.cap = 'Time plot of the three simulated series'}
+```
+
+Since we have used the same white noise series to generate the last two of the three series, and the drift in the latter is equal to the slope of the first series, the random walk with drift is just the sum of the deterministic linear trend and the random walk without drift.
+
+```{r Question5-2, echo = c(8:13), fig.width=6, fig.height=4.5, fig.cap = 'Histogram of the three simulated series'}
+```
+
+```{r Question5-3, echo = c(8:13), fig.width=6, fig.height=4.5, fig.cap = 'Histogram plot of the three simulated series (same scale)'}
+```
+
+**********
