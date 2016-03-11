@@ -32,14 +32,14 @@ header-includes:
 
 ```{r, echo = FALSE}
 require(knitr, quietly = TRUE)
-read_chunk('code/W271_HW6_template.R')
+read_chunk('code/W271_HW6_AL.R')
 opts_chunk$set(message = FALSE, warning = FALSE)
 opts_chunk$set(fig.width = 4, fig.height = 3)
 # Set path to data here (don't use setwd() inside a chunk!!!)
 opts_knit$set(root.dir = './data')
 ```
 
-```{r Libraries-Functions-Constants, echo = FALSE, eval=FALSE}
+```{r Libraries-Functions-Constants, echo = FALSE}
 ```
 
 ## Exercise 1
@@ -79,20 +79,35 @@ Weak stationarity (also called second-order stationary) is when its mean and var
 
 a. **Generate a zero-drift random walk model using 500 simulation.**
 
+```{r Question2-1, echo = T}
+```
+
 ...
 
 b. **Provide the descriptive statistics of the simulated realizations. The descriptive statistics should include the mean, standard deviation, 25th, 50th, and 75th quantiles, minimum, and maximum.**
 
+```{r Question2-2, echo = T}
+```
+
 c. **Plot the time-series plot of the simulated realizations.**
+
+```{r Question2-3, echo = T}
+```
 
 ...
 
 d. **Plot the autocorrelation graph.**
 
+```{r Question2-4, echo = T}
+```
+
 ...
 
 e. **Plot the partial autocorrelation graph.**
 
+
+```{r Question2-5, echo = T}
+```
 ...
 
 **********
@@ -104,22 +119,33 @@ e. **Plot the partial autocorrelation graph.**
 
 a. **Generate arandom walk with drift model using 500 simulation, with the drift = 0.5.**
 
+
+```{r Question3-1, echo = T}
+```
 ...
 
 b. **Provide the descriptive statistics of the simulated realizations. The descriptive statistics should include the mean, standard deviation, 25th, 50th, and 75th quantiles, minimum, and maximum.**
 
+```{r Question3-2, echo = T}
+```
 ...
 
 c. **Plot the time-series plot of the simulated realizations.**
 
+```{r Question3-3, echo = T}
+```
 ...
 
 d. **Plot the autocorrelation graph.**
 
+```{r Question3-4, echo = T}
+```
 ...
 
 e. **Plot the partial autocorrelation graph.**
 
+```{r Question3-5, echo = T}
+```
 ...
 
 **********
