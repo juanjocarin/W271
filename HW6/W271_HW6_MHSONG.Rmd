@@ -212,7 +212,8 @@ f.
 
 >  1. **Generate two symmetric Moving Average Smoothers. Choose the number of moving average terms such that one of the smoothers is very smoother and the other one can trace through the dynamics of the series. Plot the smoothers and the original series in one graph.**
 
-...
+```{r Question4-6-1, echo = T, fig.align='center', fig.width = 6.5, fig.height = 5}
+```
 
 >  2. **Generate two regression smoothers, one being a cubic trend regression and the other being a periodic regression. Plot the smoothers and the original series in one graph.**
 
