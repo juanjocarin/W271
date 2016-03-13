@@ -32,7 +32,7 @@ header-includes:
 
 ```{r, echo = FALSE, warning = FALSE}
 require(knitr, quietly = TRUE)
-read_chunk('code/W271_HW6_template.R')
+read_chunk('code/W271_HW6_Carin.R')
 opts_chunk$set(message = FALSE, warning = FALSE)
 opts_chunk$set(fig.width = 4, fig.height = 3)
 # Set path to data here (don't use setwd() inside a chunk!!!)
@@ -61,23 +61,35 @@ b. **Define strict and weak statonarity**
 
 a. **Generate a zero-drift random walk model using 500 simulation.**
 
-...
+```{r Question2-a, echo = c(3:6)}
+```
+
 
 b. **Provide the descriptive statistics of the simulated realizations. The descriptive statistics should include the mean, standard deviation, 25th, 50th, and 75th quantiles, minimum, and maximum.**
 
+```{r Question2-b, echo = c(6:7)}
+```
+
+
 c. **Plot the time-series plot of the simulated realizations.**
 
-...
+See the last part of this Exercise in the following page.
+
 
 d. **Plot the autocorrelation graph.**
 
-...
+See the last part of this Exercise in the following page.
+
+
+\pagebreak
 
 e. **Plot the partial autocorrelation graph.**
 
-...
+```{r Question2-e, echo = FALSE, fig.width = 6, fig.height = 4.5, fig.cap = "Time-series plot, histogram, correlogram, and partial autocorrelogram of the 500 simulation of a zero-drift random walk"}
+```
 
 **********
+
 \pagebreak
 
 
@@ -86,23 +98,33 @@ e. **Plot the partial autocorrelation graph.**
 
 a. **Generate a random walk with drift model using 500 simulation, with the drift = 0.5.**
 
-...
+```{r Question3-a, echo = c(4:7)}
+```
+
 
 b. **Provide the descriptive statistics of the simulated realizations. The descriptive statistics should include the mean, standard deviation, 25th, 50th, and 75th quantiles, minimum, and maximum.**
 
-...
+```{r Question3-b, echo = c(6:7)}
+```
+
 
 c. **Plot the time-series plot of the simulated realizations.**
 
-...
+See the last part of this Exercise in the following page.
+
 
 d. **Plot the autocorrelation graph.**
 
-...
+See the last part of this Exercise in the following page.
+
+
+\pagebreak
 
 e. **Plot the partial autocorrelation graph.**
 
-...
+```{r Question3-e, echo = FALSE, fig.width = 6, fig.height = 4.5, fig.cap = "Time-series plot, histogram, correlogram, and partial autocorrelogram of the 500 simulation of a 0.5-drift random walk"}
+```
+
 
 **********
 
@@ -116,7 +138,9 @@ e. **Plot the partial autocorrelation graph.**
 
 a. **Load the data and examine the basic structure of the data using `str()`, `dim()`, `head()`, and `tail()` functions.**
 
-...
+```{r Question4-a, echo = -c(1:4)}
+```
+
 
 b. **Convert the variables `INJCJC` into a time series object `frequency=52, start=c(1990,1,1), end=c(2014,11,28)`. Examine the converted data series.**
 
