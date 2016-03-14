@@ -205,38 +205,39 @@ e.
 
 >  5. **Plot a 3x3 Scatterplot Matrix of correlation against lag values.**
 
-```{r Question4-5-5, echo = T, fig.align='center', fig.width = 9, fig.height = 7}
+```{r Question4-5-5, echo = T, fig.align='center', fig.width = 4.5, fig.height = 3.5}
 ```
 
 f.
-
 >  1. **Generate two symmetric Moving Average Smoothers. Choose the number of moving average terms such that one of the smoothers is very smoother and the other one can trace through the dynamics of the series. Plot the smoothers and the original series in one graph.**
 
-```{r Question4-6-1, echo = T, fig.align='center', fig.width = 6.5, fig.height = 5}
+```{r Question4-6-1, echo = FALSE, fig.align='center', fig.width = 5, fig.height = 4}
 ```
 
 >  2. **Generate two regression smoothers, one being a cubic trend regression and the other being a periodic regression. Plot the smoothers and the original series in one graph.**
 
-...
+
+```{r Question4-6-2, echo = FALSE, fig.align='center', fig.width = 5, fig.height = 4}
+```
 
 >  3. **Generate kernel smoothers. Choose the smoothing parametrs such that one of the smoothers is very smoother and the other one can trace through the dynamics of the series. Plot the smoothers and the original series in one graph.**
 
-...
+```{r Question4-6-3, echo = FALSE, fig.align='center', fig.width = 5, fig.height = 4}
+```
 
 >  4. **Generate two nearest neighborhood smoothers. Choose the smoothing parametrs such that one of the smoothers is very smoother and the other one can trace through the dynamics of the series. Plot the smoothers and the original series in one graph.**
 
-...
+```{r Question4-6-4, echo = FALSE, fig.align='center', fig.width = 5, fig.height = 4}
+```
 
 >  5. **Generate two LOWESS smoothers. Choose the smoothing parametrs such that one of the smoothers is very smoother and the other one can trace through the dynamics of the series. Plot the smoothers and the original series in one graph.**
 
-...
+```{r Question4-6-5, echo = FALSE, fig.align='center', fig.width = 5, fig.height = 4}
+```
 
 >  6. **Generate two spline smoothers. Choose the smoothing parametrs such that one of the smoothers is very smoother and the other one can trace through the dynamics of the series. Plot the smoothers and the original series in one graph.**
 
-...
-
-
-```{r Question5, echo = -c(1:7)}
+```{r Question4-6-6, echo = FALSE, fig.align='center', fig.width = 5, fig.height = 4}
 ```
 
 **********
