@@ -141,10 +141,24 @@ a. **Load the data and examine the basic structure of the data using `str()`, `d
 ```{r Question4-a, echo = -c(1:4)}
 ```
 
+The `r dim(INJCJC)[1]` observations (of two variables, `INJCJC` and `INJCJC4`) correspond to $1,300/52=`r 1300/52`$ periods of 52 weeks, i.e., almost 25 years from January 5, 1990, until November 28, 2014. All observations correspond to Fridays.
+
+Since years are slightly longer (by 1 or 2 days) than 52 weeks, some years have 53 Fridays instead, and hence the last year in the sample (2014) is not complete (there were 1,304 Fridays in that 25-year period from 1990 to 2014).
+
+```{r Question4-a-2}
+```
+
 
 b. **Convert the variables `INJCJC` into a time series object `frequency=52, start=c(1990,1,1), end=c(2014,11,28)`. Examine the converted data series.**
 
-...
+
+```{r Question4-b}
+```
+
+
+```{r Question4-b-2}
+```
+
 
 c. **Define a variable using the command `INJCJC.time<-time(INJCJC)`.**
 

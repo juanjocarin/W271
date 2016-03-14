@@ -170,15 +170,26 @@ head(INJCJC)
 tail(INJCJC)
 desc_stat(INJCJC[, -1], names(INJCJC)[-1], 
           'Descriptive statistics of the INJCJC variables')
+
+## @knitr Question4-a-2
 INJCJC %>% 
   mutate(Date = as.Date(as.character(Date), '%d-%b-%y')) %>% 
   mutate(Year = year(Date)) %>% 
   group_by(Year) %>% 
   summarise(obs = n(), start_date = min(Date), end_date = max(Date)) %>% 
   print(n=Inf)
-INJCJC %>% 
-  mutate(week = 1:obs) %>% 
-  filter(week %% 52 < 2)
+levels(as.factor(weekdays(as.Date(as.character(INJCJC$Date), '%d-%b-%y'))))
+
+kable(INJCJC %>% 
+  mutate(week_num = 1:obs, 
+         week = ifelse(week_num %% 52== 0, 52, week_num %% 52)) %>% 
+  filter(week %% 52 < 2))
+# Count weeks 
+sum(sapply(1990:2014, function(y) 
+  ifelse(((y %% 4 == 0) & (y %% 100 != 0)) | (y %% 400 == 0), 366, 365))) / 7
+# Count Fridays in that period
+ceiling(as.numeric(as.Date('2014-12-31') + 1 - 5 + 4) / 7) - 
+  ceiling(as.numeric(as.Date('1990-01-01') - 5 + 4) / 7)
 
 
 ## @knitr Question4-b
@@ -187,10 +198,12 @@ INJCJC %>%
 # Examine the converted data series
 INJCJC4 <- ts(INJCJC$INJCJC4, frequency = 52, start = c(1990, 1, 1), 
               end = c(2014, 11, 28))
-INJCJC2 <- INJCJC %>% 
+INJCJC2 <- INJCJC %>%  
   mutate(Date = as.Date(as.character(Date), '%d-%b-%y'))
 INJCJC2 <- ts(INJCJC2$INJCJC, frequency = 52, start = c(1990, 1, 1))
-plot.ts(INJCJC, col = 'blue')
+INJCJC <- ts(INJCJC$INJCJC, frequency = 52, start = c(1990, 1, 1), 
+             end = c(2014, 11, 28))
+plot.ts(INJCJC2, col = 'blue')
 lines(INJCJC4, col = 'red', lty = 2)
 leg.txt <- c("INJCJC", "INJCJC4")
 legend("topright", legend=leg.txt, lty=c(1,2), col=c("blue", "red"), 
@@ -198,7 +211,7 @@ legend("topright", legend=leg.txt, lty=c(1,2), col=c("blue", "red"),
 # plot.ts(cbind(INJCJC, INJCJC4), main = 'Time', col = 'blue')
 
 ## @knitr Question4-b-2
-plot.ts(window(INJCJC, start = c(2014, 1), end = c(2015,52)), col = 'blue', 
+plot.ts(window(INJCJC, start = c(2013, 1)), col = 'blue', 
         ylab = 'INJCJC')
 lines(INJCJC4, col='red', lty = 2)
 leg.txt <- c("INJCJC", "INJCJC4")
