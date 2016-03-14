@@ -1,0 +1,243 @@
+---
+title: "**W271**-2 -- Spring 2016 -- **HW 6**"
+author: "***Juanjo Carin, Kevin Davis, Ashley Levato, Minghu Song***"
+date: "*March 16, 2016*"
+output:
+   pdf_document:
+     fig_caption: yes
+     toc: yes
+numbersections: false
+geometry: margin=1in
+options: width=30
+fontsize: 10pt
+linkcolor: blue
+header-includes:
+- \usepackage{fancyhdr}
+- \pagestyle{fancy}
+- \fancyhead[LO,LE]{Carin, Davis, Levato, Song}
+- \fancyhead[CE,CO]{W271 -- HW 6 -- \leftmark}
+- \fancyhead[RE,RO]{\rightmark}
+- \fancyfoot[LO,LE]{UC Berkeley -- MIDS}
+- \fancyfoot[CO,CE]{Spring semester 2016}
+- \fancyfoot[RE,RO]{\thepage}
+- \renewcommand{\headrulewidth}{0.5pt}
+- \renewcommand{\footrulewidth}{0.5pt}
+---
+
+**********
+
+\pagebreak
+
+# Exercises
+
+```{r, echo = FALSE}
+require(knitr, quietly = TRUE)
+read_chunk('code/W271_HW6_MHSONG.R')
+opts_chunk$set(message = FALSE, warning = FALSE)
+opts_chunk$set(fig.width = 4, fig.height = 3)
+# Set path to data here (don't use setwd() inside a chunk!!!)
+opts_knit$set(root.dir = "C:/Users/songminghu/Documents/GitHub/W271/HW6/data")
+```
+
+```{r Libraries-Functions-Constants, echo = FALSE}
+```
+
+## Exercise 1
+
+a. **Discuss the mean and variance functions and how the similarities and differences from those we studied in classical linear model.**
+
+The mean function for a time series is deinfed by the function:
+
+$$ \mu_x (t) = E(x_t) = \int_{- \infty}^{+ \infty} x_t f_t(x_t)dx_t$$
+
+This function has a time component so the mean could be different in different time periods. This is different from a mean in classical linear models where the mean is constant.
+
+The variance functions for a time series analys is defined by the function:
+
+$$\sigma_x^2(t) = E(x_t-\mu_x(t))^2 = \int_{- \infty}^{+ \infty} (x_t-\mu_x(t))^2F_t(x_t)dx_t$$
+
+Again this function is time dependant which means it varies with time unlike the variance in a classical linear model. 
+
+...
+
+b. **Define strict and weak statonarity**
+
+Statonarity indicates the parameter is consistent is accross time. 
+
+Strict stationary is when the joint distributions $F(x_{t_1}, ..., x_{t_n})$ and $F(x_{t_1+m}, ..., x_{t_n+m})$ are the same impling that the distribution is unchanged for any time shift. 
+
+Weak stationarity (also called second-order stationary) is when its mean and variancec stationary and its autocovariance $Cov(x_t, x_{t+k})$ depends on teh time placement k and can be written as $\gamma^{(k)}$. Once a distribution assumption is imposed the series can be completely characterized by the mean and covariance. 
+
+...
+
+**********
+\pagebreak
+
+
+
+## Exercise 2
+
+a. **Generate a zero-drift random walk model using 500 simulation.**
+
+```{r Question2-1, echo = T}
+```
+
+...
+
+b. **Provide the descriptive statistics of the simulated realizations. The descriptive statistics should include the mean, standard deviation, 25th, 50th, and 75th quantiles, minimum, and maximum.**
+
+```{r Question2-2, echo = T, comment=NA}
+```
+
+c. **Plot the time-series plot of the simulated realizations.**
+
+```{r Question2-3, echo = T}
+```
+
+...
+
+d. **Plot the autocorrelation graph.**
+
+```{r Question2-4, echo = T}
+```
+
+...
+
+e. **Plot the partial autocorrelation graph.**
+
+
+```{r Question2-5, echo = T}
+```
+...
+
+**********
+\pagebreak
+
+
+
+## Exercise 3
+
+a. **Generate arandom walk with drift model using 500 simulation, with the drift = 0.5.**
+
+
+```{r Question3-1, echo = T}
+```
+...
+
+b. **Provide the descriptive statistics of the simulated realizations. The descriptive statistics should include the mean, standard deviation, 25th, 50th, and 75th quantiles, minimum, and maximum.**
+
+```{r Question3-2, echo = T}
+```
+...
+
+c. **Plot the time-series plot of the simulated realizations.**
+
+```{r Question3-3, echo = T}
+```
+...
+
+d. **Plot the autocorrelation graph.**
+
+```{r Question3-4, echo = T}
+```
+...
+
+e. **Plot the partial autocorrelation graph.**
+
+```{r Question3-5, echo = T}
+```
+...
+
+**********
+
+\pagebreak
+
+
+
+## Exercise 4
+
+**Use the series from `INJCJC.csv`.**
+
+a. **Load the data and examine the basic structure of the data using `str()`, `dim()`, `head()`, and `tail()` functions.**
+
+```{r Question4-1, echo = T, comment=""}
+```
+
+b. **Convert the variables `INJCJC` into a time series object `frequency=52, start=c(1990,1,1), end=c(2014,11,28)`. Examine the converted data series.**
+
+```{r Question4-2, echo = T}
+```
+
+c. **Define a variable using the command `INJCJC.time<-time(INJCJC)`.**
+
+```{r Question4-3, echo = T}
+```
+
+d. **Using the following command to examine the first 10 rows of the data. Change the parameter to examine different number of rows of data.**
+
+> **`head(cbind(INJCJC.time, INJCJC),10)`**
+
+```{r Question4-4, echo = T, comment=""}
+```
+
+e.
+
+>  1. **Plot the time series plot of `INJCJC`. Remember that the graph must be well labelled.**
+
+```{r Question4-5-1, echo = T, fig.align='center'}
+```
+
+>  2. **Plot the histogram of `INJCJC`. What is shown and not shown in a histogram? How do you decide the number of bins used?**
+
+```{r Question4-5-2, echo = T, fig.align='center'}
+```
+
+>  3. **Plot the autocorrelation graph of `INJCJC` series.**
+
+```{r Question4-5-3, echo = T, fig.align='center'}
+```
+
+>  4. **Plot the partial autocorrelation graph of `INJCJC` series.**
+
+```{r Question4-5-4, echo = T, fig.align='center'}
+```
+
+
+>  5. **Plot a 3x3 Scatterplot Matrix of correlation against lag values.**
+
+```{r Question4-5-5, echo = T, fig.align='center', fig.width = 4.5, fig.height = 3.5}
+```
+
+f.
+>  1. **Generate two symmetric Moving Average Smoothers. Choose the number of moving average terms such that one of the smoothers is very smoother and the other one can trace through the dynamics of the series. Plot the smoothers and the original series in one graph.**
+
+```{r Question4-6-1, echo = FALSE, fig.align='center', fig.width = 5, fig.height = 4}
+```
+
+>  2. **Generate two regression smoothers, one being a cubic trend regression and the other being a periodic regression. Plot the smoothers and the original series in one graph.**
+
+
+```{r Question4-6-2, echo = FALSE, fig.align='center', fig.width = 5, fig.height = 4}
+```
+
+>  3. **Generate kernel smoothers. Choose the smoothing parametrs such that one of the smoothers is very smoother and the other one can trace through the dynamics of the series. Plot the smoothers and the original series in one graph.**
+
+```{r Question4-6-3, echo = FALSE, fig.align='center', fig.width = 5, fig.height = 4}
+```
+
+>  4. **Generate two nearest neighborhood smoothers. Choose the smoothing parametrs such that one of the smoothers is very smoother and the other one can trace through the dynamics of the series. Plot the smoothers and the original series in one graph.**
+
+```{r Question4-6-4, echo = FALSE, fig.align='center', fig.width = 5, fig.height = 4}
+```
+
+>  5. **Generate two LOWESS smoothers. Choose the smoothing parametrs such that one of the smoothers is very smoother and the other one can trace through the dynamics of the series. Plot the smoothers and the original series in one graph.**
+
+```{r Question4-6-5, echo = FALSE, fig.align='center', fig.width = 5, fig.height = 4}
+```
+
+>  6. **Generate two spline smoothers. Choose the smoothing parametrs such that one of the smoothers is very smoother and the other one can trace through the dynamics of the series. Plot the smoothers and the original series in one graph.**
+
+```{r Question4-6-6, echo = FALSE, fig.align='center', fig.width = 5, fig.height = 4}
+```
+
+**********
