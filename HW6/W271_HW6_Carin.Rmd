@@ -144,11 +144,21 @@ a. **Load the data and examine the basic structure of the data using `str()`, `d
 ```{r Question4-a-2, echo = FALSE}
 ```
 
-The `r dim(INJCJC_df)[1]` observations (of two variables, `INJCJC` and `INJCJC4`) correspond to $1,300/52=`r 1300/52`$ periods of 52 weeks, i.e., almost 25 years from January 5, 1990, until November 28, 2014. All observations correspond to Fridays.
+The `r dim(INJCJC_df)[1]` observations (of two variables, `INJCJC` and `INJCJC4`) correspond to $1,300/52=`r 1300/52`$ periods of 52 weeks, i.e., almost 25 years from January 5, 1990, until November 28, 2014.
 
-Since years are slightly longer (by 1 or 2 days) than 52 weeks, some years have 53 Fridays instead, and hence the last year in the sample (2014) is not complete (there were 1,304 Fridays in that 25-year period from 1990 to 2014).
+All observations correspond to Fridays.
 
 ```{r Question4-a-3}
+```
+
+Since years are slightly longer (by 1 or 2 days) than 52 weeks, some years have 53 Fridays. Those years with 53 Fridays sum up, and as a result (and since the number of observations we have is a multiple of 52) the last year in the sample (2014) does not include all of the Fridays there were that year (there were 1,304 Fridays in that 25-year period from 1990 to 2014).
+
+```{r Question4-a-4}
+```
+
+Another way to see it: because some years had more than 52 Fridays, each set of 52 observations gradually ends earlier (see the even rows below, that correspond to `week == 52`: December 28, December 27, December 25, December 24...). Hence, the next set of 52 observations start earlier, even in the previous year (see row 8), and the aggregate effect is that the 25th set of 52 observations---which should correspond to 2014---start as early as December 6, 2013, and ends in November 28, 2014.
+
+```{r Question4-a-5}
 ```
 
 
@@ -159,9 +169,9 @@ The above parameters may be wrong: according to the [`ts` documentation](http://
 ```{r Question4-b, echo = c(4:7)}
 ```
 
-We can plot both the original vector and the time series object to confirm this.
-
 \pagebreak
+
+We can plot both the original vector and the time series object to confirm this.
 
 ```{r Question4-b-2, echo = FALSE, fig.width = 6, fig.height = 4.5, fig.cap = "U.S. Initial Jobless Claims (in thousands) from 5 Jan 1990 to 28 Nov 2014"}
 ```
@@ -171,6 +181,24 @@ Hence, we slightly change the R command to get the proper time series object:
 ```{r Question4-b-3}
 ```
 
+The way `ts` works, our time scale does not correspond to the original dates (every Friday between the start and end date, including both) because we've set a fixed frequency of 52 (instead of $365/7 = `r frmt(365/7)`$ if the year is not leap, and $366/7 = `r frmt(366/7)`$ if it is) and the 1st time period is set to the very beginning of the year. Compare the original dates in our dataset with the dates `ts` sets, for the 1st and 52nd observation (while the day and month of the 1st and 52nd observations of each of the 25 subsets will vary, as we have seen, the day and month---and even time---will be fixed in the `ts` object, regardless of the year); the date of the last observation in the "wrong/truncated version" of `INJCJC` is also shown.:
+
+```{r Question4-b-4, echo = c(1, 4)}
+```
+
+\small
+
+> This does not happen with montly or quarterly data (and happens to a lesser extent with daily data).
+
+\normalsize
+
+One way to preserve the sampling dates is by using the `xts` library:
+
+```{r Question4-b-5, echo = c(1:2), fig.width = 6, fig.height = 4.5, fig.cap = "U.S. Initial Jobless Claims (in thousands) from 5 Jan 1990 to 28 Nov 2014, using the `xts` package"}
+```
+
+
+\pagebreak
 
 c. **Define a variable using the command `INJCJC.time<-time(INJCJC)`.**
 
@@ -188,6 +216,8 @@ d. **Using the following command to examine the first 10 rows of the data. Chang
 ```
 
 
+\pagebreak
+
 e.
 
 >  1. **Plot the time series plot of `INJCJC`. Remember that the graph must be well labelled.**
@@ -195,6 +225,7 @@ e.
 ```{r Question4-e-1, echo = 3, fig.width = 6, fig.height = 4.5, fig.cap = "U.S. Initial Jobless Claims (in thousands) from 5 Jan 1990 to 28 Nov 2014"}
 ```
 
+Compare the previous Figure, plotted using `xts`, with the one above: the former shows the proper time scale (starting in January 5, 1990, and ending in November 28, 2014), while the latter covers the full 25-year period.
 
 \pagebreak
 
@@ -233,32 +264,50 @@ The partial autocorrelation plot makes it evident that this time series was not 
 ```{r Question4-e-5, echo = 2, fig.width = 6, fig.height = 6, fig.cap = "Scatterplot matrix of the correlation of the U.S. Initial Jobless Claims time series against its first 9 own lags"}
 ```
 
+As the correlogram in Figue 7 suggested, the correlation between the time series and its lagged version is very high, and that correlation decreases very slowly with the lag.
+
+
 \pagebreak
 
 f.
 
 >  1. **Generate two symmetric Moving Average Smoothers. Choose the number of moving average terms such that one of the smoothers is very smoother and the other one can trace through the dynamics of the series. Plot the smoothers and the original series in one graph.**
 
-...
+```{r Question4-f-1, echo = c(5:6), fig.width = 6, fig.height = 4.5, fig.cap = "U.S. Initial Jobless Claims (in thousands) from 5 Jan 1990 to 28 Nov 2014 (original series plus two Moving Average Smoothers)"}
+```
 
 >  2. **Generate two regression smoothers, one being a cubic trend regression and the other being a periodic regression. Plot the smoothers and the original series in one graph.**
 
-...
+
+```{r Question4-f-2, echo = c(4:11), fig.width = 6, fig.height = 4.5, fig.cap = "U.S. Initial Jobless Claims (in thousands) from 5 Jan 1990 to 28 Nov 2014 (original series plus two Regression Smoothers)"}
+```
+
+\pagebreak
 
 >  3. **Generate kernel smoothers. Choose the smoothing parametrs such that one of the smoothers is very smoother and the other one can trace through the dynamics of the series. Plot the smoothers and the original series in one graph.**
 
-...
+```{r Question4-f-3, echo = c(5:6), fig.width = 6, fig.height = 4.5, fig.cap = "U.S. Initial Jobless Claims (in thousands) from 5 Jan 1990 to 28 Nov 2014 (original series plus two Regression Smoothers)"}
+```
 
->  4. **Generate two nearest neighborhood smoothers. Choose the smoothing parametrs such that one of the smoothers is very smoother and the other one can trace through the dynamics of the series. Plot the smoothers and the original series in one graph.**
+\pagebreak
 
-...
+>  4. **Generate two nearest neighborhood smoothers. Choose the smoothing parameters such that one of the smoothers is very smoother and the other one can trace through the dynamics of the series. Plot the smoothers and the original series in one graph.**
 
->  5. **Generate two LOWESS smoothers. Choose the smoothing parametrs such that one of the smoothers is very smoother and the other one can trace through the dynamics of the series. Plot the smoothers and the original series in one graph.**
+```{r Question4-f-4, echo = c(5:6), fig.width = 6, fig.height = 4.5, fig.cap = "U.S. Initial Jobless Claims (in thousands) from 5 Jan 1990 to 28 Nov 2014 (original series plus two Nearest Neighborhood Smoothers)"}
+```
 
-...
+\pagebreak
 
->  6. **Generate two spline smoothers. Choose the smoothing parametrs such that one of the smoothers is very smoother and the other one can trace through the dynamics of the series. Plot the smoothers and the original series in one graph.**
+>  5. **Generate two LOWESS smoothers. Choose the smoothing parameters such that one of the smoothers is very smoother and the other one can trace through the dynamics of the series. Plot the smoothers and the original series in one graph.**
 
-...
+```{r Question4-f-5, echo = c(5:6), fig.width = 6, fig.height = 4.5, fig.cap = "U.S. Initial Jobless Claims (in thousands) from 5 Jan 1990 to 28 Nov 2014 (original series plus two LOWESS Smoothers)"}
+```
+
+\pagebreak
+
+>  6. **Generate two spline smoothers. Choose the smoothing parameters such that one of the smoothers is very smoother and the other one can trace through the dynamics of the series. Plot the smoothers and the original series in one graph.**
+
+```{r Question4-f-6, echo = c(5:6), fig.width = 6, fig.height = 4.5, fig.cap = "U.S. Initial Jobless Claims (in thousands) from 5 Jan 1990 to 28 Nov 2014 (original series plus two Spline Smoothers)"}
+```
 
 **********

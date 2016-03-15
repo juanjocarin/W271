@@ -21,7 +21,7 @@ library(stargazer)
 # library(texreg)
 # library(weatherData)
 library(scales)
-# library(xts)
+library(xts)
 library(reshape2)
 library(lubridate)
 
@@ -104,6 +104,7 @@ desc_stat(rw, 'Random walk',
 # c. Plot the time-series plot of the simulated realizations
 # d. Plot the autocorrelation graph
 # e. Plot the partial autocorrelation graphpar(mfrow=c(2, 2))
+par(mfrow=c(2, 2))
 plot.ts(rw, 
         main = "Time plot of a 500 simulation\nof a zero-drift random walk", 
         ylab="Level", xlab = 'Observation', col="blue")
@@ -173,23 +174,27 @@ desc_stat(INJCJC_df[, -1], names(INJCJC_df)[-1],
           'Descriptive statistics of the INJCJC variables')
 
 ## @knitr Question4-a-3
+levels(as.factor(weekdays(as.Date(as.character(INJCJC_df$Date), '%d-%b-%y'))))
+
+## @knitr Question4-a-4
 INJCJC_df %>% 
   mutate(Date = as.Date(as.character(Date), '%d-%b-%y')) %>% 
   mutate(Year = year(Date)) %>% 
   group_by(Year) %>% 
   summarise(obs = n(), start_date = min(Date), end_date = max(Date)) %>% 
   print(n=Inf)
-levels(as.factor(weekdays(as.Date(as.character(INJCJC_df$Date), '%d-%b-%y'))))
-INJCJC_df %>% 
-  mutate(week_num = 1:obs, 
-         week = ifelse(week_num %% 52== 0, 52, week_num %% 52)) %>% 
-  filter(week %% 52 < 2)
 # Count weeks 
 sum(sapply(1990:2014, function(y) 
   ifelse(((y %% 4 == 0) & (y %% 100 != 0)) | (y %% 400 == 0), 366, 365))) / 7
 # Count Fridays in that period
 ceiling(as.numeric(as.Date('2014-12-31') + 1 - 5 + 4) / 7) - 
   ceiling(as.numeric(as.Date('1990-01-01') - 5 + 4) / 7)
+
+## @knitr Question4-a-5
+INJCJC_df %>% 
+  mutate(week_num = 1:obs, 
+         week = ifelse(week_num %% 52== 0, 52, week_num %% 52)) %>% 
+  filter(week %% 52 < 2)
 
 
 ## @knitr Question4-b
@@ -204,9 +209,9 @@ tail(INJCJC_df$INJCJC[1:length(INJCJC_wrong)], 10)
 # INJCJC_df$INJCJC[(length(INJCJC_wrong)+1):obs]
 
 ## @knitr Question4-b-2
-par(mar=c(5, 6, 4, 3))
+par(mar = c(5, 6, 4, 3))
 plot(as.Date(as.character(INJCJC_df$Date), '%d-%b-%y'), INJCJC_df$INJCJC, 
-     col = 'blue', type = 'l', xlab = "Time Period (weeks)", 
+     col = 'blue', type = 'l', xlab = "Year (time period = weeks)", 
      ylab = "U.S. Initial Jobless Claims\n(in thousands)", 
      main = "U.S. Initial Jobless Claims\nfrom 5 Jan 1990 to 28 Nov 2014")
 lines(as.Date(as.character(INJCJC_df$Date), '%d-%b-%y')[
@@ -220,6 +225,26 @@ INJCJC <- ts(INJCJC_df$INJCJC, frequency = 52, start = c(1990, 1),
              end = c(2014, 52))
 length(INJCJC)
 
+## @knitr Question4-b-4
+comp <- rbind(as.character(INJCJC_df$Date[c(1, 52, length(INJCJC_wrong))]), 
+              formatC(time(INJCJC)[c(1, 52, length(INJCJC_wrong))], 3, 
+                      format = 'f'), 
+              format(date_decimal(time(INJCJC)[c(1, 52, length(INJCJC_wrong))]), 
+                     "%d-%b-%Y %H:%M:%S"))
+rownames(comp) <- c("Original date", "time(ts)", "Corresponding date")
+colnames(comp) <- c(1, 52, length(INJCJC_wrong))
+comp
+
+## @knitr Question4-b-5
+INJCJC_2 <- xts(INJCJC_df$INJCJC, 
+                order.by = as.Date(as.character(INJCJC_df$Date), '%d-%b-%y'))
+head(INJCJC_2)
+par(mar = c(5, 6, 4, 3), col = "blue")
+plot(INJCJC_2, xlab = "Year (time period = weeks)", 
+     ylab = "U.S. Initial Jobless Claims\n(in thousands)", 
+     main = "U.S. Initial Jobless Claims\nfrom 5 Jan 1990 to 28 Nov 2014")
+box(col = "black"); par(col = "black")
+
 
 ## @knitr Question4-c
 # Define a variable using the command `INJCJC.time<-time(INJCJC)`
@@ -227,7 +252,6 @@ INJCJC.time <- time(INJCJC)
 head(INJCJC.time)
 tail(INJCJC.time)
 tail(time(INJCJC_wrong))
-
 
 ## @knitr Question4-d
 # Using the following command to examine the first 10 rows of the data
@@ -241,7 +265,7 @@ head(cbind(INJCJC.time, INJCJC), 13) # approximately 3 months (1 quarter)
 ## @knitr Question4-e-1
 # Plot the time series plot of `INJCJC`
 par(mar=c(5, 6, 4, 3))
-plot.ts(INJCJC, col = 'blue', xlab = "Time Period (weeks)", 
+plot.ts(INJCJC, col = 'blue', xlab = "Year (time period = weeks)", 
         ylab = "U.S. Initial Jobless Claims\n(in thousands)", 
         main = "U.S. Initial Jobless Claims\nfrom 5 Jan 1990 to 28 Nov 2014")
 
@@ -291,14 +315,129 @@ lag.plot(INJCJC, lags = 9, layout = c(3, 3), diag=TRUE, diag.col="red",
 # par(mfrow=c(1, 1))
 
 
+## @knitr Question4-f-1
+# Generate two symmetric Moving Average Smoothers
+# Choose the number of moving average terms such that one of the smoothers is 
+# very smoother and the other one can trace through the dynamics of the series
+# Plot the smoothers and the original series in one graph
+INJCJC.1 = stats::filter(INJCJC, sides=2, rep(1, 5)/5)
+INJCJC.2 = stats::filter(INJCJC, sides=2, rep(1, 53)/53)
+par(mar = c(5, 6, 4, 3))
+plot(INJCJC, pch = 4, lty = 5, lwd=1, xlab = "Year (time period = weeks)", 
+     ylab = "U.S. Initial Jobless Claims\n(in thousands)", 
+     main = paste0("U.S. Initial Jobless Claims\nfrom 5 Jan 1990 to 28 Nov", 
+                   "2014\nplus two Moving Average Smoothers"))
+lines(INJCJC.1, lty = 1, lwd = 1.5, col = "green")
+lines(INJCJC.2, lty = 1, lwd = 1.5, col = "blue")
+leg.txt <- c("Original Series", "5-Point Symmetric Moving Average", 
+             "53-Point Symmetric Moving Average")
+legend("topleft", legend=leg.txt, lty = c(1, 1, 1), 
+       col=c("black", "green", "blue"), bty = 'n', cex=1, merge = TRUE, 
+       bg = 336)
 
+## @knitr Question4-f-2
+# Generate two regression smoothers, one being a cubic trend regression and the 
+# other being a periodic regression
+# Plot the smoothers and the original series in one graph
+cbind(INJCJC.time[c(1:2, (length(INJCJC)-1):length(INJCJC))], 
+      mean(INJCJC.time))
+wk = INJCJC.time - mean(INJCJC.time)
+wk2 = wk^2
+wk3 = wk^3
+cs = cos(2 * pi * wk)  
+sn = sin(2 * pi * wk)
+reg1 = lm(INJCJC ~ wk + wk2 + wk3, na.action = NULL)
+reg2 = lm(INJCJC ~ wk + wk2 + wk3 + cs + sn, na.action = NULL)
+par(mar = c(5, 6, 4, 3))
+plot(INJCJC, pch=4, lty=5, lwd=1, xlab = "Year (time period = weeks)", 
+     ylab = "U.S. Initial Jobless Claims\n(in thousands)", 
+     main = paste0("U.S. Initial Jobless Claims\nfrom 5 Jan 1990 to 28 Nov", 
+                   "2014\nplus two Regression Smoothers"))
+lines(fitted(reg1), lty=1, lwd=1.5, col="green")
+lines(fitted(reg2), lty=1, lwd=1.5, col="blue")
+# Add Legend
+leg.txt <- c("Original Series", "Cubic Trend Regression Smoothing", 
+             "Periodic Regression Smoothing")
+legend("topleft", legend = leg.txt, lty = c(1, 1, 1), 
+       col = c("black", "green", "blue"), bty = 'n', cex = 1, merge = TRUE, 
+       bg = 336)
 
-## @knitr Question4-bbbb-2
-plot.ts(window(INJCJC, start = c(2013, 1)), col = 'blue', 
-        ylab = 'INJCJC')
-lines(INJCJC4, col='red', lty = 2)
-leg.txt <- c("INJCJC", "INJCJC4")
-legend("topright", legend=leg.txt, lty=c(1,2), col=c("blue", "red"), 
-       bty = 'n', cex = .75)
+## @knitr Question4-f-3
+# Generate kernel smoothers
+# Choose the smoothing parametrs such that one of the smoothers is very 
+# smoother and the other one can trace through the dynamics of the series
+# Plot the smoothers and the original series in one graph.
+INJCJC.1 <- ksmooth(INJCJC.time, INJCJC, "normal", bandwidth = 5/52)
+INJCJC.2 <- ksmooth(INJCJC.time, INJCJC, "normal", bandwidth = 2)
+par(mar = c(5, 6, 4, 3))
+plot(INJCJC, pch=4, lty=5, lwd=1, xlab = "Year (time period = weeks)", 
+     ylab = "U.S. Initial Jobless Claims\n(in thousands)", 
+     main = paste0("U.S. Initial Jobless Claims\nfrom 5 Jan 1990 to 28 Nov", 
+                   "2014\nplus two Kernel Smoothers"))
+lines(INJCJC.1, lty = 1, lwd = 1.5, col = "green")
+lines(INJCJC.2, lty = 1, lwd = 1.5, col = "blue")
+leg.txt <- c("Original Series", "Kernel Smoothing: bandwidth=5/52", "Kernel Smoothing: bandwidth=2")
+legend("topleft", legend = leg.txt, lty = c(1, 1, 1), 
+       col = c("black", "green", "blue"), bty = 'n', cex = 1, merge = TRUE, 
+       bg = 336)
 
+## @knitr Question4-f-4
+# Generate two nearest neighborhood smoothers
+# Choose the smoothing parameters such that one of the smoothers is very 
+# smoother and the other one can trace through the dynamics of the series
+# Plot the smoothers and the original series in one graph
+INJCJC.1 <- supsmu(INJCJC.time, INJCJC, span = .01)
+INJCJC.2 <- supsmu(INJCJC.time, INJCJC, span = .1)
+par(mar = c(5, 6, 4, 3))
+plot(INJCJC, pch=4, lty=5, lwd=1, xlab = "Year (time period = weeks)", 
+     ylab = "U.S. Initial Jobless Claims\n(in thousands)", 
+     main = paste0("U.S. Initial Jobless Claims\nfrom 5 Jan 1990 to 28 Nov", 
+                   "2014\nplus two NN Smoothers"))
+lines(INJCJC.1, lty = 1, lwd = 1.5, col = "green")
+lines(INJCJC.2, lty = 1, lwd = 1.5, col = "blue")
+leg.txt <- c("Original Series", "NN Smoothing: bandwidth=.01", 
+             "NN Smoothing: bandwidth=.1")
+legend("topleft", legend = leg.txt, lty = c(1, 1, 1), 
+       col = c("black", "green", "blue"), bty = 'n', cex = 1, merge = TRUE, 
+       bg = 336)
+
+## @knitr Question4-f-5
+# Generate two LOWESS smoothers
+# Choose the smoothing parameters such that one of the smoothers is very 
+# smoother and the other one can trace through the dynamics of the series
+# Plot the smoothers and the original series in one graph.**
+INJCJC.1 <- lowess(INJCJC, f = .02)
+INJCJC.2 <- lowess(INJCJC, f = .2)
+par(mar = c(5, 6, 4, 3))
+plot(INJCJC, pch=4, lty=5, lwd=1, xlab = "Year (time period = weeks)", 
+     ylab = "U.S. Initial Jobless Claims\n(in thousands)", 
+     main = paste0("U.S. Initial Jobless Claims\nfrom 5 Jan 1990 to 28 Nov", 
+                   "2014\nplus two LOWESS Smoothers"))
+lines(INJCJC.1, lty = 1, lwd = 1.5, col = "green")
+lines(INJCJC.2, lty = 1, lwd = 1.5, col = "blue")
+leg.txt <- c("Original Series", "LOWESS Smoothing: bandwidth=.02", 
+             "LOWESS Smoothing: bandwidth=.2")
+legend("topleft", legend = leg.txt, lty = c(1, 1, 1), 
+       col = c("black", "green", "blue"), bty = 'n', cex = 1, merge = TRUE, 
+       bg = 336)
+
+## @knitr Question4-f-6
+# Generate two spline smoothers
+# Choose the smoothing parameters such that one of the smoothers is very 
+# smoother and the other one can trace through the dynamics of the series
+# Plot the smoothers and the original series in one graph
+INJCJC.1 <- smooth.spline(INJCJC.time, INJCJC, spar = 0.05)
+INJCJC.2 <- smooth.spline(INJCJC.time, INJCJC, spar = 0.8)
+par(mar = c(5, 6, 4, 3))
+plot(INJCJC, pch=4, lty=5, lwd=1, xlab = "Year (time period = weeks)", 
+     ylab = "U.S. Initial Jobless Claims\n(in thousands)", 
+     main = paste0("U.S. Initial Jobless Claims\nfrom 5 Jan 1990 to 28 Nov", 
+                   "2014\nplus two Spline Smoothers"))
+lines(INJCJC.1, lty = 1, lwd = 1.5, col = "green")
+lines(INJCJC.2, lty = 1, lwd = 1.5, col = "blue")
+leg.txt <- c("Original Series", "Spline: Smoothing Parameter=.05", 
+             "Spline: Smoothing Parameter=0.8")
+legend("topleft", legend = leg.txt, lty = c(1, 1, 1), 
+       col = c("black", "green", "blue"), bty = 'n', cex = 1, merge = TRUE, 
+       bg = 336)
 
