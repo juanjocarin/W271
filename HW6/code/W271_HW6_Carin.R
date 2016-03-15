@@ -17,11 +17,11 @@ library(knitr)
 library(dplyr)
 library(tidyr)
 library(stargazer)
-library(pander)
+# library(pander)
 # library(texreg)
-library(weatherData)
+# library(weatherData)
 library(scales)
-library(xts)
+# library(xts)
 library(reshape2)
 library(lubridate)
 
@@ -157,33 +157,33 @@ par(mfrow=c(1, 1))
 
 
 
-
 ## @knitr Question4-a
 # QUESTION 4 --------------------------------------------------------------
 # Load the data and examine the basic structure of the data using `str()`, 
 # `dim()`, `head()`, and `tail()` functions
 # setwd('./HW6/data')
-INJCJC <- read.csv('INJCJC.csv', header = TRUE)
-str(INJCJC)
-dim(INJCJC); obs <- dim(INJCJC)[1]
-head(INJCJC)
-tail(INJCJC)
-desc_stat(INJCJC[, -1], names(INJCJC)[-1], 
-          'Descriptive statistics of the INJCJC variables')
+INJCJC_df <- read.csv('INJCJC.csv', header = TRUE)
+str(INJCJC_df)
+dim(INJCJC_df); obs <- dim(INJCJC_df)[1]
+head(INJCJC_df)
+tail(INJCJC_df)
 
 ## @knitr Question4-a-2
-INJCJC %>% 
+desc_stat(INJCJC_df[, -1], names(INJCJC_df)[-1], 
+          'Descriptive statistics of the INJCJC variables')
+
+## @knitr Question4-a-3
+INJCJC_df %>% 
   mutate(Date = as.Date(as.character(Date), '%d-%b-%y')) %>% 
   mutate(Year = year(Date)) %>% 
   group_by(Year) %>% 
   summarise(obs = n(), start_date = min(Date), end_date = max(Date)) %>% 
   print(n=Inf)
-levels(as.factor(weekdays(as.Date(as.character(INJCJC$Date), '%d-%b-%y'))))
-
-kable(INJCJC %>% 
+levels(as.factor(weekdays(as.Date(as.character(INJCJC_df$Date), '%d-%b-%y'))))
+INJCJC_df %>% 
   mutate(week_num = 1:obs, 
          week = ifelse(week_num %% 52== 0, 52, week_num %% 52)) %>% 
-  filter(week %% 52 < 2))
+  filter(week %% 52 < 2)
 # Count weeks 
 sum(sapply(1990:2014, function(y) 
   ifelse(((y %% 4 == 0) & (y %% 100 != 0)) | (y %% 400 == 0), 366, 365))) / 7
@@ -196,21 +196,104 @@ ceiling(as.numeric(as.Date('2014-12-31') + 1 - 5 + 4) / 7) -
 # Convert the variables `INJCJC` into a time series object `frequency=52, 
 # start=c(1990,1,1), end=c(2014,11,28)`
 # Examine the converted data series
-INJCJC4 <- ts(INJCJC$INJCJC4, frequency = 52, start = c(1990, 1, 1), 
-              end = c(2014, 11, 28))
-INJCJC2 <- INJCJC %>%  
-  mutate(Date = as.Date(as.character(Date), '%d-%b-%y'))
-INJCJC2 <- ts(INJCJC2$INJCJC, frequency = 52, start = c(1990, 1, 1))
-INJCJC <- ts(INJCJC$INJCJC, frequency = 52, start = c(1990, 1, 1), 
-             end = c(2014, 11, 28))
-plot.ts(INJCJC2, col = 'blue')
-lines(INJCJC4, col = 'red', lty = 2)
-leg.txt <- c("INJCJC", "INJCJC4")
-legend("topright", legend=leg.txt, lty=c(1,2), col=c("blue", "red"), 
-       bty = 'n', cex = .75)
-# plot.ts(cbind(INJCJC, INJCJC4), main = 'Time', col = 'blue')
+INJCJC_wrong <- ts(INJCJC_df$INJCJC, frequency = 52, start = c(1990, 1, 1), 
+                   end = c(2014, 11, 28))
+length(INJCJC_wrong) # 1300 - (52 -11)
+tail(INJCJC_wrong, 10)
+tail(INJCJC_df$INJCJC[1:length(INJCJC_wrong)], 10)
+# INJCJC_df$INJCJC[(length(INJCJC_wrong)+1):obs]
 
 ## @knitr Question4-b-2
+par(mar=c(5, 6, 4, 3))
+plot(as.Date(as.character(INJCJC_df$Date), '%d-%b-%y'), INJCJC_df$INJCJC, 
+     col = 'blue', type = 'l', xlab = "Time Period (weeks)", 
+     ylab = "U.S. Initial Jobless Claims\n(in thousands)", 
+     main = "U.S. Initial Jobless Claims\nfrom 5 Jan 1990 to 28 Nov 2014")
+lines(as.Date(as.character(INJCJC_df$Date), '%d-%b-%y')[
+  1:length(INJCJC_wrong)], as.numeric(INJCJC_wrong), col = 'red', lty=2)
+leg.txt <- c("INJCJC", "INJCJC truncated")
+legend("topleft", legend=leg.txt, lty=c(1,2), col=c("blue", "red"), 
+       bty = 'n', cex = .6)
+
+## @knitr Question4-b-3
+INJCJC <- ts(INJCJC_df$INJCJC, frequency = 52, start = c(1990, 1), 
+             end = c(2014, 52))
+length(INJCJC)
+
+
+## @knitr Question4-c
+# Define a variable using the command `INJCJC.time<-time(INJCJC)`
+INJCJC.time <- time(INJCJC)
+head(INJCJC.time)
+tail(INJCJC.time)
+tail(time(INJCJC_wrong))
+
+
+## @knitr Question4-d
+# Using the following command to examine the first 10 rows of the data
+# Change the parameter to examine different number of rows of data
+head(cbind(INJCJC.time, INJCJC), 10)
+head(cbind(INJCJC.time, INJCJC)) # default: 6
+head(cbind(INJCJC.time, INJCJC), -(length(INJCJC)-6)) # -1294: equivalent
+head(cbind(INJCJC.time, INJCJC), 13) # approximately 3 months (1 quarter)
+
+
+## @knitr Question4-e-1
+# Plot the time series plot of `INJCJC`
+par(mar=c(5, 6, 4, 3))
+plot.ts(INJCJC, col = 'blue', xlab = "Time Period (weeks)", 
+        ylab = "U.S. Initial Jobless Claims\n(in thousands)", 
+        main = "U.S. Initial Jobless Claims\nfrom 5 Jan 1990 to 28 Nov 2014")
+
+## @knitr Question4-e-2
+# Plot the histogram of `INJCJC`
+par(mfrow=c(3, 1))
+hist(INJCJC, col="gray", freq = FALSE, 
+     xlab = "U.S. Initial Jobless Claims (in thousands, 9 bins)", 
+     main = paste0("Histogram of the U.S. Initial Jobless Claims", 
+                   "from 5 Jan 1990 to 28 Nov 2014"))
+hist(INJCJC, breaks = 50, col="gray", freq = FALSE, 
+     xlab = "U.S. Initial Jobless Claims (in thousands, 50 bins)", 
+     main = paste0("Histogram of the U.S. Initial Jobless Claims", 
+                   "from 5 Jan 1990 to 28 Nov 2014"))
+hist(INJCJC, breaks = 500, col="gray", freq = FALSE, 
+     xlab = "U.S. Initial Jobless Claims (in thousands, 500 bins)", 
+     main = paste0("Histogram of the U.S. Initial Jobless Claims", 
+                   "from 5 Jan 1990 to 28 Nov 2014"))
+par(mfrow=c(1, 1))
+
+
+## @knitr Question4-e-3
+# Plot the autocorrelation graph of `INJCJC` series
+acf(INJCJC, lag.max = 52, 
+    main="ACF of U.S. Initial Jobless Claims\nfrom 5 Jan 1990 to 28 Nov 2014")
+
+
+## @knitr Question4-e-4
+# Plot the partial autocorrelation graph of `INJCJC` series
+pacf(INJCJC, lag.max = 52, 
+     main="PACF of U.S. Initial Jobless Claims\nfrom 5 Jan 1990 to 28 Nov 2014")
+
+
+## @knitr Question4-e-5
+# Plot a 3x3 Scatterplot Matrix of correlation against lag values
+lag.plot(INJCJC, lags = 9, layout = c(3, 3), diag=TRUE, diag.col="red", 
+         main = paste("Autocorr. between the INJCJC time series and its", 
+                      "Own Lags"))
+# par(mfrow=c(3, 3))
+# for (i in 1:9) {
+#   plot(INJCJC[1:(length(INJCJC) - i)], INJCJC[(i+1):length(INJCJC)], asp = 1, 
+#        xlab = paste("Lag", i), ylab = "INJCJC")
+#   abline(h=mean(INJCJC[1:(length(INJCJC) - i)]))
+#   abline(v=mean(INJCJC[(i+1):length(INJCJC)]))
+#   abline(lm(INJCJC[(i+1):length(INJCJC)] ~ INJCJC[1:(length(INJCJC)-i)]), col = 'red')
+# }
+# par(mfrow=c(1, 1))
+
+
+
+
+## @knitr Question4-bbbb-2
 plot.ts(window(INJCJC, start = c(2013, 1)), col = 'blue', 
         ylab = 'INJCJC')
 lines(INJCJC4, col='red', lty = 2)
@@ -218,64 +301,4 @@ leg.txt <- c("INJCJC", "INJCJC4")
 legend("topright", legend=leg.txt, lty=c(1,2), col=c("blue", "red"), 
        bty = 'n', cex = .75)
 
-time(INJCJC)
-# r = 'blue') + 
-#   labs(y = 'Level', x = 'Observation', 
-#        title = 'Plot of a simulation of an\nAR(1) model with coef. 0.9')
-
-## @knitr Question4-2
-ggplot(y1, aes(Level)) + 
-  geom_histogram(bins = 60, color = 'black', fill = 'white') + 
-  labs(x = 'AR(1, 0.9) level', y = 'Count of observations', 
-       title = 'Histogram ofa simulation of\nan AR(1) model with coef. 0.9')
-
-## @knitr Question4-3
-y2 <- generate_AR(wn, 0.2)
-ggplot(y2, aes(Time, Level)) + 
-  geom_line(colour = 'blue') + 
-  labs(y = 'Level', x = 'Observation', 
-       title = 'Plot of a simulation of an\nAR(1) model with coef. 0.2')
-
-## @knitr Question4-4
-ggplot(y2, aes(Level)) + 
-  geom_histogram(bins = 60, color = 'black', fill = 'white') + 
-  labs(x = 'AR(1, 0.9) level', y = 'Count of observations', 
-       title = 'Histogram of a simulation of\nan AR(1) model with coef. 0.2')
-
-
-
-## @knitr Question5-1
-# QUESTION 5 --------------------------------------------------------------
-# Simulate (with 1000 random draws) the following 3 models:
-# 1. A deterministic linear (time) trend of the form: yt = 10 + 0.5t
-# 2. Random walk without drift
-# 3. Random walk with drift = 0.5
-# Plot a time plot for each of the simulated series. 
-# Graph a histogram for each of the simulated series.
-trend_drift <- 0.5
-y1 <- y2 <- y3 <- data.frame(Time = 1:N)
-y1$'Trend of slope 0.5' <- 10 + trend_drift * 1:N
-y2$'Random walk' <- cumsum(wn$Level)
-y3$'Random walk with drift of 0.5' <- cumsum(wn$Level + trend_drift)
-whole_dataset <- cbind(y1, y2, y3)
-whole_dataset <- melt(whole_dataset, variable.name = 'Series', 'Time')
-ggplot(whole_dataset, aes(x = Time, y = value, colour = Series)) + 
-  geom_line() + 
-  ggtitle("Time plot of the\nthree simulated series") +
-  labs(y = "Level", x = 'Observation') + 
-  scale_colour_discrete("Simulated series")
-
-## @knitr Question5-2
-ggplot(whole_dataset, aes(value)) +
-  facet_wrap(~ Series, scales = "free", nrow = 3) +
-  geom_histogram(bins = 100, color = 'black', fill = 'white') + 
-  labs(x = 'Level', y = 'Count of observations', 
-       title = "Histogram of the three simulated series")
-
-## @knitr Question5-3
-ggplot(whole_dataset, aes(value)) +
-  facet_wrap(~ Series, nrow = 3) +
-  geom_histogram(bins = 100, color = 'black', fill = 'white') + 
-  labs(x = 'Level', y = 'Count of observations', 
-       title = "Histogram of the three simulated series\n(same scale)")
 
