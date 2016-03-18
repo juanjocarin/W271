@@ -73,8 +73,11 @@ desc_stat <- function(x, variables, caption) {
 
 ## @knitr Question1-1
 # QUESTION 1 --------------------------------------------------------------
-
-
+# setwd('./HW8/data')
+hw08 <- read.csv('hw08_series.csv', header = TRUE)
+colnames(hw08)
+all(hw08$X == 1:dim(hw08)[1])
+hw08 <- hw08[, -1]
 
 ## @knitr Question2-a
 # QUESTION 2 --------------------------------------------------------------

@@ -73,6 +73,9 @@ desc_stat <- function(x, variables, caption) {
 
 ## @knitr Question1-1
 # QUESTION 1 --------------------------------------------------------------
+# Load hw07_series1.csv
+# setwd('./HW7/data')
+hw07INJCJC_df <- read.csv('hw07_series1.csv', header = FALSE)
 
 
 
