@@ -1,0 +1,61 @@
+---
+title: "**W271**-2 -- Spring 2016 -- **HW 8**"
+author: "***Juanjo Carin, Kevin Davis, Ashley Levato, Minghu Song***"
+date: "*April 6, 2016*"
+output:
+   pdf_document:
+     fig_caption: yes
+     toc: yes
+numbersections: false
+geometry: margin=1in
+options: width=30
+fontsize: 10pt
+linkcolor: blue
+header-includes:
+- \usepackage{fancyhdr}
+- \pagestyle{fancy}
+- \fancyhead[LO,LE]{Carin, Davis, Levato, Song}
+- \fancyhead[CE,CO]{W271 -- HW 8 -- \leftmark}
+- \fancyhead[RE,RO]{\rightmark}
+- \fancyfoot[LO,LE]{UC Berkeley -- MIDS}
+- \fancyfoot[CO,CE]{Spring semester 2016}
+- \fancyfoot[RE,RO]{\thepage}
+- \renewcommand{\headrulewidth}{0.5pt}
+- \renewcommand{\footrulewidth}{0.5pt}
+---
+
+**********
+
+\pagebreak
+
+# Exercises
+
+```{r, echo = FALSE, warning = FALSE}
+require(knitr, quietly = TRUE)
+read_chunk('code/W271_HW8_template.R')
+opts_chunk$set(message = FALSE, warning = FALSE)
+opts_chunk$set(fig.width = 4, fig.height = 3)
+# Set path to data here (don't use setwd() inside a chunk!!!)
+opts_knit$set(root.dir = './data')
+```
+
+```{r Libraries-Functions-Constants, echo = FALSE}
+```
+
+## Exercise 1
+
+**Build an univariate linear time series model (i.e AR, MA, and ARMA models) using the series in `hw08_series.csv`.**
+
++ **Use all the techniques that have been taught so far to build the model, including date examination, data visualization, etc.**
+
++ **All the steps to support your final model need to be shown clearly.**
+
++ **Show that the assumptions underlying the model are valid.**
+
++ **Which model seems most reasonable in terms of satisfying the model’s underling assumption?**
+
++ **Evaluate the model performance (both in- and out-of-sample)**
+
++ **Pick your "best" models and conduct a 12-step ahead forecast. Discuss your results. Discuss the choice of your metrics to measure "best".
+
+**********

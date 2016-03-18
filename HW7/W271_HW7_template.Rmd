@@ -1,0 +1,105 @@
+---
+title: "**W271**-2 -- Spring 2016 -- **HW 7**"
+author: "***Juanjo Carin, Kevin Davis, Ashley Levato, Minghu Song***"
+date: "*March 30, 2016*"
+output:
+   pdf_document:
+     fig_caption: yes
+     toc: yes
+numbersections: false
+geometry: margin=1in
+options: width=30
+fontsize: 10pt
+linkcolor: blue
+header-includes:
+- \usepackage{fancyhdr}
+- \pagestyle{fancy}
+- \fancyhead[LO,LE]{Carin, Davis, Levato, Song}
+- \fancyhead[CE,CO]{W271 -- HW 7 -- \leftmark}
+- \fancyhead[RE,RO]{\rightmark}
+- \fancyfoot[LO,LE]{UC Berkeley -- MIDS}
+- \fancyfoot[CO,CE]{Spring semester 2016}
+- \fancyfoot[RE,RO]{\thepage}
+- \renewcommand{\headrulewidth}{0.5pt}
+- \renewcommand{\footrulewidth}{0.5pt}
+---
+
+**********
+
+\pagebreak
+
+# Exercises
+
+```{r, echo = FALSE, warning = FALSE}
+require(knitr, quietly = TRUE)
+read_chunk('code/W271_HW7_template.R')
+opts_chunk$set(message = FALSE, warning = FALSE)
+opts_chunk$set(fig.width = 4, fig.height = 3)
+# Set path to data here (don't use setwd() inside a chunk!!!)
+opts_knit$set(root.dir = './data')
+```
+
+```{r Libraries-Functions-Constants, echo = FALSE}
+```
+
+## Question 1
+
+1. Load hw07_series1.csv
+
+...
+
+2. Describe the basic structure of the data and provide summary statistics of the series
+
+...
+
+3. Plot histogram and time-series plot of the series. Describe the patterns exhibited in histograrm and time-series plot. For time series analysis, is it sufficient to use only histogram to describe a series?
+
+...
+
+4. **Plot the ACF and PACF of the series. Describe the patterns exhibited in the ACF and PACF.**
+
+...
+
+5. **Estimate the series using the `ar()` function.**
+
+...
+
+6. **Report the estimated AR parameters, the order of the model, and standard errors.**
+
+...
+
+**********
+
+\pagebreak
+
+
+
+## Question 2
+
+1. **Simulate a time series of lenght 100 for the following model. Name the series $x$.**
+
+$$\mathbf{x_t = \frac{5}{6} x_{t-1} - \frac{1}{6} x_{t-2} + \omega_t}$$
+
+...
+
+2. **Plot the correlogram and partial correlogram for the simulated series. Comments on the plots.**
+
+...
+
+3. **Estimate an AR model for this simulated series. Report the estimated AR parameters, standard errors, and the order of the AR model.**
+
+...
+
+4. **Construct a 95% confidence intervals for the parameter estimates of the estimated model. Do the "true" model parameters fall within the confidence intervals? Explain the 95% confidence intervals in this context.**
+
+...
+
+5. **Is the estimated model stationary or non-stationary?**
+
+...
+
+6. **Plot the correlogram of the residuals of the estimated model. Comment on the plot.**
+
+...
+
+**********
