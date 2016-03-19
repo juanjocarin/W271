@@ -10,14 +10,14 @@ library(ggplot2)
 library(ggfortify)
 library(scales)
 library(knitr)
-# library(pastecs)
+library(pastecs)
 # library(car)
 # library(sandwich)
 # library(lmtest)
 library(dplyr)
 library(tidyr)
 library(stargazer)
-# library(pander)
+library(pander)
 # library(texreg)
 # library(weatherData)
 library(scales)
@@ -75,48 +75,148 @@ desc_stat <- function(x, variables, caption) {
 # QUESTION 1 --------------------------------------------------------------
 # Load hw07_series1.csv
 # setwd('./HW7/data')
-hw07 <- read.csv('hw07_series1.csv', header = FALSE)
+hw07 <- read.csv('hw07_series1.csv', header = FALSE) # CSV has no headers
+names(hw07)
+
+
+## @knitr Question1-2
+# Describe the basic structure of the data and 
+# provide summary statistics of the series
+str(hw07)
+dim(hw07)
+# See the definition of the function in ## @knitr Libraries-Functions-Constants
 desc_stat(hw07, 'Time series', 'Descriptive statistics of the time series')
 
+## @knitr Question1-3-1
+# Plot histogram and time-series plot of the series
+# Describe the patterns exhibited in histograrm and time-series plot
+hw07.ts <- hw07[, 1]
+hist(hw07.ts, breaks = 15, col="gray", freq = FALSE, 
+     xlab = "Level / Amplitude", main = "Histogram of the time series")
+lines(density(hw07.ts), col = 'blue', lty = 2)
+leg.txt <- c("Estimated density plot")
+legend("topleft", legend = leg.txt, lty = 2, col = "blue", bty = 'n', cex = .8)
+
+## @knitr Question1-3-2
+more_desc_stat <- as.matrix(round(stat.desc(hw07, desc = FALSE, basic = FALSE, 
+                                            norm = TRUE), 3))
+colnames(more_desc_stat) <- "Time series"
+kable(more_desc_stat, 
+       caption = "Descriptive statistics about normality of the time series")
+
+## @knitr Question1-3-3
+plot(1:length(hw07.ts), hw07.ts, col = 'blue', type = 'l', 
+     xlab = "Observation / Time Period", ylab = "Level / Amplitude", 
+     main = "Time-series plot")
+abline(h = mean(hw07.ts), col = 'red', lty = 2)
+lines(stats::filter(hw07.ts, sides=2, rep(1, 9)/9), lty = 1, lwd = 1.5, 
+      col = "green")
+leg.txt <- c("Time-series", "Mean value", 
+             "9-Point Symmetric Moving Average")
+legend("bottomright", legend = leg.txt, lty = c(1, 2, 1), 
+       col = c("blue", "red", "green"), bty = 'n', cex = .8)
 
 
-## @knitr Question2-a
-# QUESTION 2 --------------------------------------------------------------
-# Generate a zero-drift random walk model using 500 simulation
-set.seed(123)
-N <- 500 # number of simulations / time periods
-wn <- rnorm(n = N, mean = 0, sd = 1) # white noise (can use any mean and sd)
-rw <- cumsum(wn)
-# Another way
-# rw2 <- wn; for (t in 2:N) rw2[t] <- rw2[t-1] + wn[t]
-# Check that both ways are equivalent
-# all(round(rw,4)==round(rw2,4))
-
-
-## @knitr Question2-b
-# Provide the descriptive statistics of the simulated realizations
-# mean, standard deviation, 25th, 50th, and 75th quantiles, minimum, and maximum
-# desc_stat(cbind(wn, rw), c(' White noise', 'Random walk'),
-#           paste('Descriptive statistics of the simulated random walk',
-#                 'and the white noise that generates it'))
-# See the definition of the function in ## @knitr Libraries-Functions-Constants
-desc_stat(rw, 'Random walk', 
-          'Descriptive statistics of the simulated random walk')
-
-
-## @knitr Question2-e
-# c. Plot the time-series plot of the simulated realizations
-# d. Plot the autocorrelation graph
-# e. Plot the partial autocorrelation graphpar(mfrow=c(2, 2))
-par(mfrow=c(2, 2))
-plot.ts(rw, 
-        main = "Time plot of a 500 simulation\nof a zero-drift random walk", 
-        ylab="Level", xlab = 'Observation', col="blue")
-hist(rw, breaks = 20, col="gray", freq = FALSE, xlab = "Level", 
-     main = "Histogram of a 500 simulation\nof a zero-drift random walk")
-acf(rw, main="ACF of a 500 simulation\nof a zero-drift random walk")
-pacf(rw, main="PACF of a 500 simulation\nof a zero-drift random walk")
+## @knitr Question1-4
+# Plot the ACF and PACF of the series
+par(mfrow=c(1, 2))
+acf(hw07.ts, lag.max = 20, main = "ACF of the time series")
+pacf(hw07.ts, lag.max = 20, main = "PACF of the time series")
 par(mfrow=c(1, 1))
+
+
+## @knitr Question1-5
+# Estimate the series using the `ar()` function
+(hw07.arfit <- ar(hw07.ts, method = "mle"))
+
+
+## @knitr Question1-6-1
+# Report the estimated AR parameters, the order of the model, and SEs
+hw07.arfit$order # order of the AR model with lowest AIC
+
+## @knitr Question1-6-2
+hw07.arfit$ar # parameter estimates
+
+## @knitr Question1-6-3
+hw07.arfit$aic # AICs of the fit models (differences vs. best model)
+hw07.arfit$x.mean; mean(hw07.ts) # mean of the fit model and the data
+hw07.arfit$var.pred
+hw07.arfit$asy.var.coef # asymptotic Covariance matrix
+
+## @knitr Question1-6-4
+Parameters <- cbind(hw07.arfit$ar, 
+                    sqrt(diag(hw07.arfit$asy.var.coef)), 
+                    matrix(sapply(c(-2,2), function(i) 
+                      hw07.arfit$ar + i * sqrt(diag(hw07.arfit$asy.var.coef))), 
+                      ncol = 2))
+rownames(Parameters) <- c("lag 1", "lag 2")
+colnames(Parameters) <- c("Coefficient", "SE", "95% CI lower", "95% CI upper")
+kable(Parameters, 
+      caption = "Coefficients, SEs, and 95% CIs of the estimated AR(2) model")
+
+
+
+
+## @knitr Question2-1
+# QUESTION 2 --------------------------------------------------------------
+# Simulate a time series of lenght 100 for the following model
+# Name the series x
+set.seed(12345)
+x <- arima.sim(model = list(ar = c(5/6, -1/6), ma = 0), n = 100)
+par(mfrow=c(2, 1))
+hist(x, breaks = 15, col="gray", freq = FALSE, 
+     xlab = "Level / Amplitude", 
+     main = "Histogram of the simulated time series")
+lines(density(x), col = 'blue', lty = 2)
+# leg.txt <- c("Estimated density plot")
+# legend("topleft", legend = leg.txt, lty = 2, col = "blue", bty = 'n', cex = .6)
+plot(1:length(x), x, col = 'blue', type = 'l', 
+     xlab = "Observation / Time Period", ylab = "Level / Amplitude", 
+     main = "Time-series plot")
+abline(h = mean(x), col = 'red', lty = 2)
+lines(stats::filter(x, sides=2, rep(1, 9)/9), lty = 1, lwd = 1.5, 
+      col = "green")
+# leg.txt <- c("Simulated time-series", "Mean value", 
+#              "9-Point Symmetric Moving Average")
+# legend("topleft", legend = leg.txt, lty = c(1, 2, 1), 
+#        col = c("blue", "red", "green"), bty = 'n', cex = .6)
+par(mfrow=c(1, 1))
+
+
+## @knitr Question2-2
+# Plot the correlogram and partial correlogram for the simulated series
+par(mfrow=c(1, 2))
+acf(x, lag.max = 30, main = "ACF of the simulated\ntime series")
+pacf(x, lag.max = 30, main = "PACF of the simulated\ntime series")
+par(mfrow=c(1, 1))
+
+
+## @knitr Question2-3
+# Estimate an AR model for this simulated series
+# Report the estimated AR parameters, standard errors, and the order of the AR 
+# model
+x.arfit <- ar(x, method = "mle")
+x.arfit$order # order of the AR model with lowest AIC
+x.arfit$ar # parameter estimates
+x.arfit$aic # AICs of the fit models (differences vs. best model)
+x.arfit$x.mean; mean(x) # mean of t
+x.arfit$var.pred
+x.arfit$asy.var.coef # asymptotic Covariance matrix
+Parameters <- cbind(x.arfit$ar, 
+                    sqrt(diag(x.arfit$asy.var.coef)), 
+                    matrix(sapply(c(-2,2), function(i) 
+                      x.arfit$ar + i * sqrt(diag(x.arfit$asy.var.coef))), 
+                      ncol = 2))
+rownames(Parameters) <- sapply(1:dim(Parameters)[1], function(i) 
+  paste("lag", i))
+colnames(Parameters) <- c("Coefficient", "SE", "95% CI lower", "95% CI upper")
+kable(Parameters, 
+      caption = "Coefficients, SEs, and 95% CIs of the estimated AR(2) model")
+
+
+
+
+
 
 
 
