@@ -135,6 +135,12 @@ As shown in the output of the code above, models of other orders (especially the
 
 Both coefficients are significant (the CI does not include zero in both cases).
 
+> It should be noticed that `arima()` returns slightly different parameter estimates and SEs (which now are not exactly the same for both lags), but the differences with `ar()` are pretty small.
+
+> ```{r Question1-6-5, echo = c(1:2)}
+> ```
+
+
 **********
 **********
 
@@ -194,13 +200,20 @@ In the answer to the previous question we already estimated the SE of the parame
 ```{r Question2-4, echo = 3}
 ```
 
-Based on Table 4 above (see the last two columns), the "true" model parameters (`r frmt(5/6,4)` and `r frmt(-1/6,4)`) fall within the confidence intervals.
+Based on Table 5 above (see the last two columns), the "true" model parameters (`r frmt(5/6,4)` and `r frmt(-1/6,4)`) fall within the confidence intervals.
 
 As we explained in **2.3**, what happens in many of the simulations (when using a different seed) is that the best fitted model is an AR(1) so there is no estimate for the coefficient for lag 2). In any case, if we repeat the simulation over and over, the "true" model parameters will fall within the CIs about 95% of the time (at least the coefficient of lag 1; and also the coefficient of lag 2 if we "force" our fitted model to be AR(2)[^note]).
 
 [^note]: \ \ \ That would have to be done using the `arima()` function rather than `ar()`: `arima(x, order = c(2,0,0))`.
 
+> Again, we may notice that `arima()` returns slightly different parameter estimates and SEs (which now are not exactly the same for both lags), but the differences with `ar()` are pretty small (and hence the "true" model parameters fall within the confidence intervals).
+
+> ```{r Question2-4-2, echo = c(1:2)}
+> ```
+
 **********
+
+\pagebreak
 
 
 2.5. **Is the estimated model stationary or non-stationary?**

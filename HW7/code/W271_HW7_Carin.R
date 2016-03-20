@@ -102,7 +102,7 @@ more_desc_stat <- as.matrix(round(stat.desc(hw07, desc = FALSE, basic = FALSE,
                                             norm = TRUE), 3))
 colnames(more_desc_stat) <- "Time series"
 kable(more_desc_stat, 
-       caption = "Descriptive statistics about normality of the time series")
+      caption = "Descriptive statistics about normality of the time series")
 
 ## @knitr Question1-3-3
 plot(1:length(hw07.ts), hw07.ts, col = 'blue', type = 'l', 
@@ -151,9 +151,21 @@ Parameters <- cbind(hw07.arfit$ar,
                       ncol = 2))
 rownames(Parameters) <- c("lag 1", "lag 2")
 colnames(Parameters) <- c("Coefficient", "SE", "95% CI lower", "95% CI upper")
-kable(Parameters, 
+kable(Parameters, digits = 4, 
       caption = "Coefficients, SEs, and 95% CIs of the estimated AR(2) model")
 
+## @knitr Question1-6-5
+hw07.arfit2 <- arima(hw07.ts, order = c(2, 0, 0), method = "ML")
+Parameters2 <- cbind(hw07.arfit2$coef[1:2], 
+                     sqrt(diag(hw07.arfit2$var.coef))[1:2], 
+                     matrix(sapply(c(-2,2), function(i) 
+                       hw07.arfit2$coef[1:2] + 
+                         i * sqrt(diag(hw07.arfit2$var.coef))[1:2]), ncol = 2))
+rownames(Parameters2) <- c("lag 1", "lag 2")
+colnames(Parameters2) <- c("Coefficient", "SE", "95% CI lower", "95% CI upper")
+kable(Parameters2, digits = 4, 
+      caption = paste0("Coefficients, SEs, and 95% CIs of the estimated AR(2)", 
+                       " model when using the `arima` function"))
 
 
 
@@ -218,8 +230,22 @@ Parameters <- cbind(x.arfit$ar, sqrt(diag(x.arfit$asy.var.coef)),
 rownames(Parameters) <- sapply(1:dim(Parameters)[1], function(i) 
   paste("lag", i))
 colnames(Parameters) <- c("Coefficient", "SE", "95% CI lower", "95% CI upper")
-kable(Parameters, 
-      caption = "Coefficients, SEs, and 95% CIs of the estimated AR(2) model")
+kable(Parameters, digits = 4, 
+      caption = "Coefficients, SEs, and 95% CIs of the estimated model")
+
+
+## @knitr Question2-4-2
+x.arfit2 <- arima(x, order = c(2, 0, 0), method = "ML")
+Parameters2 <- cbind(x.arfit2$coef[1:2], sqrt(diag(x.arfit2$var.coef))[1:2], 
+                     matrix(sapply(c(-2,2), function(i) 
+                       x.arfit2$coef[1:2] + 
+                         i * sqrt(diag(x.arfit2$var.coef))[1:2]), ncol = 2))
+rownames(Parameters2) <- c("lag 1", "lag 2")
+colnames(Parameters2) <- c("Coefficient", "SE", "95% CI lower", "95% CI upper")
+kable(Parameters2, digits = 4, 
+      caption = paste0("Coefficients, SEs, and 95% CIs of the estimated", 
+                       " model when using the `arima` function"))
+
 
 
 ## @knitr Question2-5
