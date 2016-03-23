@@ -157,4 +157,4 @@ abline(m)
 library(car)
 linearHypothesis(reg, sapply(c(2:12), function(i) paste0("M", i)))
 
-
+#############
