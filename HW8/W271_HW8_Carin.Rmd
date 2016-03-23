@@ -1,0 +1,113 @@
+---
+title: "**W271**-2 -- Spring 2016 -- **HW 8**"
+author: "***Juanjo Carin, Kevin Davis, Ashley Levato, Minghu Song***"
+date: "*April 6, 2016*"
+output:
+   pdf_document:
+     fig_caption: yes
+     toc: no
+numbersections: false
+geometry: margin=1in
+options: width=30
+fontsize: 10pt
+linkcolor: blue
+header-includes:
+- \usepackage{fancyhdr}
+- \pagestyle{fancy}
+- \fancyhead[LO,LE]{Carin, Davis, Levato, Song}
+- \fancyhead[CE,CO]{W271}
+- \fancyhead[RE,RO]{HW 8}
+- \fancyfoot[LO,LE]{UC Berkeley -- MIDS}
+- \fancyfoot[CO,CE]{Spring semester 2016}
+- \fancyfoot[RE,RO]{\thepage}
+- \renewcommand{\headrulewidth}{0.5pt}
+- \renewcommand{\footrulewidth}{0.5pt}
+---
+
+**********
+
+<!--# Exercises-->
+
+```{r, echo = FALSE, warning = FALSE}
+require(knitr, quietly = TRUE)
+read_chunk('code/W271_HW8_Carin.R')
+opts_chunk$set(message = FALSE, warning = FALSE)
+opts_chunk$set(fig.width = 4, fig.height = 3)
+# Set path to data here (don't use setwd() inside a chunk!!!)
+opts_knit$set(root.dir = './data')
+```
+
+```{r Libraries-Functions-Constants, echo = FALSE}
+```
+
+<!--## Exercise 1-->
+
+**Build an univariate linear time series model (i.e AR, MA, and ARMA models) using the series in `hw08_series.csv`.**
+
++ **Use all the techniques that have been taught so far to build the model, including date examination, data visualization, etc.**
+
++ **All the steps to support your final model need to be shown clearly.**
+
++ **Show that the assumptions underlying the model are valid.**
+
++ **Which model seems most reasonable in terms of satisfying the model’s underling assumption?**
+
++ **Evaluate the model performance (both in- and out-of-sample)**
+
++ **Pick your "best" models and conduct a 12-step ahead forecast. Discuss your results. Discuss the choice of your metrics to measure "best".**
+
+**********
+
+\pagebreak
+
+First we load the series:
+
+```{r ex1-1, echo = -c(1:2)}
+```
+
+The file has two columns but the first one is just an incremental index so we discard it. The second column (that is stored in a numeric vector called `hw08`) contains `r length(hw08)` observations. `r length(hw08)` is a multiple of 12 ($`r length(hw08)` / 12 = `r length(hw08) / 12`$) so **we'll assume that the series contains montly observations from `r length(hw08) / 12` years (*for labelling purposes only, sometimes we'll also assume that the period goes from 1980 to 2010*)**.
+
+Let's explore the main descriptive statistics of the series, as well as its histogram and time-series plot:
+
+```{r ex1-2}
+```
+
+```{r ex1-3, echo = FALSE, fig.width = 5, fig.height = 3.75, fig.cap = "Histogram of the data."}
+```
+
+\pagebreak
+
+The histogram shows that the distribution of the data is multimodal, and far from normal. But as usual, it tells us nothing about the dynamics of the time series. To label the time-series plot, we will assume (as mentioned) that the data were collected on a monthly basis and will use 1980 as an arbitrary starting point.
+
+```{r ex1-4-1, echo = 1, fig.width = 5, fig.height = 3.75, fig.cap = "Time-series plot (assuming monthly data, from 1980 until 2010)."}
+```
+
+\pagebreak
+
+Our assumption that the data corresponds to a monthly time series seems reasonable after noticing that there seems to be some seasonality every 12 time periods (see Figure 3 below: the level increases over the first 6 months---especially in February and June---, goes down in July, up from August to October, and down again the last 2 months of the year).
+
+
+```{r ex1-4-2, echo = FALSE, fig.height = 2.33, fig.cap = "Time-series plot of (the last 72 observations---6 years?---of) the data."}
+```
+
+\pagebreak
+
+Apart from showing that the time series is **not mean stationary** (the mean depends on time, with an increasing trend), Figure 2 in the previous page shows that the time is also **not variance stationary:** the variance is not constant but changes with time (increasing in the last years, especially the last 7); see Table 2 and Figure 4 in the next page.
+
+```{r ex1-5, echo = FALSE,  fig.width = 5.33, fig.height = 4, fig.cap = "Boxplot of the series, per year (every 12 observations)."}
+```
+
+```{r ex1-6, echo = FALSE}
+```
+
+Both results indicate that the data does not seem to be a realization of a stationary process, so **an ARMA model may not be a good fit for our data**.
+
+\pagebreak
+
+To finish the Exploratory Data Analysis, let's decompose the time series to check the growing trend and seasonality:
+
+```{r ex1-7, echo = FALSE,  fig.width = 6, fig.height = 5.6, fig.cap = "(Additive) decomposition of the time series."}
+```
+
+
+**********

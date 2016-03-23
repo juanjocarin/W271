@@ -56,6 +56,6 @@ opts_knit$set(root.dir = './data')
 
 + **Evaluate the model performance (both in- and out-of-sample)**
 
-+ **Pick your "best" models and conduct a 12-step ahead forecast. Discuss your results. Discuss the choice of your metrics to measure "best".
++ **Pick your "best" models and conduct a 12-step ahead forecast. Discuss your results. Discuss the choice of your metrics to measure "best".**
 
 **********
