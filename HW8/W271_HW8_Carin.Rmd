@@ -92,7 +92,7 @@ Our assumption that the data corresponds to a monthly time series seems reasonab
 
 \pagebreak
 
-Apart from showing that the time series is **not mean stationary** (the mean depends on time, with an increasing trend), Figure 2 in the previous page shows that the time is also **not variance stationary:** the variance is not constant but changes with time (increasing in the last years, especially the last 7); see Table 2 and Figure 4 in the next page.
+Apart from showing that the time series is **not (mean) stationary** (the mean depends on time, with an increasing trend, and the time series is very **persistent**), Figure 2 in the previous page shows that the time is also **not variance stationary:** the variance is not constant but changes with time (increasing in the last years, especially the last 7); see Table 2 and Figure 4 in the next page.
 
 ```{r ex1-5, echo = FALSE,  fig.width = 5.33, fig.height = 4, fig.cap = "Boxplot of the series, per year (every 12 observations)."}
 ```
@@ -100,7 +100,7 @@ Apart from showing that the time series is **not mean stationary** (the mean dep
 ```{r ex1-6, echo = FALSE}
 ```
 
-Both results indicate that the data does not seem to be a realization of a stationary process, so **an ARMA model may not be a good fit for our data**.
+Both results indicate that the data does not seem to be a realization of a stationary process, so **an ARMA model may not be a good fit for our data**????
 
 \pagebreak
 
@@ -109,5 +109,14 @@ To finish the Exploratory Data Analysis, let's decompose the time series to chec
 ```{r ex1-7, echo = FALSE,  fig.width = 6, fig.height = 5.6, fig.cap = "(Additive) decomposition of the time series."}
 ```
 
+\pagebreak
+
+The correlogram (where 2 years---or 24 1-month time displacements---are plotted) also shows how persistent the series is, looking very much like that of a random walk with drift. The PACF drops off very sharply after the 1st lag.
+
+```{r ex1-8, echo = FALSE, fig.width=6, fig.height=4.5, fig.cap = "Autocorrelation and partial autocorrelation graphs"}
+```
+
+```{r ex1-9}
+```
 
 **********

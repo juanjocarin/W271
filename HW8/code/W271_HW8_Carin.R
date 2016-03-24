@@ -138,7 +138,14 @@ plot(decompose(hw08.ts, type = 'additive'), col = 'blue',
 # pacf(na.omit(decompose(hw08.ts, type = 'additive')$random), lag.max = 24)
 # plot(stl(hw08.ts, s.window="periodic"), col = 'blue')
 
+## @knitr ex1-8
+# Plot the ACF and PACF of the series
+par(mfrow=c(1, 2))
+acf(hw08.ts, lag.max = 20, main = "ACF of the time series")
+pacf(hw08.ts, lag.max = 20, main = "PACF of the time series")
+par(mfrow=c(1, 1))
 
+## @knitr ex1-9
 M <- factor(cycle(hw08.ts))
 reg <- lm(hw08.ts ~ time(hw08.ts) + I(time(hw08.ts)^2)+ M)
 plot(reg$residuals)
@@ -157,4 +164,4 @@ abline(m)
 library(car)
 linearHypothesis(reg, sapply(c(2:12), function(i) paste0("M", i)))
 
-#############
+
