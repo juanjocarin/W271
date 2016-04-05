@@ -1,0 +1,677 @@
+---
+title: "**W271**-2 -- Spring 2016 -- **HW 8**"
+author: "***Juanjo Carin, Kevin Davis, Ashley Levato, Minghu Song***"
+date: "*April 6, 2016*"
+output:
+   pdf_document:
+     fig_caption: yes
+     fig_height: 3
+     fig_width: 4
+     toc: yes
+     toc_depth: 4
+numbersections: true
+geometry: margin=1in
+options: width=30
+fontsize: 10pt
+linkcolor: blue
+header-includes:
+- \usepackage{fancyhdr}
+- \pagestyle{fancy}
+- \fancyhead[LO,LE]{Carin, Davis, Levato, Song}
+- \fancyhead[CE,CO]{W271 -- HW 8}
+- \fancyhead[RE,RO]{\rightmark}
+- \fancyfoot[LO,LE]{UC Berkeley -- MIDS}
+- \fancyfoot[CO,CE]{Spring semester 2016}
+- \fancyfoot[RE,RO]{\thepage}
+- \renewcommand{\headrulewidth}{0.5pt}
+- \renewcommand{\footrulewidth}{0.5pt}
+---
+
+**********
+
+\pagebreak
+
+<!--# Exercises-->
+
+```{r, echo = FALSE, warning = FALSE}
+require(knitr, quietly = TRUE)
+read_chunk('code/W271_HW8_Carin-Davis-Levato-Song.R')
+opts_chunk$set(message = FALSE, warning = FALSE)
+opts_chunk$set(fig.width = 4, fig.height = 3)
+# Set path to data here (don't use setwd() inside a chunk!!!)
+opts_knit$set(root.dir = './data', global.par = TRUE)
+```
+
+```{r Libraries-Functions-Constants, echo = FALSE}
+```
+
+<!--## Exercise 1-->
+
+**Build an univariate linear time series model (i.e AR, MA, and ARMA models) using the series in `hw08_series.csv`.**
+
++ **Use all the techniques that have been taught so far to build the model, including date examination, data visualization, etc.**
+
++ **All the steps to support your final model need to be shown clearly.**
+
++ **Show that the assumptions underlying the model are valid.**
+
++ **Which model seems most reasonable in terms of satisfying the model’s underling assumption?**
+
++ **Evaluate the model performance (both in- and out-of-sample)**
+
++ **Pick your "best" models and conduct a 12-step ahead forecast. Discuss your results. Discuss the choice of your metrics to measure "best".**
+
+**********
+
+# Exploratory Data Analysis
+
+## Loading the Data
+
+First we load the series:
+
+```{r ex1-load, echo = -c(1:2)}
+```
+
+The file has two columns but the first one is just an incremental index so we discard it. The second column (that is stored in a numeric vector called `hw08`) contains `r length(hw08)` observations. `r length(hw08)` is a multiple of 12 ($`r length(hw08)` / 12 = `r length(hw08) / 12`$) so **we'll assume that the series contains montly observations from `r length(hw08) / 12` years (*for labelling purposes only, sometimes we'll also assume that the period goes from 1980 to 2010*)**.
+
+\pagebreak
+
+## Exploratory Data Analysis
+
+Let's explore the main descriptive statistics of the series, as well as its histogram and time-series plot:
+
+```{r ex1-desc_stats}
+```
+
+```{r ex1-hist, echo = FALSE, fig.width = 5, fig.height = 3.75, fig.cap = "Histogram of the data."}
+```
+
+The histogram shows that the distribution of the data is multimodal, and hence far from normal. But as usual, it tells us nothing about the dynamics of the time series: only what values were more or less frequent, but not when they happened.
+
+To label the time-series plot, we will assume (as mentioned) that the data were collected on a monthly basis and will use 1980 as an **arbitrary** starting point.
+
+```{r ex1-time_plot, echo = 1, fig.width = 5, fig.height = 3.75, fig.cap = "Time-series plot (assuming monthly data, from 1980 until 2010)."}
+```
+
+Our assumption that the data corresponds to a monthly time series seems reasonable after noticing that there seems to be some seasonality every 12 time periods (see Figure 3 below, which shows only the last observations: the level increases over the first 6 months---especially in February and June---, goes down in July, up from August to October, and down again the last 2 months of the year).
+
+```{r ex1-time_plot_zoom, echo = FALSE, fig.height = 2.25, fig.cap = "Time-series plot of (the last 72 observations---6 years?---of) the data."}
+```
+
+\pagebreak
+
+Apart from showing that the time series is **not (mean) stationary** (the mean depends on time, with an increasing trend, and the time series is very **persistent**), Figure 2 in the previous page shows that the time is also **not variance stationary:** the variance is not constant but changes with time (increasing in the last years, especially the last 7); see Table 2 and Figure 4 in the next page.
+
+```{r ex1-boxplot, echo = FALSE,  fig.width = 5, fig.height = 4, fig.cap = "Boxplot of the series, per year (every 12 observations)."}
+```
+
+```{r ex1-var_table, echo = FALSE}
+```
+
+Both results indicate that the data does not seem to be a realization of a stationary process, so **an ARMA model may not be a good fit for our data** (maybe it is---as it happened with the USNZ series we analyzed in class---, but it will certainly not be good for forecasting). At the very least, we should transform the data to stabilize the variance, take first differences of the data until they're stationary, and so forth.
+
+\pagebreak
+
+To continue the Exploratory Data Analysis, let's decompose the time series to check the growing (though not exactly linear) trend and seasonality:
+
+```{r ex1-decompose, echo = FALSE,  fig.width = 6, fig.height = 5.6, fig.cap = "(Additive) decomposition of the time series."}
+```
+
+\pagebreak
+
+## ACF and PACF of the Time Series
+
+The correlogram (where 2 years---or 24 1-month time displacements---are plotted) also shows how persistent the series is, looking very much like that of a random walk with drift. That is also an indication that an MA model may not be a good fit for this time series. The PACF drops off very sharply after the 1st lag, though the PACF of the 12th lag is also significant (probably due to the seasonal component).
+
+```{r ex1-acf_pacf, echo = FALSE, fig.width=6, fig.height=4.5, fig.cap = "Autocorrelation and partial autocorrelation graphs"}
+```
+
+\pagebreak
+
+# Univariate Linear Time Series models
+
+## Candidate Models
+
+We are going to build several models of each family (ARMA, AR, and MA---the last two ones are just an special case of the former), with up to 12 coefficients each (i.e., the most complex AR and MA models will be AR(12) and MA(12), respectively; as for the ARMA models, they could be ARMA(11,1), ARMA(10,2), ..., ARMA(6,6)). We will select those models (within each family) with the lowest value of **AIC** and **BIC**---which puts a greater penalty on the number of coefficients---, and test their behavior in terms of their residuasl and (in- and out-of-sample) fit.
+
+There are $13^2=`r 13^2`$ possible combinations of 2 orders from 0 to 12 each, but since we're excluding the cases where $p=0$ and $q=0$ at the same time (that is, an AR(0) or MA(0) or ARMA(0,0) model, which is simply a white noise), plus all the combinations for which $p+q>12$, the number is limited to 90. And, depending on the time series, some of them will not be valid: those that yield a non-stationary process (the function `arima()` will yield an error in those cases). In this particular case, only 37 of those 90 potential models can actually be estimated.
+
+```{r ex1-models_analysis, echo = c(2:11, 46:47)}
+```
+
+As shown below, the range of the AIC (and BIC) values is quite reduced for AR models, slightly wider for ARMA models (which have lower AIC and BIC values in most cases), and quite huge for MA models, which have the highest (and hence worst) values of all models: for the number of coefficients that we have considered, even the best MA model is worse (with respect to these criteria, at least) than the worst of the AR or ARMA models.
+
+```{r ex1-models_analysis-2, echo = FALSE, fig.width=6, fig.height=4.5, fig.cap = "Box-plots of the AIC and BIC values per model family"}
+```
+
+\pagebreak
+
+The following plots show the AIC and BIC values for the AR and MA models, depending on the number of coefficients ($p$ and $q$, respectively). As we can see:
+
++ Only 4 of the possible 12 AR models could be estimated (the others were not stationary).
++ The AIC values of the AR(1) and AR(2) models are quite similar. Those of the AR(3) and AR(9) models are lower. And though the AIC value of the AR(9) is the lowest, its BIC value is larger than all the others (because of the extra parameters).
++ The AIC and BIC values of the MA models are all higher than those of the AR models. They decrease with the number of coefficients, though they are pretty much the same for 10, 11, or 12 coefficients.
+
+```{r ex1-models_analysis-3, echo = FALSE, fig.width=6, fig.height=4.5, fig.cap = "AIC and BIC values of the AR and MA models vs. the number of coefficients"}
+```
+
+\pagebreak
+
+Next we plot two similar graphs (only for the AIC; the one for the BIC is quite similar), one for all models, and only for the ARMA models (because including the MA models increases the scale so it's harder to compare the lengths of the bars). They both show that the model with the lowest AIC value is the ARMA(8,3) one. Do note that there are no values for half of the $p-q$ plane (since we limited our search to the region $p+q \leq 12$).
+
+```{r ex1-models_analysis-4, echo = FALSE, fig.width=5, fig.height=3.75, fig.cap = "AIC of the models depending on the order (p and q)"}
+```
+
+```{r ex1-models_analysis-5, echo = FALSE, fig.width=5, fig.height=3.75, fig.cap = "AIC of the ARMA models depending on the order (p and q)"}
+```
+
+\pagebreak
+
+A table (ordered by the AIC or BIC value, in increasing order) is more helpful to check which are the better models.
+
+```{r ex1-models_analysis-6, echo = FALSE}
+```
+
+Thus, we confirm that the best models of all (based on the mentioned criteria) are the ARMA ones: first the **\color{red}{ARMA(8,3)}**, then the **\color{red}{ARMA(7,4)}**, and third the **\color{red}{ARMA(3,9)}**. Depending on the criterion, the fourth best option is the ARMA(1,10) if we compare based on the AIC, or the ARMA(5,2) if we use the BIC (because it only uses 7 rather than 11 coefficients).
+ 
+A higher number of coefficients may lead to an **overfitted model**, that follows the changes in the random component of the stochastic process very well, but does not do a good job at forecasting. Therefore we will analyze the best 3 ARMA models, together with the 4th one based on the BIC, **\color{red}{ARMA(5,2)}** (to check the impact of fewer coefficients).
+ 
+The best AR model (based on the AIC value) is the **\color{red}{AR(9)}** followed by the **\color{red}{AR(3)}**. That one is the best in terms of the BIC, while the AR(9) is the 4th in the list according to that criterion. Following our previous idea about the impact of the number of coefficients, we'll analyze those 2 models.
+
+As for the MA models, the **\color{red}{MA(12)}** one is the best regardless of the criterion (AIC or BIC). The 2nd best depends on whether we use the AIC (MA(11)) or the BIC value (MA(10)). Because both values are very similar for each of them, we select the **\color{red}{MA(10)}** model as our 2nd choice.
+
+But the lowest AIC or BIC value may not necessarily involve the best model (with highest explanatory power). That criterion should be combined with others, such as how much the residuals of the model resemble a white noise (and then selecting the simplest model among those). The problem with this time series, due to its stationality, is that the correlogram of the residuals never look like that of a white noise: the autocorrelation at lag 12 (and multiples of 12) is always highly significant (unless we transformed the time series, which is not the purpose of this exercise). So we could (and will) inspect visually the correlograms, but most of them do not differ too much between one another, and it's hard to find the differences based on the heights in the correlogram. One approach---still far from perfect---that might be worth exploring is sum the absolute value of all the auto-correlations (and partial auto-correlations) that are significant (i.e., that exceed $2/\sqrt{n}$, the variance of the lag $k$ autocorrelation---$\rho_k$---of a white noise, in absolute value).
+
+```{r ex1-models_analysis-7, echo = c(1:3)}
+```
+
+\pagebreak
+
+```{r ex1-models_analysis-7-2, echo = FALSE}
+```
+
+We find some new models (as well as others that we already considered such as AR(9)) which do not have the lowest AIC or BIC value, but that have lowest significant autocorrelations, overall, and hence look closer to a white noise (whose ideal value, for the 2 parameters shown above, would be  close to zero[^1]). We add the best one with regards to each criterion (ACF: **\color{red}{ARMA(1,10)}**; PACF: **\color{red}{ARMA(1,5)}**) to the list of models to consider.
+
+[^1]: Not exactly zero because 5% of the auto-correlations, on average, will be significant.
+
+```{r ex1-models_analysis-8}
+```
+
+\pagebreak
+
+## AR Models
+
+### Estimation
+
+We start with the best AR model according to the BIC value: **\color{red}{AR(3)}**.
+
+```{r ex1-AR_models-3, echo = 2}
+```
+
+Note that the 2nd coefficient is not significant (its 95% confidence interval includes zero).
+
+```{r ex1-AR_models-3-2}
+```
+
+If we consider the **\color{red}{AR(9)}** model instead, the last 5 coefficients (5 to 9) and 2 others (2 and 3) are not significant:
+
+```{r ex1-AR_models-9, echo = 1}
+```
+
+```{r ex1-AR_models-9-2}
+```
+
+### Diagnostics using Residuals
+
+If we examine the residuals of the **\color{red}{AR(3)}** model we observe that, though their distribution looks like normal, they follow a tend and the variance seems to increase over time. Their ACF and PACF do not look like the ones of white noise (especially---but not only---because the ACF and PACF at lag 12).
+
+```{r ex1-AR-3_res_plots, echo = 1, fig.width=6, fig.height=4.5, fig.cap = "AR(3) model diagnostic based on the residuals"}
+``` 
+
+Nonetheless, we cannot reject the hypothesis of independence of the residual series:
+
+```{r ex1-AR-3_boxtest}
+```
+
+The residuals of the **\color{red}{AR(9)}** model look pretty much the same as those of the AR(3) model.
+
+```{r ex1-AR-9_res_plots, echo = 1, fig.width=6, fig.height=4.5, fig.cap = "AR(9) model diagnostic based on the residuals"}
+``` 
+
+Again, we cannot reject the hypothesis of independence of the residual series (and now the *p*-value of the Box-Ljung test is even less significant, close to one):
+
+```{r ex1-AR-9_boxtest}
+```
+
+### Model Performance Evaluation
+
+#### In-sample fit
+
+Despite the fact that the original series is not stationary and (hence) the residuals of the **\color{red}{AR(3)}** model do not resemble a white noise, the in-sample fit looks reasonable...though not completely: the estimated series is lagged 1 period (compare each value in the first column of the following table with the value in the second column and the next row).
+
+```{r ex1-AR-3_in-sample-fit, echo = FALSE, fig.width=6, fig.height=4.5, fig.cap = "AR(3) model performance evaluation (in-sample)"}
+``` 
+
+\pagebreak
+
+The same happens with the **\color{red}{AR(9)}** model:
+  
+```{r ex1-AR-9_in-sample-fit, echo = FALSE, fig.width=6, fig.height=4.5, fig.cap = "AR(9) model performance evaluation (in-sample)"}
+``` 
+
+\pagebreak
+
+
+#### Out-of-sample fit
+
+The time series has `r length(hw08)` observations (which we believe correspond to `r length(hw08)/12` years of monthly observations). To evaluate the out-of-sample fit we will build the model without the last 10% observations or so: that would exclude `r length(hw08) * 0.1` observations, but we'll limit that number to `r round(length(hw08) * 0.1 /12, 0) * 12` (supposedly 3 years: 2008 to 2010 under our arbitrary assumption that the time series starts in 1980).
+
+> If we repeated the process in [2.1](#candidate-models) with this shortened version of the time series we might get a different AR model, but the purpose of this step is to evaluate our selected model, not a potentially different one.
+
+```{r ex1-AR-3_out-of-sample-fit, echo = c(1:3, 6:7)}
+``` 
+
+\pagebreak
+
+Though the **\color{red}{AR(3)}** model fitted quite well, the out-of-sample forecast is not very good on the long-term, but it is on the short-term: almost all the values of the time series for the 1st year out-of-sample (2008 in the Figure below) are within the 95% confidence interval (so the difference with the forecast is not statistically significant), but most of them for the remaining 2 years left out of the sample are outside that region. Also compare the RMSE, MAE, and other parameters, for both the training and test sets, which were shown in the previous page.
+
+```{r ex1-AR-3_out-of-sample-fit-2, echo = FALSE, fig.width=6, fig.height=4.5, fig.cap = "AR(3) model performance evaluation (out of-sample)"}
+``` 
+
+The **\color{red}{AR(9)}** model is a better (out-of-sample) fit: the mean of the forecasts is still decreasing (while the trend of the original series is positive during the last 3 years) but the slope is lower, and as a result most of the original values (with the exception of the last ones, that would correspond to 2010) are within the 95% confidence interval.
+
+```{r ex1-AR-9_out-of-sample-fit}
+``` 
+
+```{r ex1-AR-9_out-of-sample-fit-2, echo = FALSE, fig.width=6, fig.height=4.5, fig.cap = "AR(9) model performance evaluation (out of-sample)"}
+``` 
+
+\pagebreak
+
+
+## MA Models
+
+### Estimation
+
+We start with the best MA model based on both criteria (AIC and BIC): **\color{red}{MA(12)}**. As shown below, all its coefficients are significant(ly different from zero).
+
+```{r ex1-MA_models-12, echo = 2}
+```
+
+```{r ex1-MA_models-12-2}
+```
+
+\pagebreak
+
+The **\color{red}{MA(10)}** had only slighlty higher AIC and BIC values. Its coefficients are also significant (and, as expected, not very different from the first 10 coefficients of the MA(12) model).
+
+```{r ex1-MA_models-10, echo = 1}
+```
+
+```{r ex1-MA_models-10-2}
+```
+
+### Diagnostics using Residuals
+
+The residuals of the **\color{red}{MA(12)}** model do not look exactly like those of a white noise: the time plot shows a growing trend, the histogram is right-skewed, and many of the auto-correlations (apart from $k=0$) and partial auto-correlations are significantly different from zero.
+
+```{r ex1-MA-12_res_plots, echo = 1, fig.width=6, fig.height=4.5, fig.cap = "MA(12) model diagnostic based on the residuals"}
+``` 
+
+\pagebreak
+
+The result of a Llung-Box test is that we cannot reject the hypothesis of independence of the residual series:
+
+```{r ex1-MA-12_boxtest}
+```
+
+\pagebreak
+
+Something very similar happens with the **\color{red}{MA(10)}**) model.
+
+```{r ex1-MA-10_res_plots, echo = 1, fig.width=6, fig.height=4.5, fig.cap = "MA(10) model diagnostic based on the residuals"}
+``` 
+
+```{r ex1-MA-10_boxtest}
+```
+
+\pagebreak
+
+### Model Performance Evaluation
+
+#### In-sample fit
+
+Surprisingly, the **\color{red}{MA(12)}** model fits the data almost as well as the AR models we've analyized (it captures the trend and seasonality, but it's approximately lagged 1 time period), but since its residuals took higher values (and were more volatile), the differences between the fitted and original values are greater.
+
+```{r ex1-MA-12_in-sample-fit, echo = FALSE, fig.width=6, fig.height=4.5, fig.cap = "MA(12) model performance evaluation (in-sample)"}
+``` 
+
+\pagebreak
+
+Again, there is not much difference with the **\color{red}{MA(10)}** model.
+
+```{r ex1-MA-10_in-sample-fit, echo = FALSE, fig.width=6, fig.height=4.5, fig.cap = "MA(10) model performance evaluation (in-sample)"}
+``` 
+
+\pagebreak
+
+#### Out-of-sample fit
+
+The out-of-sample fit of the **\color{red}{MA(12)}** is horrible (see the Figure in the next page). This is because the original time series is not mean-stationary but has an increasing trend, while MA models are stationary (and hence the value of their realizations may be above or below the mean, but does not deviate much from it in the long-term), so their forecasts always tend (after a few observations) to the mean of the original time series (`r frmt(mean(hw08), 1)` in this case), while the time series keeps increasing. As a result, and though the 95% confidence interval comprises a very wide region, it does not include any of the original values.
+
+```{r ex1-MA-12_out-of-sample-fit, echo = c(1, 4:5)}
+``` 
+
+\pagebreak
+
+```{r ex1-MA-12_out-of-sample-fit-2, echo = FALSE, fig.width=6, fig.height=4.5, fig.cap = "MA(12) model performance evaluation (out of-sample)"}
+``` 
+
+The **\color{red}{MA(10)}**) model does not do a much better job.
+
+```{r ex1-MA-10_out-of-sample-fit, echo = c(1, 3:4)}
+``` 
+
+\pagebreak
+
+```{r ex1-MA-10_out-of-sample-fit-2, echo = FALSE, fig.width=6, fig.height=4.5, fig.cap = "MA(10) model performance evaluation (out of-sample)"}
+``` 
+
+\pagebreak
+
+## ARMA Models
+
+
+### Estimation
+
+Finally, we analyze the four ARMA models that we mentioned in [2.1](#candidate-models): the three models with the lowest values of both the AIC and the BIC, and the ARMA(5,2) model, which is the 4th one with the lowest BIC value (but fewer coefficients).
+
+All the AR coefficients of the **\color{red}{ARMA(8,3)}** model, except the 4th, are not statistically significant.
+
+```{r ex1-ARMA_models-83, echo = 2}
+```
+
+```{r ex1-ARMA_models-83-2}
+```
+
+Two of the AR coefficients of the **\color{red}{ARMA(7,4)}** model, as well as the mean, are not statistically significant.
+
+```{r ex1-ARMA_models-74, echo = 1}
+```
+
+```{r ex1-ARMA_models-74-2}
+```
+
+\pagebreak
+
+In the **\color{red}{ARMA(3,9)}** model, it's some of their MA coefficients which are not significant.
+
+```{r ex1-ARMA_models-39, echo = 1}
+```
+
+```{r ex1-ARMA_models-39-2}
+```
+
+\pagebreak
+
+All the coefficients of the **\color{red}{ARMA(5,2)}** are significant.
+
+```{r ex1-ARMA_models-52, echo = 1}
+```
+
+```{r ex1-ARMA_models-52-2}
+```
+
+\pagebreak
+
+In the **\color{red}{ARMA(1,10)}** model, many of the MA coefficients are not significant; the AR(1) coefficient is close to one.
+
+```{r ex1-ARMA_models-110, echo = 1}
+```
+
+```{r ex1-ARMA_models-110-2}
+```
+
+\pagebreak
+
+Finally, R is not able to find the SE for the AR(1) coefficient (and the mean) in the **\color{red}{ARMA(1,5)}** model.
+
+```{r ex1-ARMA_models-15, echo = 1}
+```
+
+```{r ex1-ARMA_models-15-2}
+```
+
+\pagebreak
+
+
+### Diagnostics using Residuals
+
+The residuals of the **\color{red}{ARMA(8,3)}** model still do not look like white noise: though the mean seems constant and close to zero, its variance grows over time, and some auto-correlations and partial auto-correlations are significantly different from zero, especially at lag=12.
+
+```{r ex1-ARMA-83_res_plots, echo = 1, fig.width=6, fig.height=4.5, fig.cap = "ARMA(8,3) model diagnostic based on the residuals"}
+```
+
+The result of a Llung-Box test is that we cannot reject the hypothesis of independence of the residual series:
+
+```{r ex1-ARMA-83_boxtest}
+```
+
+\pagebreak
+
+Something similar happens with the **\color{red}{ARMA(7,4)}**, **\color{red}{ARMA(3,9)}**, and **\color{red}{ARMA(5,2)}** models. In these 3 cases, the ACFs and PACFs are even bigger for some lags.
+
+```{r ex1-ARMA-74_res_plots, echo = 1, fig.width=6, fig.height=4.5, fig.cap = "ARMA(7,4) model diagnostic based on the residuals"}
+```
+
+```{r ex1-ARMA-74_boxtest}
+```
+
+\pagebreak
+
+```{r ex1-ARMA-39_res_plots, echo = 1, fig.width=6, fig.height=4.5, fig.cap = "ARMA(3,9) model diagnostic based on the residuals"}
+```
+
+```{r ex1-ARMA-39_boxtest}
+```
+
+\pagebreak
+
+```{r ex1-ARMA-52_res_plots, echo = 1, fig.width=6, fig.height=4.5, fig.cap = "ARMA(5,2) model diagnostic based on the residuals"}
+```
+
+```{r ex1-ARMA-52_boxtest}
+```
+
+\pagebreak
+
+The ACFs of the **\color{red}{ARMA(1,10)}** model are, as expected, lower than those of the previous models. But the residuals are still volatile (their variance increases over time), and due to the ACF at lags 12 and 24, it does not look exactly like white noise, either.
+
+```{r ex1-ARMA-110_res_plots, echo = 1, fig.width=6, fig.height=4.5, fig.cap = "ARMA(1,10) model diagnostic based on the residuals"}
+```
+
+```{r ex1-ARMA-110_boxtest}
+```
+
+\pagebreak
+
+Something similar happens with the **\color{red}{ARMA(1,5)}** model (in this case, it's the PACFs which are lower than ever).
+
+```{r ex1-ARMA-15_res_plots, echo = 1, fig.width=6, fig.height=4.5, fig.cap = "ARMA(1,5) model diagnostic based on the residuals"}
+```
+
+```{r ex1-ARMA-15_boxtest}
+```
+
+\pagebreak
+
+
+### Model Performance Evaluation
+
+#### In-sample fit
+
+As it happened with the AR and MA models, the in-sample fit of the **\color{red}{ARMA(8,3)}** (the best model in terms of AIC and BIC) looks reasonable, but again the estimated series is lagged 1 period (compare each value in the first column of the following table with the value in the second column and the next row).
+
+```{r ex1-ARMA-83_in-sample-fit, echo = FALSE, fig.width=6, fig.height=4.5, fig.cap = "ARMA(8,3) model performance evaluation (in-sample)"}
+``` 
+
+\pagebreak
+
+Something similar occurs with the other 5 ARMA models under study.
+
+**\color{red}{ARMA(7,4)}**:
+  
+```{r ex1-ARMA-74_in-sample-fit, echo = FALSE, fig.width=6, fig.height=4.5, fig.cap = "ARMA(7,4) model performance evaluation (in-sample)"}
+``` 
+
+\pagebreak
+
+**\color{red}{ARMA(3,9)}**:
+
+```{r ex1-ARMA-39_in-sample-fit, echo = FALSE, fig.width=6, fig.height=4.5, fig.cap = "ARMA(3,9) model performance evaluation (in-sample)"}
+``` 
+
+\pagebreak
+
+**\color{red}{ARMA(5,2)}**:
+
+```{r ex1-ARMA-52_in-sample-fit, echo = FALSE, fig.width=6, fig.height=4.5, fig.cap = "ARMA(5,2) model performance evaluation (in-sample)"}
+``` 
+
+\pagebreak
+
+**\color{red}{ARMA(1,10)}**:
+
+```{r ex1-ARMA-110_in-sample-fit, echo = FALSE, fig.width=6, fig.height=4.5, fig.cap = "ARMA(1,10) model performance evaluation (in-sample)"}
+``` 
+
+\pagebreak
+
+**\color{red}{ARMA(1,5)}**:
+
+```{r ex1-ARMA-15_in-sample-fit, echo = FALSE, fig.width=6, fig.height=4.5, fig.cap = "ARMA(1,5) model performance evaluation (in-sample)"}
+``` 
+
+\pagebreak
+
+#### Out-of-sample fit
+
+Surprisingly, the out-of-sample fit of the **\color{red}{ARMA(8,3)}** is not good: although the forecasts capture part of the seasonality (see how their mean goes up and down in the Figure in the next page), almost all the original values are outside the 95% confidence intervals.
+
+```{r ex1-ARMA-83_out-of-sample-fit, echo = c(1, 4:5)}
+``` 
+
+\pagebreak
+
+```{r ex1-ARMA-83_out-of-sample-fit-2, echo = FALSE, fig.width=6, fig.height=4.5, fig.cap = "ARMA(8,3) model performance evaluation (out of-sample)"}
+``` 
+
+It is not possible to estimate an **\color{red}{ARMA(7,4)}** model using around the first 90% of the original observations: the resulting model is not stationary. We had to decrease the training period to approximately $`r frmt(312/372*100,1)`\%$ (i.e, 26 years instead of 28, increasing the test period from 3 to 5 years) to be able to estimate the new ARMA(7,4) model. Once we did that, the out-of-sample fit was actually pretty good, with only some original observations (those corresponding to the large drop at the end of 2006 and beginning of 2007---which were included in the training set for the other models---and just a few of the last ones) out of the 95% confidence intervals.
+
+Since we modified the training and test sets for this particular ARMA model, the comparison between the values of the RMSE, MAE, MAPE, etc., for both sets is different than for the other models.
+
+```{r ex1-ARMA-74_out-of-sample-fit, echo = c(1:3, 6:7)}
+``` 
+
+
+```{r ex1-ARMA-74_out-of-sample-fit-2, echo = FALSE, fig.width=6, fig.height=4.5, fig.cap = "ARMA(7,4) model performance evaluation (out of-sample)"}
+``` 
+
+\pagebreak
+
+To estimate the out-of-sample fit of the **\color{red}{ARMA(3,9)}** model, we use again the first 28 and last 3 years as the training & test sets. As shown in the Figure in the next page, the fit is probably the best so far.
+
+```{r ex1-ARMA-39_out-of-sample-fit, echo = c(1:3, 6:7)}
+``` 
+
+\pagebreak
+
+```{r ex1-ARMA-39_out-of-sample-fit-2, echo = FALSE, fig.width=6, fig.height=4.5, fig.cap = "ARMA(3,9) model performance evaluation (out of-sample)"}
+``` 
+
+The out-of-sample fit of the **\color{red}{ARMA(5,2)}** model is quite similar to that of the AR(3) model: not very good on the long-term, though the first original observations lie within the 95% confidence intervals.
+
+```{r ex1-ARMA-52_out-of-sample-fit, echo = c(1, 4:5)}
+``` 
+
+```{r ex1-ARMA-52_out-of-sample-fit-2, echo = FALSE, fig.width=6, fig.height=4.5, fig.cap = "ARMA(5,2) model performance evaluation (out of-sample)"}
+``` 
+
+The out-of-sample fit of the **\color{red}{ARMA(1,10)}** model (whose residuals resemble white noise, in terms of their auto-correlations, more than any other model) is worse: almost all out-of-sample observationsis lie out of the 95% confidence intervals.
+
+```{r ex1-ARMA-110_out-of-sample-fit, echo = c(1, 4:5)}
+``` 
+
+```{r ex1-ARMA-110_out-of-sample-fit-2, echo = FALSE, fig.width=6, fig.height=4.5, fig.cap = "ARMA(1,10) model performance evaluation (out of-sample)"}
+``` 
+
+The out-of-sample fit of the **\color{red}{ARMA(1,5)}** model (whose residuals resemble white noise, in terms of their partial auto-correlations, more than any other model) is quite good, though not as good as that of the ARMA(3,9) model. It has the advantage, though, of being a simpler model.
+
+```{r ex1-ARMA-15_out-of-sample-fit, echo = c(1, 4:5)}
+``` 
+
+\pagebreak
+
+
+```{r ex1-ARMA-15_out-of-sample-fit-2, echo = FALSE, fig.width=6, fig.height=4.5, fig.cap = "ARMA(1,5) model performance evaluation (out of-sample)"}
+``` 
+
+\pagebreak
+
+# Selection of the "best" model
+
+As a reminder, we present again the AIC and BIC values (which do not indicate how well a model will perform in terms of forecasting) of the 8 models we've analyzed:
+
+```{r ex1-comparison, echo = FALSE}
+```
+
+As shown above, the best models (in terms of BIC or AIC) are (in general) the ARMA ones, and the worst are the MA ones. But we cannot rely exclusively in this criterion, especially for forecasting.
+
+The table above also shows the sum of the absolute value of the significant ACFs and PACFs of each model (for the first 24 lags, excluding lag 0 in the case of the ACF). This is just a proxy for the resemblance of each model's residuals to white noise: it does not substitute the inspection of the time plot series, histogram, and correlogram, but reminds us the poor performance of the  MA models, the fact that the AR(9) model is a better fit than the AR(3) one, etc.
+
+The in-sample fit was pretty similar for the 10 models under study.
+
+\pagebreak
+
+As for the out-of-sample fit, the following table (that shows the RMSE and MAE values of each model, for the training and test sets) serves as a summary of what the plots showed:
+
+```{r ex1-comparison-2, echo = FALSE}
+```
+
+Since the other metrics are not very different from one model to the other, we use the out-of-sample fit as the main criterion for selection. Excluding the ARMA(7,4) (for which we had to use a longer out-of-sample interval), the previos Table shows that the models with the lowest RMSE and MAE values are **\color{red}{ARMA(3,9)}** and **\color{red}{AR(9)}**. But we mainly base our selection on the time series plots of those out-of-sample fits (Figures 15 and 16, 21 and 22, and 35 to 40), and what we commented about them.
+
+Besides, both models have low AIC and BIC values (though not the lowest), and more importantly, their residuals are similar to those of the other models (i.e., they don't resemble a white noise mainly because of the correlations at lags 12 and 24, but most of the other correlations are not significant), and the same applies to their in-sample fit.
+
+\pagebreak
+
+## 12-step ahead forecast
+
+As mentioned, the "best" models are the ARMA(3,9) model, followed by the AR(9):
+
+```{r ex1-forecast-arma39, echo = 1:3, fig.width=6, fig.height=4.5, fig.cap = "ARMA(3,9) model 12-step ahead forecast"}
+``` 
+
+\pagebreak
+
+Of course, the ARMA(3,9) model allows for a much variable forecast (as shown in the previous page), but its confidence region is approximately the same than that of the AR(9) model (shown below). In both cases, the forecast keeps increasing for the first observations, then decreases, then gets stable.
+
+```{r ex1-forecast-ar9, echo = 1:3, fig.width=6, fig.height=4.5, fig.cap = "AR(9) model 12-step ahead forecast"}
+``` 
+
+\pagebreak
+
+We'll also forecast using the ARMA(1,5) model, which was just sligthly worse (in terms of out-of-sample fit, mainly) than the other two, but has the advantage of being simpler (6 coefficients instead of 12 and 9, respectively):
+
+```{r ex1-forecast-arma15, echo = 1:3, fig.width=6, fig.height=4.5, fig.cap = "ARMA(1,5) model 12-step ahead forecast"}
+``` 
+
+The confidence region is very similar, though the yearly seasonality is not captured (the forecasts just oscillate around the final value: `r frmt(arma15.fcast2$pred[12], 1)`, close to the one in the other 2 models).
+
+\pagebreak
+
+To finish (and forecast using at least one model of each kind), we also plot the forecasts for the "best" MA model, MA(12). As discussed previously, the MA forecasts tend to the mean value of the time series (about `r frmt(mean(hw08),0)`), which seems unlikely to happen.
+
+```{r ex1-forecast-ma12, echo = 1:3, fig.width=6, fig.height=4.5, fig.cap = "MA(12) model 12-step ahead forecast"}
+``` 
+
+**********
