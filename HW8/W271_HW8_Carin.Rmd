@@ -451,7 +451,7 @@ The residuals of the **\color{red}{ARMA(8,3)}** model still do not look like whi
 ```{r ex1-ARMA-83_res_plots, echo = 1, fig.width=6, fig.height=4.5, fig.cap = "ARMA(8,3) model diagnostic based on the residuals"}
 ```
 
-The result of a Llung-Box test is that we can reject the hypothesis of independence of the residual series:
+The result of a Llung-Box test is that we cannot reject the hypothesis of independence of the residual series:
 
 ```{r ex1-ARMA-83_boxtest}
 ```
