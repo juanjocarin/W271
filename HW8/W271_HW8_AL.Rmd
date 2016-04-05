@@ -1,0 +1,212 @@
+---
+title: "**W271**-2 -- Spring 2016 -- **HW 8**"
+author: "***Juanjo Carin, Kevin Davis, Ashley Levato, Minghu Song***"
+date: "*April 6, 2016*"
+output:
+   pdf_document:
+     fig_caption: yes
+     toc: no
+numbersections: false
+geometry: margin=1in
+options: width=30
+fontsize: 10pt
+linkcolor: blue
+header-includes:
+- \usepackage{fancyhdr}
+- \pagestyle{fancy}
+- \fancyhead[LO,LE]{Carin, Davis, Levato, Song}
+- \fancyhead[CE,CO]{W271}
+- \fancyhead[RE,RO]{HW 8}
+- \fancyfoot[LO,LE]{UC Berkeley -- MIDS}
+- \fancyfoot[CO,CE]{Spring semester 2016}
+- \fancyfoot[RE,RO]{\thepage}
+- \renewcommand{\headrulewidth}{0.5pt}
+- \renewcommand{\footrulewidth}{0.5pt}
+---
+
+**********
+
+<!--# Exercises-->
+
+```{r, echo = FALSE, warning = FALSE}
+require(knitr, quietly = TRUE)
+read_chunk('code/W271_HW8_Davis.R')
+opts_chunk$set(message = FALSE, warning = FALSE)
+opts_chunk$set(fig.width = 4, fig.height = 3)
+# Set path to data here (don't use setwd() inside a chunk!!!)
+opts_knit$set(root.dir = './data')
+```
+
+```{r Libraries-Functions-Constants, echo = FALSE}
+```
+
+<!--## Exercise 1-->
+
+**Build an univariate linear time series model (i.e AR, MA, and ARMA models) using the series in `hw08_series.csv`.**
+
++ **Use all the techniques that have been taught so far to build the model, including date examination, data visualization, etc.**
+
++ **All the steps to support your final model need to be shown clearly.**
+
++ **Show that the assumptions underlying the model are valid.**
+
++ **Which model seems most reasonable in terms of satisfying the model underlying Assumptions?**
+
++ **Evaluate the model performance (both in- and out-of-sample)**
+
++ **Pick your "best" models and conduct a 12-step ahead forecast. Discuss your results. Discuss the choice of your metrics to measure "best".**
+
+**********
+
+\pagebreak
+
+First we load the series:
+
+```{r ex1-load, echo = -c(1:2)}
+```
+
+The file has two columns but the first one is just an incremental index so we discard it. The second column (that is stored in a numeric vector called `hw08`) contains `r length(hw08)` observations. `r length(hw08)` is a multiple of 12 ($`r length(hw08)` / 12 = `r length(hw08) / 12`$) so **we'll assume that the series contains monthly observations from `r length(hw08) / 12` years (*for labelling purposes only, sometimes we'll also assume that the period goes from 1980 to 2010*)**.
+
+Let's explore the main descriptive statistics of the series, as well as its histogram and time-series plot:
+
+```{r ex1-desc_stats}
+```
+
+```{r ex1-hist, echo = FALSE, fig.width = 5, fig.height = 3.75, fig.cap = "Histogram of the data."}
+```
+
+\pagebreak
+
+The histogram shows that the distribution of the data is multimodal, and hence far from normal. But as usual, it tells us nothing about the dynamics of the time series: only what values were more or less frequent, but not when they happened.
+
+To label the time-series plot, we will assume (as mentioned) that the data were collected on a monthly basis and will use 1980 as an arbitrary starting point.
+
+```{r ex1-time_plot, echo = 1, fig.width = 5, fig.height = 3.75, fig.cap = "Time-series plot (assuming monthly data, from 1980 until 2010)."}
+```
+
+\pagebreak
+
+Our assumption that the data corresponds to a monthly time series seems reasonable after noticing that there seems to be some seasonality every 12 time periods (see Figure 3 below: the level increases over the first 6 months---especially in February and June---, goes down in July, up from August to October, and down again the last 2 months of the year).
+
+
+```{r ex1-time_plot_zoom, echo = FALSE, fig.height = 2.33, fig.cap = "Time-series plot of (the last 72 observations---6 years?---of) the data."}
+```
+
+\pagebreak
+
+In addition to showing that the time series is **not (mean) stationary** (the mean depends on time, with an increasing trend, and the time series is very **persistent**), Figure 2 in the previous page shows that the time is also **not variance stationary:** the variance is not constant but changes with time (increasing in the last years, especially the last 7); see Table 2 and Figure 4 in the next page.
+
+```{r ex1-boxplot, echo = FALSE,  fig.width = 5.33, fig.height = 4, fig.cap = "Boxplot of the series, per year (every 12 observations)."}
+```
+
+```{r ex1-var_table, echo = FALSE}
+```
+
+Both results indicate that the data does not seem to be a realization of a stationary process, so this time-series may not meet the assumptions of an AR-MA process, and thus **an ARMA model may not be a good fit for our data** (maybe it is---as it happened with the USNZ series we analyzed in class---, but it will certainly not be good for forecasting). At the very least, we should transform the data to stabilize the variance, take first differences of the data until they're stationary, and so forth.
+
+
+\pagebreak
+
+To continue the Exploratory Data Analysis, let's decompose the time series to check the growing (though not exactly linear) trend and seasonality:
+
+```{r ex1-decompose, echo = FALSE,  fig.width = 6, fig.height = 5.6, fig.cap = "(Additive) decomposition of the time series."}
+```
+
+\pagebreak
+
+The correlogram (where 2 years---or 24 1-month time displacements---are plotted) also shows how persistent the series is, looking very much like that of a random walk with drift. That is also an indication that an MA model may not be a good fit for this time series. The PACF drops off very sharply after the 1st lag, though the PACF of the 12th lag is also significant (probably due to the seasonal component).
+
+```{r ex1-acf_pacf, echo = FALSE, fig.width=6, fig.height=4.5, fig.cap = "Autocorrelation and partial autocorrelation graphs"}
+```
+
+We start by trying different orders of AR models. To choose the 'best' AR model, we will try AR models up to degree 8 and use the model with the lowest AIC as the criterion for selecting the prefered model.
+
+```{r ex1-AR_models, echo = c(1:6)}
+```
+
+The best AR model (with up to 8 coefficients) is the AR(3) one. Note that the 2nd coefficient is not significant.
+
+If we examine the residuals of the AR(3) model we observe that, though their distribution looks normal, they follow a trend and the variance seems to increase over time. Their ACF and PACF do not look like the ones of white noise (especially---but not only---because the ACF and PACF at lag 12).
+
+\pagebreak
+
+```{r ex1-AR_res_plots, echo = 1, fig.width=6, fig.height=4.5, fig.cap = "AR(3) model diagnostic based on the residuals"}
+``` 
+
+Nonetheless, we cannot reject the hypothesis of independence of the residual series:
+
+```{r ex1-AR_boxtest}
+```
+
+\pagebreak
+
+The plot of the AR(3) fitted model versus the original series shows us that the model is well-suited to capturing the in-sample dynamics of this particular series. 
+
+```{r ex1-AR_in_sample_fit, echo = F, fig.width=6, fig.height=4.5, fig.cap = "In-Sample Fit of AR(3) Model and Original Series"}
+```
+
+
+
+We follow by trying different orders of MA models, again up to the 8th order and choosing the best model based on its AIC value:
+
+```{r ex1-MA_models, echo = c(1:4)}
+```
+
+The best MA model (with up to 8 coefficients) is the MA(8) one. All its coefficients are significantly different from zero. Note that the AIC value (even for the best model among the eight considered) is larger than the one of the AR(3) model, indicating that the latter is a better choice.
+
+The residuals of this MA(8) model do not look normal like those of a white noise at all: the time plot shows a clear growing trend, the histogram is right-skewed, and many of the auto-correlations (apart from $k=0$) and partial auto-correlations are significantly different from zero.
+
+```{r ex1-MA_res_plots, echo = 1, fig.width=6, fig.height=4.5, fig.cap = "AR(3) model diagnostic based on the residuals"}
+``` 
+
+As expected, the results of a Llung-Box test is that we can reject the hypothesis of independence of the residual series:
+
+```{r ex1-MA_boxtest}
+```
+
+Similar to the AR(3) model, the plot of the MA(8) fitted model versus the original series shows us that the model is capable of capturing the dynamics of this time-series, although the fit does not look as close as the MA(3) model. 
+
+```{r ex1-MA_in_sample_fit, echo = F, fig.width=6, fig.height=4.5, fig.cap = "In-Sample Fit of MA(8) Model and Original Series"}
+```
+
+\pagebreak
+
+We also try different ARMA models: we exclude the AR and MA models (i.e., those with $p=0$ or $q=0$, already considered), and (because of the nature of ARMA models) only consider orders up to (4,4).......
+
+```{r ex1-ARMA_models, echo = c(1:4)}
+```
+
+The best ARMA model (with up to 4 coefficients) is the ARMA(3,4) one. All its coefficients (not considering the mean) are significantly different from zero.
+
+The residuals of this ARMA(3,4) model like similar to the residuals from the AR(3) model and do not look like those of a white noise process: the time plot shows a clear growing trend and many of the auto-correlations (apart from $k=0$) and partial auto-correlations are significantly different from zero.
+
+The AIC value (`r frmt(best.ARMA.aic, 1)`) for the ARMA(3,4) model is slightly smaller than that of the MA(3) model (which was `r frmt(best.AR.aic, 1)`), so if we considered all of the models together and only used the AIC as a selection criterion, we would select the ARMA(3,4) model. It's worth noting again that the assumption of a stationary process has not been met, and thus there is good reason to believe that the ARMA model will not generalize well out-of-sample or make accurate predictions. However, without transforming the dataset, the ARMA(3,4) model would be selected. .
+
+```{r ex1-ARMA_res_plots, echo = 1, fig.width=6, fig.height=4.5, fig.cap = "AR(3) model diagnostic based on the residuals"}
+``` 
+
+However, the result of a Llung-Box test is that we cannot reject the hypothesis of independence of the residual series:
+
+```{r ex1-ARMA_boxtest}
+```
+
+The fitted values versus original series plot for the ARMA(3,4) model shows us that the model performs well at matching the within-sample dynamics of the time-series. 
+
+```{r ex1-ARMA_in_sample_fit, echo = F, fig.width=6, fig.height=4.5, fig.cap = "In-Sample Fit of ARMA(3,4) Model and Original Series"}
+```
+
+
+Since we have a non-stationary and a seasonal component we can also try using an ARIMA model. However, ARIMA models still assumes constant variance which we showed above is not true for this data. To model conditional heteroskedasticity, we may get better results using Generalized Autoregressive Conditional Heteroskedasticity (GARCH) models. 
+
+```{r ex1-ARIMA_models, echo = c(1:4)}
+```
+
+
+One property we are interested in when selecting univariate time-series models in out-of-sample forecasting. For the best fitting model, we will estimate a new model witholding one year of the observations (the last year because of the correlations between incremental observations). We can than use this model to forecast the next observations and compare the forecasted values to the realized data in the series. 
+
+```{r ex1-Forecast, echo = F, fig.width=6, fig.height=4.5, fig.cap = "12-Step Ahead Forecast and Original & Estimated Series for ARMA(3,4) Model"}
+```
+
+Looking at the forecasted versus actual values we can see how the model is unable to capture the dynamics of this non-stationary process when forecasting out-of-sample. The forecasted values tend to be near the mean of the previous few values, while the actual values steadily increase with a few values falling outside of the 95% confidence interval of the forecast. This out-of-sample forecast illustrates why an ARMA type model, while capable of capturing the in-sample dynamics of a random walk with drift process, is not well-suited to forecasting non-stationary processes. 
+
+**********
