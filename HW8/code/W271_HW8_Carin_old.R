@@ -25,6 +25,7 @@ library(xts)
 library(reshape2)
 library(lubridate)
 library(forecast)
+library(zoo)
 
 # Define functions
 
@@ -69,29 +70,36 @@ desc_stat <- function(x, variables, caption) {
 }
 
 # Define constants
+par(cex.main = 1, cex.lab = 0.9, cex.axis = 0.9)
+set.seed(1234)
 
 
 
-## @knitr ex1-1
-# EXERCISE 1 --------------------------------------------------------------
+## @knitr ex1-load
+# Loading the Data --------------------------------------------------------
 # setwd('./HW8/data')
 hw08 <- read.csv('hw08_series.csv', header = TRUE)
 str(hw08)
 all(hw08$X == 1:dim(hw08)[1]) # check if 1st column is just an incremental index
 hw08 <- hw08[, -1]
 
-## @knitr ex1-2
+
+
+## @knitr ex1-desc_stats
+# Exploratory Data Analysis -----------------------------------------------
 # See the definition of the function in ## @knitr Libraries-Functions-Constants
 desc_stat(hw08, 'Time series', 'Descriptive statistics of the time series.')
 
-## @knitr ex1-3
+
+## @knitr ex1-hist
 hist(hw08, breaks = 30, col="gray", freq = FALSE, 
      xlab = "Level / Amplitude", main = "Histogram of the time series")
 lines(density(hw08), col = 'blue', lty = 2)
 leg.txt <- c("Estimated density plot")
 legend("topright", legend = leg.txt, lty = 2, col = "blue", bty = 'n', cex = .8)
 
-## @knitr ex1-4-1
+
+## @knitr ex1-time_plot
 hw08.ts <- ts(hw08, start = c(1980,1), frequency = 12)
 plot.ts(hw08.ts, col = 'blue', type = 'l', 
      xlab = "Year (time period: month)", ylab = "Level / Amplitude", 
@@ -104,7 +112,8 @@ leg.txt <- c("Time-series", "Mean value",
 legend("topleft", legend = leg.txt, lty = c(1, 2, 1), lwd = c(1, 1, 1.5), 
        col = c("blue", "red", "green"), bty = 'n', cex = .8)
 
-## @knitr ex1-4-2
+
+## @knitr ex1-time_plot_zoom
 plot.ts(window(hw08.ts, 2005), col = 'blue', type = 'l', 
      xlab = "Year (time period: month)", ylab = "Level / Amplitude", 
      main = paste0("Detail of the last 72 observations"))
@@ -115,13 +124,15 @@ abline(v = seq(2005, 2011), lty = 2, col = "gray")
 # legend("topleft", legend = leg.txt, lty = c(1, 1), lwd = c(1, 1.75), 
 #        col = c("blue", "green"), bty = 'n', cex = .8)
 
-## @knitr ex1-5
+
+## @knitr ex1-boxplot
 boxplot(hw08 ~ factor(rep(1980:2010, each = 12)), 
         outcex = 0.4, medcol="red", lwd = 0.5, 
         xlab = 'Year', ylab = 'Level / Amplitude',
         main = 'Box-and-whisker plot of\nthe time series per year')
 
-## @knitr ex1-6
+
+## @knitr ex1-var_table
 hw08_df <- data.frame(Year = factor(rep(1980:2010, each = 12)), 
                       Level = hw08)
 hw08_df_mv <- hw08_df %>% 
@@ -132,27 +143,924 @@ kable(cbind(hw08_df_mv %>% filter(Year %in% factor(1980:1989)),
       caption = paste("Variance of the time-series amplitude per year ", 
                       "(for the first 30 out of 31)."))
 
-## @knitr ex1-7
+
+## @knitr ex1-decompose
 plot(decompose(hw08.ts, type = 'additive'), col = 'blue', 
      xlab = "Year (time period: month)")
+# acf(na.omit(decompose(hw08.ts, type = 'additive')$random), lag.max = 24)
 # pacf(na.omit(decompose(hw08.ts, type = 'additive')$random), lag.max = 24)
 # plot(stl(hw08.ts, s.window="periodic"), col = 'blue')
 
-## @knitr ex1-8
+
+## @knitr ex1-acf_pacf
+# ACF and PACF of the Time Series -----------------------------------------
 # Plot the ACF and PACF of the series
 par(mfrow=c(1, 2))
-acf(hw08.ts, lag.max = 20, main = "ACF of the time series")
-pacf(hw08.ts, lag.max = 20, main = "PACF of the time series")
+par(cex.main = 1, cex.lab = 0.9, cex.axis = 0.9)
+acf(hw08.ts, lag.max = 24, main = "ACF of the time series")
+pacf(hw08.ts, lag.max = 24, main = "PACF of the time series")
 par(mfrow=c(1, 1))
+par(cex.main = 1, cex.lab = 0.9, cex.axis = 0.9)
 
-## @knitr ex1-9
-M <- factor(cycle(hw08.ts))
-reg <- lm(hw08.ts ~ time(hw08.ts) + I(time(hw08.ts)^2)+ M)
-plot(reg$residuals)
 
+## @knitr ex1-AR_models
+# AR Model ----------------------------------------------------------------
+best.AR.order <- best.MA.order <- best.ARMA.order <- c(0, 0, 0)
+best.AR.aic <- best.MA.aic <- best.ARMA.aic <- Inf
+for (i in 0:4) {
+  # Try the corresponding order, skip if estimating the model yields an error
+    # due to non-stationarity
+  # Not using try() would cause the loop to break
+  try(fit.AR.aic <- AIC(Arima(hw08.ts, order = c(i, 0, 0))), silent = TRUE)
+  if (fit.AR.aic < best.AR.aic) {
+    best.AR.order <- c(i, 0, 0)
+    best.ar <- Arima(hw08.ts, order = best.AR.order)
+    best.AR.aic <- fit.AR.aic
+  }
+}
+best.AR.order
+(best.AR.aic1 <- best.AR.aic)
+
+
+## @knitr ex1-AR_models-2
+best.ar
+
+## @knitr ex1-AR_models-3
+Parameters <- cbind(best.ar$coef, 
+                    sqrt(diag(best.ar$var.coef)), 
+                    matrix(sapply(c(-2,2), function(i) 
+                      best.ar$coef + i * sqrt(diag(best.ar$var.coef))), 
+                      ncol = 2))
+colnames(Parameters) <- c("Coefficient", "SE", "95% CI lower", "95% CI upper")
+kable(Parameters, digits = 4, 
+      caption = "Coefficients, SEs, and 95% CIs of the estimated AR(3) model")
+
+
+## @knitr ex1-AR_models-4
+(roots_ar <- polyroot(c(1, -best.ar$coef[1:(length(best.ar$coef)-1)])))
+all(Mod(roots_ar) > 1) # Stationarity condition
+
+
+## @knitr ex1-AR_models_bis
+best.AR.order2 <- best.MA.order2 <- best.ARMA.order2 <- c(0, 0, 0)
+for (i in 5:12) {
+  # No need to try i between 0 and 4 again. best.AR.aic is saved, so we'll only 
+    # come with a different model if it's better than what we already have
+  try(fit.AR.aic <- AIC(Arima(hw08.ts, order = c(i, 0, 0))), silent = TRUE)
+  if (fit.AR.aic < best.AR.aic) {
+    best.AR.order2 <- c(i, 0, 0)
+    best.ar2 <- Arima(hw08.ts, order = best.AR.order2)
+    best.AR.aic <- fit.AR.aic
+  }
+}
+best.AR.order2
+best.AR.aic
+
+
+## @knitr ex1-AR_models_bis-2
+best.ar2
+
+## @knitr ex1-AR_models_bis-3
+Parameters <- cbind(best.ar2$coef, 
+                    sqrt(diag(best.ar2$var.coef)), 
+                    matrix(sapply(c(-2,2), function(i) 
+                      best.ar2$coef + i * sqrt(diag(best.ar2$var.coef))), 
+                      ncol = 2))
+colnames(Parameters) <- c("Coefficient", "SE", "95% CI lower", "95% CI upper")
+kable(Parameters, digits = 4, 
+      caption = "Coefficients, SEs, and 95% CIs of the estimated AR(9) model")
+
+
+## @knitr ex1-AR_models_bis-4
+(roots_ar <- polyroot(c(1, -best.ar2$coef[1:(length(best.ar2$coef)-1)])))
+all(Mod(roots_ar) > 1) # Stationarity condition
+
+
+## @knitr ex1-AR_res_plots
+summary(best.ar$resid)
+par(mfrow = c(2, 2))
+par(cex.main = 1, cex.lab = 0.9, cex.axis = 0.9)
+plot(best.ar$resid, main = "Residual Series of\nthe AR(3) model", col="blue", 
+     xlab = "Year (time period: month)", ylab = "Residual level")
+hist(best.ar$resid, col = "gray", breaks = 20, xlab = "Residual level", 
+     main = "Histogram of the residuals\n(AR(3) model")
+acf(best.ar$resid, main = "ACF of the Residual\nSeries (AR(3) model)")
+pacf(best.ar$resid, main = "PACF of the Residual\nSeries (AR(3) model)")
+par(mfrow = c(1, 1))
+par(cex.main = 1, cex.lab = 0.9, cex.axis = 0.9)
+
+
+## @knitr ex1-AR_res_plots_bis
+summary(best.ar2$resid)
+par(mfrow = c(2, 2))
+par(cex.main = 1, cex.lab = 0.9, cex.axis = 0.9)
+plot(best.ar2$resid, main = "Residual Series of\nthe AR(9) model", col="blue", 
+     xlab = "Year (time period: month)", ylab = "Residual level")
+hist(best.ar2$resid, col = "gray", breaks = 20, xlab = "Residual level", 
+     main = "Histogram of the residuals\n(AR(9) model")
+acf(best.ar2$resid, main = "ACF of the Residual\nSeries (AR(9) model)")
+pacf(best.ar2$resid, main = "PACF of the Residual\nSeries (AR(9) model)")
+par(mfrow = c(1, 1))
+par(cex.main = 1, cex.lab = 0.9, cex.axis = 0.9)
+
+
+## @knitr ex1-AR_boxtest
+Box.test(best.ar$resid, type = "Ljung-Box")
+
+
+## @knitr ex1-AR_boxtest_bis
+Box.test(best.ar2$resid, type = "Ljung-Box")
+
+
+## @knitr ex1-AR_in-sample-fit
+kable(tail(cbind("Time" = as.character(as.yearmon(time(hw08.ts), "%b %Y")), 
+                 "Original series" = frmt(as.numeric(hw08.ts), 1), 
+                 "Estimated series" = frmt(as.numeric(fitted(best.ar)), 1), 
+                 "Residuals" = frmt(as.numeric(best.ar$resid), 1))), 
+      row.names = FALSE, align = "r")
+par(mar = c(5, 4, 4, 5) + 0.1)
+par(cex.main = 1, cex.lab = 0.9, cex.axis = 0.9)
+plot(hw08.ts, xlab = "Year (time period: month)", 
+     main = "Original vs. an AR(3) Estimated Series with Residuals",
+     ylab = "Original and Estimated Values", 
+     ylim = c(40, 160), lwd = 0.5)
+leg.txt <- c("Original Series", "Estimated Series", "Residuals")
+legend("topleft", legend = leg.txt, lty = 1, col = c("black", "blue", "green"), 
+       bty = 'n', cex = 0.9)
+lines(fitted(best.ar), col = "blue", lwd = 0.5)
+par(new = TRUE)
+plot.ts(best.ar$resid, axes = FALSE, xlab = "", ylab = "", 
+        col = rgb(0, 1, 0, 0.5), ylim = c(-12, 12), lty = 1, pch = 1, 
+        col.axis = "green", lwd = 0.5)
+axis(side = 4, col = "green")
+mtext("Residuals", side = 4, line = 2, col = "green")
+par(mar = c(5, 4, 4, 2) + 0.1)
+par(cex.main = 1, cex.lab = 0.9, cex.axis = 0.9)
+
+
+## @knitr ex1-AR_in-sample-fit_bis
+kable(tail(cbind("Time" = as.character(as.yearmon(time(hw08.ts), "%b %Y")), 
+                 "Original series" = frmt(as.numeric(hw08.ts), 1), 
+                 "Estimated series" = frmt(as.numeric(fitted(best.ar2)), 1), 
+                 "Residuals" = frmt(as.numeric(best.ar2$resid), 1))), 
+      row.names = FALSE, align = "r")
+par(mar = c(5, 4, 4, 5) + 0.1)
+par(cex.main = 1, cex.lab = 0.9, cex.axis = 0.9)
+plot(hw08.ts, xlab = "Year (time period: month)", 
+     main = "Original vs. an AR(9) Estimated Series with Residuals",
+     ylab = "Original and Estimated Values", 
+     ylim = c(40, 160), lwd = 0.5)
+leg.txt <- c("Original Series", "Estimated Series", "Residuals")
+legend("topleft", legend = leg.txt, lty = 1, col = c("black", "blue", "green"), 
+       bty = 'n', cex = 0.9)
+lines(fitted(best.ar2), col = "blue", lwd = 0.5)
+par(new = TRUE)
+plot.ts(best.ar2$resid, axes = FALSE, xlab = "", ylab = "", 
+        col = rgb(0, 1, 0, 0.5), ylim = c(-12, 12), lty = 1, pch = 1, 
+        col.axis = "green", lwd = 0.5)
+axis(side = 4, col = "green")
+mtext("Residuals", side = 4, line = 2, col = "green")
+par(mar = c(5, 4, 4, 2) + 0.1)
+par(cex.main = 1, cex.lab = 0.9, cex.axis = 0.9)
+
+
+## @knitr ex1-AR_out-of-sample-fit
+# ar.oos.fit <- Arima(hw08[1:(length(hw08)-36)], order = best.AR.order)
+hw08.ts_train <- window(hw08.ts, start = 1980, end=c(2007,12))
+hw08.ts_test <- window(hw08.ts, start = 2008)
+(ar.oos.fit <- Arima(hw08.ts_train, order = best.AR.order))
+kable(head(cbind("Time" = as.character(as.yearmon(time(hw08.ts_train), 
+                                                  "%b %Y")),
+                 "Original series" = frmt(as.numeric(hw08.ts_train), 1), 
+                 "Estimated series" = frmt(as.numeric(fitted(ar.oos.fit)), 1),
+                 "Residuals" = frmt(as.numeric(ar.oos.fit$resid), 1))),
+      row.names = FALSE, align = "r")
+# Forecast / Backtesting
+ar.oos.fit.fcast <- forecast.Arima(ar.oos.fit, h = 36)
+accuracy(ar.oos.fit.fcast, hw08.ts_test)
+
+## @knitr ex1-AR_out-of-sample-fit-2
+plot(ar.oos.fit.fcast, col = 'blue', ylim = c(40, 160), 
+     xlab = "Year (time period: month)", 
+     main = "Original vs. an AR(3) model Forecasts",
+     ylab = "Original and Forecasted Values")
+leg.txt <- c("Original Series", "Forecasts from AR(3) model")
+legend("topleft", legend = leg.txt, lty = 1, col = c("black", "blue"), 
+       bty = 'n', cex = 0.9)
+lines(hw08.ts, col = "black")
+
+
+## @knitr ex1-AR_out-of-sample-fit_bis
+(ar.oos.fit2 <- Arima(hw08.ts_train, order = best.AR.order2))
+# kable(head(cbind("Time" = as.character(as.yearmon(time(hw08.ts_train), 
+#                                                   "%b %Y")),
+#                  "Original series" = frmt(as.numeric(hw08.ts_train), 1), 
+#                  "Estimated series" = frmt(as.numeric(fitted(ar.oos.fit2)), 1),
+#                  "Residuals" = frmt(as.numeric(ar.oos.fit2$resid), 1))),
+#       row.names = FALSE, align = "r")
+# Forecast / Backtesting
+ar.oos.fit.fcast2 <- forecast.Arima(ar.oos.fit2, h = 36)
+accuracy(ar.oos.fit.fcast2, hw08.ts_test)
+
+## @knitr ex1-AR_out-of-sample-fit_bis-2
+plot(ar.oos.fit.fcast2, col = 'blue', ylim = c(40, 160), 
+     xlab = "Year (time period: month)", 
+     main = "Original vs. an AR(9) model Forecasts",
+     ylab = "Original and Forecasted Values")
+leg.txt <- c("Original Series", "Forecasts from AR(9) model")
+legend("topleft", legend = leg.txt, lty = 1, col = c("black", "blue"), 
+       bty = 'n', cex = 0.9)
+lines(hw08.ts, col = "black")
+
+
+## @knitr ex1-MA_models
+# MA Model ----------------------------------------------------------------
+for (j in 1:4) {
+  # No need to include j = 0 (MA(0) = AR(0) <=> xt = wt)
+  try(fit.MA.aic <- AIC(Arima(hw08.ts, order = c(0, 0, j))), silent = TRUE)
+  if (fit.MA.aic < best.MA.aic) {
+    best.MA.order <- c(0, 0, j)
+    best.ma <- Arima(hw08.ts, order = best.MA.order)
+    best.MA.aic <- fit.MA.aic
+  }
+}
+best.MA.order
+(best.MA.aic1 <- best.MA.aic)
+
+
+## @knitr ex1-MA_models-2
+best.ma
+
+
+## @knitr ex1-MA_models-3
+Parameters <- cbind(best.ma$coef, 
+                    sqrt(diag(best.ma$var.coef)), 
+                    matrix(sapply(c(-2,2), function(i) 
+                      best.ma$coef + i * sqrt(diag(best.ma$var.coef))), 
+                      ncol = 2))
+colnames(Parameters) <- c("Coefficient", "SE", "95% CI lower", "95% CI upper")
+kable(Parameters, digits = 4, 
+      caption = "Coefficients, SEs, and 95% CIs of the estimated MA(4) model")
+
+
+## @knitr ex1-MA_models-4
+(roots_ma <- polyroot(c(1, best.ma$coef[1:(length(best.ma$coef)-1)])))
+all(Mod(roots_ma) > 1) # Invertibility condition
+
+
+## @knitr ex1-MA_models_bis
+for (j in 5:12) {
+  # No need to try j between 1 and 4 again. best.MA.aic is saved, so we'll only 
+    # come with a different model if it's better than what we already have
+  try(fit.MA.aic <- AIC(Arima(hw08.ts, order = c(0, 0, j))), silent = TRUE)
+  if (fit.MA.aic < best.MA.aic) {
+    best.MA.order2 <- c(0, 0, j)
+    best.ma2 <- Arima(hw08.ts, order = best.MA.order2)
+    best.MA.aic <- fit.MA.aic
+  }
+}
+best.MA.order2
+best.MA.aic
+
+
+## @knitr ex1-MA_models_bis-2
+best.ma2
+
+## @knitr ex1-MA_models_bis-3
+Parameters <- cbind(best.ma2$coef, 
+                    sqrt(diag(best.ma2$var.coef)), 
+                    matrix(sapply(c(-2,2), function(i) 
+                      best.ma2$coef + i * sqrt(diag(best.ma2$var.coef))), 
+                      ncol = 2))
+colnames(Parameters) <- c("Coefficient", "SE", "95% CI lower", "95% CI upper")
+kable(Parameters, digits = 4, 
+      caption = "Coefficients, SEs, and 95% CIs of the estimated MA(12) model")
+
+
+## @knitr ex1-MA_models_bis-4
+(roots_ma <- polyroot(c(1, -best.ma2$coef[1:(length(best.ma2$coef)-1)])))
+all(Mod(roots_ma) > 1) # Stationarity condition
+
+
+## @knitr ex1-MA_res_plots
+summary(best.ma$resid)
+par(mfrow=c(2, 2))
+par(cex.main = 1, cex.lab = 0.9, cex.axis = 0.9)
+plot(best.ma$resid, main = "Residual Series of\nthe MA(4) model", col="blue", 
+     xlab = "Year (time period: month)", ylab = "Residual level")
+hist(best.ma$resid, col = "gray", breaks = 20, xlab = "Residual level", 
+     main = "Histogram of the residuals\n(MA(4) model")
+acf(best.ma$resid, main = "ACF of the Residual\nSeries (MA(4) model)")
+pacf(best.ma$resid, main = "PACF of the Residual\nSeries (MA(4) model)")
+par(mfrow=c(1, 1))
+par(cex.main = 1, cex.lab = 0.9, cex.axis = 0.9)
+
+
+## @knitr ex1-MA_res_plots_bis
+summary(best.ma2$resid)
+par(mfrow=c(2, 2))
+par(cex.main = 1, cex.lab = 0.9, cex.axis = 0.9)
+plot(best.ma2$resid, main = "Residual Series of\nthe MA(12) model", col="blue", 
+     xlab = "Year (time period: month)", ylab = "Residual level")
+hist(best.ma2$resid, col = "gray", breaks = 20, xlab = "Residual level", 
+     main = "Histogram of the residuals\n(MA(12) model")
+acf(best.ma2$resid, main = "ACF of the Residual\nSeries (MA(12) model)")
+pacf(best.ma2$resid, main = "PACF of the Residual\nSeries (MA(12) model)")
+par(mfrow=c(1, 1))
+par(cex.main = 1, cex.lab = 0.9, cex.axis = 0.9)
+
+
+## @knitr ex1-MA_boxtest
+Box.test(best.ma$resid, type = "Ljung-Box")
+
+
+## @knitr ex1-MA_boxtest_bis
+Box.test(best.ma2$resid, type = "Ljung-Box")
+
+
+## @knitr ex1-MA_in-sample-fit
+kable(head(cbind("Time" = as.character(as.yearmon(time(hw08.ts), "%b %Y")),
+                 "Original series" = frmt(as.numeric(hw08.ts), 1), 
+                 "Estimated series" = frmt(as.numeric(fitted(best.ma)), 1),
+                 "Residuals" = frmt(as.numeric(best.ma$resid), 1))),
+      row.names = FALSE, align = "r")
+par(mar = c(5, 4, 4, 5) + 0.1)
+par(cex.main = 1, cex.lab = 0.9, cex.axis = 0.9)
+plot(hw08.ts, xlab = "Year (time period: month)", 
+     main = "Original vs. a MA(4) Estimated Series with Residuals",
+     ylab = "Original and Estimated Values",
+     ylim = c(40, 160), lwd = 0.5)
+leg.txt <- c("Original Series", "Estimated Series", "Residuals")
+legend("topleft", legend = leg.txt, lty = 1, col = c("black", "blue", "green"), 
+       bty = 'n', cex = 0.9)
+lines(fitted(best.ma), col = "blue", lwd = 0.5)
+par(new = TRUE)
+plot.ts(best.ma$resid, axes = FALSE, xlab = "", ylab = "", 
+        col = rgb(0, 1, 0, 0.5), ylim = c(-20, 20), lty = 1, pch = 1, 
+        col.axis = "green", lwd = 0.5)
+axis(side = 4, col = "green")
+mtext("Residuals", side = 4, line = 2, col = "green")
+par(mar = c(5, 4, 4, 2) + 0.1)
+par(cex.main = 1, cex.lab = 0.9, cex.axis = 0.9)
+
+
+## @knitr ex1-MA_in-sample-fit_bis
+kable(head(cbind("Time" = as.character(as.yearmon(time(hw08.ts), "%b %Y")),
+                 "Original series" = frmt(as.numeric(hw08.ts), 1), 
+                 "Estimated series" = frmt(as.numeric(fitted(best.ma2)), 1),
+                 "Residuals" = frmt(as.numeric(best.ma2$resid), 1))),
+      row.names = FALSE, align = "r")
+par(mar = c(5, 4, 4, 5) + 0.1)
+par(cex.main = 1, cex.lab = 0.9, cex.axis = 0.9)
+plot(hw08.ts, xlab = "Year (time period: month)", 
+     main = "Original vs. a MA(12) Estimated Series with Residuals",
+     ylab = "Original and Estimated Values",
+     ylim = c(40, 160), lwd = 0.5)
+leg.txt <- c("Original Series", "Estimated Series", "Residuals")
+legend("topleft", legend = leg.txt, lty = 1, col = c("black", "blue", "green"), 
+       bty = 'n', cex = 0.9)
+lines(fitted(best.ma2), col = "blue", lwd = 0.5)
+par(new = TRUE)
+plot.ts(best.ma2$resid, axes = FALSE, xlab = "", ylab = "", 
+        col = rgb(0, 1, 0, 0.5), ylim = c(-20, 20), lty = 1, pch = 1, 
+        col.axis = "green", lwd = 0.5)
+axis(side = 4, col = "green")
+mtext("Residuals", side = 4, line = 2, col = "green")
+par(mar = c(5, 4, 4, 2) + 0.1)
+par(cex.main = 1, cex.lab = 0.9, cex.axis = 0.9)
+
+
+# @knitr ex1-MA_out-of-sample-fit
+(ma.oos.fit <- Arima(hw08.ts_train, order = best.MA.order))
+kable(head(cbind("Time" = as.character(as.yearmon(time(hw08.ts_train), 
+                                                  "%b %Y")),
+                 "Original series" = frmt(as.numeric(hw08.ts_train), 1), 
+                 "Estimated series" = frmt(as.numeric(fitted(ma.oos.fit)), 1),
+                 "Residuals" = frmt(as.numeric(ma.oos.fit$resid), 1))),
+      row.names = FALSE, align = "r")
+# Forecast / Backtesting
+ma.oos.fit.fcast <- forecast.Arima(ma.oos.fit, h = 36)
+accuracy(ma.oos.fit.fcast, hw08.ts_test)
+
+# @knitr ex1-MA_out-of-sample-fit-2
+plot(ma.oos.fit.fcast, col = 'blue', ylim = c(40, 160), 
+     xlab = "Year (time period: month)", 
+     main = "Original vs. an MA(4) model Forecasts",
+     ylab = "Original and Forecasted Values")
+leg.txt <- c("Original Series", "Forecasts from MA(4) model")
+legend("topleft", legend = leg.txt, lty = 1, col = c("black", "blue"), 
+       bty = 'n', cex = 0.9)
+lines(hw08.ts, col = "black")
+
+
+# @knitr ex1-MA_out-of-sample-fit_bis
+(ma.oos.fit2 <- Arima(hw08.ts_train, order = best.MA.order2))
+# kable(head(cbind("Time" = as.character(as.yearmon(time(hw08.ts_train), 
+#                                                   "%b %Y")),
+#                  "Original series" = frmt(as.numeric(hw08.ts_train), 1), 
+#                  "Estimated series" = frmt(as.numeric(fitted(ma.oos.fit2)), 1),
+#                  "Residuals" = frmt(as.numeric(ma.oos.fit2$resid), 1))),
+#       row.names = FALSE, align = "r")
+# Forecast / Backtesting
+ma.oos.fit.fcast2 <- forecast.Arima(ma.oos.fit2, h = 36)
+accuracy(ma.oos.fit.fcast2, hw08.ts_test)
+
+# @knitr ex1-MA_out-of-sample-fit_bis-2
+plot(ma.oos.fit.fcast2, col = 'blue', ylim = c(40, 160), 
+     xlab = "Year (time period: month)", 
+     main = "Original vs. an MA(12) model Forecasts",
+     ylab = "Original and Forecasted Values")
+leg.txt <- c("Original Series", "Forecasts from MA(12) model")
+legend("topleft", legend = leg.txt, lty = 1, col = c("black", "blue"), 
+       bty = 'n', cex = 0.9)
+lines(hw08.ts, col = "black")
+
+
+## @knitr ex1-ARMA_models
+# ARMA Model --------------------------------------------------------------
+for (i in 1:2)
+  for (j in 1:2) {
+    # No need to include i = 0 and j = 0 (AR and MA models, already checked)
+    try(fit.ARMA.aic <- AIC(Arima(hw08.ts, order = c(i, 0, j))), silent = TRUE)
+    if (fit.ARMA.aic < best.ARMA.aic) {
+      best.ARMA.order <- c(i, 0, j)
+      best.arma <- Arima(hw08.ts, order = best.ARMA.order)
+      best.ARMA.aic <- fit.ARMA.aic
+    }
+  }
+best.ARMA.order
+(best.ARMA.aic1 <- best.ARMA.aic)
+
+
+## @knitr ex1-ARMA_models-2
+best.arma
+
+
+## @knitr ex1-ARMA_models-3
+Parameters <- cbind(best.arma$coef, 
+                    sqrt(diag(best.arma$var.coef)), 
+                    matrix(sapply(c(-2,2), function(i) 
+                      best.arma$coef + i * sqrt(diag(best.arma$var.coef))), 
+                      ncol = 2))
+colnames(Parameters) <- c("Coefficient", "SE", "95% CI lower", "95% CI upper")
+kable(Parameters, digits = 4, 
+      caption = paste0("Coefficients, SEs, and 95% CIs of the estimated", 
+                       "ARMA(2,1) model"))
+
+
+## @knitr ex1-ARMA_models-4
+(roots_ar <- polyroot(c(1, -best.arma$coef[1:best.ARMA.order[1]])))
+all(Mod(roots_ar) > 1) # Stationarity condition
+(roots_ma <- polyroot(c(1, best.arma$coef[(best.ARMA.order[1] + 1):
+                                            (best.ARMA.order[1] + 
+                                               best.ARMA.order[3])])))
+all(Mod(roots_ma) > 1) # Invertibility condition
+
+
+## @knitr ex1-ARMA_models_bis
+for (i in 1:6)
+  for (j in 1:6) {
+    try(fit.ARMA.aic <- AIC(Arima(hw08.ts, order = c(i, 0, j))), silent = TRUE)
+    if (fit.ARMA.aic < best.ARMA.aic) {
+      best.ARMA.order2 <- c(i, 0, j)
+      best.arma2 <- Arima(hw08.ts, order = best.ARMA.order2)
+      best.ARMA.aic <- fit.ARMA.aic
+    }
+  }
+best.ARMA.order2
+best.ARMA.aic
+
+
+## @knitr ex1-ARMA_models_bis-2
+best.arma2
+
+
+## @knitr ex1-ARMA_models_bis-3
+Parameters <- cbind(best.arma2$coef, 
+                    sqrt(diag(best.arma2$var.coef)), 
+                    matrix(sapply(c(-2,2), function(i) 
+                      best.arma2$coef + i * sqrt(diag(best.arma2$var.coef))), 
+                      ncol = 2))
+colnames(Parameters) <- c("Coefficient", "SE", "95% CI lower", "95% CI upper")
+kable(Parameters, digits = 4, 
+      caption = paste0("Coefficients, SEs, and 95% CIs of the estimated", 
+                       "ARMA(5,2) model"))
+
+
+## @knitr ex1-ARMA_models_bis-4
+(roots_ar <- polyroot(c(1, -best.arma2$coef[1:best.ARMA.order2[1]])))
+all(Mod(roots_ar) > 1) # Stationarity condition
+(roots_ma <- polyroot(c(1, best.arma2$coef[(best.ARMA.order2[1] + 1):
+                                            (best.ARMA.order2[1] + 
+                                               best.ARMA.order2[3])])))
+all(Mod(roots_ma) > 1) # Invertibility condition
+
+
+## @knitr ex1-ARMA_res_plots
+summary(best.arma$resid)
+par(mfrow=c(2, 2))
+par(cex.main = 1, cex.lab = 0.9, cex.axis = 0.9)
+plot(best.arma$resid, main = "Residual Series of\nthe ARMA(2,1) model", 
+     col="blue", xlab = "Year (time period: month)", ylab = "Residual level")
+hist(best.arma$resid, col = "gray", breaks = 20, xlab = "Residual level", 
+     main = "Histogram of the residuals\n(ARMA(2,1) model")
+acf(best.arma$resid, main = "ACF of the Residual\nSeries (ARMA(2,1) model)")
+pacf(best.arma$resid, main = "PACF of the Residual\nSeries (ARMA(2,1) model)")
+par(mfrow=c(1, 1))
+par(cex.main = 1, cex.lab = 0.9, cex.axis = 0.9)
+
+
+## @knitr ex1-ARMA_res_plots_bis
+summary(best.arma2$resid)
+par(mfrow=c(2, 2))
+par(cex.main = 1, cex.lab = 0.9, cex.axis = 0.9)
+plot(best.arma2$resid, main = "Residual Series of\nthe ARMA(5,2) model", 
+     col="blue", xlab = "Year (time period: month)", ylab = "Residual level")
+hist(best.arma2$resid, col = "gray", breaks = 20, xlab = "Residual level", 
+     main = "Histogram of the residuals\n(ARMA(5,2) model")
+acf(best.arma2$resid, main = "ACF of the Residual\nSeries (ARMA(5,2) model)")
+pacf(best.arma2$resid, main = "PACF of the Residual\nSeries (ARMA(5,2) model)")
+par(mfrow=c(1, 1))
+par(cex.main = 1, cex.lab = 0.9, cex.axis = 0.9)
+
+
+## @knitr ex1-ARMA_boxtest
+Box.test(best.arma$resid, type = "Ljung-Box")
+
+
+## @knitr ex1-ARMA_boxtest_bis
+Box.test(best.arma2$resid, type = "Ljung-Box")
+
+
+## @knitr ex1-ARMA_in-sample-fit
+kable(tail(cbind("Time" = as.character(as.yearmon(time(hw08.ts), "%b %Y")),
+                 "Original series" = frmt(as.numeric(hw08.ts), 1), 
+                 "Estimated series" = frmt(as.numeric(fitted(best.arma)), 1),
+                 "Residuals" = frmt(as.numeric(best.arma$resid), 1))),
+      row.names = FALSE, align = "r")
+par(mar = c(5, 4, 4, 5) + 0.1)
+par(cex.main = 1, cex.lab = 0.9, cex.axis = 0.9)
+plot(hw08.ts, xlab = "Year (time period: month)", 
+     main = "Original vs. an ARMA(2,1) Estimated Series with Residuals",
+     ylab = "Original and Estimated Values",
+     ylim = c(40, 160), lwd = 0.5)
+leg.txt <- c("Original Series", "Estimated Series", "Residuals")
+legend("topleft", legend = leg.txt, lty = 1, col = c("black", "blue", "green"), 
+       bty = 'n', cex = 0.9)
+lines(fitted(best.arma), col = "blue", lwd = 0.5)
+par(new = TRUE)
+plot.ts(best.arma$resid, axes = FALSE, xlab = "", ylab = "", 
+        col = rgb(0, 1, 0, 0.5), ylim = c(-10, 10), lty = 1, pch = 1, 
+        col.axis = "green", lwd = 0.5)
+axis(side = 4, col = "green")
+mtext("Residuals", side = 4, line = 2, col = "green")
+par(mar = c(5, 4, 4, 2) + 0.1)
+par(cex.main = 1, cex.lab = 0.9, cex.axis = 0.9)
+
+
+## @knitr ex1-ARMA_in-sample-fit_bis
+kable(tail(cbind("Time" = as.character(as.yearmon(time(hw08.ts), "%b %Y")),
+                 "Original series" = frmt(as.numeric(hw08.ts), 1), 
+                 "Estimated series" = frmt(as.numeric(fitted(best.arma2)), 1),
+                 "Residuals" = frmt(as.numeric(best.arma2$resid), 1))),
+      row.names = FALSE, align = "r")
+par(mar = c(5, 4, 4, 5) + 0.1)
+par(cex.main = 1, cex.lab = 0.9, cex.axis = 0.9)
+plot(hw08.ts, xlab = "Year (time period: month)", 
+     main = "Original vs. an ARMA(5,2) Estimated Series with Residuals",
+     ylab = "Original and Estimated Values",
+     ylim = c(40, 160), lwd = 0.5)
+leg.txt <- c("Original Series", "Estimated Series", "Residuals")
+legend("topleft", legend = leg.txt, lty = 1, col = c("black", "blue", "green"), 
+       bty = 'n', cex = 0.9)
+lines(fitted(best.arma2), col = "blue", lwd = 0.5)
+par(new = TRUE)
+plot.ts(best.arma2$resid, axes = FALSE, xlab = "", ylab = "", 
+        col = rgb(0, 1, 0, 0.5), ylim = c(-10, 10), lty = 1, pch = 1, 
+        col.axis = "green", lwd = 0.5)
+axis(side = 4, col = "green")
+mtext("Residuals", side = 4, line = 2, col = "green")
+par(mar = c(5, 4, 4, 2) + 0.1)
+par(cex.main = 1, cex.lab = 0.9, cex.axis = 0.9)
+
+
+## @knitr ex1-ARMA_out-of-sample-fit
+(arma.oos.fit <- Arima(hw08.ts_train, order = best.ARMA.order))
+kable(head(cbind("Time" = as.character(as.yearmon(time(hw08.ts_train), 
+                                                  "%b %Y")),
+                 "Original series" = frmt(as.numeric(hw08.ts_train), 1), 
+                 "Estimated series" = frmt(as.numeric(fitted(arma.oos.fit)), 1), 
+                 "Residuals" = frmt(as.numeric(arma.oos.fit$resid), 1))),
+      row.names = FALSE, align = "r")
+# Forecast / Backtesting
+arma.oos.fit.fcast <- forecast.Arima(arma.oos.fit, h = 36)
+accuracy(arma.oos.fit.fcast, hw08.ts_test)
+
+## @knitr ex1-ARMA_out-of-sample-fit-2
+plot(arma.oos.fit.fcast, col = 'blue', ylim = c(40, 160), 
+     xlab = "Year (time period: month)", 
+     main = "Original vs. an ARMA(2,1) model Forecasts",
+     ylab = "Original and Forecasted Values")
+leg.txt <- c("Original Series", "Forecasts from ARMA(2,1) model")
+legend("topleft", legend = leg.txt, lty = 1, col = c("black", "blue"), 
+       bty = 'n', cex = 0.9)
+lines(hw08.ts, col = "black")
+
+
+## @knitr ex1-ARMA_out-of-sample-fit_bis
+(arma.oos.fit2 <- Arima(hw08.ts_train, order = best.ARMA.order2))
+# kable(head(cbind("Time" = as.character(as.yearmon(time(hw08.ts_train), 
+#                                                   "%b %Y")),
+#                  "Original series" = frmt(as.numeric(hw08.ts_train), 1), 
+#                  "Estimated series" = frmt(as.numeric(fitted(arma.oos.fit2)), 1), 
+#                  "Residuals" = frmt(as.numeric(arma.oos.fit2$resid), 1))),
+#       row.names = FALSE, align = "r")
+# Forecast / Backtesting
+arma.oos.fit.fcast2 <- forecast.Arima(arma.oos.fit2, h = 36)
+accuracy(arma.oos.fit.fcast2, hw08.ts_test)
+
+## @knitr ex1-ARMA_out-of-sample-fit_bis-2
+plot(arma.oos.fit.fcast2, col = 'blue', ylim = c(40, 160), 
+     xlab = "Year (time period: month)", 
+     main = "Original vs. an ARMA(5,2) model Forecasts",
+     ylab = "Original and Forecasted Values")
+leg.txt <- c("Original Series", "Forecasts from ARMA(5,2) model")
+legend("topleft", legend = leg.txt, lty = 1, col = c("black", "blue"), 
+       bty = 'n', cex = 0.9)
+lines(hw08.ts, col = "black")
+
+
+## @knitr ex1-comparison
+comparison <- data.frame(AIC = c(best.AR.aic1, best.AR.aic, best.MA.aic1, 
+                                 best.MA.aic, best.ARMA.aic1, best.ARMA.aic), 
+                         BIC = c(BIC(best.ar), BIC(best.ar2), BIC(best.ma), 
+                                 BIC(best.ma2), BIC(best.arma), 
+                                 BIC(best.arma2)))
+rownames(comparison) <- c(paste0("AR(", best.AR.order[1],")"), 
+                          paste0("AR(", best.AR.order2[1],")"), 
+                          paste0("MA(", best.MA.order[3],")"), 
+                          paste0("MA(", best.MA.order2[3],")"), 
+                          paste0("ARMA(", best.ARMA.order[1], ",", 
+                                 best.ARMA.order[3], ")"), 
+                          paste0("ARMA(", best.ARMA.order2[1], ",", 
+                                 best.ARMA.order2[3], ")"))
+kable(comparison, digits = 1)
+
+## @knitr ex1-120
+
+best.MA.aic; best.MA.order; best.ma
+best.ARMA.aic; best.ARMA.order; best.arma
+
+
+
+
+(hw08.arma21.fit <- Arima(hw08.ts, order=c(2,0,1)))
+summary(hw08.arma21.fit)
+
+## @knitr ex1-10000
+
+# Diagnostics using residuals
+# Visualization
+summary(hw08.arma21.fit$resid)
+par(mfrow=c(2, 2))
+par(cex.main = 1, cex.lab = 0.9, cex.axis = 0.9)
 library(forecast)
+plot(hw08.arma21.fit$resid, fitted(hw08.arma21.fit), 
+     main = "Residuals vs Fitted Series", 
+     xlab = "Residuals", ylab = "Fitted Values")
+abline(lm(fitted(hw08.arma21.fit) ~ hw08.arma21.fit$resid))
+plot.ts(hw08.arma21.fit$resid, main = "Residual Series", ylab = "Residuals")
+acf(hw08.arma21.fit$resid , main = "ACF of the Residual Series")
+pacf(hw08.arma21.fit$resid, main = "PACF of the Residual Series")
+par(mfrow=c(1, 1))
+par(cex.main = 1, cex.lab = 0.9, cex.axis = 0.9)
+
+# Check for conditional heteroscedasticity
+acf(hw08.arma21.fit$resid^2 , main="ACF of the Residual Series")
+pacf(hw08.arma21.fit$resid^2, main="PACF of the Residual Series")
+# Observations: 
+# 1. The residuals clearly show a relationship with the fitted series,
+#    indicating that there are aspects of the series that are left unexplained
+# 2. The residual series' t-plot does not look like a realization of a white 
+#    noise
+# 3. Both ACF and PACF show strong autocorrelations and partial autocorrelations
+
+# Ljung-Box test of residual dynamics (or lack thereof)
+# Reference: 
+# https://stat.ethz.ch/R-manual/R-patched/library/stats/html/box.test.html
+# These tests are sometimes applied to the residuals from an ARMA(p, q) fit,
+# in which case the references suggest a better approximation to the 
+# null-hypothesis distribution is obtained by setting fitdf = p+q, provided of 
+# course that lag > fitdf.
+Box.test(hw08.arma21.fit$resid, type="Ljung-Box") # Box-Pierce test
+# Observations: the null hypothesis of independence of the residual series is 
+#               strongly rejected.
+
+# x_t = \phi_1 x_{t-1} + \phi_1 x_{t-2} + \omega_t + \theta_1 \omega_{t-1}
+# \Phi_p(B)x_t = \Theta_q(B)\omega_t \ (p=2,q=1)
+# \Phi_p(B) = 1 - \phi_1 B - \phi_2 B^2, \Theta(B) = 1 + \theta_1 B
+all(Mod(polyroot(c(1, -hw08.arma21.fit$coef[1:2]))) > 1) # AR roots
+all(Mod(polyroot(c(1, hw08.arma21.fit$coef[3]))) > 1) # MA roots
+
+
+# 5. Model Performance Evaluation
+summary(hw08.arma21.fit$resid)
+plot(hw08.ts, 
+     main = "Original vs a MA4 Estimated Series with Resdiauls",
+     ylab = "Simulated and Estimated Values",
+     ylim = c(40, 160))
+leg.txt <- c("Original Series", "Estimated Series", "Residuals")
+legend("topright", legend=leg.txt, lty=1, col=c("black","blue","green"),
+       bty='n', cex=1)
+lines(fitted(hw08.arma21.fit),col="blue")
+# Observation: Surprisingly, the in-sample fit looks reasonable
+par(new=T)
+plot.ts(hw08.arma21.fit$resid,axes=F,xlab="",ylab="",col="green",
+        ylim=c(-12, 8), lty=1, pch=1, col.axis="green")
+axis(side = 4, col="green")
+mtext("Residuals", side = 4, line = 2, col = "green")
+
+df <- cbind(hw08, fitted(hw08.arma21.fit), hw08.arma21.fit$resid)
+head(df)
+
+# 6. Forecast / Statistical Inference
+# As we noted above, the model's underlying assumption is incorrect.
+# However, let's continue with the exercise anyway.
+
+# rm(ma4.nzfit.fcast)
+
+# 372 observations = 372/12 = 31 years
+# 10% > 3 years (36 months) ==> 1:336, 337:372
+hw08.arma21.fit.fcast <- forecast.Arima(hw08.arma21.fit, h = 24)
+hw08.arma21.fit.fcast2 <- predict(hw08.arma21.fit, n.ahead = 24)
+summary(hw08.arma21.fit.fcast2$pred)
+plot(hw08.arma21.fit.fcast, main="24-Step Ahead Forecast and Original & Estimated Series",
+     xlab="Simulated Time Period", ylab="Original, Estimated, and Forecasted Values",
+     xlim=c())
+lines(fitted(hw08.arma21.fit),col="blue")  
+lines(hw08.ts, col='red')
+
+# 7. Model Evaluation - An Altervative Method called Backtesting
+
+# Step 1: Re-estimate the model leaving out the last 10% of the observations.
+#         For this series, I leave out 54 observations, which is 4.5 years worth
+#         of data
+hw08.arma21.fit2 <- Arima(hw08[1:(length(hw08)-36)], order=c(13,0,13))
+summary(hw08.arma21.fit2)
+fitted(hw08.arma21.fit2)  
+# cbind(hw08[1:(length(hw08)-36)], fitted(hw08.arma21.fit2), hw08.arma21.fit2$resid)
+plot(hw08.arma21.fit2$resid)
+
+# Step 2: Forecast
+hw08.arma21.fit2.fcast <- forecast.Arima(hw08.arma21.fit2, h = 36)
+plot(hw08.arma21.fit2.fcast, ylim = c(40, 160))
+lines(hw08, col = 'navy')
+cbind(hw08[337:length(hw08)], hw08.arma21.fit2.fcast$mean[1:36])
+lines(c(fitted(hw08.arma21.fit2), hw08.arma21.fit2.fcast$mean[1:36]), col = 'red')
+lines(fitted(hw08.arma21.fit2), xlim=c(1,336), col = 'blue')
+
+
+plot(hw08.arma21.fit2.fcast, ylim = c(40, 160), lty = 2)
+par(new = TRUE)
+plot.ts(hw08.ts, col="navy",axes=F,ylab="", lty=1,ylim = c(40, 160))
+
+
+z1 <- ts(hw08[337:length(hw08)])
+z2 <- ts(hw08.arma21.fit2.fcast$mean[1:36])
+ts.plot(z1,z2, gpars = list(col = c("black", "blue")))
+
+library(reshape2)
+z2b <- ts(rbind(melt(hw08[1:336]), melt(hw08.arma21.fit2.fcast$mean[1:36])))
+ts.plot(hw08, z2b, gpars = list(col = c("black", "blue")))
+ts.plot(z2b)
+cbind(hw08,z2b)
+
+library(reshape2)
+z2b<- ts(rbind(melt(as.numeric(fitted(hw08.arma21.fit2))),melt(hw08.arma21.fit2.fcast$mean[1:36])))
+ts.plot(hw08, z2b, gpars = list(col = c("black", "blue")))
+cbind(hw08,z2b)
+
+length(hw08)
+length(z2b)
+
+##########
+fit <- Arima(hw08[1:(length(hw08)-36)], order=c(2,0,1))
+summary(fit)
+length(fitted(fit))
+length(fit$resid)
+cbind(hw08[1:(length(hw08)-36)], fitted(fit), fit$resid)
+
+# Plot the original and estimate series 
+plot.ts(hw08[1:(length(hw08)-36)], col="navy", 
+        main="Original vs a MA5 Estimated Series with Resdiauls",
+        ylab="Original and Estimated Values",
+        ylim=c(40,160), pch=1)
+par(new=T)
+plot.ts(fitted(fit),col="blue",axes=T,xlab="",ylab="",
+        ylim=c(40,160)) 
+leg.txt <- c("Original Series", "Estimated Series", "Residuals")
+legend("top", legend=leg.txt, lty=1, col=c("navy","blue","green"),
+       bty='n', cex=1)
+par(new=T)
+plot.ts(fit$resid,axes=F,xlab="",ylab="",col="green",
+        ylim=c(-6,6), pch=1)
+axis(side = 4, col = "green")
+mtext("Residuals", side = 4, line = 2,col = "green")
+
+# Step 2: Out-of-Sample Forecast
+fit.fcast <- forecast.Arima(fit, h=36)
+length(fit.fcast$mean)
+
+plot(fit.fcast,lty=2,
+     main="Out-of-Sample Forecast",
+     ylab="Original, Estimated, and Forecast Values", ylim=c(40,160))
+par(new=T)
+plot.ts(hw08, col="navy",axes=F, ylab="", lty=1, ylim=c(40,160))
+leg.txt <- c("Original Series", "Forecast series")
+legend("top", legend=leg.txt, lty=1, col=c("black","blue"),
+       bty='n', cex=1)
+##########
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+## @knitr ex1-100
+hw08.ts_out = window(hw08.ts, start = 1980, end = c(2008,12))
+Imth <- factor(cycle(hw08.ts_out))
+Time <- 1:length(hw08.ts_out)
+hw08.lm <- lm(hw08.ts_out ~ Time + I(Time^2)+ Imth)
+best.arma <- arima(resid(hw08.lm), order = c(2,0,1))
+new.time <- seq(length(hw08.ts)-24+1, length = 24)
+new.data <- data.frame(Time = new.time, Imth = factor(rep(1:12, 2)))
+predict.lm <- predict(hw08.lm, new.data)
+predict.arma <- predict(best.arma, n.ahead = 24)
+hw08.pred <- ts(predict.lm + predict.arma$pred, start = 2009, freq=12)
+ts.plot(cbind(hw08.ts_out, hw08.pred), ylim = c(30, 150))
+par(new=T)
+plot.ts(hw08.ts, ylim = c(30, 150), col = 'blue', lty = 2)
+
+hw08.arma21.fit2 <- Arima(resid(hw08.lm), order=c(2,0,1))
+hw08.arma21.fit2.fcast <- forecast.Arima(hw08.arma21.fit2, h = 24)
+plot(hw08.arma21.fit2.fcast, ylim = c(-20, 20))
+par(new=T)
+plot.ts(c(hw08[1:348]-fitted(hw08.lm), hw08[349:372]-predict.lm), ylim = c(-20, 20))
+
+plot(hw08.ts_out, ylim = c(30, 140), ylab = "")
+par(new = T)
+plot.ts(ts(fitted(hw08.lm), start = 1980, freq = 12), ylim = c(30, 140), 
+        col = 'blue')
+polygon(c(time(hw08.ts_out), rev(time(hw08.ts_out))), 
+        c(predict(hw08.lm, interval = "confidence")[, 3], 
+          rev(predict(hw08.lm, interval = "confidence")[, 2])),
+        col=rgb(0, 0, 0, 0.25), border = NA)
+
+
+predict.lm <- predict(hw08.lm, new.data, interval = "confidence")
+hw08.arma21.fit2.fcast
+# plot.ts(window(hw08.ts, start = 2009, end = c(2010,12)), ylim = c(120, 160))
+# par(new = TRUE)
+
+plot.ts(hw08.ts, ylim = c(40, 160), lty = 2)
+par(new = TRUE)
+uno <- ts(c(hw08.ts_out, predict.lm[, 1]), start = 1980, freq = 12)
+dos <- ts(c(rep(0, 348), hw08.arma21.fit2.fcast$mean), start = 1980, freq = 12)
+
+plot(uno + dos, ylim = c(40, 160), col = 'blue', lty = 1, lwd = 2)
+uno <- ts(predict.lm[, 1], start = 2009, freq = 12)
+dos <- ts(hw08.arma21.fit2.fcast$mean, start = 2009, freq = 12)
+polygon(c(time(uno), rev(time(dos))), 
+        c(predict.lm[, 3] + hw08.arma21.fit2.fcast$upper[,'95%'], 
+          rev(predict.lm[, 2] + hw08.arma21.fit2.fcast$lower[,'95%'])),
+        col=rgb(0, 0, 0, 0.25), border = NA)
+
+
+predict(hw08.lm, interval = "confidence")
+arima(resid(hw08.lm), order = c(2, 0, 2))
+acf(arima(resid(hw08.lm), order = c(2, 0, 2))$resid)
+
+
+# library(forecast)
 m2 <- tslm(hw08.ts~trend)
-f <- forecast(m2, h=5,level=c(80,95))
+f <- forecast(m2, h = 12, level=c(80,95))
 plot(f)
 lines(fitted(m2))
 summary(m2)
@@ -161,7 +1069,5 @@ m <- lm(x~time, d)
 plot(hw08.ts)
 abline(m)
 
-library(car)
-linearHypothesis(reg, sapply(c(2:12), function(i) paste0("M", i)))
-
-
+# library(car)
+linearHypothesis(hw08.lm, sapply(c(2:12), function(i) paste0("Imth", i)))
