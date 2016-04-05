@@ -222,17 +222,17 @@ Parameters <- cbind(best.ma$coef,
                       ncol = 2))
 colnames(Parameters) <- c("Coefficient", "SE", "95% CI lower", "95% CI upper")
 kable(Parameters, digits = 4, 
-      caption = "Coefficients, SEs, and 95% CIs of the estimated MA(4) model")
+      caption = "Coefficients, SEs, and 95% CIs of the estimated MA(8) model")
 
 ## @knitr ex1-MA_res_plots
 summary(best.ma$resid)
 par(mfrow=c(2, 2))
-plot(best.ma$resid, main = "Residual Series of\nthe MA(4) model", col="blue", 
+plot(best.ma$resid, main = "Residual Series of\nthe MA(8) model", col="blue", 
      xlab = "Year (time period: month)", ylab = "Residual level")
 hist(best.ma$resid, col = "gray", breaks = 20, xlab = "Residual level", 
-     main = "Histogram of the residuals\n(MA(4) model")
-acf(best.ma$resid, main = "ACF of the Residual\nSeries (MA(4) model)")
-pacf(best.ma$resid, main = "PACF of the Residual\nSeries (MA(4) model)")
+     main = "Histogram of the residuals\n(MA(8) model")
+acf(best.ma$resid, main = "ACF of the Residual\nSeries (MA(8) model)")
+pacf(best.ma$resid, main = "PACF of the Residual\nSeries (MA(8) model)")
 
 ## @knitr ex1-MA_boxtest
 Box.test(best.ma$resid, type = "Ljung-Box")
