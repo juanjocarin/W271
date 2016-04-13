@@ -1,0 +1,21 @@
+crimeRate_pc: crime rate per capital, measured by number of crimes per 1000 residents in neighborhood
+
+nonRetailBusiness: the proportion of non-retail business acres per neighborhood
+
+withWater: the neighborhood within 5 miles of a water body (lake, river, etc); 1 if true and 0 otherwise 
+
+ageHouse: proportion of house built before 1950
+
+distanceToCity: distances to the nearest city (measured in miles)
+
+pupilTeacherRatio: average pupil-teacher ratio in all the schools in the neighborhood 
+
+pctLowIncome: percentage of low income household in the neighborhood
+
+homeValue: median price of single-family house in the neighborhood (measured in dollar)
+
+pollutionIndex: pollution index, scaled between 0 and 100, with 0 being the best and 100 being the worst (i.e. uninhabitable) 
+
+nBedRooms: average number of bed rooms in the single family houses in the neighborhood
+
+

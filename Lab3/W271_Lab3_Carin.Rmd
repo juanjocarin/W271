@@ -1,0 +1,109 @@
+---
+title: "**W271**-2 -- Spring 2016 -- **Lab 3**"
+author: "***Juanjo Carin, Kevin Davis, Ashley Levato, Minghu Song***"
+date: "*April 22, 2016*"
+output:
+   pdf_document:
+     fig_caption: yes
+     fig_height: 3
+     fig_width: 4
+     toc: yes
+     toc_depth: 2
+numbersections: false
+geometry: margin=1in
+options: width=30
+fontsize: 10pt
+linkcolor: blue
+header-includes:
+- \usepackage{fancyhdr}
+- \pagestyle{fancy}
+- \fancyhead[LO,LE]{Carin, Davis, Levato, Song}
+- \fancyhead[CE,CO]{W271 -- Lab 3}
+- \fancyhead[RE,RO]{\leftmark}
+- \fancyfoot[LO,LE]{UC Berkeley -- MIDS}
+- \fancyfoot[CO,CE]{Spring semester 2016}
+- \fancyfoot[RE,RO]{\thepage}
+- \renewcommand{\headrulewidth}{0.5pt}
+- \renewcommand{\footrulewidth}{0.5pt}
+---
+
+**********
+
+### Instructions
+
+* Thoroughly analyze the given dataset or data series. Detect any anomalies in each of the variables. Examine if any of the variables that may appear to be top- or bottom-coded.
+* Your report needs to include a comprehensive graphical analysis
+* Your analysis needs to be accompanied by detailed narrative. Just printing a bunch of graphs and econometric results will likely receive a very low score.
+* Your analysis needs to show that your models are valid (in statistical sense).
+* Your rationale of using certian metrics to choose models need to be provided. Explain the validity / pros / cons of the metric you use to choose your "best" model.
+* Your rationale of any decisions made in your modeling needs to be explained and supported with empirical evidence.
+* All the steps to arrive at your final model need to be shown and explained clearly.
+* All of the assumptions of your final model need to be thoroughly tested and explained and shown to be valid. Don't just write something like, "the plot looks reasonable", or "the plot looks good", as different people interpret vague terms like "reasonable" or "good" differently.
+
+\pagebreak
+
+```{r, echo = FALSE, warning = FALSE}
+require(knitr, quietly = TRUE)
+read_chunk('code/W271_Lab3_Carin.R')
+opts_chunk$set(message = FALSE, warning = FALSE)
+opts_chunk$set(fig.width = 4, fig.height = 3)
+# Set path to data here (don't use setwd() inside a chunk!!!)
+opts_knit$set(root.dir = './data', global.par = TRUE)
+```
+
+```{r Libraries-Functions-Constants, echo = FALSE}
+```
+
+# Part 1
+
+## Modeling House Values
+
+**In Part 1, you will use the data set `houseValue.csv` to build a linear regression model, which includes the possible use of the instrumental variable approach, to answer a set of questions interested by a philanthropist group. You will also need to test hypotheses using these questions.**
+
+**The philanthropist group hires a think tank to examine the relationship between the house values and neighborhood characteristics. For instance, they are interested in the extent to which houses in neighbhorhood with desirable features command higher values. They are specifically interested in environmental features, such as proximity to water body (i.e. lake, river, or ocean) or air quality of a region.**
+
+**The think tank has collected information from tens of thousands of neighborhoods throughout the United States. They hire your group as contractors, and you are given a small sample and selected variables of the original data set collected to conduct an initial, proof-of-concept analysis. Many variables, in their original form or transfomed forms, that can explain the house values are included in the dataset. Analyze each of these variables as well as different combinations of them very carefully and use them (or a subset of them), in its original or transformed version, to build a linear regression model and test hypotheses to address the questions. Also address potential (statistical) issues that may be casued by omitted variables.**
+
+**********
+
+\pagebreak
+
+**********
+
+\pagebreak
+
+# Part 2
+
+## Modeling and Forecasting a Real-World Macroeconomic / Financial time series
+
+**Build a time-series model for the series in `lab3_series02.csv`, which is extracted from a real-world macroeconomic/financial time series, and use it to perform a 36-step ahead forecast. The periodicity of the series is purposely not provided. Possible models include AR, MA, ARMA, ARIMA, Seasonal ARIMA, GARCH, ARIMA-GARCH, or Seasonal ARIMA-GARCH models.**
+
+**********
+
+\pagebreak
+
+# Part 3
+
+## Forecast the Web Search Activity for global Warming
+
+**Imagine that you group is part of a data science team in an appreal company. One of its recent products is Global-Warming T-shirts. The marketing director expects that the demand for the t-shirts tends to increase when global warming issues are reported in the news. As such, the director asks your group to forecast the level of interest in global warming in the news. The dataset given to your group captures the relative web search activity for the phrase, "global warming" over time. For the purpose of this exercise, ignore the units reported in the data as they are unimportant and irrelevant. Your task is to produce the weekly forecast for the *next 3 months* for the relative web search activity for global warming. For the purpose of this exercise, treat it as a *12-step ahead forecast*.**
+
+**The dataset for this exercise is provided in `globalWarming.csv`. Use only models and techniques covered in the course (up to lecture 13). Note that one of the modeling issues you may have to consider is whether or not to use the entire series provided in the data set. Your choice will have to be clearly explained and supported with empirical evidence. As in other parts of the lab, the general instructions in the *Instruction Section* apply.**
+
+**********
+
+\pagebreak
+
+# Part 4
+
+## Forecast Inflation-Adjusted Gas Price
+
+**During 2013 amid high gas prices, the Associated Press (AP) published an article about the U.S. inflation-adjusted price of gasoline and U.S. oil production. The article claims that there is "*evidence of no statistical correlation*" between oil production and gas prices. The data was not made publicly available, but comparable data was created using data from the Energy Information Administration. The workspace and data frame `gasOil.Rdata` contains the U.S. oil production (in millions of barrels of oil) and the inflation-adjusted average gas prices (in dollars) over the date range the article indicates.**
+
+**In support of their conclusion, the AP reported a single p-value. You have two tasks for this exericse, and both tasks need the use of the data set `gasOil.Rdata`.**
+
+**Your first task is to recreate the analysis that the AP likely used to reach their conclusion. Thoroughly discuss all of the errors the AP made in their analysis and conclusion.**
+
+**Your second task is to create a more statistically-sound model that can be used to predict/forecast inflation-adjusted gas prices. Use your model to forecast the inflation-adjusted gas prices from 2012 to 2016.**
+
+**********
