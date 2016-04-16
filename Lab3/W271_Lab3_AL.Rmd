@@ -79,9 +79,9 @@ opts_knit$set(root.dir = './data', global.par = TRUE)
 **Build a time-series model for the series in `lab3_series02.csv`, which is extracted from a real-world macroeconomic/financial time series, and use it to perform a 36-step ahead forecast. The periodicity of the series is purposely not provided. Possible models include AR, MA, ARMA, ARIMA, Seasonal ARIMA, GARCH, ARIMA-GARCH, or Seasonal ARIMA-GARCH models.**
 
 
-We argue that an XXXX model is the best choice. We evaluated this model, along with AR, MA, ARMA, ARIMA, Seasonal ARIMA, GARCH, ARIMA-GARCH, or Seasonal ARIMA-GARCH models, and chose it becasue of....
+We argue that an XXXX model is the best choice. We explored this timeseries data and evaluted possible model types including AR, MA, ARMA, ARIMA, Seasonal ARIMA, GARCH, ARIMA-GARCH, or Seasonal ARIMA-GARCH models. A GARCHXXXXX model was identified as the best fitting model because the time-series is not stationary in the mean or variance and is conditional heteroskedasstic which makes modeling the data using AR, MA, ARMA, ARIMA, or SARIMA models not good fits. 
 
-In this first section, we first load the data and conduct some exploratory analysis. This includes plotting the timeseries (see Figure XXXX), and its ACF and PACF (see Figure XX). From this we can see.....
+First we load the data and conduct some exploratory analysis. This includes plotting the timeseries and examining key characteristics that can help us elimate unlikly modeling choices instead of testing all model types.  
 
 
 
@@ -113,29 +113,29 @@ We then take a look at the box and whisker plot of the timeseries in order to se
 ```{r ex2-square_ts, echo = 1, fig.width = 5, fig.height = 3.75, fig.cap = "Squared Time-series plot"}
 ```
 
-From the variance analysis above we choose to subset the data and only work with the data from about 1500 to 2332, becasue the data prior to 1500 is likely to not be useful in forcasting the data and may overwhelm some of the other analysis.
+From the variance analysis above we choose to subset the data and only work with the data from about 1500 to 2332, becasue the data prior to 1500 is likely to not be useful in forcasting the data.
+
 ```{r ex2-subset}
 ```
 
 ```{r ex2-sub_time_plot, echo = 1, fig.width = 5, fig.height = 3.75, fig.cap = "Subset Time-series plot"}
 ```
 
+Since this data is not stationary in the mean or variance; MA, AR, and ARMA models will not be good models to forcast the data. In order to model this non-staionary data we need to difference the data. The plot of the differenced data looks stationary in the mean; however, we also plot the squared ts and notice the variance is still volitile. To confirm our suspicion of conditionally heteroskedastic we plot the ACF of the squared values with adjusted mean. The results in the plot below confirm our suspicion which indicatese that a GARCH style model would be better suited to model the data because they allow for conditional changes in variance. 
 
+```{r ex2-first_diff}
+```
 
+```{r ex2-acf, echo = FALSE, fig.width=6, fig.height=4.5, fig.cap = "Autocorrelation Plot"}
+```
 
+We now model the data using a GARCH model and look at the confidence intervals, acf, and acf of squared values to examine the residuals. We see that just the GARCH model coefficients are not all statistically significant since zero falls within the the confidence interval of b1. 
 
-Just looking at the ACF and PACF of this time series we see that the ACF tails off very slowly and is near 1. On the other hand the PACF has the largest spike at 1 and possible other significant spikes around 14 and 16. 
+```{r ex2-garch}
+```
 
-
-
-
-
-Next, in section 2, we run through a series of canidate models. 
-
-
-Finally in section 3, we select the best model and use it to perform a 36-step ahead forecast, which is......
-
-
+```{r ex2-acf, echo = FALSE, fig.width=6, fig.height=4.5, fig.cap = "Autocorrelation Plots"}
+```
 
 **********
 

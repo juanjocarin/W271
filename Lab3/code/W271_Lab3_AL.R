@@ -83,9 +83,8 @@ set.seed(1234)
 
 ## @knitr ex2-load
 # Loading the Data --------------------------------------------------------
-# setwd('./HW8/data')
+# setwd('./Lab3/data')
 #load the data
-setwd('C:/Users/Batman/Documents/Term2/271/github_group/W271/Lab3/data')
 d<-read.csv('lab3_series02.csv')
 str(d)
 all(d$X == 1:dim(d)[1]) # check if 1st column is just an incremental index
@@ -146,7 +145,7 @@ par(mfrow=c(1, 1))
 par(cex.main = 1, cex.lab = 0.9, cex.axis = 0.9)
 
 ## @knitr ex2-boxplot
-boxplot(d ~ factor(rep(1:78, each = 30)), 
+boxplot(d ~ factor(rep(1:22, each = 106)), 
         outcex = 0.4, medcol="red", lwd = 0.5, 
         xlab = 'Year', ylab = 'Level / Amplitude',
         main = 'Box-and-whisker plot of\nthe time series per year')
@@ -173,3 +172,25 @@ leg.txt <- c("Time-series", "Mean value",
 legend("topleft", legend = leg.txt, lty = c(1, 2, 1), lwd = c(1, 1, 1.5), 
        col = c("blue", "red", "green"), bty = 'n', cex = .8)
 
+## @knitr ex2-first_diff
+d1.ts<-diff(d_sub.ts)
+plot(d1.ts)
+#Now we take a look at the variance of this differenced model by looking at the squared ts
+plot.ts(d1.ts*d1.ts, col = 'purple', type = 'l', 
+        xlab = "Time period", ylab = "Level / Amplitude", 
+        main = "Squared Time-series plot of the first differenced data")
+
+## @knitr ex2-acf
+#conduct the acf of the squared values of the difference to identify conditional heteroskedasticity 
+acf((d1.ts-mean(d1.ts))^2, lag.max = 24, main = "ACF of the squared values")
+
+
+## @knitr ex2-garch
+library(tseries)
+d1.garch<-garch(d1.ts,  trace=FALSE)
+confint(d1.garch)
+d1.res <- d1.garch$res[-1]
+
+## @knitr ex2-garch_acf
+acf(d1.res)
+acf(d1.res^2)
