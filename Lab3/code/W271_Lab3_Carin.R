@@ -34,6 +34,11 @@ library(fGarch)
 library(quantmod)
 library(tseries)
 
+library(GGally)
+library(lattice)
+library(corrgram)
+library(TSA)
+
 # Define functions
 
 # A function to apply format
@@ -82,15 +87,366 @@ set.seed(1234)
 
 
 
-## @knitr ex1-load
+## @knitr P1-load
 # Loading the Data --------------------------------------------------------
-# setwd('./HW8/data')
-hw08 <- read.csv('hw08_series.csv', header = TRUE)
-str(hw08)
-all(hw08$X == 1:dim(hw08)[1]) # check if 1st column is just an incremental index
-hw08 <- hw08[, -1]
+# setwd('./Lab3/data')
+houseValue <- read.csv('houseValueData.csv', header = TRUE)
+head(houseValue)
+
+## @knitr P2-load
+# Loading the Data --------------------------------------------------------
+# setwd('./Lab3/data')
+financial <- read.csv('lab3_series02.csv', header = TRUE)
+head(financial)
+# Check if 1st column is just an incremental index
+all(financial$X == 1:dim(financial)[1])
+financial <- financial[, -1]
+head(financial)
 
 
+## @knitr P3-load
+# Loading the Data --------------------------------------------------------
+# setwd('./Lab3/data')
+globalWarming <- read.csv('globalWarming.csv', header = TRUE)
+head(globalWarming)
+
+
+## @knitr P4-load
+# Loading the Data --------------------------------------------------------
+# setwd('./Lab3/data')
+load('gasOil.Rdata')
+rbind(head(gasOil,4 ), tail(gasOil, 4))
+summary(gasOil)
+
+## @knitr P4-timeseries
+Production <- ts(data = gasOil$Production, start = year(gasOil$Date[1]), 
+                 frequency = 12)
+Price <- ts(data = gasOil$Price, start = year(gasOil$Date[1]), frequency = 12)
+
+## @knitr P4-timeplot_prod
+par(mar = c(5, 5, 4, 2) + 0.1)
+plot(Production, xlab = "Year (time period: months)", 
+     ylab = "U.S. oil production\n(in millions of barrels)", 
+     main = paste0("U.S. oil production (in millions of barrels)\nfrom Jan. ", 
+                  "1978 to Feb. 2012"))
+lines(stats::filter(Production, sides=2, rep(1, 13)/13), lwd = 1.5, 
+      col = "green")
+leg.txt <- c("Original Series", "13-Point Symmetric Moving Average")
+legend("bottomleft", legend=leg.txt, lty = c(1, 1), col=c("black", "green"), 
+       bty = 'n', cex = .8, merge = TRUE, bg = 336)
+par(mar = c(5, 4, 4, 2) + 0.1)
+
+## @knitr P4-timeplot_price
+par(mar = c(5, 5, 4, 2) + 0.1)
+plot(Price, xlab = "Year (time period: months)", 
+     ylab = "U.S. inflation-adjusted average\ngas prices (in dollars)", 
+     main = paste0("U.S. inflation-adjusted average gas prices (in dollars)\n", 
+                  "from Jan. 1978 to Feb. 2012"))
+lines(stats::filter(Price, sides=2, rep(1, 13)/13), lwd = 1.5, 
+      col = "green")
+leg.txt <- c("Original Series", "13-Point Symmetric Moving Average")
+legend("bottomleft", legend=leg.txt, lty = c(1, 1), col=c("black", "green"), 
+       bty = 'n', cex = .8, merge = TRUE, bg = 336)
+par(mar = c(5, 4, 4, 2) + 0.1)
+# Production <- xts(gasOil$Production, 
+#                   order.by = as.Date(as.character(gasOil$Date), '%Y-%m-%d'))
+# Price <- xts(gasOil$Price, 
+#              order.by = as.Date(as.character(gasOil$Date), '%Y-%m-%d'))
+# par(mar = c(5, 5, 4, 2) + 0.1)
+# par(mfrow = c(2, 1))
+# plot(Production, xlab = "Month and Year (time period: months)", 
+#      ylab = "U.S. oil production\n(in millions of barrels)", 
+#      main = paste("U.S. oil production (in millions of barrels) from Jan.", 
+#                   "1978 to Feb. 2012"))
+# plot(Price, xlab = "Month and Year (time period = weeks)", 
+#      ylab = "Inflation-adjusted average gas\nprices (in U.S. dollars)", 
+#      main = paste("Inflation-adjusted average gas\nprices (in U.S. dollars)", 
+#                   "from Jan. 1978 to Feb. 2012"))
+# par(mar = c(5, 4, 4, 2) + 0.1)
+# par(mfrow = c(1, 1))
+
+## @knitr P4-timeplot_combined
+par(mar = c(5, 4, 4, 5) + 0.1)
+par(cex.main = 1, cex.lab = 0.9, cex.axis = 0.9)
+plot(Production, col = 'blue', xlab = "Year (time period: month)", ylab = "", 
+     main = paste0("U.S. oil production (in millions of barrels) and ", 
+                   "inflation-adjusted\naverage gas prices (in dollars) ", 
+                   "from Jan. 1978 to Feb. 2012"), 
+     ylim = c(100, 300), lwd = 1)
+axis(side = 2, col = "blue", col.axis = "blue", at = seq(100, 300, 25))
+mtext("U.S. oil production (in millions of barrels)", side = 2, line = 2, 
+      col = "blue", cex = 1)
+leg.txt <- c("Production", "Price")
+legend("bottomleft", legend = leg.txt, lty = 1, col = c("blue", "green"), 
+       bty = 'n', cex = 0.8)
+par(new = TRUE)
+plot(Price, axes = FALSE, xlab = "", ylab = "", col = rgb(0, 1, 0), 
+     ylim = c(1.25, 4.5), lty = 1, pch = 1, col.axis = "green", lwd = 1)
+axis(side = 4, col = "green", col.axis = 'green')
+mtext("U.S. inflation-adjusted average gas prices (in $)", side = 4, 
+      line = 2, col = "green", cex = 1)
+par(mar = c(5, 4, 4, 2) + 0.1)
+par(cex.main = 1, cex.lab = 0.9, cex.axis = 0.9)
+
+## @knitr P4-matrix
+ggpairs(gasOil[, 2:3], title = paste("Scatterplot matrix of U.S. oil", 
+                                     "production and inflation-adjusted", 
+                                     "average gas prices"), 
+        mapping = list(colour='red')) + 
+  theme(plot.title = element_text(size=12))
+
+## @knitr P4-correlation
+# cor(gasOil$Production, gasOil$Price)
+(ProdPrice.cor <- cor.test(Production, Price))
+
+## @knitr P4-ACF
+par(mfrow = c(2, 2), cex.main = 0.9)
+stats::acf(Production, lag = 24, 
+           main = paste0("ACF of the U.S. oil production (in millions of\n", 
+                 "barrels from Jan. 1978 to Feb 2012"))
+pacf(Production, lag = 24, 
+     main = paste0("PACF of the U.S. oil production (in millions of\nbarrels)", 
+                  " from Jan. 1978 to Feb. 2012"))
+stats::acf(Price, lag = 24, 
+           main = paste0("ACF of the U.S. infl.-adj. average gas prices\n", 
+                         "(in dollars) from Jan. 1978 to Feb. 2012"))
+pacf(Price, lag = 24, 
+     main = paste("PACF of the U.S. infl.-adj. average gas prices\n", 
+                  "(in dollars) from Jan. 1978 to Feb. 2012"))
+par(mfrow = c(1, 1), cex.main = 1)
+
+## @knitr P4-unity_root
+# Augmented Dickey-Fuller Test
+adf.test(Production)
+adf.test(Price)
+# Phillips-Perron Unit Root Test
+pp.test(Production)
+pp.test(Price)
+
+## @knitr P4-cointegration
+po.test(gasOil[, 2:3])
+# McLeod.Li.test
+
+## @knitr P4-model_AIC_BIC
+max_coef <- 3
+orders <- data.frame(permutations(n = max_coef + 1, r = 3, v = 0:max_coef, 
+                                  set = FALSE, repeats.allowed = TRUE))
+dim(orders)[1] # Number of models up to max_coef
+colnames(orders) <- c("p", "d", "q")
+orders <- orders %>% dplyr::filter(d >= 1)
+dim(orders)[1] # Number of models considered
+orders %>% sample_n(10) # A 10-sample of the possible orders
+model_list <- orders %>% rowwise() %>% 
+  mutate(aic = try_default(AIC(Arima(Price, order = c(p, d, q))), default = NA, 
+                           quiet = TRUE))
+model_list <- model_list %>% dplyr::filter(!is.na(aic))
+dim(model_list)[1] # Number of models estimated
+model_list <- model_list %>% 
+  mutate(bic = BIC(Arima(Price, order = c(p, d, q))))
+kable(model_list %>% arrange(aic) %>% top_n(-5, aic), 
+      digits = 1, caption = "Top 5 models  based on the (lowest) AIC value")
+kable(model_list %>% arrange(bic) %>% top_n(-5, bic), 
+      digits = 1, caption = "Top 5 models based on the (lowest) BIC value")
+
+## @knitr P4-model_AIC_BIC_2
+auto.arima(Price, seasonal = TRUE, ic = "aic") # same result using AICc
+auto.arima(Price, seasonal = TRUE, ic = "bic")
+
+## @knitr P4-model_candidates
+orders_AIC <- model_list %>% arrange(aic) %>% top_n(-3, aic) %>% select(p, d, q)
+orders_BIC <- model_list %>% arrange(bic) %>% top_n(-3, bic) %>% select(p, d, q)
+orders <- rbind_list(orders_AIC, orders_BIC) %>% unique()
+models <- apply(orders, 1, function(arima_order) 
+  Arima(Price, order = c(arima_order[1], arima_order[2], arima_order[3])))
+
+## @knitr P4-model_ACF_PACF
+par(mfrow=c(5,2))
+for (i in 1:5) {
+  stats::acf(resid(models[[i]]), 
+             main = paste0("ACF of the residuals of the\nARIMA(", orders[i, 1], 
+                           ",", orders[i, 2], ",", orders[i, 3], ") model"))
+  pacf(resid(models[[i]]), main = paste0("ACF of the residuals of the\nARIMA(", 
+                                         orders[i, 1], ",", orders[i, 2], ",", 
+                                         orders[i, 3], ") model"))
+}
+par(mfrow=c(1,1))
+
+## @knitr P4-model_ACF_PACF_2
+sum_acf <- function(model) {
+  # Get the ACFs of first 24 lags
+  ACF <- stats::acf(model$residuals, plot = FALSE, lag.max = 24)$acf
+  # Exclude (assign 0) to those not significant
+  significant_ACF <- ifelse(abs(ACF) < qnorm(.975) / sqrt(model$nobs), 0, 
+                            abs(ACF))
+  # Sum absolute values (exluding lag 0)
+  return(sum(significant_ACF[-1]))
+}
+sum_pacf <- function(model) {
+  # Get the PACFs of first 24 lags
+  PACF <- pacf(model$residuals, plot = FALSE, lag.max = 24)$acf
+  # Exclude (assign 0) to those not significant
+  significant_PACF <- ifelse(abs(PACF) < qnorm(.975) / sqrt(model$nobs), 0, 
+                             abs(PACF))
+  # Sum absolute values
+  return(sum(significant_PACF))
+}
+model_list <- join(orders, model_list, by=c("p","d","q"), type="inner") %>% 
+  rowwise() %>% 
+  mutate(ACF = sum_acf(Arima(Price, order = c(p, d, q))), 
+         PACF = sum_pacf(Arima(Price, order = c(p, d, q))))
+kable(model_list %>% arrange(ACF) %>% top_n(-5, ACF), digits = 1, 
+      caption = paste0("Top 5 models based on the (lowest) sum of the ", 
+                       "absolute value of their (significant) ", 
+                       "auto-correlations"))
+
+## @knitr P4-OOS_fit_ARIMA113
+models <- models[c(1,4)]
+orders <- orders[c(1,4), ]
+Price.train <- window(Price, start = 1978, end=c(2008, 12))
+Price.test <- window(Price, start = 2009)
+(arima113.oos.fit <- Arima(Price.train, order = as.numeric(orders[1, ])))
+kable(head(cbind("Time" = as.character(as.yearmon(time(Price.train), "%b %Y")), 
+                 "Original series" = frmt(as.numeric(Price.train), 2), 
+                 "Estimated series" = 
+                   frmt(as.numeric(fitted(arima113.oos.fit)), 2), 
+                 "Residuals" = frmt(as.numeric(arima113.oos.fit$resid), 2))), 
+      row.names = FALSE, align = "r")
+arima113.oos.fit.fcast <- forecast.Arima(arima113.oos.fit, h = 38)
+kable(accuracy(arima113.oos.fit.fcast, Price.test)[, 1:7], 
+      caption = paste("Goodness-of-fit parameters for the training and", 
+                      "test sets (ARIMA(1,1,3)"))
+
+## @knitr P4-OOS_fit_ARIMA113_2
+plot(arima113.oos.fit.fcast, col = 'blue', ylim = c(-0.5, 4.5), 
+     xlab = "Year (time period: month)", 
+     main = paste0("38-step out-of-sample Forecast and Original & Estimated ", 
+                   "Series\n(ARIMA(1,1,3)"), 
+     ylab="Original, Estimated, and Forecasted Values")
+leg.txt <- c("Original series", "Esimated series (ARIMA(1,1,3))", 
+             "Out-of-sample forecasts")
+legend("bottomleft", legend = leg.txt, lty = c(1, 2, 1), 
+       col = c("black", "blue", "blue"), 
+       bty = 'n', cex = 0.9)
+lines(Price, col = "black")
+lines(fitted(arima113.oos.fit), col = 'blue', lty = 2)
+
+## @knitr P4-OOS_fit_ARIMA012
+(arima012.oos.fit <- Arima(Price.train, order = as.numeric(orders[2, ])))
+kable(head(cbind("Time" = as.character(as.yearmon(time(Price.train), "%b %Y")), 
+                 "Original series" = frmt(as.numeric(Price.train), 2), 
+                 "Estimated series" = 
+                   frmt(as.numeric(fitted(arima012.oos.fit)), 2), 
+                 "Residuals" = frmt(as.numeric(arima012.oos.fit$resid), 2))), 
+      row.names = FALSE, align = "r")
+arima012.oos.fit.fcast <- forecast.Arima(arima012.oos.fit, h = 38)
+kable(accuracy(arima012.oos.fit.fcast, Price.test)[, 1:7], 
+      caption = paste("Goodness-of-fit parameters for the training and", 
+                      "test sets (ARIMA(0,1,2)"))
+
+## @knitr P4-OOS_fit_ARIMA012_2
+plot(arima012.oos.fit.fcast, col = 'blue', ylim = c(-0.5, 4.5), 
+     xlab = "Year (time period: month)", 
+     main = paste0("38-step out-of-sample Forecast and Original & Estimated ", 
+                   "Series\n(ARIMA(0,1,2)"), 
+     ylab="Original, Estimated, and Forecasted Values")
+leg.txt <- c("Original series", "Esimated series (ARIMA(0,1,2))", 
+             "Out-of-sample forecasts")
+legend("bottomleft", legend = leg.txt, lty = c(1, 2, 1), 
+       col = c("black", "blue", "blue"), 
+       bty = 'n', cex = 0.9)
+lines(Price, col = "black")
+lines(fitted(arima012.oos.fit), col = 'blue', lty = 2)
+
+## @knitr P4-ARIMA113_forecast
+(arima113.fit <- models[[1]])
+arima113.fit.fcast <- forecast.Arima(arima113.fit, h = 58)
+pander(predict(arima113.fit, n.ahead = 58)$pred)
+
+## @knitr P4-ARIMA113_forecast_2
+plot(arima113.fit.fcast, col = 'blue', ylim = c(1, 5.5), 
+     xlab = "Year (time period: month)", 
+     main = paste0("58-step ahead Forecast and Original & Estimated ", 
+                   "Series\n(ARIMA(1,1,3)"), 
+     ylab="Original, Estimated, and Forecasted Values")
+leg.txt <- c("Original series", "Esimated series (ARIMA(1,1,3))", 
+             "Out-of-sample forecasts")
+legend("topleft", legend = leg.txt, lty = c(1, 2, 1), 
+       col = c("black", "blue", "blue"), 
+       bty = 'n', cex = 0.9)
+lines(Price, col = "black")
+lines(fitted(arima113.fit), col = 'blue', lty = 2)
+
+## @knitr P4-GARCH_1
+acf(resid(arima113.fit)^2, lag.max = 24, 
+    main = paste0("ACF of the squared residuals of the\nARIMA(1,1,3) model ", 
+                  "fitted to the U.S.\ninflation-adjusted average gas prices"))
+
+## @knitr P4-GARCH_2
+Price.garch11 <- garch(resid(arima113.fit), trace = FALSE)
+Price.garch11.res <- Price.garch11$res[-1]
+t(confint(Price.garch11))
+
+## @knitr P4-GARCH_3
+acf(Price.garch11.res^2, lag.max = 24, 
+    main = paste0("ACF of the residuals of an\nARIMA(1,1,3)/GARCH(1,1) model ", 
+                  "fitted to the\nU.S. inflation-adjusted average gas prices"))
+
+## @knitr P4-GARCH_4
+ht <- Price.garch11$fit[,1]^2
+plot(ht, main = paste0("Estimated conditional variance of the\nARIMA(1,1,3)/", 
+                       "GARCH(1,1) model fitted to the\nU.S. inflation-", 
+                       "adjusted average gas prices"))
+
+## @knitr P4-GARCH_5
+low <- fitted.values(arima113.fit) - qnorm(.975) * sqrt(ht)
+high <- fitted.values(arima113.fit) + qnorm(.975) * sqrt(ht)
+new.ht <- new.res <- new.low <- new.high <- rep(0, 58)
+for (i in 1:58) {
+  if (i == 1) {
+    new.ht[i] <- Price.garch11$coef[1] + 
+      Price.garch11$coef[2] * resid(arima113.fit)[length(Price)]^2 + 
+      Price.garch11$coef[3] * ht[length(Price)]
+  } else {
+    new.ht[i] <- Price.garch11$coef[1] + 
+      Price.garch11$coef[2] * new.res[i-1]^2 + 
+      Price.garch11$coef[3] * new.ht[i-1]
+  }
+  new.res[i] <- rnorm(1) * sqrt(new.ht[i])
+  new.low[i] <- as.numeric(forecast(arima113.fit, 58)$mean)[i] - 
+    qnorm(.975) * sqrt(new.ht[i])
+  new.high[i] <- as.numeric(forecast(arima113.fit, 58)$mean)[i] + 
+    qnorm(.975) * sqrt(new.ht[i])
+}
+
+## @knitr P4-GARCH_6
+plot(arima113.fit.fcast, ylim = c(1, 5), ylab = "", 
+     main = "Forecasts from ARIMA(1,1,3)/GARCH(1,1)")
+polygon(c(time(Price), rev(time(Price))), 
+        c(high, rev(low)), col=rgb(0, 0, 0, 0.25), border = NA)
+polygon(c(time(arima113.fit.fcast$mean), 
+          rev(time(arima113.fit.fcast$mean))), 
+        c(new.high, rev(new.low)), col=rgb(0, 0, 0, 0.25), border = NA)
+
+## @knitr hola
+
+plot(rbind(Price, arima113.fit.fcast$mean), ylim = c(0, 5), ylab = "")
+
+plot(arima113.fit.fcast)
+
+# https://talksonmarkets.files.wordpress.com/2012/09/time-series-analysis-with-arima-e28093-arch013.pdf
+plot(Price, ylim = c(0, 5), ylab = "")
+polygon(c(time(Price), rev(time(Price))), 
+        c(high, rev(low)), col=rgb(0, 0, 0, 0.25), border = NA)
+
+
+plot(Price, ylim = c(0, 5), ylab = "")
+polygon(c(time(Price), rev(time(Price))), 
+        c(high, rev(low)), col=rgb(0, 0, 0, 0.25), border = NA)
+
+
+archres=resid(arima113.fit)/sqrt(ht.arch08)
+qqnorm(archres,main='ARIMA-ARCH Residuals')
+qqline(archres)
 
 ## @knitr ex1-desc_stats
 # Exploratory Data Analysis -----------------------------------------------
@@ -159,71 +515,28 @@ plot(decompose(hw08.ts, type = 'additive'), col = 'blue',
 # plot(stl(hw08.ts, s.window="periodic"), col = 'blue')
 
 
-## @knitr ex1-acf_pacf
-# ACF and PACF of the Time Series -----------------------------------------
-# Plot the ACF and PACF of the series
-par(mfrow=c(1, 2))
-par(cex.main = 1, cex.lab = 0.9, cex.axis = 0.9)
-acf(hw08.ts, lag.max = 24, main = "ACF of the time series")
-pacf(hw08.ts, lag.max = 24, main = "PACF of the time series")
-par(mfrow=c(1, 1))
-par(cex.main = 1, cex.lab = 0.9, cex.axis = 0.9)
-
 
 ## @knitr ex1-models_analysis
 # Candidate Models --------------------------------------------------------
-max_coef <- 12
-orders <- data.frame(permutations(n = max_coef + 1, r = 2, v = 0:max_coef, 
+max_coef <- 3
+orders <- data.frame(permutations(n = max_coef + 1, r = 3, v = 0:max_coef, 
                                   set = FALSE, repeats.allowed = TRUE))
 dim(orders)[1] # Number of models up to max_coef
-colnames(orders) <- c("p", "q")
-orders <- orders %>% filter(p + q <= max_coef & p + q > 0)
+colnames(orders) <- c("p", "d", "q")
+orders <- orders %>% dplyr::filter(d >= 1)
 dim(orders)[1] # Number of models considered
 orders %>% sample_n(10) # A 10-sample of the possible orders
 aic_list <- orders %>% rowwise() %>% 
-  mutate(aic = try_default(AIC(Arima(hw08, order = c(p, 0, q))), default = NA, 
+  mutate(aic = try_default(AIC(Arima(Price, order = c(p, d, q))), default = NA, 
                            quiet = TRUE))
-aic_list <- aic_list %>% filter(!is.na(aic))
+aic_list <- aic_list %>% dplyr::filter(!is.na(aic))
 dim(aic_list)[1] # Number of models estimated
-# # # # Another way # # # #
-# aic_list2 <- orders %>% mutate(aic = mapply(function(p, q) 
-#   try_default(AIC(Arima(hw08, order = c(p, 0, q))), NA, TRUE), p, q))
-# aic_list2 <- aic_list2 %>% filter(!is.na(aic))
-# # # # Yet another way # # # #
-# aic_list3 <- matrix(rep(NA, (max_coef + 1)^2), ncol = max_coef + 1)
-# for (i in 0:max_coef) 
-#   for (j in 0:max_coef) 
-#     if (i + j > 0 & i + j <= max_coef) 
-#       aic_list3[i + 1, j + 1] <- try_default(AIC(Arima(hw08, 
-#                                                        order = c(i, 0, j))), 
-#                                              NA, TRUE)
-# aic_list3 <- data.frame(aic_list3, row.names = 0:max_coef)
-# colnames(aic_list3) <- 0:max_coef
-# aic_list3 <- aic_list3 %>% gather() %>% rename(q = key,  aic = value) %>% 
-#   mutate(p = rep(0:max_coef, max_coef + 1)) %>% select(p, q, aic) %>% 
-#   arrange(p) %>% filter(!is.na(aic))
-# # # # And yet another way # # # #
-# i <- rep(0:max_coef, times = max_coef + 1)
-# j <- rep(0:max_coef, each = max_coef + 1)
-# aic_list4 <- mapply(function(p, q) ifelse(p + q > 0 & p + q <= max_coef, 
-#                                           try_default(AIC(Arima(hw08, 
-#                                                                 order = c(p, 0, 
-#                                                                           q))), 
-#                                                       NA, TRUE), NA), i, j)
-# aic_list4 <- matrix(aic_list4, nrow = max_coef + 1)
-# aic_list4 <- data.frame(aic_list4, row.names = 0:max_coef)
-# colnames(aic_list4) <- 0:max_coef
-# aic_list4 <- aic_list4 %>% gather %>% rename(q = key,  aic = value) %>% 
-#   mutate(p = rep(0:max_coef, max_coef + 1)) %>% select(p, q, aic) %>% 
-#   arrange(p) %>% filter(!is.na(aic))
-# # # # The 4 methods yield the same result # # # #
-# all(aic_list == aic_list2); all(aic_list== aic_list3); all(aic_list ==
-#                                                                aic_list4)
-# Add the BIC (and the corresponding family)
 aic_list <- aic_list %>% 
-  mutate(bic = BIC(Arima(hw08, order = c(p, 0, q))), 
-         family = ifelse(q == 0, "AR", ifelse(p == 0, "MA", "ARMA")))
-
+  mutate(bic = BIC(Arima(Price, order = c(p, d, q))))
+kable(aic_list %>% arrange(aic) %>% top_n(-5, aic), 
+      digits = 1, caption = "Top 5 models  based on their AIC value")
+kable(aic_list %>% arrange(bic) %>% top_n(-5, bic), 
+      digits = 1, caption = "Top 5 models based on their BIC value")
 
 ## @knitr ex1-models_analysis-2
 par(mfrow = c(1, 2))
@@ -237,12 +550,11 @@ par(mfrow = c(1, 1))
 ## @knitr ex1-models_analysis-3
 par(mar = c(5, 4, 4, 5) + 0.1)
 par(mfrow = c(2, 2))
-plot(aic_list %>% filter(family == "AR") %>% select(p, aic), col = "blue", 
-     main = "AIC of AR(p) model vs. p", ylab = "AIC", type = "o", lty = 2, 
-     pch = 1)
-plot(aic_list %>% filter(family == "MA") %>% select(q, aic), col = "blue", 
-     main = "AIC of MA(q) model vs. q", ylab = "AIC", type = "o", lty = 2, 
-     pch = 1)
+par(mar = c(5, 4, 4, 2) + 0.1)
+par(mfrow = c(1, 1))
+
+par(mar = c(5, 4, 4, 5) + 0.1)
+par(mfrow = c(2, 2))
 plot(aic_list %>% filter(family == "AR") %>% select(p, bic), col = "blue", 
      main = "BIC of AR(p) model vs. p", ylab = "BIC", type = "o", lty = 2, 
      pch = 1)
