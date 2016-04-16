@@ -79,11 +79,9 @@ opts_knit$set(root.dir = './data', global.par = TRUE)
 **Build a time-series model for the series in `lab3_series02.csv`, which is extracted from a real-world macroeconomic/financial time series, and use it to perform a 36-step ahead forecast. The periodicity of the series is purposely not provided. Possible models include AR, MA, ARMA, ARIMA, Seasonal ARIMA, GARCH, ARIMA-GARCH, or Seasonal ARIMA-GARCH models.**
 
 
-We argue that an XXXX model is the best choice. We explored this timeseries data and evaluted possible model types including AR, MA, ARMA, ARIMA, Seasonal ARIMA, GARCH, ARIMA-GARCH, or Seasonal ARIMA-GARCH models. A GARCHXXXXX model was identified as the best fitting model because the time-series is not stationary in the mean or variance and is conditional heteroskedasstic which makes modeling the data using AR, MA, ARMA, ARIMA, or SARIMA models not good fits. 
+We argue that an seasonal-ARIMA-GARCH model is the best choice. We explored this timeseries data and evaluted possible model types including AR, MA, ARMA, ARIMA, Seasonal ARIMA, GARCH, ARIMA-GARCH, or Seasonal ARIMA-GARCH models. A sARIMA-GARCH model was identified as the best fitting model because the time-series is not stationary in the mean or variance and is conditional heteroskedasstic which makes modeling the data using AR, MA, ARMA, ARIMA, or SARIMA models not good fits by themselves. We also note a statistically significant lags and possible seasonal trends in the data around 14 or 16. If this data is daily data this lag could be approximately mid month or every two weeks.Therefore, the combination sARIMA-GARCH model should produe the best fit for the data. 
 
-First we load the data and conduct some exploratory analysis. This includes plotting the timeseries and examining key characteristics that can help us elimate unlikly modeling choices instead of testing all model types.  
-
-
+First we load the data and conduct some exploratory analysis. This includes plotting the timeseries and examining key characteristics that can help us elimate unlikly modeling choices instead of testing all possible model types.  
 
 ```{r ex2-load, echo = -c(1:2)}
 ```
@@ -102,18 +100,21 @@ We look at the timeseries itself and some zoomed in plots covering approximately
 ```{r ex2-time_plot, echo = 1, fig.width = 5, fig.height = 3.75, fig.cap = "Time-series plot"}
 ```
 
-```{r ex2-time_plot_zoom, echo = FALSE, fig.height = 2.25, fig.cap = "Zoomed Time-series plots"}
+```{r ex2-time_plot_zoom, fig.width = 5, echo = FALSE, fig.cap = "Zoomed Time-series plots"}
 ```
 
 We then take a look at the box and whisker plot of the timeseries in order to see if the variance is stationary over time. As we can see in the plot below the variance is not stationary in time and starts to increase over time especially after group 16 in the plot. Note since we do not know the unit of observation we choose to group the data into 22 equal bins of 106 observations in order to be able to identify any changes in variance. We can also plot the square of the timeseries to see if the variance is conditional on the prior and as we can see in the figure below there is a change at around obervation 1700.
 
-```{r ex2-boxplot, echo = FALSE,  fig.width = 5, fig.height = 4, fig.cap = "Boxplot of the series (every 106 observations)."}
+```{r ex2-boxplot, echo = FALSE,  fig.width = 5, fig.height = 4, fig.cap = "Checking for Staionarity in Variance"}
 ```
 
-```{r ex2-square_ts, echo = 1, fig.width = 5, fig.height = 3.75, fig.cap = "Squared Time-series plot"}
+We also examine the acf and pacf to see look for any statistically significant lags or seasonality. As we can see from the pacf that there may be some seasonality around 14 or 16 which as we noted above could be about every two weeks or mid month if the data is daily. 
+
+```{r ex2-acf_pacf, echo = FALSE, fig.width=6, fig.height=4.5, fig.cap = "Autocorrelation Plot"}
 ```
 
-From the variance analysis above we choose to subset the data and only work with the data from about 1500 to 2332, becasue the data prior to 1500 is likely to not be useful in forcasting the data.
+
+From the variance analysis,  we choose to subset the data and only work with the data from about 1500 to 2332, becasue the data prior to 1500 is likely to not be useful in forcasting the data.
 
 ```{r ex2-subset}
 ```
@@ -121,7 +122,14 @@ From the variance analysis above we choose to subset the data and only work with
 ```{r ex2-sub_time_plot, echo = 1, fig.width = 5, fig.height = 3.75, fig.cap = "Subset Time-series plot"}
 ```
 
+
+Since we suspect some seasonality, we can decomponse the timeseries which varifies the increasing trend and the seasonality as see in the figure below. We use multiplicative decomposition because of the nonstationarity in the variance.  
+
+```{r ex2-decompose, echo = FALSE,  fig.width = 6, fig.height = 5.6, fig.cap = "Decomposition of the time series."}
+```
+
 Since this data is not stationary in the mean or variance; MA, AR, and ARMA models will not be good models to forcast the data. In order to model this non-staionary data we need to difference the data. The plot of the differenced data looks stationary in the mean; however, we also plot the squared ts and notice the variance is still volitile. To confirm our suspicion of conditionally heteroskedastic we plot the ACF of the squared values with adjusted mean. The results in the plot below confirm our suspicion which indicatese that a GARCH style model would be better suited to model the data because they allow for conditional changes in variance. 
+
 
 ```{r ex2-first_diff}
 ```
@@ -129,12 +137,28 @@ Since this data is not stationary in the mean or variance; MA, AR, and ARMA mode
 ```{r ex2-acf, echo = FALSE, fig.width=6, fig.height=4.5, fig.cap = "Autocorrelation Plot"}
 ```
 
-We now model the data using a GARCH model and look at the confidence intervals, acf, and acf of squared values to examine the residuals. We see that just the GARCH model coefficients are not all statistically significant since zero falls within the the confidence interval of b1. 
+
+At this point we know that an MA, AR, ARMA, ARIMA, and sARIMA models will not be able to fully capture the data; however, a simple GARCH model will not be able to capture the seasonal aspect of the data. Therefore, we use a seasonal-ARIMA-GARCH model to capture all of the elements of the data. The sARIMA model to capture the seasonal component and then run a GARCH on the residuals to model the conditional changes in variance. 
+
+In order order to show that an ARIMA model does not capture the data, we run several ARIMA models to find the best coeficients and see that sARIMA(0,0,0)(0,1,2) are the best fit coefficients using AIC criteria showing a seasonality component to the model. Examining the acf and squared acf we note that the squared acf still has volitility which is evident by the squared residuals being significant at most lags and confirms our assumption that we need to run a GARCH on the residuals. We also see that the confidence intervals on the coeficients for the seasonal componets are significant and do not cross zero. 
+
+```{r ex2-sarima}
+```
+
+```{r ex2-sarima_acf, echo = FALSE, fig.width=6, fig.height=4.5, fig.cap = "Autocorrelation Plots from sARIMA model"}
+```
+
+We now model the residuals using a GARCH model and look at the confidence intervals, acf, and acf of squared values to examine goodness of fit. We see that just the GARCH model coefficients are not all statistically significant since zero falls within the the confidence interval of b1. The acf also shows no obvious pattern of significant values. 
 
 ```{r ex2-garch}
 ```
 
-```{r ex2-acf, echo = FALSE, fig.width=6, fig.height=4.5, fig.cap = "Autocorrelation Plots"}
+```{r ex2-garch_acf, echo = FALSE, fig.width=6, fig.height=4.5, fig.cap = "Autocorrelation Plots from GARCH model"}
+```
+
+We then use this model to forcast ahead 36 steps and plot it with the timeseries. 
+
+```{r ex2-forcast, echo = 1, fig.width = 5, fig.height = 3.75, fig.cap = "Time-series plot with 36 step forcast"}
 ```
 
 **********

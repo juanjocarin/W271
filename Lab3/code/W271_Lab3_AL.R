@@ -106,7 +106,7 @@ legend("topright", legend = leg.txt, lty = 2, col = "blue", bty = 'n', cex = .8)
 
 
 ## @knitr ex2-time_plot
-d.ts <- ts(d)
+d.ts <- ts(d, frequency =1)
 plot.ts(d.ts, col = 'blue', type = 'l', 
         xlab = "Time period", ylab = "Level / Amplitude", 
         main = "Time-series plot of the data")
@@ -119,7 +119,6 @@ legend("topleft", legend = leg.txt, lty = c(1, 2, 1), lwd = c(1, 1, 1.5),
        col = c("blue", "red", "green"), bty = 'n', cex = .8)
 
 ## @knitr ex2-time_plot_zoom
-layout(1:1)
 plot.ts(window(d.ts, 1332), col = 'blue', type = 'l', 
         xlab = "Time Period", ylab = "Level / Amplitude", 
         main = paste0("Detail of the last 1000 observations"))
@@ -134,6 +133,16 @@ plot.ts(window(d.ts, 2272 ), col = 'blue', type = 'l',
         main = paste0("Detail of the last 60 observations(two months"))
 
 
+## @knitr ex2-boxplot
+boxplot(d ~ factor(rep(1:22, each = 106)), 
+        outcex = 0.4, medcol="red", lwd = 0.5, 
+        xlab = 'Year', ylab = 'Level / Amplitude',
+        main = 'Box-and-whisker plot of\nthe time series per year')
+#plot the squared timeseries to check for staionarity in the variance
+plot.ts(d.ts*d.ts, col = 'purple', type = 'l', 
+        xlab = "Time period", ylab = "Level / Amplitude", 
+        main = "Squared Time-series plot of the data")
+
 ## @knitr ex2-acf_pacf
 # ACF and PACF of the Time Series -----------------------------------------
 # Plot the ACF and PACF of the series
@@ -144,21 +153,10 @@ pacf(d.ts, lag.max = 24, main = "PACF of the time series")
 par(mfrow=c(1, 1))
 par(cex.main = 1, cex.lab = 0.9, cex.axis = 0.9)
 
-## @knitr ex2-boxplot
-boxplot(d ~ factor(rep(1:22, each = 106)), 
-        outcex = 0.4, medcol="red", lwd = 0.5, 
-        xlab = 'Year', ylab = 'Level / Amplitude',
-        main = 'Box-and-whisker plot of\nthe time series per year')
-
-## @knitr ex2-square_ts
-plot.ts(d.ts*d.ts, col = 'purple', type = 'l', 
-        xlab = "Time period", ylab = "Level / Amplitude", 
-        main = "Squared Time-series plot of the data")
-
 ## @knitr ex2-subset
-#subset the data to only use observation 1700-2332
+#subset the data to only use observation 1500-2332
 d_sub<-d[1500:2332]
-d_sub.ts<-ts(d_sub)
+d_sub.ts<-ts(d_sub, frequency =16)
 
 ## @knitr ex2-sub_time_plot
 plot.ts(d_sub.ts, col = 'blue', type = 'l', 
@@ -172,8 +170,13 @@ leg.txt <- c("Time-series", "Mean value",
 legend("topleft", legend = leg.txt, lty = c(1, 2, 1), lwd = c(1, 1, 1.5), 
        col = c("blue", "red", "green"), bty = 'n', cex = .8)
 
+## @knitr ex2-decompose
+plot(decompose(d_sub.ts, type = 'multiplicative'), col = 'blue', 
+     xlab = "Time Period")
+
+
 ## @knitr ex2-first_diff
-d1.ts<-diff(d_sub.ts)
+d1.ts<-diff(d_sub.ts, frequency=16)
 plot(d1.ts)
 #Now we take a look at the variance of this differenced model by looking at the squared ts
 plot.ts(d1.ts*d1.ts, col = 'purple', type = 'l', 
@@ -184,13 +187,51 @@ plot.ts(d1.ts*d1.ts, col = 'purple', type = 'l',
 #conduct the acf of the squared values of the difference to identify conditional heteroskedasticity 
 acf((d1.ts-mean(d1.ts))^2, lag.max = 24, main = "ACF of the squared values")
 
+## @knitr ex2-sarima
+#create function to find the best seasonal ARIMA model 
+get.best.arima <- function(x.ts, maxord = c(1,1,1,1,1,1))
+{
+  best.aic <- 1e8
+  n <- length(x.ts)
+  for (p in 0:maxord[1]) for(d in 0:maxord[2]) for(q in 0:maxord[3]) 
+    for (P in 0:maxord[4]) for(D in 0:maxord[5]) for(Q in 0:maxord[6])
+    {
+      fit <- arima(x.ts, order = c(p,d,q),
+                   seas = list(order = c(P,D,Q), frequency(x.ts)),
+                   method = "CSS")
+      fit.aic <- -2*fit$loglik + (log(n)+1)*length(fit$coef)
+      if (fit.aic < best.aic)
+      {
+        best.aic <- fit.aic
+        best.fit <- fit
+        best.model <- c(p,d,q,P,D,Q)
+      }
+    }
+  list(best.aic, best.fit, best.model)
+}
+#run the function on the data
+best_sarima_d1<-get.best.arima(d1.ts, maxord= c(2,2,2,2,2,2))
+#pull out the best model coefs
+best_sarima_d1[[3]]
+
+## @knitr ex2-sarima_acf
+#plot the acf and acf of squared vales to check for volitility 
+best_fit_d1<-best_sarima_d1[[2]]
+acf(resid(best_fit_d1))
+acf(resid(best_fit_d1)^2)
 
 ## @knitr ex2-garch
-library(tseries)
-d1.garch<-garch(d1.ts,  trace=FALSE)
-confint(d1.garch)
-d1.res <- d1.garch$res[-1]
+#first we need to initialize the sarima model with the best coefs identified above
+d1_sarima<-arima(d1.ts, order = c(0,0,0), seas = list(order = c(0,1,2), 16))
+t(confint(d1_sarima))
+d1_res<-resid(d1_sarima)
+d1_garch<-garch(d1_res, trace=FALSE)
+t(confint(d1_garch))
+d1_gres <- resid(d1_garch)[-1]
 
 ## @knitr ex2-garch_acf
-acf(d1.res)
-acf(d1.res^2)
+acf(d1_gres)
+acf(d1_gres^2)
+
+## @knitr ex2-forcast
+plot(forecast(d1_sarima, h=36))
