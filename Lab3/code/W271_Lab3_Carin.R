@@ -199,6 +199,10 @@ ggpairs(gasOil[, 2:3], title = paste("Scatterplot matrix of U.S. oil",
 # cor(gasOil$Production, gasOil$Price)
 (ProdPrice.cor <- cor.test(Production, Price))
 
+## @knitr P4-correlation_2
+(linReg <- summary(lm(Price ~ Production)))
+(ProdPrice.cor2 <- sqrt(linReg$r.squared))
+
 ## @knitr P4-ACF
 par(mfrow = c(2, 2), cex.main = 0.9)
 stats::acf(Production, lag = 24, 
@@ -359,6 +363,13 @@ lines(fitted(arima012.oos.fit), col = 'blue', lty = 2)
 
 ## @knitr P4-ARIMA113_forecast
 (arima113.fit <- models[[1]])
+Parameters <- cbind(arima113.fit$coef, sqrt(diag(arima113.fit$var.coef)), 
+                    matrix(sapply(c(-2,2), function(i) 
+                      arima113.fit$coef + 
+                        i * sqrt(diag(arima113.fit$var.coef))), ncol = 2))
+colnames(Parameters) <- c("Coefficient", "SE", "95% CI lower", "95% CI upper")
+kable(Parameters, digits = 4, 
+      caption = "Coefficients, SEs, and 95% CIs of the estimated ARIMA(1,1,3) model")
 arima113.fit.fcast <- forecast.Arima(arima113.fit, h = 58)
 pander(predict(arima113.fit, n.ahead = 58)$pred)
 
@@ -382,7 +393,7 @@ acf(resid(arima113.fit)^2, lag.max = 24,
                   "fitted to the U.S.\ninflation-adjusted average gas prices"))
 
 ## @knitr P4-GARCH_2
-Price.garch11 <- garch(resid(arima113.fit), trace = FALSE)
+(Price.garch11 <- garch(resid(arima113.fit), trace = FALSE))
 Price.garch11.res <- Price.garch11$res[-1]
 t(confint(Price.garch11))
 
@@ -398,34 +409,46 @@ plot(ht, main = paste0("Estimated conditional variance of the\nARIMA(1,1,3)/",
                        "adjusted average gas prices"))
 
 ## @knitr P4-GARCH_5
-low <- fitted.values(arima113.fit) - qnorm(.975) * sqrt(ht)
-high <- fitted.values(arima113.fit) + qnorm(.975) * sqrt(ht)
-new.ht <- new.res <- new.low <- new.high <- rep(0, 58)
+ht.lower <- fitted.values(arima113.fit) - qnorm(.975) * sqrt(ht)
+ht.upper <- fitted.values(arima113.fit) + qnorm(.975) * sqrt(ht)
+# Initialize h_t (cond. variance), its lower and upper limits
+  # and epsilon_t (residuals or error term): 58 elements (as many as forecasts)
+new.ht <- new.ht.lower <- new.ht.upper <- new.res <- rep(0, 58) 
 for (i in 1:58) {
-  if (i == 1) {
+  if (i == 1) { # use last observation
     new.ht[i] <- Price.garch11$coef[1] + 
       Price.garch11$coef[2] * resid(arima113.fit)[length(Price)]^2 + 
       Price.garch11$coef[3] * ht[length(Price)]
-  } else {
+  } else { # use previous predictions
     new.ht[i] <- Price.garch11$coef[1] + 
       Price.garch11$coef[2] * new.res[i-1]^2 + 
       Price.garch11$coef[3] * new.ht[i-1]
   }
   new.res[i] <- rnorm(1) * sqrt(new.ht[i])
-  new.low[i] <- as.numeric(forecast(arima113.fit, 58)$mean)[i] - 
+  new.ht.lower[i] <- as.numeric(forecast(arima113.fit, 58)$mean)[i] - 
     qnorm(.975) * sqrt(new.ht[i])
-  new.high[i] <- as.numeric(forecast(arima113.fit, 58)$mean)[i] + 
+  new.ht.upper[i] <- as.numeric(forecast(arima113.fit, 58)$mean)[i] + 
     qnorm(.975) * sqrt(new.ht[i])
 }
 
 ## @knitr P4-GARCH_6
-plot(arima113.fit.fcast, ylim = c(1, 5), ylab = "", 
-     main = "Forecasts from ARIMA(1,1,3)/GARCH(1,1)")
+plot(arima113.fit.fcast, ylim = c(1, 5), 
+     xlab = "Year (time period: month)", 
+     main = paste0("58-step ahead Forecast and Original Series\n", 
+                   "with confidence intervals (ARIMA(1,1,3)/GARCH(1,1)"), 
+     ylab = "Original and Forecasted Values")
 polygon(c(time(Price), rev(time(Price))), 
-        c(high, rev(low)), col=rgb(0, 0, 0, 0.25), border = NA)
+        c(ht.upper, rev(ht.lower)), col=rgb(0, 0, 0, 0.25), border = NA)
 polygon(c(time(arima113.fit.fcast$mean), 
           rev(time(arima113.fit.fcast$mean))), 
-        c(new.high, rev(new.low)), col=rgb(0, 0, 0, 0.25), border = NA)
+        c(new.ht.upper, rev(new.ht.lower)), col=rgb(0, 0, 0, 0.25), border = NA)
+leg.txt <- c("Original series", "Forecasts (ARIMA(1,1,3)/GARCH(1,1))", 
+             "Confidence intervals")
+legend("topleft", legend = leg.txt, lty = c(1, 1, 1), lwd = c(1, 1, 6), 
+       col = c("black", "blue", "gray"), 
+       bty = 'n', cex = 0.9)
+
+
 
 ## @knitr hola
 
@@ -558,7 +581,7 @@ par(mfrow = c(2, 2))
 plot(aic_list %>% filter(family == "AR") %>% select(p, bic), col = "blue", 
      main = "BIC of AR(p) model vs. p", ylab = "BIC", type = "o", lty = 2, 
      pch = 1)
-plot(aic_list %>% filter(family == "MA") %>% select(q, bic), col = "blue", 
+plot(aic_list %>% filter(family kable== "MA") %>% select(q, bic), col = "blue", 
      main = "BIC of MA(q) model vs. q", ylab = "BIC", type = "o", lty = 2, 
      pch = 1)
 par(mar = c(5, 4, 4, 2) + 0.1)
@@ -1571,3 +1594,5 @@ leg.txt <- c("Original Series",
              "Estimated series and ahead\nforecasts from MA(12) model")
 legend("topleft", legend = leg.txt, lty = 1, col = c("black", "blue"), 
        bty = 'n', cex = 0.9)
+
+
