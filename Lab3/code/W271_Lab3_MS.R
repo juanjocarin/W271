@@ -106,7 +106,7 @@ legend("topright", legend = leg.txt, lty = 2, col = "blue", bty = 'n', cex = .8)
 
 
 ## @knitr ex2-time_plot
-d.ts <- ts(d, frequency =1)
+d.ts <- ts(d)
 plot.ts(d.ts, col = 'blue', type = 'l', 
         xlab = "Time period", ylab = "Level / Amplitude", 
         main = "Time-series plot of the data")
@@ -119,6 +119,7 @@ legend("topleft", legend = leg.txt, lty = c(1, 2, 1), lwd = c(1, 1, 1.5),
        col = c("blue", "red", "green"), bty = 'n', cex = .8)
 
 ## @knitr ex2-time_plot_zoom
+layout(1:1)
 plot.ts(window(d.ts, 1332), col = 'blue', type = 'l', 
         xlab = "Time Period", ylab = "Level / Amplitude", 
         main = paste0("Detail of the last 1000 observations"))
@@ -133,16 +134,6 @@ plot.ts(window(d.ts, 2272 ), col = 'blue', type = 'l',
         main = paste0("Detail of the last 60 observations(two months"))
 
 
-## @knitr ex2-boxplot
-boxplot(d ~ factor(rep(1:22, each = 106)), 
-        outcex = 0.4, medcol="red", lwd = 0.5, 
-        xlab = 'Year', ylab = 'Level / Amplitude',
-        main = 'Box-and-whisker plot of\nthe time series per year')
-#plot the squared timeseries to check for staionarity in the variance
-plot.ts(d.ts*d.ts, col = 'purple', type = 'l', 
-        xlab = "Time period", ylab = "Level / Amplitude", 
-        main = "Squared Time-series plot of the data")
-
 ## @knitr ex2-acf_pacf
 # ACF and PACF of the Time Series -----------------------------------------
 # Plot the ACF and PACF of the series
@@ -153,10 +144,21 @@ pacf(d.ts, lag.max = 24, main = "PACF of the time series")
 par(mfrow=c(1, 1))
 par(cex.main = 1, cex.lab = 0.9, cex.axis = 0.9)
 
+## @knitr ex2-boxplot
+boxplot(d ~ factor(rep(1:22, each = 106)), 
+        outcex = 0.4, medcol="red", lwd = 0.5, 
+        xlab = 'Year', ylab = 'Level / Amplitude',
+        main = 'Box-and-whisker plot of\nthe time series per year')
+
+## @knitr ex2-square_ts
+plot.ts(d.ts*d.ts, col = 'purple', type = 'l', 
+        xlab = "Time period", ylab = "Level / Amplitude", 
+        main = "Squared Time-series plot of the data")
+
 ## @knitr ex2-subset
-#subset the data to only use observation 1500-2332
+#subset the data to only use observation 1700-2332
 d_sub<-d[1500:2332]
-d_sub.ts<-ts(d_sub, frequency =16)
+d_sub.ts<-ts(d_sub)
 
 ## @knitr ex2-sub_time_plot
 plot.ts(d_sub.ts, col = 'blue', type = 'l', 
@@ -170,13 +172,8 @@ leg.txt <- c("Time-series", "Mean value",
 legend("topleft", legend = leg.txt, lty = c(1, 2, 1), lwd = c(1, 1, 1.5), 
        col = c("blue", "red", "green"), bty = 'n', cex = .8)
 
-## @knitr ex2-decompose
-plot(decompose(d_sub.ts, type = 'multiplicative'), col = 'blue', 
-     xlab = "Time Period")
-
-
 ## @knitr ex2-first_diff
-d1.ts<-diff(d_sub.ts, frequency=16)
+d1.ts<-diff(d_sub.ts)
 plot(d1.ts)
 #Now we take a look at the variance of this differenced model by looking at the squared ts
 plot.ts(d1.ts*d1.ts, col = 'purple', type = 'l', 
@@ -187,51 +184,111 @@ plot.ts(d1.ts*d1.ts, col = 'purple', type = 'l',
 #conduct the acf of the squared values of the difference to identify conditional heteroskedasticity 
 acf((d1.ts-mean(d1.ts))^2, lag.max = 24, main = "ACF of the squared values")
 
-## @knitr ex2-sarima
-#create function to find the best seasonal ARIMA model 
-get.best.arima <- function(x.ts, maxord = c(1,1,1,1,1,1))
-{
-  best.aic <- 1e8
-  n <- length(x.ts)
-  for (p in 0:maxord[1]) for(d in 0:maxord[2]) for(q in 0:maxord[3]) 
-    for (P in 0:maxord[4]) for(D in 0:maxord[5]) for(Q in 0:maxord[6])
-    {
-      fit <- arima(x.ts, order = c(p,d,q),
-                   seas = list(order = c(P,D,Q), frequency(x.ts)),
-                   method = "CSS")
-      fit.aic <- -2*fit$loglik + (log(n)+1)*length(fit$coef)
-      if (fit.aic < best.aic)
-      {
-        best.aic <- fit.aic
-        best.fit <- fit
-        best.model <- c(p,d,q,P,D,Q)
-      }
-    }
-  list(best.aic, best.fit, best.model)
-}
-#run the function on the data
-best_sarima_d1<-get.best.arima(d1.ts, maxord= c(2,2,2,2,2,2))
-#pull out the best model coefs
-best_sarima_d1[[3]]
-
-## @knitr ex2-sarima_acf
-#plot the acf and acf of squared vales to check for volitility 
-best_fit_d1<-best_sarima_d1[[2]]
-acf(resid(best_fit_d1))
-acf(resid(best_fit_d1)^2)
 
 ## @knitr ex2-garch
-#first we need to initialize the sarima model with the best coefs identified above
-d1_sarima<-arima(d1.ts, order = c(0,0,0), seas = list(order = c(0,1,2), 16))
-t(confint(d1_sarima))
-d1_res<-resid(d1_sarima)
-d1_garch<-garch(d1_res, trace=FALSE)
-t(confint(d1_garch))
-d1_gres <- resid(d1_garch)[-1]
+library(tseries)
+d1.garch<-garch(d1.ts,  trace=FALSE)
+confint(d1.garch)
+d1.res <- d1.garch$res[-1]
 
 ## @knitr ex2-garch_acf
-acf(d1_gres)
-acf(d1_gres^2)
+acf(d1.res)
+acf(d1.res^2)
 
-## @knitr ex2-forcast
-plot(forecast(d1_sarima, h=36))
+
+## @knitr P3-load
+# Loading the Global Warming Data 
+gw<- read.csv('globalWarming.csv', header = TRUE)
+head(gw)
+
+
+## @knitr P3-timeseries
+# Create ts object with non-integer frequencies and 
+gw_ts <- ts(gw[,2], start = 2004 + 4/265.25, frequency = 365.25/7)
+str(gw_ts)
+
+
+## @knitr P3-timeplot_prod
+# Plot ts and its decomposed plots 
+plot(gw_ts, xlab = "Time", ylab = " The Interested Level", 
+     main = "Interest Levels in Global Warming\nfrom Jan" )
+
+## @knitr P3-plot_seasonal
+# Plot its trend and seasonal decomposition
+plot(decompose(gw_ts) )
+
+## @knitr P3-acfplot_prod
+# Extract a subset of data from 2012 to 2016
+# Plot new ts and acf/pacf plots 
+gw_ts_new <-window(gw_ts, start = c(2012,1) )
+par(mfrow=c(3,2))
+plot(gw_ts_new, xlab = "Time",ylab = " The Interested Level", 
+     main = paste0(" Interest Levels in Global Warming\nfrom Jan. ", 
+                   "2012 to Feb. 2016"))
+plot(diff(gw_ts_new),xlab = "Time",ylab= 'Differenced Interest Levels',
+     main= 'Differenced Interest Level')
+acf(gw_ts_new, main = "ACF of Interest Levels in Global Warming", ylim=c(-0.2,1))
+acf(diff(gw_ts_new), main = "ACF of Differenced Interest Levels",ylim=c(-0.2,1))
+pacf(diff(gw_ts_new), main = "PACF of Interest Levels",ylim=c(-0.2,1))
+pacf(diff(gw_ts_new), main = "PACF of Differenced  Interest Levels",ylim=c(-0.2,1))
+invisible(dev.off())
+
+## @knitr P3-best-fit_arima
+# Best fit arima model and 12-step ahead forecast
+gw_ts_fit <- auto.arima(gw_ts_new)
+gw_ts_fit.fcast<-forecast.Arima(gw_ts_fit, h = 12)
+gw_ts_fit
+
+## @knitr P3-plot-fit_arima
+# Plot best-fit arima model and 12-step ahead forecast
+plot(gw_ts_fit.fcast, main="12-Step Ahead Forecast by the Best-fit Model",
+     xlab="Time", xlim=c(), lty=2, col="navy")
+lines(fitted(gw_ts_fit),col="red" )
+leg.txt <- c("Original Series", "Estimated Series")
+legend("topleft", legend=leg.txt, lty=c(2,1), 
+       col=c("navy","red"), bty='n', cex=1)
+
+## @knitr P3-check-arima_residues
+# Plot ACF/PACF for residuals of the best fit ARIMA model to 
+# ensure no more information is left for extraction
+par(mfrow=c(2,1))
+acf(residuals(gw_ts_fit), main='ACF of Residual', ylim=c(-0.2,1))
+pacf(residuals(gw_ts_fit),main='PACF of Residual',ylim=c(-0.2,1))
+box.test(residuals(gw_ts_fit), type="Ljung" )
+invisible(dev.off())
+
+## @knitr P3-best-aic_arima
+# Compare the AIC values of manually selected arima models:
+# arima(0,1,0), arima(1,1,0), arima(0,1,1), arima(1,1,1), arima(1,1,1)
+# arima(0,1,2), arima(1,1,2), arima(2,1,0), arima(2,1,2)
+arima010<- arima(gw_ts_new, order=c(0,1,0))
+arima110<- arima(gw_ts_new, order=c(1,1,0))
+arima011<- arima(gw_ts_new, order=c(0,1,1))
+arima111<- arima(gw_ts_new, order=c(1,1,1))
+arima012<- arima(gw_ts_new, order=c(0,1,2))
+arima112<- arima(gw_ts_new, order=c(1,1,2))
+arima210<- arima(gw_ts_new, order=c(2,1,0))
+arima212<- arima(gw_ts_new, order=c(2,1,2))
+aic_values <- c(arima010$aic, arima110$aic, arima011$aic, arima111$aic, arima012$aic,
+                arima012$aic, arima112$aic, arima210$aic, arima212$aic)
+aic_values
+summary(arima212)
+
+## @knitr P3-check-aic_arima
+# Diagonstic Checking for the arima model with the best AIC value:
+par(mfrow=c(2,2))
+acf(residuals(arima212), main='ACF of Residual from arima212', ylim=c(-0.2,1))
+pacf(residuals(arima212),main='PACF of Residual from arima212',ylim=c(-0.2,1))
+acf(residuals(arima212)^2, main='ACF of Squared Residual from arima212', ylim=c(-0.2,1))
+pacf(residuals(arima212)^2,main='PACF of Squared Residual from arima212',ylim=c(-0.2,1))
+invisible(dev.off())
+
+## @knitr P3-forecast-aic_arima
+# Forecast using the arima model with the best AIC value
+gw_ts_bestaic.fcast<-forecast.Arima(arima212, h = 12)
+plot(gw_ts_bestaic.fcast, main="12-Step Ahead Forecast by the Best-AIC Model",
+     xlab="Time", xlim=c(), lty=2, col="navy")
+lines(fitted(arima212),col="red" )
+leg.txt <- c("Original Series", "Estimated Series")
+legend("topleft", legend=leg.txt, lty=c(2,1), 
+       col=c("navy","red"), bty='n', cex=1)
