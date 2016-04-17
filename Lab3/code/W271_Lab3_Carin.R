@@ -1,4 +1,3 @@
-## MIDS W271-4 Lab3           ##
 ## Carin, Davis, Levato, Song ##
 
 
@@ -37,7 +36,7 @@ library(tseries)
 library(GGally)
 library(lattice)
 library(corrgram)
-library(TSA)
+#library(TSA)
 
 # Define functions
 
@@ -88,13 +87,15 @@ set.seed(1234)
 
 
 ## @knitr P1-load
-# Loading the Data --------------------------------------------------------
+# Lab 3 - Part 1 ----------------------------------------------------------
 # setwd('./Lab3/data')
 houseValue <- read.csv('houseValueData.csv', header = TRUE)
 head(houseValue)
 
+
+
 ## @knitr P2-load
-# Loading the Data --------------------------------------------------------
+# Lab 3 - Part 2 ----------------------------------------------------------
 # setwd('./Lab3/data')
 financial <- read.csv('lab3_series02.csv', header = TRUE)
 head(financial)
@@ -104,19 +105,105 @@ financial <- financial[, -1]
 head(financial)
 
 
+
 ## @knitr P3-load
-# Loading the Data --------------------------------------------------------
+# Lab 3 - Part 3 ----------------------------------------------------------
 # setwd('./Lab3/data')
-globalWarming <- read.csv('globalWarming.csv', header = TRUE)
-head(globalWarming)
+GW <- read.csv('globalWarming.csv', header = TRUE)
+rbind(head(GW,4 ), tail(GW, 4))
+GW$Date <- as.Date(as.character(GW$Date), '%m/%d/%y')
+# Day of week of 1st observation
+as.character(wday(GW$Date[1], label = TRUE, abbr = FALSE))
+# Check that all observations correspond to same day of the week
+all(wday(GW$Date, label = TRUE) == wday(GW$Date[1], label = TRUE))
+# Check that all weeks between start and end dates appear in the dataset
+identical(GW$Date, seq(min(GW$Date), max(GW$Date), by=7))
+names(GW)[2] <- "DS"
+summary(GW)
+round(stat.desc(as.data.frame(GW$DS), desc = TRUE, norm = TRUE), 2)
+      
+
+## @knitr P3-histogram
+hist(GW$DS, breaks = 20, freq = FALSE, ylim = c(0, 4.5), 
+     xlab = "Weekly level of interest in global warming in the news", 
+     main = paste0("Histogram (and approximate density plot) of the weekly\n", 
+                   "level of interest in global warming in the news"), 
+     cex.main = 0.8)
+lines(density(GW$DS), col = 'blue')
+
+## @knitr P3-timeplot
+# DS <- ts(GW$DS, start = 2004, freq = 52)
+par(mar = c(5, 5, 4, 2) + 0.1)
+plot(GW, type = 'l', xlab = "Year (time period: weeks)", 
+     ylab = "Level of interest in global warming in the news", 
+     main = paste0("Level of interest in global warming in the news\n", 
+                   "from ", min(GW$Date), " to ", max(GW$Date)))
+lines(GW$Date, stats::filter(GW$DS, sides=2, rep(1, 13)/13), lwd = 1.5, 
+      col = rgb(0, 1, 0, 0.6))
+leg.txt <- c("Original Series", "13-Point (~quarterly) Symmetric Moving Average")
+legend("topleft", legend=leg.txt, lty = c(1, 1), col=c("black", "green"), 
+       bty = 'n', cex = .8, merge = TRUE, bg = 336)
+par(mar = c(5, 4, 4, 2) + 0.1)
+
+## @knitr P3-timeplot_2
+# DS <- ts(GW$DS, start = 2004, freq = 52)
+par(mar = c(5, 5, 4, 2) + 0.1)
+plot(GW[which(year(GW$Date) >= 2013), ], type = 'l', xlab = "Year (time period: weeks)", 
+     ylab = "Level of interest in global warming in the news", 
+     main = paste0("Level of interest in global warming in the news\n", 
+                   "from ", min(GW$Date), " to ", max(GW$Date)))
+lines(GW$Date, stats::filter(GW$DS, sides=2, rep(1, 13)/13), lwd = 1.5, 
+      col = rgb(0, 1, 0, 0.6))
+leg.txt <- c("Original Series", "13-Point (~quarterly) Symmetric Moving Average")
+legend("topleft", legend=leg.txt, lty = c(1, 1), col=c("black", "green"), 
+       bty = 'n', cex = .8, merge = TRUE, bg = 336)
+par(mar = c(5, 4, 4, 2) + 0.1)
+
+## @knitr P3-whole_and_last
+GW.whole <- GW
+GW.last <- GW[which(year(GW$Date) >= 2013), ]
+arima.whole.fit <- auto.arima(GW.whole$DS, seasonal = TRUE)
+arima.last.fit <- auto.arima(GW.last$DS, seasonal = TRUE)
+GW.whole.train <- GW.whole[1:(dim(GW.whole)[1]-16), ]
+GW.last.train <- GW.last[1:(dim(GW.last)[1]-16), ]
+GW.test <- GW[(dim(GW)[1]-16):dim(GW)[1], ]
+arima.whole.oos.fit <- Arima(GW.whole.train$DS, 
+                             order = arima.whole.fit$arma[c(1, 2, 6)], 
+                             seas = list(order = arima.whole.fit$arma[c(3, 4, 
+                                                                        7)], 
+                                         freq = arima.whole.fit$arma[5]))
+arima.whole.oos.fit.fcast <- forecast.Arima(arima.whole.oos.fit, h = 16)
+arima.last.oos.fit <- Arima(GW.last.train$DS, 
+                            order = arima.last.fit$arma[c(1, 2, 6)], 
+                            seas = list(order = arima.last.fit$arma[c(3, 4, 
+                                                                      7)], 
+                                        freq = arima.whole.fit$arma[5]))
+arima.last.oos.fit.fcast <- forecast.Arima(arima.last.oos.fit, h = 16)
+
+## @knitr P3-whole_and_last_2
+plot(arima.whole.oos.fit.fcast, xaxt = 'n', ylim = c(-0.5, 4.5))
+axis(1, at = seq(1, dim(GW.whole)[1], 12), 
+     labels = seq(min(GW.whole$Date), max(GW.whole$Date), by = 7*12))
+lines(GW.whole$DS)
+
+## @knitr P3-whole_and_last_3
+plot(arima.last.oos.fit.fcast, xaxt = 'n', ylim = c(-0.5, 4.5))
+axis(1, at = seq(1, dim(GW.last)[1], 4), 
+     labels = seq(min(GW.last$Date), max(GW.last$Date), by = 7*4))
+lines(GW.last$DS)
+
 
 
 ## @knitr P4-load
-# Loading the Data --------------------------------------------------------
+# Lab 3 - Part 4 ----------------------------------------------------------
 # setwd('./Lab3/data')
 load('gasOil.Rdata')
 rbind(head(gasOil,4 ), tail(gasOil, 4))
+gasOil$Date <- as.Date(as.character(gasOil$Date), '%Y-%m-%d')
 summary(gasOil)
+round(stat.desc(gasOil[, 2:3], desc = TRUE, norm = TRUE), 2)
+# Check that all months between start and end dates appear in the dataset
+identical(gasOil$Date, seq(min(gasOil$Date), max(gasOil$Date), by='month'))
 
 ## @knitr P4-timeseries
 Production <- ts(data = gasOil$Production, start = year(gasOil$Date[1]), 
@@ -131,7 +218,7 @@ plot(Production, xlab = "Year (time period: months)",
                   "1978 to Feb. 2012"))
 lines(stats::filter(Production, sides=2, rep(1, 13)/13), lwd = 1.5, 
       col = "green")
-leg.txt <- c("Original Series", "13-Point Symmetric Moving Average")
+leg.txt <- c("Original Series", "13-Point (~yearly) Symmetric Moving Average")
 legend("bottomleft", legend=leg.txt, lty = c(1, 1), col=c("black", "green"), 
        bty = 'n', cex = .8, merge = TRUE, bg = 336)
 par(mar = c(5, 4, 4, 2) + 0.1)
@@ -144,7 +231,7 @@ plot(Price, xlab = "Year (time period: months)",
                   "from Jan. 1978 to Feb. 2012"))
 lines(stats::filter(Price, sides=2, rep(1, 13)/13), lwd = 1.5, 
       col = "green")
-leg.txt <- c("Original Series", "13-Point Symmetric Moving Average")
+leg.txt <- c("Original Series", "13-Point (~yearly) Symmetric Moving Average")
 legend("bottomleft", legend=leg.txt, lty = c(1, 1), col=c("black", "green"), 
        bty = 'n', cex = .8, merge = TRUE, bg = 336)
 par(mar = c(5, 4, 4, 2) + 0.1)
@@ -403,33 +490,41 @@ acf(Price.garch11.res^2, lag.max = 24,
                   "fitted to the\nU.S. inflation-adjusted average gas prices"))
 
 ## @knitr P4-GARCH_4
-ht <- Price.garch11$fit[,1]^2
+ht <- Price.garch11$fit[,1]^2 # conditional variance
 plot(ht, main = paste0("Estimated conditional variance of the\nARIMA(1,1,3)/", 
                        "GARCH(1,1) model fitted to the\nU.S. inflation-", 
                        "adjusted average gas prices"))
 
 ## @knitr P4-GARCH_5
-ht.lower <- fitted.values(arima113.fit) - qnorm(.975) * sqrt(ht)
-ht.upper <- fitted.values(arima113.fit) + qnorm(.975) * sqrt(ht)
-# Initialize h_t (cond. variance), its lower and upper limits
-  # and epsilon_t (residuals or error term): 58 elements (as many as forecasts)
-new.ht <- new.ht.lower <- new.ht.upper <- new.res <- rep(0, 58) 
+res.CI.halfwidth <- qnorm(.975) * sqrt(ht) # CI of epsilon_t
+# Variation of Price during observation period
+Price.lower <- fitted.values(arima113.fit) - res.CI.halfwidth
+Price.upper <- fitted.values(arima113.fit) + res.CI.halfwidth
+# Forecasts
+# Initialize h_t (cond. variance) and epsilon_t (residuals or error term)
+  # 58 elements (as many as forecasts)
+ht.fcst <- res.fcst <- rep(0, 58) 
 for (i in 1:58) {
   if (i == 1) { # use last observation
-    new.ht[i] <- Price.garch11$coef[1] + 
+    ht.fcst[i] <- Price.garch11$coef[1] + 
       Price.garch11$coef[2] * resid(arima113.fit)[length(Price)]^2 + 
       Price.garch11$coef[3] * ht[length(Price)]
   } else { # use previous predictions
-    new.ht[i] <- Price.garch11$coef[1] + 
-      Price.garch11$coef[2] * new.res[i-1]^2 + 
-      Price.garch11$coef[3] * new.ht[i-1]
+    ht.fcst[i] <- Price.garch11$coef[1] + 
+      Price.garch11$coef[2] * res.fcst[i-1]^2 + 
+      Price.garch11$coef[3] * ht.fcst[i-1]
   }
-  new.res[i] <- rnorm(1) * sqrt(new.ht[i])
-  new.ht.lower[i] <- as.numeric(forecast(arima113.fit, 58)$mean)[i] - 
-    qnorm(.975) * sqrt(new.ht[i])
-  new.ht.upper[i] <- as.numeric(forecast(arima113.fit, 58)$mean)[i] + 
-    qnorm(.975) * sqrt(new.ht[i])
+  res.fcst[i] <- sqrt(ht.fcst[i]) # epsilon_t = omega_t * sqrt(h_t)
+  #### SHOULDN'T I USE THIS LINE BELOW INSTEAD???
+  # res.fcst[i] <- rnorm(1) * sqrt(ht.fcst[i])
+  #### THAT GWN(0,1) COMPONENT MAKES h_t FLUCTUATES MUCH MORE
+  #### PROBABLY NOT APPROPRIATE FOR FORECASTING
 }
+# Lower & upper limits of the Price forecasts CI
+Price.fcst.lower <- as.numeric(arima113.fit.fcast$mean) - 
+  qnorm(.975) * sqrt(ht.fcst)
+Price.fcst.upper <- as.numeric(arima113.fit.fcast$mean) + 
+  qnorm(.975) * sqrt(ht.fcst)
 
 ## @knitr P4-GARCH_6
 plot(arima113.fit.fcast, ylim = c(1, 5), 
@@ -438,15 +533,137 @@ plot(arima113.fit.fcast, ylim = c(1, 5),
                    "with confidence intervals (ARIMA(1,1,3)/GARCH(1,1)"), 
      ylab = "Original and Forecasted Values")
 polygon(c(time(Price), rev(time(Price))), 
-        c(ht.upper, rev(ht.lower)), col=rgb(0, 0, 0, 0.25), border = NA)
+        c(Price.upper, rev(Price.lower)), col=rgb(0, 0, 0, 0.25), border = NA)
 polygon(c(time(arima113.fit.fcast$mean), 
           rev(time(arima113.fit.fcast$mean))), 
-        c(new.ht.upper, rev(new.ht.lower)), col=rgb(0, 0, 0, 0.25), border = NA)
+        c(Price.fcst.upper, rev(Price.fcst.lower)), col=rgb(0, 0, 0, 0.25), 
+        border = NA)
 leg.txt <- c("Original series", "Forecasts (ARIMA(1,1,3)/GARCH(1,1))", 
-             "Confidence intervals")
+             "95% Confidence Intervals")
 legend("topleft", legend = leg.txt, lty = c(1, 1, 1), lwd = c(1, 1, 6), 
        col = c("black", "blue", "gray"), 
        bty = 'n', cex = 0.9)
+
+## @knitr P4-GARCH_7
+(Price.garch11.2 <- garchFit(~ garch(1,1), data = resid(arima113.fit), 
+                             trace = FALSE))
+# res.fcst2 <- predict(Price.garch11.2, n.ahead=58, plot = TRUE, conf = .95)
+res.fcst.2 <- predict(Price.garch11.2, n.ahead=58, conf = .95)
+res.fcst.lower.2 <- res.fcst.2$meanForecast - 
+  qnorm(.975) * res.fcst.2$standardDeviation
+res.fcst.upper.2 <- res.fcst.2$meanForecast + 
+  qnorm(.975) * res.fcst.2$standardDeviation
+Price.fcst.lower.2 <- as.numeric(forecast(arima113.fit, 58)$mean) +
+  res.fcst.lower.2
+Price.fcst.upper.2 <- as.numeric(forecast(arima113.fit, 58)$mean) + 
+  res.fcst.upper.2
+
+## @knitr P4-GARCH_8
+plot(arima113.fit.fcast, ylim = c(1, 5), 
+     xlab = "Year (time period: month)", 
+     main = paste0("58-step ahead Forecast and Original Series\n", 
+                   "with confidence intervals (ARIMA(1,1,3)/GARCH(1,1)"), 
+     ylab = "Original and Forecasted Values")
+polygon(c(time(Price), rev(time(Price))), 
+        c(Price.upper, rev(Price.lower)), col=rgb(0, 0, 0, 0.25), border = NA)
+polygon(c(time(arima113.fit.fcast$mean), 
+          rev(time(arima113.fit.fcast$mean))), 
+        c(Price.fcst.upper.2, rev(Price.fcst.lower.2)), col=rgb(0, 0, 0, 0.25), 
+        border = NA)
+leg.txt <- c("Original series", "Forecasts (ARIMA(1,1,3)/GARCH(1,1))", 
+             "95% Confidence Intervals")
+legend("topleft", legend = leg.txt, lty = c(1, 1, 1), lwd = c(1, 1, 6), 
+       col = c("black", "blue", "gray"), 
+       bty = 'n', cex = 0.9)
+
+## @knitr P4-GARCH_9
+(Price.garch11.3 <- garchFit(~ arma(1,3) + garch(1,1), data = diff(Price), 
+                             trace = FALSE))
+res.fcst.3 <- predict(Price.garch11.3, n.ahead=58, conf = .95)
+res.fcst.lower.3 <- res.fcst.3$meanForecast - 
+  qnorm(.975) * res.fcst.3$standardDeviation
+res.fcst.upper.3 <- res.fcst.3$meanForecast + 
+  qnorm(.975) * res.fcst.3$standardDeviation
+Price.fcst.lower.3 <- as.numeric(forecast(arima113.fit, 58)$mean) +
+  res.fcst.lower.3
+Price.fcst.upper.3 <- as.numeric(forecast(arima113.fit, 58)$mean) + 
+  res.fcst.upper.3
+
+## @knitr P4-GARCH_10
+plot(arima113.fit.fcast, ylim = c(1, 5), 
+     xlab = "Year (time period: month)", 
+     main = paste0("58-step ahead Forecast and Original Series\n", 
+                   "with confidence intervals (ARIMA(1,1,3)/GARCH(1,1)"), 
+     ylab = "Original and Forecasted Values")
+polygon(c(time(Price), rev(time(Price))), 
+        c(Price.upper, rev(Price.lower)), col=rgb(0, 0, 0, 0.25), border = NA)
+polygon(c(time(arima113.fit.fcast$mean), 
+          rev(time(arima113.fit.fcast$mean))), 
+        c(Price.fcst.upper.3, rev(Price.fcst.lower.3)), col=rgb(0, 0, 0, 0.25), 
+        border = NA)
+leg.txt <- c("Original series", "Forecasts (ARIMA(1,1,3)/GARCH(1,1))", 
+             "95% Confidence Intervals")
+legend("topleft", legend = leg.txt, lty = c(1, 1, 1), lwd = c(1, 1, 6), 
+       col = c("black", "blue", "gray"), 
+       bty = 'n', cex = 0.9)
+
+## @knitr P4-GARCH_11
+head(cbind(sqrt(ht.fcst), res.fcst.2$standardDeviation, 
+           res.fcst.3$standardDeviation))
+plot(sqrt(ht.fcst), ylim=c(0,.2), type = 'l', col = 'red', 
+     xlab = "Steps ahead", ylab = expression(h[t]), 
+     main=expression(paste("Standard deviation (", h[t], ") of the forecasts")))
+lines(res.fcst.2$standardDeviation, col = 'blue')
+lines(res.fcst.3$standardDeviation, col = 'green')
+leg.txt <- c("GARCH(1,1) using own code on residuals of ARIMA(1,1,3)", 
+             "GARCH(1,1) using fGarch on residuals of ARIMA(1,1,3)", 
+             "ARMA(1,3)/GARCH(1,1) using fGarch on differenced Price series")
+legend("bottomright", legend = leg.txt, lty = c(1, 1, 1), lwd = c(1, 1, 1), 
+       col = c("red", "blue", "green"), bty = 'n', cex = 0.9)
+
+## @knitr asdjflj
+
+
+X.timeSeries = MSFT
+plot(X.timeSeries)
+fit3 <- garchFit(Open ~ garch(1,1), data = returns(X.timeSeries)) 
+plot(fit3)
+fit3 = garchFit(~ garch(1, 1), data = resid(arima113.fit), 
+                trace = FALSE, mse="cond")
+## 90% confidence level and nx=100
+predict(fit3,n.ahead=58,plot=TRUE,conf=.95,nx=100) 
+
+plot(resid(arima113.fit))
+
+## garchFit - 
+# Parameter Estimation of Default GARCH(1,1) Model:
+set.seed(123)
+fit = garchFit(~ garch(1, 1), data = garchSim(), trace = FALSE)
+fit
+
+## predict -
+predict(fit, n.ahead = 10)
+predict(fit, n.ahead = 10,mse="uncond", plot=T)
+
+## predict with plotting: critical values = +- 2
+
+predict(fit, n.ahead = 10, plot=TRUE, crit_val=2)
+
+## predict with plotting: automatic critical values 
+## for different conditional distributions
+
+set.seed(321)
+fit2 = garchFit(~ garch(1, 1), data = garchSim(), trace = FALSE, cond.dist="sged")
+
+## 95% confidence level
+predict(fit2,n.ahead=20,plot=TRUE) 
+
+set.seed(444)
+fit3 = garchFit(~ garch(1, 1), data = garchSim(), trace = FALSE, cond.dist="QMLE")
+
+## 90% confidence level and nx=100
+
+predict(fit3,n.ahead=20,plot=TRUE,conf=.95,nx=100) 
 
 
 

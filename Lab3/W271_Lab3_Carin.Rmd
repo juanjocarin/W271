@@ -103,11 +103,41 @@ opts_knit$set(root.dir = './data', global.par = TRUE)
 
 \color{Blue}
 
-**Imagine that you group is part of a data science team in an appreal company. One of its recent products is Global-Warming T-shirts. The marketing director expects that the demand for the t-shirts tends to increase when global warming issues are reported in the news. As such, the director asks your group to forecast the level of interest in global warming in the news. The dataset given to your group captures the relative web search activity for the phrase, "global warming" over time. For the purpose of this exercise, ignore the units reported in the data as they are unimportant and irrelevant. Your task is to produce the weekly forecast for the *next 3 months* for the relative web search activity for global warming. For the purpose of this exercise, treat it as a *12-step ahead forecast*.**
+**Imagine that you group is part of a data science team in an apparel company. One of its recent products is Global-Warming T-shirts. The marketing director expects that the demand for the t-shirts tends to increase when global warming issues are reported in the news. As such, the director asks your group to forecast the level of interest in global warming in the news. The dataset given to your group captures the relative web search activity for the phrase, "global warming" over time. For the purpose of this exercise, ignore the units reported in the data as they are unimportant and irrelevant. Your task is to produce the weekly forecast for the *next 3 months* for the relative web search activity for global warming. For the purpose of this exercise, treat it as a *12-step ahead forecast*.**
 
 **The dataset for this exercise is provided in `globalWarming.csv`. Use only models and techniques covered in the course (up to lecture 13). Note that one of the modeling issues you may have to consider is whether or not to use the entire series provided in the data set. Your choice will have to be clearly explained and supported with empirical evidence. As in other parts of the lab, the general instructions in the *Instruction Section* apply.**
 
 \color{Black}
+
+We start loading the data and inspecting (and transforming[^3.1]) the resulting dataframe.
+
+[^3.1]: Converting the dates from factors to dates, shortening the names of the dataframe and variables, etc.
+
+```{r P3-load, echo = -c(1:2)}
+```
+
+It contains `r dim(GW)[1]` observations of a numeric variables (`data.science`, shortened to `DS`), with no missing values, from 
+
+The dataset contains `r dim(GW)[1]` observations of a numeric variable (`data.science`, which we shortened to `DS`), from `r min(GW$Date)` to `r max(GW$Date)` (i.e., approximately `r round(as.numeric(difftime(max(GW$Date), min(GW$Date)) / 7 / 52), 1)` years). All dates correspond to Sundays (so we have weekly observations), and there are no missing values for any Sunday, and all Sundays between the start and end date are available in the dataset. The numeric variable must have been standardized (i.e., rescaled by subtracting its mean and dividing by its standard deviation), and that's the possible reason it has zero mean and unit variance. In any case, it does not resemble a normal distribution at all, as it is very right-skewed.
+
+\pagebreak
+
+```{r P3-histogram, echo = FALSE, fig.cap = "Histogram (and approximate density plot) of the weekly level of interest in global warming in the news"}
+```
+
+But the density distribution of a time series tells us nothing about its dynamics: we have to look at the time series plot to know that the value of the (standardized) variable was almost flat until 2012, when it started growing almost linearly (with some shocks up and down, the most prominent ones a fall at the end of 2015 and a peak right after that).
+
+```{r P3-timeplot, echo = FALSE, fig.width = 6, fig.height = 3.75, fig.cap = "Level of interest in global warming in the news from 2004 to 2015"}
+```
+
+```{r P3-whole_and_last, fig.width = 6, fig.height = 3.75, fig.cap = "Level of interest in global warming in the news from 2004 to 2015"}
+```
+
+```{r P3-whole_and_last_2, echo = FALSE, fig.width = 6, fig.height = 4.5, fig.cap = "xxxx"}
+```
+
+```{r P3-whole_and_last_3, echo = FALSE, fig.width = 6, fig.height = 4.5, fig.cap = "xxxx"}
+```
 
 **********
 
@@ -129,9 +159,9 @@ opts_knit$set(root.dir = './data', global.par = TRUE)
 
 \color{Black}
 
-It would seem reasonable (and that's probably what interested parties tell about the benefits of drilling) that the more oil is produced in the U.S. (mainly because of that new technique), the lower the price of gasoline would be. In other words, we might expect a highly significant **negative** correlation between domestic oil production and (inflation-adjusted) prices[^1]. 
+It would seem reasonable (and that's probably what interested parties tell about the benefits of drilling) that the more oil is produced in the U.S. (mainly because of that new technique), the lower the price of gasoline would be. In other words, we might expect a highly significant **negative** correlation between domestic oil production and (inflation-adjusted) prices[^4.1]. 
 
-[^1]: At first sight, that could seem coherent with the *law of supply and demand*: if the supply increases, the price should go down... **assuming the demand is constant** (let's not forget that assumption). That might not be the case, and [an increase in both production and demand can result in higher prices](https://en.wikipedia.org/wiki/Supply_and_demand). In any case, that so-called law is just an economic model of price determination in a market; as all models, it can fit or not the reality.
+[^4.1]: At first sight, that could seem coherent with the *law of supply and demand*: if the supply increases, the price should go down... **assuming the demand is constant** (let's not forget that assumption). That might not be the case, and [an increase in both production and demand can result in higher prices](https://en.wikipedia.org/wiki/Supply_and_demand). In any case, that so-called law is just an economic model of price determination in a market; as all models, it can fit or not the reality.
 
 Possible sources for the mentioned article might be [this one](https://www.documentcloud.org/documents/327163-gas-production-and-prices.html) or [this other one](https://www.documentcloud.org/documents/327163-gas-production-and-prices.html) (though none of them reproduced the phrase "*evidence of no statistical correlation*"). That phrase would be the \textcolor{red}{first error} made by the AP (in case they used it): in **hypothesis testing**, \textcolor{red}{we can talk of} *\textcolor{red}{no evidence of correlation}* \textcolor{red}{(or any other fact) but not of} *\textcolor{red}{evidence of no correlation}* \textcolor{red}{(in general, of evidence of a fact not occurring)}. Remember that, whatever a **null hypothesis** is (in this case, that the **correlation** is---**not statistically significantly different from**---**zero**), we can never prove or confirm it, just claim that we have evidence or not to reject it. To put an example, if we toss a coin $N$ times and get heads $N$ times, we do not have evidence that the coin is fair (i.e., $\Pr(heads) = 0.5$); but we should not claim that we have evidence that the opposite is true (i.e., the coin is unfair or biased); the most we can say, strictly speaking, is that we are quite confident (the more confident the greater the number of tosses).
 
@@ -140,19 +170,21 @@ Let's continue by loading and exploring the data frame we are given:
 ```{r P4-load, echo = -c(1:2)}
 ```
 
-The dataset contains `r dim(gasOil)[1]` observations of `r dim(gasOil)[2]` variables: the first one corresponds to dates (in character format), the second to U.S. oil production (in millions of barrels of oil, ranging from `r frmt(min(gasOil$Production), 1)` to `r frmt(max(gasOil$Production), 1)` millions of barrels), and the third one to inflation-adjusted average gas prices (in U.S. dollars, ranging from  `r frmt(min(gasOil$Price), 2)` to `r frmt(max(gasOil$Price), 2)` USD). All dates correspond to the first day of the month (i.e., we have monthly observations of production and price), from `r as.character(month(as.Date(as.character(gasOil$Date), '%Y-%m-%d')[1], label = TRUE, abbr = FALSE))` `r year(as.Date(as.character(gasOil$Date), '%Y-%m-%d')[1])` until `r as.character(month(as.Date(as.character(gasOil$Date), '%Y-%m-%d')[dim(gasOil)[1]], label = TRUE, abbr = FALSE))` `r year(as.Date(as.character(gasOil$Date), '%Y-%m-%d')[dim(gasOil)[1]])` (i.e., `r dim(gasOil)[1] %/% 12` years---from `r year(as.Date(as.character(gasOil$Date), '%Y-%m-%d')[1])` to `r year(as.Date(as.character(gasOil$Date), '%Y-%m-%d')[12 * dim(gasOil)[1] %/% 12])`---and `r dim(gasOil)[1] %% 12` months---the first `r dim(gasOil)[1] %% 12` moths of `r year(as.Date(as.character(gasOil$Date), '%Y-%m-%d')[dim(gasOil)[1]])`).
+The dataset contains `r dim(gasOil)[1]` observations of `r dim(gasOil)[2]` variables: the first one corresponds to dates (in character format), the second to U.S. oil production (in millions of barrels of oil, ranging from `r frmt(min(gasOil$Production), 1)` to `r frmt(max(gasOil$Production), 1)` millions of barrels), and the third one to inflation-adjusted average gas prices (in U.S. dollars, ranging from  `r frmt(min(gasOil$Price), 2)` to `r frmt(max(gasOil$Price), 2)` USD). All dates correspond to the first day of the month (i.e., we have monthly observations of production and price), from `r as.character(month(gasOil$Date[1], label = TRUE, abbr = FALSE))` `r year(gasOil$Date[1])` until `r as.character(month(gasOil$Date[dim(gasOil)[1]], label = TRUE, abbr = FALSE))` `r year(gasOil$Date[dim(gasOil)[1]])` (i.e., `r dim(gasOil)[1] %/% 12` years---from `r year(gasOil$Date[1])` to `r year(gasOil$Date[12 * dim(gasOil)[1] %/% 12])`---and `r dim(gasOil)[1] %% 12` months---the first `r dim(gasOil)[1] %% 12` moths of `r year(gasOil$Date[dim(gasOil)[1]])`). There are no missing values for any month, and all months between the start and end date are available in the dataset.
 
 ```{r P4-timeseries}
 ```
 
-Oil production was relatively flat from 1978 to 1985, then it had a declining trend until 2009 or so, and it has increased (at a lower rate) since then (probably due to the introduction of driling).
+\pagebreak
+
+Oil production was relatively flat (it was actually U-shaped, but it decreased and then increased at a much lower rate than it did afterwards) from 1978 to 1985, then it had a declining trend until 2009 or so, and it has increased (at a lower rate) since then (probably due to the introduction of driling).
 
 ```{r P4-timeplot_prod, echo = FALSE, fig.width = 6, fig.height = 4.5, fig.cap = "Time series plots of the U.S. oil production (in millions of barrels) from January 1978 to February 2012"}
 ```
 
 \pagebreak
 
-As for the inflation-adjusted average gas prices, their dynamics are quite different: they increased a lot (more than $1\$$, almost a 50% increase) from 1978 to 1981 or so, then decreased until 1986-1987 (to levels below the previous ones), remained relatively flat (or even decreased a bit more) unti 1999, and has kept increasing since then, except for a sharp fall at the end of 2008 (that's approximately when the domestic oil production began to increase again; maybe the drop in production was due to the hype about drilling?).
+As for the inflation-adjusted average gas prices, their dynamics are quite different: they increased a lot (more than $\$1$, almost a 50% increase) from 1978 to 1981 or so, then decreased until 1986-1987 (to levels below the previous ones), remained relatively flat (or even decreased a bit more) unti 1999, and has kept increasing since then, except for a sharp fall at the end of 2008 (that's approximately when the domestic oil production began to increase again; maybe the drop in production was due to the hype about drilling?).
 
 ```{r P4-timeplot_price, echo = FALSE, fig.width = 6, fig.height = 4.5, fig.cap = "Time series plot of the U.S. inflation-adjusted average gas prices (in dollars) from January 1978 to February 2012"}
 ```
@@ -185,11 +217,11 @@ Another way to estimate the correlation is running a linear regression with one 
 
 What is erroneous (the \textcolor{red}{second error}) is the implications from that result (and \textcolor{red}{the use of correlation}, to begin with): correlation is \textcolor{red}{not a good measure of the dependency of two time series}. Same way that two independent time series can show a high **spurious correlation** (the correlation between both time series is driven by some underlying common driver or it is merely "coincidental"; there are [multiple examples](http://tylervigen.com/spurious-correlations)), the opposite can happen (though to noise or other factors that may also drive the time series and "mask" their dependence; that's might be the case here: even if U.S. prices depend on domestic production, it's world production---and other possible factors---what drives them).
 
-This goes down to the **definitions of correlation and time series** models. The correlation is defined as the quotient of the covariance of two random variables divided by the product of their respective standard deviations (the square root of their variances). (The sample estimates[^2] of) These two parameters---variance and covariance---depend on the value of the individual observations and their (sample) mean, which is constant (and that is not the case in time series!). Now let's revisit what a stochastic process (which is how we model time series) is: it is **a collection of random variables** representing the evolution of some sytem of random values over time. That is (in the case of discrete time series like the ones we are working with), a sequence of random variables, that may be completely different at the different times (and dependent...or not); the only requirement is that those random variables all take values in the same space. To put it simply, it makes no sense to define the mean of $\{x_t\}, \ t = 1, \dots, n$[^3] because **$x_1, x_2, \dots, x_n$ are not observations from a single random variable**, **but** from a realization of a stochastic process, i.e., **from $n$ different random variables, not necessarily i.i.d.**
+This goes down to the **definitions of correlation and time series** models. The correlation is defined as the quotient of the covariance of two random variables divided by the product of their respective standard deviations (the square root of their variances). (The sample estimates[^4.2] of) These two parameters---variance and covariance---depend on the value of the individual observations and their (sample) mean, which is constant (and that is not the case in time series!). Now let's revisit what a stochastic process (which is how we model time series) is: it is **a collection of random variables** representing the evolution of some sytem of random values over time. That is (in the case of discrete time series like the ones we are working with), a sequence of random variables, that may be completely different at the different times (and dependent...or not); the only requirement is that those random variables all take values in the same space. To put it simply, it makes no sense to define the mean of $\{x_t\}, \ t = 1, \dots, n$[^4.3] because **$x_1, x_2, \dots, x_n$ are not observations from a single random variable**, **but** from a realization of a stochastic process, i.e., **from $n$ different random variables, not necessarily i.i.d.**
 
-[^2]: Which is what we are able to estimate (we are often not able to estimate the population estimates).
+[^4.2]: Which is what we are able to estimate (we are often not able to estimate the population estimates).
 
-[^3]: The same can be said of the correlation, if we extend this idea to two time series, $\{x_t\}$ and $\{y_t\}$.
+[^4.3]: The same can be said of the correlation, if we extend this idea to two time series, $\{x_t\}$ and $\{y_t\}$.
 
 \pagebreak
 
@@ -346,11 +378,43 @@ Finally, we have to predict the variance for the 58 months until the end of 2016
 ```{r P4-GARCH_5}
 ```
 
-\pagebreak
-
-And now we can plot the original series and the forecasts 'til 2016, with the 95% confidence intervals for both periods.
+And now we can plot the original series and the forecasts until 2016, with the 95% confidence intervals for both periods.
 
 ```{r P4-GARCH_6, echo = FALSE, fig.height = 4.5, fig.width = 6, fig.cap = "58-step ahead forecasts (from March 2012 to December 2016) of the U.S. inflation-adjusted average gas prices (in dollars) based on an ARIMA(1,1,3)/GARCH(1,1) model fitted to data from January 1978 to February 2012. Gray area shows the 95% confidence region"}
+```
+
+Do note how much we've been able to narrow down the confidence intervals (the 80% and 95% CIs for the ARIMA model only are also plotted for comparison). Though it's hard to distinguish from the Figure above, the CIs still increase over time (because the variance of the residuals do), but not as much as when we did not include the GARCH(1,1) model.
+
+\pagebreak
+
+The `fGarch` package also allows to make predictions of GARCH models, so we start using it on the residuals of our original ARIMA(1,1,3) model:
+
+```{r P4-GARCH_7}
+```
+
+
+The 95% confidence intervals of the forecasts are quite similar (i.e., \textcolor{red}{we've been able to replicate the predictions of `fGarch` with our own code :)}.
+
+```{r P4-GARCH_8, echo = FALSE, fig.height = 4.5, fig.width = 6, fig.cap = "(2nd version of) 58-step ahead forecasts (from March 2012 to December 2016) of the U.S. inflation-adjusted average gas prices (in dollars) based on an ARIMA(1,1,3)/GARCH(1,1) model fitted to data from January 1978 to February 2012. Gray area shows the 95% confidence region"}
+```
+
+We can also apply an ARMA(1,3)/GARCH(1,1) on the original series differentiated (`fGarch` only allows to combine ARMA and GARCH models, not ARIMA).
+
+```{r P4-GARCH_9}
+```
+
+\pagebreak
+
+As expected, the results are quite similar than in the 2 previous cases.
+
+```{r P4-GARCH_10, echo = FALSE, fig.height = 4.5, fig.width = 6, fig.cap = "(3rd version of) 58-step ahead forecasts (from March 2012 to December 2016) of the U.S. inflation-adjusted average gas prices (in dollars) based on an ARIMA(1,1,3)/GARCH(1,1) model fitted to data from January 1978 to February 2012. Gray area shows the 95% confidence region"}
+```
+
+\pagebreak
+
+For comparison, let's just finish plotting the standard deviation of the forecasts for the 3 approaches (our own and two using the `fGarch` library):
+
+```{r P4-GARCH_11, echo = 1, fig.height = 4.5, fig.width = 6, fig.cap = "Standard deviation ($h_t$) of the U.S. inflation-adjusted average gas price forecasts for the 3 methods used"}
 ```
 
 **********
