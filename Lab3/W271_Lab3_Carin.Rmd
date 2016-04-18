@@ -91,6 +91,22 @@ opts_knit$set(root.dir = './data', global.par = TRUE)
 
 \color{Black}
 
+We start loading and inspecting the data:
+
+```{r P2-load, echo = -c(1:2)}
+```
+
+The dataset contains `r length(financial)` observations, with no dates (there was another column but that just contains an incremental index that adds no information).
+
+```{r P2-histogram, echo = FALSE, fig.cap = "Histogram (and approximate density plot) of the values of the financial time series"}
+```
+
+```{r P2-timeplot, echo = FALSE, fig.height = 4.5, fig.width = 6, fig.cap = "Time series plot of the financial series"}
+```
+
+```{r P2-ACF_PACF, echo = FALSE, fig.height = 4.5, fig.width = 6, fig.cap = "ACF and PACF of the financial time series"}
+```
+
 **********
 
 \pagebreak
@@ -128,7 +144,16 @@ But the density distribution of a time series tells us nothing about its dynamic
 ```{r P3-timeplot, echo = FALSE, fig.width = 6, fig.height = 3.75, fig.cap = "Level of interest in global warming in the news from 2004-01-04 to 2016-01-24"}
 ```
 
+The ACF and PACF (see next page) might make us think of a simple AR(1) model: the ACF decreases very slowly and the PACF falls sharply after the 1st lag. But the PACF is also significant at the 5th lag, so more complex models may be necessary.
+
+\pagebreak
+
+```{r P3-ACF_PACF, echo = FALSE, fig.width = 6, fig.height = 4.5, fig.cap = "ACF and PACF of th level of interest in global warming in the news from 2013-03-17 to 2016-01-24"}
+```
+
 Next **we should focus on what data to use to forecast the next 3 months: the whole dataset or the last observations)**. The time series plot makes us think that \textcolor{red}{the process that generates the series might not be the same all the time}: it is unlikely that the same process, which generated values close to zero and small variance for several years, then started to generate increasing (and more variable) values. It is more plausible that some event (likely a higher level of awareness about global warming) changed the process, making it different. Hence, **modelling two subsequent processes in the same way may lead to wrong results**.
+
+\pagebreak
 
 Let's begin decomposing the time series:
 
@@ -150,10 +175,14 @@ To check which approach is more appropriate, we consider two datasets: one with 
 ```{r P3-Dataset_selection}
 ```
 
+\pagebreak
+
+Looking at the ACFs, the residuals of both models resemble a white noise slightly well. But when it comes to the PACFs, only the 2nd model, fitted to the reduced dataset, really resembles a white noise.
+
 ```{r P3-Dataset_selection_2, echo = c(1:2), fig.width = 6, fig.height = 4.5, fig.cap = "ACF and PACF of residuals of the two SARIMA fitted to the level of interest in global warming in the news from 2004 and 2013, respectively"}
 ```
 
-Looking at the ACFs, the residuals of both models resemble a white noise slightly well. But when it comes to the PACFs, only the 2nd model, fitted to the reduced dataset, really resembles a white noise.
+\pagebreak
 
 To have a better idea of what dataset (complete or limited to last observations) leads to a better model, we now conduct an out-of-sample fit testing with the last 15 observations (the reduced time series contains `r length(GW.last)` observations):
 

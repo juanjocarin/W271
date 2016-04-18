@@ -125,19 +125,12 @@ legend("topleft", legend=leg.txt, lty = c(1, 1), col=c("black", "green"),
        bty = 'n', cex = .8, merge = TRUE, bg = 336)
 par(mar = c(5, 4, 4, 2) + 0.1)
 
-## @knitr P3-decomposition_1
-plot(decompose(ts(financial, start = 2000, freq = 365.25/7), 
-               type = 'additive'), col = 'blue', 
-     xlab = "Year (time period: day)")
-plot(decompose(ts(financial, start = 2000, freq = 365.25/7), 
-               type = 'additive')$seasonal[1:210], type = 'l')
+## @knitr P2-ACF_PACF
+par(mfrow = c(2, 1), cex.main = 0.9)
+stats::acf(financial, lag = 100, main = "ACF of the financial time series")
+pacf(financial, lag = 100, main = "PACF of the financial time series")
+par(mfrow = c(1, 1), cex.main = 1)
 
-## @knitr P3-decomposition_2
-plot(decompose(ts(financial, start = 2000, freq = 365.25), 
-               type = 'multiplicative'), col = 'blue', 
-     xlab = "Year (time period: day)")
-plot(decompose(ts(financial, start = 2000, freq = 365.25/7), 
-          type = 'multiplicative')$seasonal[1:210], type = 'l')
 
 auto.arima(ts(financial, start = 2000, freq = 365.25/7), seasonal = TRUE)
 
@@ -183,6 +176,16 @@ leg.txt <- c("Original Series", "13-Point (~quarterly) Symmetric Moving Average"
 legend("topleft", legend=leg.txt, lty = c(1, 1), col=c("black", "green"), 
        bty = 'n', cex = .8, merge = TRUE, bg = 336)
 par(mar = c(5, 4, 4, 2) + 0.1)
+
+## @knitr P3-ACF_PACF
+par(mfrow = c(2, 1), cex.main = 0.9)
+stats::acf(GW.ts, lag = 105, 
+           main = paste0("Level of interest in global warming in the news\n", 
+                         "from ", min(GW$Date), " to ", max(GW$Date)))
+pacf(GW.ts, lag = 105, 
+     main = paste0("Level of interest in global warming in the news\n", 
+                   "from ", min(GW$Date), " to ", max(GW$Date)))
+par(mfrow = c(1, 1), cex.main = 1)
 
 ## @knitr P3-decomposition_1
 plot(decompose(GW.ts, type = 'additive'), col = 'blue', 
