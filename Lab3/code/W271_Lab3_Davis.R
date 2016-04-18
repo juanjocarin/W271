@@ -372,7 +372,7 @@ univar_scatters_water <- ggplot(waterScatter_df, aes(withWater, value)) +
   geom_point() + geom_smooth(method = "lm") +
   facet_wrap(~variable, scales = "free", ncol=2) +
   labs(title = "Scatterplot of Water Presence/Absence Against Variables of Interest",
-       x="Water Present/Abset") +
+       x="Water Present/Absence") +
   theme_gray()
 univar_scatters_water
 
@@ -466,8 +466,17 @@ stargazer2(model3, title = "Selected Model Regression summary", digits = 3, digi
            dep.var.labels = 'log(home value)', 
            covariate.labels = c("log(PollutionIndex)", "Water Absence/Presence",
                                 "Number of Bedrooms", "log(Percentage Low Income Housing",
-                                "Pupil to Teacher Ratio", "log(Distance to City",
+                                "Pupil to Teacher Ratio", "log(Distance to City)",
                                 "log(Average Crime Rate"))
+# model_check <- s_df[-c(370,378),]
+# model3_check <- lm(log_homeValue~log_pollutionIndex + withWater + nBedRooms + log_pctLowIncome +
+#                      pupilTeacherRatio + log_distanceToCity + log_crimeRate_pc, data = model_check)
+# 
+# coeftest(model3_check, vcov=vcovHC)
+# coeftest(model3, vcov=vcovHC)
+
+## @knitr ex1-model3Plot
+autoplot(model3) + theme_gray()
 
 ## @knitr ex1-interaction
 inter_model <- lm(log_homeValue~log_pollutionIndex + withWater + nBedRooms + log_pctLowIncome +
@@ -484,6 +493,39 @@ lines(pollut_interp)
 model3 <- lm(log_homeValue~log_pollutionIndex + withWater + nBedRooms + log_pctLowIncome +
                    pupilTeacherRatio + log_distanceToCity + log_crimeRate_pc, data = s_df)
 coeftest(model3, vcov=vcovHC)
+
+## @knitr ivReg
+
+step_one <- lm(log_pollutionIndex ~ distanceToHighway, data = s_df)
+step_two <- lm(log_homeValue~step_one$fitted + withWater + nBedRooms + log_pctLowIncome +
+                 pupilTeacherRatio + log_distanceToCity + log_crimeRate_pc, data = s_df)
+coeftest(step_one, vcov=vcovHC)
+coeftest(step_two, vcov=vcovHC)
+
+step_onea <- lm(withWater ~ log_nonRetailBusiness, data = s_df)
+step_twoa <- lm(log_homeValue~log_pollutionIndex + step_onea$fitted + nBedRooms + log_pctLowIncome +
+                 pupilTeacherRatio + log_distanceToCity + log_crimeRate_pc, data = s_df)
+
+coeftest(step_onea, vcov=vcovHC)
+summary.lm(step_onea)
+coeftest(step_twoa, vcov=vcovHC)
+
+step_oneb <- lm(withWater ~ ageHouse +log_pollutionIndex + step_oneb$fitted + nBedRooms + log_pctLowIncome +
+                  pupilTeacherRatio + log_distanceToCity + log_crimeRate_pc, data = s_df)
+step_twob <- lm(log_homeValue~log_pollutionIndex + step_oneb$fitted + nBedRooms + log_pctLowIncome +
+                  pupilTeacherRatio + log_distanceToCity + log_crimeRate_pc, data = s_df)
+
+coeftest(step_oneb, vcov=vcovHC)
+summary.lm(step_oneb)
+coeftest(step_twob, vcov=vcovHC)
+
+step_onec <- lm(log_pollutionIndex ~ log_nonRetailBusiness, data = s_df)
+step_twoc <- lm(log_homeValue~step_onec$fitted + withWater + nBedRooms + log_pctLowIncome +
+                  pupilTeacherRatio + log_distanceToCity + log_crimeRate_pc, data = s_df)
+
+coeftest(step_onec, vcov=vcovHC)
+summary.lm(step_onec)
+coeftest(step_twoc, vcov=vcovHC)
 
 ## @knitr scratch
 plot(ex1df$crimeRate_pc, ex1df$homeValue)

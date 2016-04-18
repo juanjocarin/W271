@@ -68,6 +68,8 @@ opts_knit$set(root.dir = './/data', global.par = TRUE)
 
 \pagebreak
 
+### Exploratory Analysis
+
 First, we will load the data and conduct an exploratory analysis
 
 ```{r ex1-load, echo = TRUE}
@@ -176,6 +178,8 @@ Since we are tasked with determining the impact of environmental variables on th
 
 The scatter plots of the variables in the dataset against the pollution index reveal that there are many strong negative and positive correlations. This provides evidence that estimating the effects of polluiton on home values requires controling for a number of potential confounding variables. The scatter plot of adjacency to water with the variables reveals generally weaker relationships, which is not surprising given that the variable is a factor and that the occurance of water is less influenced by social factors than pollution. 
 
+### Model selection
+
 Before beginning the empirical process of model selection, we will stipulate that the variables for number of bedrooms and percentage of low income housing should be included in *any* regression model with house value because they have a well established relationship with the outcome variable. 
 
 Taking our variables of interest and the two variables included for theoretical reasons, the baseline model is:
@@ -189,9 +193,9 @@ $$ log(homeValue) = \beta_0 + \beta_1 log(pollutionIndex) + \beta_2 withWater + 
 
 \pagebreak
 
-Looking at the results of the base regression, we see that all coefficients are significant, a very basic confirmation that these 3 variables are indeed variables of interest, and that the R^2 value is `r summary.lm(baseModel)$r.squared`. Looking at the diagnostic plots, we see in the residuals versus fitted plot that the band of values seems to widen in from left to right and then narrow, suggesting that the use of **heteroskadasticity robust standard errors** is appropriate. 
+Looking at the results of the base regression, we see that all coefficients are significant and the R^2 value is `r summary.lm(baseModel)$r.squared`, a very basic confirmation that these 4 variables are indeed variables of interest. Looking at the diagnostic plots, we see in the residuals versus fitted plot that the band of values seems to widen out from left to right and then narrow, suggesting that the use of **heteroskadasticity robust standard errors** is appropriate. The residuials vs leverage plot suggests that some points may represent outliers, although they do not exert leverage on the model that is outside of the norm. The presence of outliers is not surprising in a dataset like this, as we know the values of homes in some areas are simply much higher or lower due to conditions that may not be perfectly captured by the dataset. **Since the presence of outliers is simply a reality in datasets relating to housing, we do not argue in favor of any sort of outlier removal procedure.**
 
-Starting with our basemodel, we are interesting in selecting a model that 1) is a good fit of our sample data 2) can generalize to the larger dataset 3) provides insight into the effect of environmental factors on the value of homes. One approach we examine for selecting a final model is adding additional parameters while penalizing the model for increasing complexity using a measure like the AIC/BIC.
+Starting with our base model, we are interested in selecting a model that 1) is a good fit of our sample data 2) can generalize to the larger dataset 3) provides insight into the effect of environmental factors on the value of homes. One approach we examine for selecting a final model is adding additional parameters while penalizing the model for increasing complexity using a measure like the AIC/BIC.
 
 ```{r ex1-stepWise, echo=T}
 ```
@@ -210,15 +214,40 @@ The results of out-of-sample fitting are summarized in the table below:
 
 Using the criterion of the RMES or MAE, the model chosen would include 4 additional parameters, while the AIC would favor either the model with 3 or 4 additional parameters, and the BIC would favor the model with 3 additional parameters. 
 
-Taking the results of step-wise addition and out-of-sample forecasting together, one could persausively argue for both the model with 3 additional parameters and the model with 4.  Given the similarity of the out of sample fit and the preference for models with less complexity, **I would select a model with the fewest additonal parameters, in this case 3** 
+Taking the results of step-wise addition and out-of-sample forecasting together, one could persausively argue for both the model with 3 additional parameters and the model with 4.  Given the similarity of the out of sample fit and the preference for models with less complexity, **the model we select for predicting home values is the base model with three additional paramaters, pupil to teacher ratio, log(distance to city), and log(crime rate percentage) **. This model has the form:
+$$log(homeValue) = \beta_0 + \beta_1 log(pollutionIndex) + \beta_2 withWater + \beta_3 nBedRooms +$$
+$$\beta_4 pupilTeacherRatio + \beta_5 log(distanceToCity) + \beta_6 log(crimeRate_pc) + \epsilon$$ 
+
+\pagebreak
 
 ```{r ex1-model3, echo=F, results='asis'}
 ```
 
+According to the model summary, there is in fact an effect of environmental factors on home values. Compared to our original base model, controling for the additional variables has resulted is a large (negative) increase in the coefficient for pollution index and a small decrease in the coefficent for absence/presence of water. For pollution index value, an increase of 1 in the log value of pollution index score results in a decrease of `r round(coeftest(model3)[2],3)` (`r round(coeftest(model3)[2] + 1.96 * coeftest(model3)[10],3)`, `r round(coeftest(model3)[2] - 1.96 * coeftest(model3)[10],3)`), p = $`r round(coeftest(model3)[26], 3)`$ in the log home value. For a house with median value, going from the 25th percentile on the pollution index to the median value would result in a decrease in home value of  \$$`r format(round(exp(median(s_df$log_homeValue) + quantile(s_df$log_pollutionIndex, 0.25, names=F) * -.211)- exp(median(s_df$log_homeValue) + quantile(s_df$log_pollutionIndex, 0.5, names=F) * -.211), 2), scientific=F)`$. For locations adjacent to water, going from not being adjacent to water to being adjacent results in an increase in log home value of `r round(coeftest(model3)[3],3)` (`r round(coeftest(model3)[3] + 1.96 * coeftest(model3)[11],3)`, `r round(coeftest(model3)[3] - 1.96 * coeftest(model3)[11],3)`), p = $`r round(coeftest(model3)[27], 3)`$. For a house with median value, being adjacent to water would result in an increase of home value of \$$`r format(round(exp(median(s_df$log_homeValue) + .113) - exp(median(s_df$log_homeValue)) , 2), scientific=F)`$
+
+\pagebreak
+
+```{r ex1-model3Plot, echo=F, fig.height=5, fig.width=6, fig.cap="Diagnoistic Plots for Selected Regression Model"}
+```
+
+The residual vs fitted plot for our selected model shows a distinct tunneling of values from left to right, suggesting heteroskadasticity and the need to use heteroskadasticity-robust standard errors. 
+
+<!-- The primary issue in estimating home value using this dataset is the likelihood of omitted variable bias. The type of information needed to fully characterize the 'desirability' of a neighboorhood, and the causal mechanisms that translate from 'desirability' to home values are not fully captured by this dataset. For instance, we could imagine that the variable of interest, pollutionIndex, has a causal path to homeValue via intermediary variables. Perhaps total green space is an important variable for influencing people's beliefs about the environmental quality of a neighborhood, and people 'estimate' the pollutionIndex of a place based on the degree of green space. Then the true effect of pollution on home values is mediated through green space. In this case, our estimates of the coefficient for pollutionIndex would be biased because we are not controlling for green space. Given the likely complexity of the casual pathway between neighborhood desirability and home value, It is highly likely that there are variables relating to the 'diserabilityr' of a neighborhood that have an effect on the value of homes that are not captured by this dataset.  -->
+
+The primary issue in estimating home value using this dataset is the likelihood of omitted variable bias. For instance, we could imagine that the variable of interest, pollutionIndex, has a causal path to homeValue via intermediary variables. Perhaps total green space is an important variable for influencing people's beliefs about the environmental quality of a neighborhood, and people 'estimate' the pollutionIndex of a place based on the degree of green space. Then the true effect of pollution on home values is mediated through green space. In this case, our estimates of the coefficient for pollutionIndex would be biased because we are not controlling for green space. Given the likely complexity of the casual pathway between neighborhood desirability and home value, it is highly likely that there are variables relating to the 'diserability' of a neighborhood that have an effect on the value of homes that are not captured by this dataset.
+
+### Using IV to estimate coefficient for pollution index
+
+Given that we are interested in how environmental factors influence home prices, we may worry that the coefficient for pollution index is biased due to considerations of omitted variables outlined above. We argue that the the percentage of non-retail businesses is a source of random variation with regards to home values (controling for covariates), and thus represents an instrument for pollution index. 
+
+In order for non-retail business percentage to be a suitable IV for pollution index score, two conditions must hold:
+* Non-retail business percentage must be correlated with pollution index
+* Non-retail business percentage must be uncorrelated with the error term in the regression model. 
+
+Given that non-retail businesses include industrial operations like manufacturing, which are sources of pollution, it is not surprising that the two variables are positively correlated (See scatterplot above). For the IV approach to be causal, we need to argue persuasively that non-retail business percentage is not endogenous to the model, that is to say that home values do not depend directly on non-retail business percentage, conditional on the covariates in the model. Here, we argue that the main proxy of non-retail business would be urban/rural, given that rural areas tend to have fewer retail-businesses, and since we are controlling for distance to city then, on average, non-retail business percentage is not a determinant of house valuation. This assumption is generally not testible, and can be seen as more or less persausive depending on the IV proposed. In this case, one can imagine enough situations where the closeness to certain kinds of non-retail business would have an impact on the valuation of a home that I wouldn't find non-retail business percentage to be a completely persausive instrument for pollution index. 
+ 
+
 **********
-
-According to the model summary, there is in fact an effect of environmental factors on home values. For pollution index value, an increase of 1 in the log value of pollution index score results in a decrease of `r round(coeftest(model3)[2],3)` (`r round(coeftest(model3)[2] + 1.96 * coeftest(model3)[10],3)`, `r round(coeftest(model3)[2] - 1.96 * coeftest(model3)[10],3)`), p = $`r round(coeftest(model3)[26], 3)`$ in the log home value. For a house with median value, going from the 25th percentile on the pollution index to the median value would result in a decrease in home value of  \$$`r format(round(exp(median(s_df$log_homeValue) + quantile(s_df$log_pollutionIndex, 0.25, names=F) * -.211)- exp(median(s_df$log_homeValue) + quantile(s_df$log_pollutionIndex, 0.5, names=F) * -.211), 2), scientific=F)`$. For locations adjacent to water, going from not being adjacent to water to being adjacent results in an increase in log home value of `r round(coeftest(model3)[3],3)` (`r round(coeftest(model3)[3] + 1.96 * coeftest(model3)[11],3)`, `r round(coeftest(model3)[3] - 1.96 * coeftest(model3)[11],3)`), p = $`r round(coeftest(model3)[27], 3)`$. For a house with median value, being adjacent to water would result in an increase of home value of \$$`r format(round(exp(median(s_df$log_homeValue) + .113) - exp(median(s_df$log_homeValue)) , 2), scientific=F)`$
-
 \pagebreak
 
 # Part 2
