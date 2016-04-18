@@ -102,7 +102,44 @@ head(financial)
 # Check if 1st column is just an incremental index
 all(financial$X == 1:dim(financial)[1])
 financial <- financial[, -1]
-head(financial)
+c(head(financial), tail(financial)) # 1st and last observations
+summary(financial)
+round(stat.desc(as.data.frame(financial), desc = TRUE, norm = TRUE), 2)
+
+## @knitr P2-histogram
+hist(financial, breaks = 20, freq = FALSE, 
+     xlab = "Time period", 
+     main = paste0("Histogram (and approximate density plot) of the\n", 
+                   "financial time series"), cex.main = 0.8)
+lines(density(financial), col = 'blue')
+
+## @knitr P2-timeplot
+par(mar = c(5, 5, 4, 2) + 0.1)
+plot(1:length(financial), financial, type = 'l', xlab = "Time period", 
+     ylab = "Value of the financial time series", 
+     main = "Financial time series")
+lines(1:length(financial), stats::filter(financial, sides=2, rep(1, 53)/53), 
+      lwd = 2, col = rgb(0, 1, 0, 0.6))
+leg.txt <- c("Original Series", "53-Point Symmetric Moving Average")
+legend("topleft", legend=leg.txt, lty = c(1, 1), col=c("black", "green"), 
+       bty = 'n', cex = .8, merge = TRUE, bg = 336)
+par(mar = c(5, 4, 4, 2) + 0.1)
+
+## @knitr P3-decomposition_1
+plot(decompose(ts(financial, start = 2000, freq = 365.25/7), 
+               type = 'additive'), col = 'blue', 
+     xlab = "Year (time period: day)")
+plot(decompose(ts(financial, start = 2000, freq = 365.25/7), 
+               type = 'additive')$seasonal[1:210], type = 'l')
+
+## @knitr P3-decomposition_2
+plot(decompose(ts(financial, start = 2000, freq = 365.25), 
+               type = 'multiplicative'), col = 'blue', 
+     xlab = "Year (time period: day)")
+plot(decompose(ts(financial, start = 2000, freq = 365.25/7), 
+          type = 'multiplicative')$seasonal[1:210], type = 'l')
+
+auto.arima(ts(financial, start = 2000, freq = 365.25/7), seasonal = TRUE)
 
 
 
@@ -121,7 +158,9 @@ identical(GW$Date, seq(min(GW$Date), max(GW$Date), by=7))
 names(GW)[2] <- "DS"
 summary(GW)
 round(stat.desc(as.data.frame(GW$DS), desc = TRUE, norm = TRUE), 2)
-      
+# Create a time series object (weekly observations)
+GW.ts <- ts(GW$DS, start = 2004 + day(min(GW$Date)) / 365.25, 
+            freq = 365.25 / 7)
 
 ## @knitr P3-histogram
 hist(GW$DS, breaks = 20, freq = FALSE, ylim = c(0, 4.5), 
@@ -145,52 +184,175 @@ legend("topleft", legend=leg.txt, lty = c(1, 1), col=c("black", "green"),
        bty = 'n', cex = .8, merge = TRUE, bg = 336)
 par(mar = c(5, 4, 4, 2) + 0.1)
 
+## @knitr P3-decomposition_1
+plot(decompose(GW.ts, type = 'additive'), col = 'blue', 
+     xlab = "Year (time period: week)")
+
+## @knitr P3-decomposition_2
+plot(decompose(GW.ts, type = 'multiplicative'), col = 'blue', 
+     xlab = "Year (time period: week)")
+
+## @knitr P3-decomposition_3
+(shock.position <- which(decompose(GW.ts, 
+                                   type = 'multiplicative')[['random']] == 
+                           max(decompose(GW.ts, 
+                                         type = 'multiplicative')[['random']], 
+                               na.rm = TRUE))) # 481
+(shock.date <- GW$Date[shock.position]) # "2013-03-17"
+
 ## @knitr P3-timeplot_2
 # DS <- ts(GW$DS, start = 2004, freq = 52)
 par(mar = c(5, 5, 4, 2) + 0.1)
-plot(GW[which(year(GW$Date) >= 2013), ], type = 'l', xlab = "Year (time period: weeks)", 
+plot(GW[shock.position:length(GW$Date), ], type = 'l', 
+     xlab = "Year (time period: weeks)", 
      ylab = "Level of interest in global warming in the news", 
      main = paste0("Level of interest in global warming in the news\n", 
-                   "from ", min(GW$Date), " to ", max(GW$Date)))
-lines(GW$Date, stats::filter(GW$DS, sides=2, rep(1, 13)/13), lwd = 1.5, 
-      col = rgb(0, 1, 0, 0.6))
+                   "from ", shock.date, " to ", max(GW$Date)))
+lines(GW$Date[shock.position:length(GW$Date)], 
+      stats::filter(GW$DS[shock.position:length(GW$Date)], sides=2, 
+                    rep(1, 13)/13), lwd = 1.5, col = rgb(0, 1, 0, 0.6))
 leg.txt <- c("Original Series", "13-Point (~quarterly) Symmetric Moving Average")
 legend("topleft", legend=leg.txt, lty = c(1, 1), col=c("black", "green"), 
        bty = 'n', cex = .8, merge = TRUE, bg = 336)
 par(mar = c(5, 4, 4, 2) + 0.1)
 
-## @knitr P3-whole_and_last
-GW.whole <- GW
-GW.last <- GW[which(year(GW$Date) >= 2013), ]
-arima.whole.fit <- auto.arima(GW.whole$DS, seasonal = TRUE)
-arima.last.fit <- auto.arima(GW.last$DS, seasonal = TRUE)
-GW.whole.train <- GW.whole[1:(dim(GW.whole)[1]-16), ]
-GW.last.train <- GW.last[1:(dim(GW.last)[1]-16), ]
-GW.test <- GW[(dim(GW)[1]-16):dim(GW)[1], ]
-arima.whole.oos.fit <- Arima(GW.whole.train$DS, 
-                             order = arima.whole.fit$arma[c(1, 2, 6)], 
-                             seas = list(order = arima.whole.fit$arma[c(3, 4, 
-                                                                        7)], 
+## @knitr P3-Dataset_selection
+# Whole dataset
+GW.whole <- GW.ts
+# Reduced dataset: last obsservations (from shock date)
+GW.last <- window(GW.whole, start = year(shock.date) + (as.numeric(difftime(
+  shock.date, as.Date(paste0(year(shock.date), "-1-1")))) + 1) / 365.25, 
+  freq = 365.25/7)
+# Fit the "best" ARIMA model for the whole dataset
+(arima.whole.fit <- auto.arima(GW.whole, seasonal = TRUE))
+
+## @knitr P3-Dataset_selection_2
+# Fit the "best" ARIMA model for the reduced dataset
+(arima.last.fit <- auto.arima(GW.last, seasonal = TRUE))
+par(mfrow = c(2, 2), cex.main = 0.9)
+stats::acf(resid(arima.whole.fit), lag = 53, 
+           main = paste0("ACF of the residuals of SARIMA(0,1,1)(0,1,0)\n", 
+                         "model fitted to data from ", min(GW$Date)))
+pacf(resid(arima.whole.fit), lag = 53, 
+     main = paste0("PACF of the residuals of SARIMA(0,1,1)(0,1,0)\n", 
+                   "model fitted to data from ", shock.date))
+stats::acf(resid(arima.last.fit), lag = 53, 
+           main = paste0("ACF of the residuals of SARIMA(0,1,1)(0,1,0)\n", 
+                         "model fitted to data from ", min(GW$Date)))
+pacf(resid(arima.last.fit), lag = 53, 
+     main = paste0("PACF of the residuals of SARIMA(0,1,1)(0,1,0)\n", 
+                   "model fitted to data from ", shock.date))
+par(mfrow = c(1, 1), cex.main = 1)
+
+
+## @knitr P3-Dataset_selection_3
+# Out-of-sample fit of both models
+# Training sets (exclude last 15 observations, 10% of the reduced dataset)
+GW.whole.train <- window(GW.whole, start = time(GW.whole)[1], 
+                         end = time(GW.whole)[length(GW.whole)-15])
+GW.last.train <- window(GW.last, start = time(GW.last)[1], 
+                        end = time(GW.last)[length(GW.last)-15])
+# Test set
+GW.test <- window(GW.whole, start = time(GW.whole)[length(GW.whole)-15+1], 
+                  end = time(GW.whole)[length(GW.whole)])
+# Fit new models for the training sets using same coefficients
+arima.whole.oos.fit <- Arima(GW.whole.train, 
+                             order = arima.whole.fit$arma[c(1, 6, 2)], 
+                             seas = list(order = arima.whole.fit$arma[c(3, 7, 
+                                                                        4)], 
                                          freq = arima.whole.fit$arma[5]))
-arima.whole.oos.fit.fcast <- forecast.Arima(arima.whole.oos.fit, h = 16)
-arima.last.oos.fit <- Arima(GW.last.train$DS, 
-                            order = arima.last.fit$arma[c(1, 2, 6)], 
-                            seas = list(order = arima.last.fit$arma[c(3, 4, 
-                                                                      7)], 
-                                        freq = arima.whole.fit$arma[5]))
-arima.last.oos.fit.fcast <- forecast.Arima(arima.last.oos.fit, h = 16)
+arima.last.oos.fit <- Arima(GW.last.train, 
+                            order = arima.last.fit$arma[c(1, 6, 2)], 
+                            seas = list(order = arima.last.fit$arma[c(3, 7, 
+                                                                      4)], 
+                                        freq = arima.last.fit$arma[5]))
+# Predict next 15 observations based on each model
+arima.whole.oos.fit.fcast <- forecast.Arima(arima.whole.oos.fit, h = 15)
+arima.last.oos.fit.fcast <- forecast.Arima(arima.last.oos.fit, h = 15)
 
-## @knitr P3-whole_and_last_2
-plot(arima.whole.oos.fit.fcast, xaxt = 'n', ylim = c(-0.5, 4.5))
-axis(1, at = seq(1, dim(GW.whole)[1], 12), 
-     labels = seq(min(GW.whole$Date), max(GW.whole$Date), by = 7*12))
-lines(GW.whole$DS)
+## @knitr P3-Dataset_selection_4
+plot(arima.whole.oos.fit.fcast, ylim = c(-0.5, 4.5), 
+     xlab = "Date", ylab = "Original, Esimated and Forecasted Values", 
+     main = paste0("15-step out-of-sample Forecast and Original & Estimated ", 
+                   "Series\nusing a SARIMA(", arima.whole.fit$arma[1], ",", 
+                   arima.whole.fit$arma[6], ",", arima.whole.fit$arma[2], 
+                   ")(", arima.whole.fit$arma[3], ",", arima.whole.fit$arma[7], 
+                   ",", arima.whole.fit$arma[4], ")[", arima.whole.fit$arma[5], 
+                   "] model from data from ", min(GW$Date)))
+lines(fitted(arima.whole.oos.fit), col = 'blue', lty = 2)
+par(new = TRUE)
+plot(GW.whole, xaxt = 'n', xlab = '', ylab = '', ylim = c(-0.5, 4.5))
+leg.txt <- c("Original series", "Esimated series (SARIMA(1,1,1)(0,1,1)[52])", 
+             "Out-of-sample forecasts")
+legend("topleft", legend = leg.txt, lty = c(1, 2, 1), 
+       col = c("black", "blue", "blue"), 
+       bty = 'n', cex = 0.9)
 
-## @knitr P3-whole_and_last_3
-plot(arima.last.oos.fit.fcast, xaxt = 'n', ylim = c(-0.5, 4.5))
-axis(1, at = seq(1, dim(GW.last)[1], 4), 
-     labels = seq(min(GW.last$Date), max(GW.last$Date), by = 7*4))
-lines(GW.last$DS)
+## @knitr P3-Dataset_selection_5
+plot(arima.last.oos.fit.fcast, ylim = c(-0.5, 4.5), 
+     xlab = "Date", ylab = "Original, Esimated and Forecasted Values", 
+     main = paste0("15-step out-of-sample Forecast and Original & Estimated ", 
+                   "Series\nusing a SARIMA(", arima.last.fit$arma[1], ",", 
+                   arima.last.fit$arma[6], ",", arima.last.fit$arma[2], 
+                   ")(", arima.last.fit$arma[3], ",", arima.last.fit$arma[7], 
+                   ",", arima.last.fit$arma[4], ")[", arima.last.fit$arma[5], 
+                   "] model from data from ", min(GW$Date)))
+lines(fitted(arima.last.oos.fit), col = 'blue', lty = 2)
+par(new = TRUE)
+plot(GW.last, xaxt = 'n', xlab = '', ylab = '', ylim = c(-0.5, 4.5))
+leg.txt <- c("Original series", "Esimated series (SARIMA(0,1,1)(0,1,0)[52])", 
+             "Out-of-sample forecasts")
+legend("topleft", legend = leg.txt, lty = c(1, 2, 1), 
+       col = c("black", "blue", "blue"), 
+       bty = 'n', cex = 0.9)
+
+## @knitr P3-Dataset_selection_6
+plot(GW.test, ylim = c(2, 4.5), xlab = "Date", 
+     main = paste0("15-step out-of-sample Forecast (Detail)"), 
+     ylab = "Original and Forecasted Values", lwd = 2)
+par(new = TRUE)
+plot(arima.last.oos.fit.fcast$mean, ylim = c(2, 4.5), , xaxt = 'n', xlab = '', 
+     ylab = '', col = 'green', lwd = 2)
+polygon(c(time(GW.test), rev(time(GW.test))), 
+        c(arima.last.oos.fit.fcast$upper[,'95%'], 
+          rev(arima.last.oos.fit.fcast$lower[,'95%'])), 
+        col=rgb(0, 1, 0, 0.25), border = NA)
+par(new = TRUE)
+plot(arima.whole.oos.fit.fcast$mean, ylim = c(2, 4.5), xaxt = 'n', xlab = '', 
+     ylab = '', col = 'red', lwd = 2)
+polygon(c(time(GW.test), rev(time(GW.test))), 
+        c(arima.whole.oos.fit.fcast$upper[,'95%'], 
+          rev(arima.whole.oos.fit.fcast$lower[,'95%'])), 
+        col=rgb(1, 0, 0, 0.25), border = NA)
+leg.txt <- c("Original series", 
+             paste0("Forecasts of model from data from ", shock.date, " on"), 
+             paste0("Forecast of model from ", min(GW$Date), " on"))
+legend("topleft", legend = leg.txt, lty = rep(1, 3), lwd = rep(1, 3), 
+       col = c("black", "green", "red"), 
+       bty = 'n', cex = 0.8)
+
+## @knitr P3-conditional_var
+par(mfrow = c(2,1))
+acf(resid(arima.last.fit)^2, lag.max = 53, 
+    main = "ACF of the squared residuals\nof the SARIMA(0,1,0)(0,1,0)model")
+pacf(resid(arima.last.fit)^2, lag.max = 53, 
+    main = "PACF of the squared residuals\nof the SARIMA(0,1,0)(0,1,0)model")
+par(mfrow = c(1,1))
+
+## @knitr P3-forecast
+arima.last.fit.fcast <- forecast.Arima(arima.last.fit, h = 12)
+plot(arima.last.fit.fcast, col = 'blue', ylim = c(-0.5, 5.5), 
+     xlab = "Year (time period: month)", 
+     main = paste0("12-step ahead Forecast and Original & Estimated ", 
+                   "Series\n(SARIMA(0,1,1)(0,1,0)[52]"), 
+     ylab="Original, Estimated, and Forecasted Values")
+leg.txt <- c("Original series", "Esimated series (SARIMA(0,1,1)(0,1,0))", 
+             "Forecasts")
+legend("topleft", legend = leg.txt, lty = c(1, 2, 1), 
+       col = c("black", "blue", "blue"), 
+       bty = 'n', cex = 0.9)
+lines(GW.last, col = "black")
+lines(fitted(arima.last.fit), col = 'blue', lty = 2)
 
 
 
@@ -467,7 +629,7 @@ plot(arima113.fit.fcast, col = 'blue', ylim = c(1, 5.5),
                    "Series\n(ARIMA(1,1,3)"), 
      ylab="Original, Estimated, and Forecasted Values")
 leg.txt <- c("Original series", "Esimated series (ARIMA(1,1,3))", 
-             "Out-of-sample forecasts")
+             "Forecasts")
 legend("topleft", legend = leg.txt, lty = c(1, 2, 1), 
        col = c("black", "blue", "blue"), 
        bty = 'n', cex = 0.9)
