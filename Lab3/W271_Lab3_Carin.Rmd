@@ -98,14 +98,92 @@ We start loading and inspecting the data:
 
 The dataset contains `r length(financial)` observations, with no dates (there was another column but that just contains an incremental index that adds no information).
 
+The histogram is very right-skewed. Anyway, it is not informative in time series (it tells us nothing about their dynamics).
+
 ```{r P2-histogram, echo = FALSE, fig.cap = "Histogram (and approximate density plot) of the values of the financial time series"}
 ```
 
-```{r P2-timeplot, echo = FALSE, fig.height = 4.5, fig.width = 6, fig.cap = "Time series plot of the financial series"}
+If we plot **the time series** (see next page) we observe that it **is quite persistent, it is difficult to observe any seasonality, and the variance seems to increase**. The ACF and PACF (plotted after the time series, also in the next page) resemble a random walk or an AR(1) model very much: the ACF decreases very slowly, and the PACF falls sharply after the 1st lag.
+
+```{r P2-timeplot, echo = FALSE, fig.height = 3.9, fig.width = 6, fig.cap = "Time series plot of the financial series"}
 ```
 
-```{r P2-ACF_PACF, echo = FALSE, fig.height = 4.5, fig.width = 6, fig.cap = "ACF and PACF of the financial time series"}
+```{r P2-ACF_PACF, echo = FALSE, fig.height = 3.9, fig.width = 6, fig.cap = "ACF and PACF of the financial time series"}
 ```
+
+\pagebreak
+
+The PACF at the 16th lag is also significant, which might make us think that that's the seasonality, but we can check that quickly, by analyzing the ACF of the differenced series:
+
+```{r P2-ACF_PACF_2, echo = FALSE, fig.cap = "ACF of the differenced financial time series"}
+```
+
+For a (strong) seasonal component, the ACF of the differenced series would be significant at the corresponding lag (16 in this case)... and also at multiples of it (32, 48, ...), which is not the case (besides, financial series do not usually have a strong seasonal component as other series do).
+
+Since this is a **financial** series, let's analyze the \textcolor{red}{return} (or relative increment), defined as:
+
+$$r_t=\frac{x_t-x_{t-1}}{x_{t-1}}$$
+
+If we define $y_t$ as $y_t = \log(x_t)$ then for small increases of $x_t$ (i.e., if $x_t/x_{t-1} \approx 1 \ \forall t$}), we can use the following approximation:
+
+$$\mathbf{(1-B) \log(x_t) = \log(x_t) - \log(x_{t-1})} = \log\left(\frac{x_t}{x_{t-1}}\right) = \Delta \log(x_t) \approx \frac{x_t}{x_{t-1}} - 1 = \mathbf{r_t}$$
+
+I.e., if we difference the log of the series we have a new series close to the return of the original one.
+
+```{r  P2-return}
+```
+
+Let's now plot the log and difference of logs (i.e., the \textcolor{red}{log return}) of the financial series, as well as the respective ACFs and PACFs:
+
+```{r P2-timeplot_ret, echo = FALSE, fig.height = 5.5, fig.width = 6, fig.cap = "Time series plot of the financial series"}
+```
+
+\pagebreak
+
+```{r P2-ACF_PACF_ret, echo = FALSE, fig.height = 5, fig.width = 6, fig.cap = "ACF and PACF of the log return of the financial time series"}
+```
+
+Both the time series plot and the ACF and PACF of the log of the series resemble a **random walk**. Similarly (and consequently), the difference resemble a **white noise**...with one caveat: **the variance is not constant** (but higher around the 500th observation).
+
+So a good model for the log of the series would be simply an \textcolor{red}{ARIMA(0,1,0)}! We can predict using such model and exponentiate to get the predictions for the original series (those predictions should be corrected because the model is optimized for the log, not for the original series, and since the logarithm is not a linear operation, $\exp(E[\log(x_t)]) \neq E[\exp(\log(x_t))] = E[x_t]$).
+
+```{r P2-forecast}
+```
+
+\pagebreak
+
+```{r P2-forecast_2, echo = FALSE, fig.height = 4, fig.width = 6, fig.cap = "36-step ahead forecasts of the financial time series based on an ARIMA(0,1,0) model fitted to the log of the data"}
+```
+
+But as we mentioned before, the variance of the residuals might be not constant. An inspection of the square of the residuals of the integrated model (see the 1st Figure in the following page) confirms that, so we should enhance the confidence intervals of our forecasts (their mean value will remain the same) with a GARCH model.
+
+```{r P2-cond_var, echo = FALSE, fig.height=2.5, fig.cap = "ACF of the squared residuals of the ARIMA(0,1,0) model fitted to the log of the financial series"}
+```
+
+Let's try a GARCH(1,1) model:
+
+```{r P2-garch}
+```
+
+\pagebreak
+
+The residuals of such model resemble a white noise (with constant variance!), so the \textcolor{red}{ARIMA(0,1,0)/GARCH(1,1) of the log} is a good fit.
+
+```{r P2-garch_2, echo = FALSE, fig.height = 4.5, fig.width = 6, echo = FALSE, fig.cap = "ACF of the residuals and squared residuals of an ARIMA(1,1,3)/GARCH(1,1) model fitted to the U.S. inflation-adjusted average gas prices"}
+```
+
+Thus, we can use this enhanced model to get narrower confidence intervals of the previous forecasts.
+
+```{r P2-garch_3}
+```
+
+\pagebreak
+
+The figure below shows the previous 80% and 95% confidence intervals (without applying the GARCH model), and (in a darker shade) the 95% confidence intervals applying a GARCH(1,1) model to the residuals of the ARIMA(0,1,0), which are much narrower.
+
+```{r P2-garch_4, echo = FALSE, fig.height = 4.5, fig.width = 6, fig.cap = "36-step ahead forecasts of the financial time series based on an ARIMA(0,1,0)/GARCH(1,1) model fitted to the log of the data"}
+```
+
 
 **********
 
@@ -174,8 +252,6 @@ To check which approach is more appropriate, we consider two datasets: one with 
 
 ```{r P3-Dataset_selection}
 ```
-
-\pagebreak
 
 Looking at the ACFs, the residuals of both models resemble a white noise slightly well. But when it comes to the PACFs, only the 2nd model, fitted to the reduced dataset, really resembles a white noise.
 
@@ -451,7 +527,7 @@ As shown above, the confidence region of the forecasts is quite wide. But we hav
 
 As shown below, the residuals of that GARCH(1,1) model fairly resemble a white noise (the auto-correlation at lag 16 is significant, but about 5% of them could be, just due to chance), so we can use this model \textcolor{red}{GARCH(1,1)}.
 
-```{r P4-GARCH_3, echo = FALSE, fig.cap = "ACF of the residuals of an ARIMA(1,1,3)/GARCH(1,1) model fitted to the U.S. inflation-adjusted average gas prices"}
+```{r P4-GARCH_3, fig.height = 4.5, fig.width = 6, echo = FALSE, fig.cap = "ACF of the residuals and squared residuals of an ARIMA(1,1,3)/GARCH(1,1) model fitted to the U.S. inflation-adjusted average gas prices"}
 ```
                                                                                
 Hence, our \textcolor{red}{complete model, ARIMA(1,1,3)/GARCH(1,1)} is:
