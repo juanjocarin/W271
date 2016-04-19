@@ -462,12 +462,12 @@ stargazer(model_df, title="Summary of Model Diagnoistics and Out-Of-Sample Fit",
 ## @knitr ex1-model3
 model3 <- lm(log_homeValue~log_pollutionIndex + withWater + nBedRooms + log_pctLowIncome +
                pupilTeacherRatio + log_distanceToCity + log_crimeRate_pc, data = s_df)
-stargazer2(model3, title = "Selected Model Regression summary", digits = 3, digits.extra = 6, 
+stargazer2(model3, title = "Perfered Model Regression summary", digits = 3, digits.extra = 6, 
            dep.var.labels = 'log(home value)', 
            covariate.labels = c("log(PollutionIndex)", "Water Absence/Presence",
-                                "Number of Bedrooms", "log(Percentage Low Income Housing",
+                                "Number of Bedrooms", "log(Percentage Low Income Housing)",
                                 "Pupil to Teacher Ratio", "log(Distance to City)",
-                                "log(Average Crime Rate"))
+                                "log(Average Crime Rate)"))
 # model_check <- s_df[-c(370,378),]
 # model3_check <- lm(log_homeValue~log_pollutionIndex + withWater + nBedRooms + log_pctLowIncome +
 #                      pupilTeacherRatio + log_distanceToCity + log_crimeRate_pc, data = model_check)
@@ -482,17 +482,23 @@ autoplot(model3) + theme_gray()
 inter_model <- lm(log_homeValue~log_pollutionIndex + withWater + nBedRooms + log_pctLowIncome +
                     pupilTeacherRatio + log_distanceToCity + log_crimeRate_pc + 
                     log_pollutionIndex * log_pctLowIncome, data=s_df)
-coeftest(inter_model, vcov=vcovHC)
+# coeftest(inter_model, vcov=vcovHC)
+stargazer2(inter_model,title = "Interaction Effect Regression summary", digits = 3, digits.extra = 6, 
+           dep.var.labels = 'log(home value)', 
+           covariate.labels = c("log(PollutionIndex)", "Water Absence/Presence",
+                                "Number of Bedrooms", "log(Percentage Low Income Housing)",
+                                "Pupil to Teacher Ratio", "log(Distance to City)",
+                                "log(Average Crime Rate)", "log\\_PI x log\\_LIH"))
 
-poll <- seq(3, 5, .01)
-Income_interp <- 10.6 + (1.38 - .481 * poll)
-pollut_interp <- 10.6 + (1.05 - .481 * x)
-plot(poll, Income_interp, type='l')
-plot(x, pollut_interp, type='l')
-lines(pollut_interp)
-model3 <- lm(log_homeValue~log_pollutionIndex + withWater + nBedRooms + log_pctLowIncome +
-                   pupilTeacherRatio + log_distanceToCity + log_crimeRate_pc, data = s_df)
-coeftest(model3, vcov=vcovHC)
+# poll <- seq(3, 5, .01)
+# Income_interp <- 10.6 + (1.38 - .481 * poll)
+# pollut_interp <- 10.6 + (1.05 - .481 * x)
+# plot(poll, Income_interp, type='l')
+# plot(x, pollut_interp, type='l')
+# lines(pollut_interp)
+# model3 <- lm(log_homeValue~log_pollutionIndex + withWater + nBedRooms + log_pctLowIncome +
+#                    pupilTeacherRatio + log_distanceToCity + log_crimeRate_pc, data = s_df)
+# coeftest(model3, vcov=vcovHC)
 
 ## @knitr ivReg
 
@@ -526,6 +532,17 @@ step_twoc <- lm(log_homeValue~step_onec$fitted + withWater + nBedRooms + log_pct
 coeftest(step_onec, vcov=vcovHC)
 summary.lm(step_onec)
 coeftest(step_twoc, vcov=vcovHC)
+
+## @knitr ex1-IVRegTable
+step_onec <- lm(log_pollutionIndex ~ log_nonRetailBusiness, data = s_df)
+step_twoc <- lm(log_homeValue~step_onec$fitted + withWater + nBedRooms + log_pctLowIncome +
+                  pupilTeacherRatio + log_distanceToCity + log_crimeRate_pc, data = s_df)
+stargazer2(step_twoc, title = "Instrumental Variable Regression summary", digits = 3, digits.extra = 6, 
+           dep.var.labels = 'log(home value)', 
+           covariate.labels = c("log(PollutionIndex)", "Water Absence/Presence",
+                                "Number of Bedrooms", "log(Percentage Low Income Housing)",
+                                "Pupil to Teacher Ratio", "log(Distance to City)",
+                                "log(Average Crime Rate)"))
 
 ## @knitr scratch
 plot(ex1df$crimeRate_pc, ex1df$homeValue)

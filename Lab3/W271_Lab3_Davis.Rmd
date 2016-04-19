@@ -35,7 +35,7 @@ header-includes:
 * Your report needs to include a comprehensive graphical analysis
 * Your analysis needs to be accompanied by detailed narrative. Just printing a bunch of graphs and econometric results will likely receive a very low score.
 * Your analysis needs to show that your models are valid (in statistical sense).
-* Your rationale of using certian metrics to choose models need to be provided. Explain the validity / pros / cons of the metric you use to choose your "best" model.
+* Your rationale of using certain metrics to choose models need to be provided. Explain the validity / pros / cons of the metric you use to choose your "best" model.
 * Your rationale of any decisions made in your modeling needs to be explained and supported with empirical evidence.
 * All the steps to arrive at your final model need to be shown and explained clearly.
 * All of the assumptions of your final model need to be thoroughly tested and explained and shown to be valid. Don't just write something like, "the plot looks reasonable", or "the plot looks good", as different people interpret vague terms like "reasonable" or "good" differently.
@@ -75,39 +75,40 @@ First, we will load the data and conduct an exploratory analysis
 ```{r ex1-load, echo = TRUE}
 ```
 
-The data consists of 400 observations of 11 numeric variables related to the value of each house and characteristics that describe it and it's surrounding neighborhood. A numeric summary of each variable is provided below.
+The data consists of 400 observations of 11 numeric variables related to the value of houses in each neighborhood and characteristics that describe the houses and the surrounding neighborhood. A numeric summary of each variable is provided below.
 
 ```{r ex1-summary_table, results = 'asis', echo=F, fig.cap = "Summary Statistics of Housing Data"}
 ```
 
-The summary table shows that the dataset has no missing values and that many of the variables likely have a skewed distribution and may benefit from tranformation. Potential transformations will be discussed as the exploratory analysis proceedes.
+The summary table shows that the dataset has no missing values and that many of the variables likely have a skewed distribution and may benefit from transformation. Potential transformations will be discussed as the exploratory analysis proceeds.
 
 ```{r ex1-CrimeRate, echo=F, fig.height=3, fig.width=8, fig.cap="Histograms of the Crime Rate Variable"}
 ```
 
-The crime rate variable is highly right-skewed, with most houses being in very low and low crime neighborhoods and a few houses ranging from moderate to very high crime neighborhoods. Log transformation of the variable reveals a roughly bimodel distribution, with a peak below zero representing low crime neighborhoods and a peak above zero representing moderate crime neighborhoods. 
+The crime rate variable is highly right-skewed, with most neighborhoods  very low and low in crime rate and a few neighborhoods ranging from moderate to very high crime rates. Log transformation of the variable reveals a roughly bi-model distribution, with a peak below zero representing low crime neighborhoods and a peak above zero representing moderate crime neighborhoods. 
 
 ```{r ex1-Business, echo=F, fig.height=3, fig.width=8, fig.cap="Histograms of Non-Retail Business Percentage Variable"}
 ```
 
-The non-retail business percentage variabel also shows multimodiality, with one group of houses having a very low percentage of non-retail businesses. Another group of `r sum(ex1df$nonRetailBusiness==.181)` houses has a non-retail business percentage of exactly `r ex1df$nonRetailBusiness[1]`. This large group with the same value suggests that a large portion of the sample may come from the same location, or perhaps that value-imputation was to fill in missing values or infer values for this dataset. ???This variable may be a proxy for if the house is more urban or rural, so perhaps retail businesses are a sign of greater economic activity and thus we would expect these houses to have higher value. 
+The non-retail business percentage variable also shows multimodiality, with one group of neighborhoods having a very low percentage of non-retail businesses. Another group of `r sum(ex1df$nonRetailBusiness==.181)` houses has a non-retail business percentage of exactly `r ex1df$nonRetailBusiness[1]`. This large group with the same value suggests that a large portion of the sample may come from the same location, or perhaps that value-imputation was to fill in missing values or infer values for this dataset. 
+<!-- ???This variable may be a proxy for if the house is more urban or rural, so perhaps retail businesses are a sign of greater economic activity and thus we would expect these houses to have higher value.  -->
 
 ```{r ex1-withWater, echo=F, fig.height=3, fig.width=4, fig.cap="Histogram of Water Variable"}
 ```
 
-The water variable shows that most houses are not located adjacent to water. The rarity of having water is likely a signal that having water is a strongly desirable trait for some home buyers and thus we would expect it to be correlated with higher home values.
+The water variable shows that most neighborhoods are not located adjacent to water. The rarity of having water is likely a signal that having water is a strongly desirable trait for some home buyers and thus we would expect it to be correlated with higher home values.
 
 \pagebreak
 
 ```{r ex1-houseAge, echo=F, fig.height=3, fig.width=8, fig.cap="Histogram of House Age"}
 ```
 
-The age of houses in the same ranged from less than 5 years to about 100 years and was roughly uniformly distributed between 10 and 75 years and increasing thereafter. The majority of houses are over 50 years old, with a spike in home age at around 100 years. Log transformation of the house age variable produced a roughly monotonically increasing distribution and does not seem to be an appropriate transformation for purposes of modeling. 
+The average age of houses in neighborhoods the sample ranged from less than 5 years to about 100 years and was roughly uniformly distributed between 10 and 75 years and then increasing thereafter. The majority of houses are over 50 years old, with a spike in home age at around 100 years. Log transformation of the house age variable produced a roughly monotonically increasing distribution and does not seem to be an appropriate transformation for purposes of modeling. 
 
 ```{r ex1-cityDistance, echo=F, fig.height=3, fig.width=8, fig.cap="Histogram of Distance to City"}
 ```
 
-The distance from a house to the nearest city had a right-tailed distribtuion, with most houses within 10 miles of a city and a minority of houses with greater than 25 miles to the nearest city. Log transformation of the city distance variable removed the skewness of the distribution and produced a more approximately normal distribution, although certainly still non-normal.
+The distance from a neighborhood to nearby cities has a right-tailed distribution, with most neighborhoods within 10 miles of nearby cities and a minority of houses with greater than 25 miles to nearby cities. Log transformation of the city distance variable removed the skewness of the distribution and produced a more approximately normal distribution, although still non-normal.
 
 \pagebreak
 
@@ -119,33 +120,33 @@ The distance to highway values fall in to 8 bins. This suggests that these value
 ```{r ex1-classSize, echo=F, fig.height=3, fig.width=4, fig.cap="Histogram of Distance to Highway"}
 ```
 
-The pupil to teacher ratio histogram shows a large portion of school districts have ratios between 17 and 23, and a small minority have ratios below 16. 
+The pupil to teacher ratio histogram shows a large portion of school districts have ratios between 17.5 and 23, with a gap between 17.5 and 16, and a small minority have ratios below 16. 
 
 \pagebreak
 
-```{r ex1-lowIncome, echo=F, fig.height=3, fig.width=8, fig.cap="Histogram of Distance to Highway"}
+```{r ex1-lowIncome, echo=F, fig.height=3, fig.width=8, fig.cap="Histogram of Pupil to Teacher Ratio"}
 ```
 
-The percentage of low income housing displayed a right-skewed distribution, with most values falling around the mean of `r mean(ex1df$pctLowIncome)` and then a long tail stretching to the maximum of nearly 50% low income housing. Log transformation produced a more normal looking distrubtion.
+The percentage of low income housing in a neighborhood displayed a right-skewed distribution, with most values falling around the mean of `r mean(ex1df$pctLowIncome)` and then a long tail stretching to the maximum of nearly 50% low income housing. Log transformation produced a more normal looking distribution.
 
-```{r ex1-homeValue, echo=F, fig.height=3, fig.width=8, fig.cap="Histogram of Distance to Highway"}
+```{r ex1-homeValue, echo=F, fig.height=3, fig.width=8, fig.cap="Histogram of Percentage Low Income Housing"}
 ```
 
-The housing value plot was also right-skewed, with most values around the mean of `r round(mean(ex1df$pctLowIncome),2)` and a right tail extendiong to around $1,200,000. Again, log transformation seems appropriate and produces a more normal looking distribution. 
+The housing value plot was also right-skewed, with most values around the mean of `r round(mean(ex1df$pctLowIncome),2)` and a right tail extending to around $1,200,000. Again, log transformation seems appropriate and produces a more normal looking distribution. 
 
 \pagebreak
 
-```{r ex1-pollution, echo=F, fig.height=3, fig.width=8, fig.cap="Histogram of Distance to Highway"}
+```{r ex1-pollution, echo=F, fig.height=3, fig.width=8, fig.cap="Histogram of Housing Value"}
 ```
 
-The pollution index scores have a slightly-right tailed appearing distrubtion, with thin tails and evidence of multimodality. Log transformation of the polution index reduced the right-skewiness while still showing evidence of multimodality and thinner tails than a normal distribution.
+The pollution index scores have a slightly-right tailed appearing distribution, with thin tails and evidence of multimodality. Log transformation of the pollution index reduced the right-skewness while still showing evidence of multimodality and thinner tails than a normal distribution.
 
-```{r ex1-beds, echo=F, fig.height=3, fig.width=4, fig.cap="Histogram of Distance to Highway"}
+```{r ex1-beds, echo=F, fig.height=3, fig.width=4, fig.cap="Histogram of Pollution Index"}
 ```
 
-The number of beds in houses had a roughly normal appearing distribution, but with considerably longer tails.
+The number of beds in houses had a distribution appearing roughly normal, but with considerably longer tails.
 
-After visually inspect the distribution of each individual variable, we are also interested in how the variables relate, especially to the outcome variable of our model, housevalue. To gain an understanding of how each potential input variable relates to the outcome variable, we make a scatter plot and summarize the results of a univariate regression for each input variable against the output variable.
+After visually inspecting the distribution of each individual variable, we are also interested in how the variables relate, especially to the outcome variable of our model, homeValue. To gain an understanding of how each potential input variable relates to the outcome variable, we make a scatter plot and summarize the results of a uni-variate regression for each input variable against the output variable.
 
 ```{r ex1-houseScatters, echo=F, fig.height=10.5, fig.width=8, fig.cap="Scatter Plot of Home Value Against the Variables of Interest"}
 ```
@@ -155,7 +156,7 @@ After visually inspect the distribution of each individual variable, we are also
 ```{r ex1-univarRegressions, echo=F, results='asis'}
 ```
 
-The scatterplots and regression summaries show that each of the variables, when not controlling for any other variables, is a better predictor of log(house price) than the mean house price. This fact may complicate any effort to select one of these variables as an instrument, as being un-related to the outcome variable is one condition of the exclusion restriction for an instrumental variable approach. However, this does not necessarily preclude all the variables from being used as an instrument, as some variables may not be significant when controlling for other variables. 
+The scatterplots and regression summaries show that each of the variables, when not controlling for any other variables, is a better predictor of log(house price) than the mean house price. This fact may complicate our effort to select one of these variables as an instrument, as being un-related to the outcome variable is one condition of the exclusion restriction for an instrumental variable approach. However, this does not necessarily preclude all the variables from being used as an instrument, as some variables may not be significant when controlling for other variables. 
 
 Examining the scatter plot, it is noteworthy that many of the input variables seem to have a negative relationship with the outcome variable. To check for potential issues with multicollinarity, we can test the values in the correlation matrix for the dataset to see if they are over a threshold. 
 
@@ -164,7 +165,7 @@ Examining the scatter plot, it is noteworthy that many of the input variables se
 
 Analysis of the correlation matrix shows that there are no variable pairs with a correlation coefficient above .9. While a good check against obvious issues of multicolliniarity, this does not preclude the possibility that one variable is highly correlated with linear combinations of the other variables. 
 
-Since we are tasked with determining the impact of environmental variables on the value of homes, we will want to understand how those variables relate to the other variables in the dataset. 
+Since we are tasked with determining the impact of environmental variables on the value of homes, we also want to understand how those variables relate to the other variables in the dataset. 
 
 ```{r ex1-polluteScatters, echo=F, fig.height=10.5, fig.width=8, fig.cap="Scatter Plot of Pollution Index Against the Variables of Interest"}
 ```
@@ -176,14 +177,14 @@ Since we are tasked with determining the impact of environmental variables on th
 \pagebreak
 
 
-The scatter plots of the variables in the dataset against the pollution index reveal that there are many strong negative and positive correlations. This provides evidence that estimating the effects of polluiton on home values requires controling for a number of potential confounding variables. The scatter plot of adjacency to water with the variables reveals generally weaker relationships, which is not surprising given that the variable is a factor and that the occurance of water is less influenced by social factors than pollution. 
+The scatter plots of the variables in the dataset against the pollution index reveal that there are many strong negative and positive correlations. This provides evidence that estimating the effects of pollution on home values requires controlling for a number of potential confounding variables. The scatter plot of adjacency to water with the variables reveals generally weaker relationships, which is not surprising given that the variable is a factor and that the occurrence of water is less influenced by social and demographic factors than pollution. 
 
 ### Model selection
 
 Before beginning the empirical process of model selection, we will stipulate that the variables for number of bedrooms and percentage of low income housing should be included in *any* regression model with house value because they have a well established relationship with the outcome variable. 
 
 Taking our variables of interest and the two variables included for theoretical reasons, the baseline model is:
-$$ log(homeValue) = \beta_0 + \beta_1 log(pollutionIndex) + \beta_2 withWater + \beta_3 nBedRooms$$
+$$ log(homeValue) = \beta_0 + \beta_1 log(pollutionIndex) + \beta_2 withWater + \beta_3 nBedRooms + \epsilon$$
 
 ```{r ex1-baseModel, echo=F, results = 'asis'}
 ```
@@ -193,16 +194,16 @@ $$ log(homeValue) = \beta_0 + \beta_1 log(pollutionIndex) + \beta_2 withWater + 
 
 \pagebreak
 
-Looking at the results of the base regression, we see that all coefficients are significant and the R^2 value is `r summary.lm(baseModel)$r.squared`, a very basic confirmation that these 4 variables are indeed variables of interest. Looking at the diagnostic plots, we see in the residuals versus fitted plot that the band of values seems to widen out from left to right and then narrow, suggesting that the use of **heteroskadasticity robust standard errors** is appropriate. The residuials vs leverage plot suggests that some points may represent outliers, although they do not exert leverage on the model that is outside of the norm. The presence of outliers is not surprising in a dataset like this, as we know the values of homes in some areas are simply much higher or lower due to conditions that may not be perfectly captured by the dataset. **Since the presence of outliers is simply a reality in datasets relating to housing, we do not argue in favor of any sort of outlier removal procedure.**
+Looking at the results of the base regression, we see that all coefficients are significant and the R^2 value is `r summary.lm(baseModel)$r.squared`, a very basic confirmation that these 4 variables are indeed variables of interest. Looking at the diagnostic plots, we see in the residuals versus fitted plot that the band of values seems to widen out from left to right and then narrow, suggesting that the use of **heteroskadasticity-robust standard errors** is appropriate. The residuals vs leverage plot suggests that some points may represent outliers, although they do not exert leverage on the model that is outside of the norm. The presence of outliers is not surprising in a dataset like this, as we know the values of homes in some neighborhoods are simply much higher or lower due to conditions that may not be perfectly captured by the dataset. **Since the presence of outliers is simply a reality in datasets relating to housing, we do not argue in favor of any outlier removal procedure.**
 
-Starting with our base model, we are interested in selecting a model that 1) is a good fit of our sample data 2) can generalize to the larger dataset 3) provides insight into the effect of environmental factors on the value of homes. One approach we examine for selecting a final model is adding additional parameters while penalizing the model for increasing complexity using a measure like the AIC/BIC.
+Starting with our base model, we are interested in selecting a final model that 1) is a good fit of our sample data 2) can generalize to the larger dataset 3) provides insight into the effect of environmental factors on the value of homes. One approach we examine for selecting a final model is adding additional parameters while penalizing the model for increasing complexity using a measure like the AIC/BIC.
 
 ```{r ex1-stepWise, echo=T}
 ```
 
 The model chosen by step-wise addition of variables and AIC penalization has 4 additional parameters. One obvious drawback to this approach is it tends to under-state the confidence intervals and thus the resulting p-values for the parameters are too low. Indeed, in the resulting model, the final parameter's coefficient is not statistically different from zero using heteroskedasticity-robust standard errors. 
 
-Since we are estimating a model using only a portion of the data, we should also be concerned with the out of sample fit for our proposed model. Here, we can test the accuracy of predictions made with increasingly complex models using a subsample of withheld data. 
+Since we are estimating a model using only a portion of the data, we should also be concerned with the out of sample fit for our proposed model. Here, we can test the accuracy of predictions made with increasingly complex models using a sub-sample of withheld data. 
 
 ```{r ex1-outSampleFit, echo=T}
 ```
@@ -214,7 +215,7 @@ The results of out-of-sample fitting are summarized in the table below:
 
 Using the criterion of the RMES or MAE, the model chosen would include 4 additional parameters, while the AIC would favor either the model with 3 or 4 additional parameters, and the BIC would favor the model with 3 additional parameters. 
 
-Taking the results of step-wise addition and out-of-sample forecasting together, one could persausively argue for both the model with 3 additional parameters and the model with 4.  Given the similarity of the out of sample fit and the preference for models with less complexity, **the model we select for predicting home values is the base model with three additional paramaters, pupil to teacher ratio, log(distance to city), and log(crime rate percentage) **. This model has the form:
+Taking the results of step-wise addition and out-of-sample forecasting together, one could persuasively argue for both the model with 3 additional parameters and the model with 4.  Given the similarity of the out of sample fit and the preference for models with less complexity, **the model we select for predicting home values is the base model with three additional paramaters: pupil to teacher ratio, log(distance to city), and log(crime rate percentage) **. This model has the form:
 $$log(homeValue) = \beta_0 + \beta_1 log(pollutionIndex) + \beta_2 withWater + \beta_3 nBedRooms +$$
 $$\beta_4 pupilTeacherRatio + \beta_5 log(distanceToCity) + \beta_6 log(crimeRate_pc) + \epsilon$$ 
 
@@ -223,29 +224,47 @@ $$\beta_4 pupilTeacherRatio + \beta_5 log(distanceToCity) + \beta_6 log(crimeRat
 ```{r ex1-model3, echo=F, results='asis'}
 ```
 
-According to the model summary, there is in fact an effect of environmental factors on home values. Compared to our original base model, controling for the additional variables has resulted is a large (negative) increase in the coefficient for pollution index and a small decrease in the coefficent for absence/presence of water. For pollution index value, an increase of 1 in the log value of pollution index score results in a decrease of `r round(coeftest(model3)[2],3)` (`r round(coeftest(model3)[2] + 1.96 * coeftest(model3)[10],3)`, `r round(coeftest(model3)[2] - 1.96 * coeftest(model3)[10],3)`), p = $`r round(coeftest(model3)[26], 3)`$ in the log home value. For a house with median value, going from the 25th percentile on the pollution index to the median value would result in a decrease in home value of  \$$`r format(round(exp(median(s_df$log_homeValue) + quantile(s_df$log_pollutionIndex, 0.25, names=F) * -.211)- exp(median(s_df$log_homeValue) + quantile(s_df$log_pollutionIndex, 0.5, names=F) * -.211), 2), scientific=F)`$. For locations adjacent to water, going from not being adjacent to water to being adjacent results in an increase in log home value of `r round(coeftest(model3)[3],3)` (`r round(coeftest(model3)[3] + 1.96 * coeftest(model3)[11],3)`, `r round(coeftest(model3)[3] - 1.96 * coeftest(model3)[11],3)`), p = $`r round(coeftest(model3)[27], 3)`$. For a house with median value, being adjacent to water would result in an increase of home value of \$$`r format(round(exp(median(s_df$log_homeValue) + .113) - exp(median(s_df$log_homeValue)) , 2), scientific=F)`$
+According to the model summary, there is in fact an effect of environmental factors on home values. Compared to our original base model, controlling for the additional variables has resulted is a large (negative) increase in the coefficient for pollution index and a small decrease in the coefficient for absence/presence of water. For pollution index value, an increase of 1 in the log value of pollution index score results in a decrease of $`r round(coeftest(model3)[2],3)` (`r round(coeftest(model3)[2] + 1.96 * coeftest(model3)[10],3)`$, $`r round(coeftest(model3)[2] - 1.96 * coeftest(model3)[10],3)`$), p = $`r round(coeftest(model3)[26], 3)`$ in the log home value. For a house with median value, going from the 25th percentile on the pollution index to the median value would result in a decrease in home value of  \$$`r format(round(exp(median(s_df$log_homeValue) + quantile(s_df$log_pollutionIndex, 0.25, names=F) * -.211)- exp(median(s_df$log_homeValue) + quantile(s_df$log_pollutionIndex, 0.5, names=F) * -.211), 2), scientific=F)`$. For locations adjacent to water, going from not being adjacent to water to being adjacent results in an increase in log home value of $`r round(coeftest(model3)[3],3)`$ ($`r round(coeftest(model3)[3] + 1.96 * coeftest(model3)[11],3)`$, $`r round(coeftest(model3)[3] - 1.96 * coeftest(model3)[11],3)`$), p = $`r round(coeftest(model3)[27], 3)`$. For a house with median value, being adjacent to water would result in an increase of home value of \$$`r format(round(exp(median(s_df$log_homeValue) + .113) - exp(median(s_df$log_homeValue)) , 2), scientific=F)`$.
 
 \pagebreak
 
 ```{r ex1-model3Plot, echo=F, fig.height=5, fig.width=6, fig.cap="Diagnoistic Plots for Selected Regression Model"}
 ```
 
-The residual vs fitted plot for our selected model shows a distinct tunneling of values from left to right, suggesting heteroskadasticity and the need to use heteroskadasticity-robust standard errors. 
+The residual vs fitted plot for our selected model shows a distinct tunneling of values from left to right, suggesting heteroskedasticity and the need to use heteroskedasticity-robust standard errors. 
 
 <!-- The primary issue in estimating home value using this dataset is the likelihood of omitted variable bias. The type of information needed to fully characterize the 'desirability' of a neighboorhood, and the causal mechanisms that translate from 'desirability' to home values are not fully captured by this dataset. For instance, we could imagine that the variable of interest, pollutionIndex, has a causal path to homeValue via intermediary variables. Perhaps total green space is an important variable for influencing people's beliefs about the environmental quality of a neighborhood, and people 'estimate' the pollutionIndex of a place based on the degree of green space. Then the true effect of pollution on home values is mediated through green space. In this case, our estimates of the coefficient for pollutionIndex would be biased because we are not controlling for green space. Given the likely complexity of the casual pathway between neighborhood desirability and home value, It is highly likely that there are variables relating to the 'diserabilityr' of a neighborhood that have an effect on the value of homes that are not captured by this dataset.  -->
 
-The primary issue in estimating home value using this dataset is the likelihood of omitted variable bias. For instance, we could imagine that the variable of interest, pollutionIndex, has a causal path to homeValue via intermediary variables. Perhaps total green space is an important variable for influencing people's beliefs about the environmental quality of a neighborhood, and people 'estimate' the pollutionIndex of a place based on the degree of green space. Then the true effect of pollution on home values is mediated through green space. In this case, our estimates of the coefficient for pollutionIndex would be biased because we are not controlling for green space. Given the likely complexity of the casual pathway between neighborhood desirability and home value, it is highly likely that there are variables relating to the 'diserability' of a neighborhood that have an effect on the value of homes that are not captured by this dataset.
+The primary issue in estimating home value using this dataset is the likelihood of omitted variable bias. For instance, we could imagine that the variable of interest, pollutionIndex, has a causal path to homeValue via intermediary variables. Perhaps total green space is an important variable for influencing people's beliefs about the environmental quality of a neighborhood, and people 'estimate' the pollutionIndex of a place based on the degree of green space. Then the true effect of pollution on home values is mediated through green space. In this case, our estimates of the coefficient for pollutionIndex would be biased because we are not controlling for green space. Given the likely complexity of the casual pathway between neighborhood desirability and home value, it is highly likely that there are variables relating to the 'desirability' of a neighborhood that have an effect on the value of homes that are not captured by this dataset.
 
 ### Using IV to estimate coefficient for pollution index
 
-Given that we are interested in how environmental factors influence home prices, we may worry that the coefficient for pollution index is biased due to considerations of omitted variables outlined above. We argue that the the percentage of non-retail businesses is a source of random variation with regards to home values (controling for covariates), and thus represents an instrument for pollution index. 
+Given that we are interested in how environmental factors influence home prices, we may worry that the coefficient for pollution index is biased due to considerations of omitted variables outlined above. We argue that the the percentage of non-retail businesses is a source of random variation with regards to home values (controlling for covariates), and thus represents a possible instrument for pollution index. 
 
 In order for non-retail business percentage to be a suitable IV for pollution index score, two conditions must hold:
 * Non-retail business percentage must be correlated with pollution index
 * Non-retail business percentage must be uncorrelated with the error term in the regression model. 
 
-Given that non-retail businesses include industrial operations like manufacturing, which are sources of pollution, it is not surprising that the two variables are positively correlated (See scatterplot above). For the IV approach to be causal, we need to argue persuasively that non-retail business percentage is not endogenous to the model, that is to say that home values do not depend directly on non-retail business percentage, conditional on the covariates in the model. Here, we argue that the main proxy of non-retail business would be urban/rural, given that rural areas tend to have fewer retail-businesses, and since we are controlling for distance to city then, on average, non-retail business percentage is not a determinant of house valuation. This assumption is generally not testible, and can be seen as more or less persausive depending on the IV proposed. In this case, one can imagine enough situations where the closeness to certain kinds of non-retail business would have an impact on the valuation of a home that I wouldn't find non-retail business percentage to be a completely persausive instrument for pollution index. 
+Given that non-retail businesses include industrial operations like manufacturing, which are sources of pollution, it is not surprising that the two variables are positively correlated (See scatterplot above). For the IV approach to be causal, we need to argue persuasively that non-retail business percentage is not endogenous to the model, that is to say that home values do not depend directly on non-retail business percentage, conditional on the covariates in the model. Here, we argue that the main proxy of non-retail business would be urban/rural, given that rural areas tend to have fewer retail-businesses, both in terms of total number of business and the proportion of business, and since we are controlling for distance to city then, on average, non-retail business percentage is not a determinant of house valuation. This assumption is generally not testable, and can be seen as more or less persuasive depending on the IV proposed. In this case, one can imagine enough situations where the closeness to certain kinds of non-retail business (heavy manufacturing, open-pit mining) would have an impact on the valuation of a home that I wouldn't find non-retail business percentage to be a completely persuasive instrument for pollution index. 
  
+Performing a two-step regression process using non-retail business percentage as an instrument for pollution index score produces the coefficients presented in the table below:
+
+```{r ex1-IVRegTable, echo=F, results='asis'}
+```
+
+The coefficient for pollution index using an instrumental variable approach is considerably smaller than when using straightforward OLS regression. Depending on how you interpret the strength of the instrument, this result could be used to argue in favor of the hypothesis that people are generally not aware of the pollution index of an area and it has a small effect on home valuation, while omitted variables may give the appearance of greater importance for pollution index scores. However, I think there are strong arguments to be made against this particular instrument, and when combined with the large standard errors of the estimate, **we can be fairly confident that there is a negative effect of pollution index on home values, but the magnitude of the effect remains uncertain.** 
+
+One hypothesis that may be of particular interest to the think-tank is whether or not the effect of pollution is the same for neighborhoods with a lot of low income housing and neighborhoods with very little low income housing. Given the bi-model distribution of low income housing noted in the exploratory analysis, this dataset seems well suited to testing this hypothesis. Formally, we are interested in the interaction term ($\beta_7 = log(PollutionIdex) \cdot log(Percentage Low Income Housing)$) and the hypothesis:
+
+$$H_0: \beta_{7}= 0 $$
+$$H_A: \beta_{7} \neq 0$$
+
+Adding the interaction term $\beta_{7}$ to our preferred model yields:
+
+```{r ex1-interaction, echo=F, results='asis'}
+```
+
+The coefficient for the interaction effect represents a practically and significantly difference in the effect of pollution for neighborhoods with little low income housing and neighborhoods with a lot of low income housing ($\beta_7$ = $`r round(coeftest(inter_model)[9], 3)`$, s.e. = $`r round(coeftest(inter_model)[18], 3)`$, p = $`r round(coeftest(inter_model)[36], 3)`$). For neighborhoods with a high proportion of low income housing, pollution has a considerably larger negative effect on home values, representing about a 5% decrease relative to neighborhoods with little low income housing. 
 
 **********
 \pagebreak
