@@ -221,12 +221,17 @@ par(mfrow = c(1, 1), mar = c(5, 4, 4, 2) + 0.1, cex.main = 1)
 financial.garch11 <- garchFit(~ garch(1,1), data = resid(arima010.fit), 
                               trace = FALSE)
 res.fcst <- predict(financial.garch11, n.ahead = 36, conf = .95)
-res.fcst.lower <- res.fcst$meanForecast - 
-  qnorm(.975) * res.fcst$standardDeviation
-res.fcst.upper <- res.fcst$meanForecast + 
-  qnorm(.975) * res.fcst$standardDeviation
-fcst.lower <- exp(arima010.fit.fcast$mean + res.fcst.lower)
-fcst.upper <- exp(arima010.fit.fcast$mean + res.fcst.upper)
+# Compare the previous std. dev. with the (changing) new one
+sd(resid(arima010.fit))
+c(head(res.fcst$standardDeviation), tail(res.fcst$standardDeviation))
+# Add the mean prediction of GARCH (close to zero) to the prediction of SARIMA
+  # and subtract/add the previous CI / sigma * sigma_t
+fcst.lower <- exp(arima010.fit.fcast$mean + res.fcst$meanForecast - 
+                    c(arima010.fit.fcast$upper - arima010.fit.fcast$mean) / 
+                    sd(resid(arima010.fit)) * res.fcst$standardDeviation)
+fcst.upper <- exp(arima010.fit.fcast$mean + res.fcst$meanForecast + 
+                    c(arima010.fit.fcast$upper - arima010.fit.fcast$mean) / 
+                    sd(resid(arima010.fit)) * res.fcst$standardDeviation)
 
 ## @knitr P2-garch_4
 plot(arima010.fit.fcast2, xlab = "Time period", 
@@ -793,19 +798,20 @@ for (i in 1:58) {
       Price.garch11$coef[3] * ht.fcst[i-1]
   }
   res.fcst[i] <- sqrt(ht.fcst[i]) # epsilon_t = omega_t * sqrt(h_t)
-  #### SHOULDN'T I USE THIS LINE BELOW INSTEAD???
-  # res.fcst[i] <- rnorm(1) * sqrt(ht.fcst[i])
-  #### THAT GWN(0,1) COMPONENT MAKES h_t FLUCTUATES MUCH MORE
-  #### PROBABLY NOT APPROPRIATE FOR FORECASTING
 }
+# Compare the previous std. dev. with the (changing) new one
+sd(resid(arima113.fit))
+c(head(sqrt(ht.fcst)), tail(sqrt(ht.fcst)))
 # Lower & upper limits of the Price forecasts CI
 Price.fcst.lower <- as.numeric(arima113.fit.fcast$mean) - 
-  qnorm(.975) * sqrt(ht.fcst)
+  c(arima113.fit.fcast$upper[, '95%'] - arima113.fit.fcast$mean) / 
+  sd(resid(arima113.fit.fcast)) * sqrt(ht.fcst)
 Price.fcst.upper <- as.numeric(arima113.fit.fcast$mean) + 
-  qnorm(.975) * sqrt(ht.fcst)
+  c(arima113.fit.fcast$upper[, '95%'] - arima113.fit.fcast$mean) / 
+  sd(resid(arima113.fit.fcast)) * sqrt(ht.fcst)
 
 ## @knitr P4-GARCH_6
-plot(arima113.fit.fcast, ylim = c(1, 5), 
+plot(arima113.fit.fcast, ylim = c(1, 6), 
      xlab = "Year (time period: month)", 
      main = paste0("58-step ahead Forecast and Original Series\n", 
                    "with confidence intervals (ARIMA(1,1,3)/GARCH(1,1)"), 
@@ -827,17 +833,16 @@ legend("topleft", legend = leg.txt, lty = c(1, 1, 1), lwd = c(1, 1, 6),
                              trace = FALSE))
 # res.fcst2 <- predict(Price.garch11.2, n.ahead=58, plot = TRUE, conf = .95)
 res.fcst.2 <- predict(Price.garch11.2, n.ahead=58, conf = .95)
-res.fcst.lower.2 <- res.fcst.2$meanForecast - 
-  qnorm(.975) * res.fcst.2$standardDeviation
-res.fcst.upper.2 <- res.fcst.2$meanForecast + 
-  qnorm(.975) * res.fcst.2$standardDeviation
-Price.fcst.lower.2 <- as.numeric(forecast(arima113.fit, 58)$mean) +
-  res.fcst.lower.2
-Price.fcst.upper.2 <- as.numeric(forecast(arima113.fit, 58)$mean) + 
-  res.fcst.upper.2
+Price.fcst.lower.2 <- arima113.fit.fcast$mean + res.fcst.2$meanForecast - 
+  c(arima113.fit.fcast$upper[, '95%'] - arima113.fit.fcast$mean) / 
+  sd(resid(arima113.fit.fcast)) * res.fcst.2$standardDeviation
+Price.fcst.upper.2 <- arima113.fit.fcast$mean + res.fcst.2$meanForecast + 
+  c(arima113.fit.fcast$upper[, '95%'] - arima113.fit.fcast$mean) / 
+  sd(resid(arima113.fit.fcast)) * res.fcst.2$standardDeviation
+
 
 ## @knitr P4-GARCH_8
-plot(arima113.fit.fcast, ylim = c(1, 5), 
+plot(arima113.fit.fcast, ylim = c(1, 6), 
      xlab = "Year (time period: month)", 
      main = paste0("58-step ahead Forecast and Original Series\n", 
                    "with confidence intervals (ARIMA(1,1,3)/GARCH(1,1)"), 
@@ -858,17 +863,17 @@ legend("topleft", legend = leg.txt, lty = c(1, 1, 1), lwd = c(1, 1, 6),
 (Price.garch11.3 <- garchFit(~ arma(1,3) + garch(1,1), data = diff(Price), 
                              trace = FALSE))
 res.fcst.3 <- predict(Price.garch11.3, n.ahead=58, conf = .95)
-res.fcst.lower.3 <- res.fcst.3$meanForecast - 
-  qnorm(.975) * res.fcst.3$standardDeviation
-res.fcst.upper.3 <- res.fcst.3$meanForecast + 
-  qnorm(.975) * res.fcst.3$standardDeviation
-Price.fcst.lower.3 <- as.numeric(forecast(arima113.fit, 58)$mean) +
-  res.fcst.lower.3
-Price.fcst.upper.3 <- as.numeric(forecast(arima113.fit, 58)$mean) + 
-  res.fcst.upper.3
+# Add the mean prediction of GARCH (close to zero) to the prediction of SARIMA
+  # and subtract/add the previous CI / sigma * sigma_t
+Price.fcst.lower.3 <- arima113.fit.fcast$mean + res.fcst.3$meanForecast - 
+  c(arima113.fit.fcast$upper[, '95%'] - arima113.fit.fcast$mean) / 
+  sd(resid(arima113.fit.fcast)) * res.fcst.3$standardDeviation
+Price.fcst.upper.3 <- arima113.fit.fcast$mean + res.fcst.3$meanForecast + 
+  c(arima113.fit.fcast$upper[, '95%'] - arima113.fit.fcast$mean) / 
+  sd(resid(arima113.fit.fcast)) * res.fcst.3$standardDeviation
 
 ## @knitr P4-GARCH_10
-plot(arima113.fit.fcast, ylim = c(1, 5), 
+plot(arima113.fit.fcast, ylim = c(1, 6), 
      xlab = "Year (time period: month)", 
      main = paste0("58-step ahead Forecast and Original Series\n", 
                    "with confidence intervals (ARIMA(1,1,3)/GARCH(1,1)"), 
@@ -898,40 +903,4 @@ leg.txt <- c("GARCH(1,1) using own code on residuals of ARIMA(1,1,3)",
              "ARMA(1,3)/GARCH(1,1) using fGarch on differenced Price series")
 legend("bottomright", legend = leg.txt, lty = c(1, 1, 1), lwd = c(1, 1, 1), 
        col = c("red", "blue", "green"), bty = 'n', cex = 0.9)
-
-
-
-
-
-
-## @knitr tests
-X.timeSeries = MSFT
-plot(X.timeSeries)
-fit3 <- garchFit(Open ~ garch(1,1), data = returns(X.timeSeries)) 
-plot(fit3)
-fit3 = garchFit(~ garch(1, 1), data = resid(arima113.fit), 
-                trace = FALSE, mse="cond")
-## 90% confidence level and nx=100
-predict(fit3,n.ahead=58,plot=TRUE,conf=.95,nx=100) 
-plot(resid(arima113.fit))
-## garchFit - 
-# Parameter Estimation of Default GARCH(1,1) Model:
-set.seed(123)
-fit = garchFit(~ garch(1, 1), data = garchSim(), trace = FALSE)
-fit
-## predict -
-predict(fit, n.ahead = 10)
-predict(fit, n.ahead = 10,mse="uncond", plot=T)
-## predict with plotting: critical values = +- 2
-predict(fit, n.ahead = 10, plot=TRUE, crit_val=2)
-## predict with plotting: automatic critical values 
-## for different conditional distributions
-set.seed(321)
-fit2 = garchFit(~ garch(1, 1), data = garchSim(), trace = FALSE, cond.dist="sged")
-## 95% confidence level
-predict(fit2,n.ahead=20,plot=TRUE) 
-set.seed(444)
-fit3 = garchFit(~ garch(1, 1), data = garchSim(), trace = FALSE, cond.dist="QMLE")
-## 90% confidence level and nx=100
-predict(fit3,n.ahead=20,plot=TRUE,conf=.95,nx=100) 
 

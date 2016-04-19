@@ -172,17 +172,28 @@ The residuals of such model resemble a white noise (with constant variance!), so
 ```{r P2-garch_2, echo = FALSE, fig.height = 4.5, fig.width = 6, echo = FALSE, fig.cap = "ACF of the residuals and squared residuals of an ARIMA(1,1,3)/GARCH(1,1) model fitted to the U.S. inflation-adjusted average gas prices"}
 ```
 
-Thus, we can use this enhanced model to get narrower confidence intervals of the previous forecasts.
+Thus, we can use this enhanced model to get narrower confidence intervals of the previous forecasts. In a SARIMA model, the 95% **prediction intervals** for $x_{n+h}$ (where $n$ is the last observation and $h$ is the number of steps ahead) satisfies:
+
+$$\Pr\left(|f_{n,h}-x_{n+h}| < 1.96 \sqrt{Var(e_{n,h})}\right) = 0.95$$
+
+where $f_{n,h}$ is the forecast, $e_{n,h}$ is the prediction error, and:
+
+$$Var(e_{n,h}) = \sigma^2 \sum_{j=0}^{h-1}\Psi_j^2$$
+
+$\sigma^2$ is the---supposedly constant---variance of the noise, which we approximate by the residuals, and $Psi_j$ are the coefficients of $\Psi(B) = \Phi(B)/\Theta(B) = x_t/\epsilon_t$. **The sum of $h$ terms is what makes the prediction interval gets wider over time**.
+
+When the series are conditional heteroskedastic, we have to **substitute that constant variance ($\sigma^2$ = `var(resid(model.fit))`) by the variance (that changes with time) given by the GARCH model**.
 
 ```{r P2-garch_3}
 ```
 
-\pagebreak
-
-The figure below shows the previous 80% and 95% confidence intervals (without applying the GARCH model), and (in a darker shade) the 95% confidence intervals applying a GARCH(1,1) model to the residuals of the ARIMA(0,1,0), which are much narrower.
+As shown below, the new 95% confidence intervals are almost (slightly narrower) than the previous ones (without applying the GARCH model).
 
 ```{r P2-garch_4, echo = FALSE, fig.height = 4.5, fig.width = 6, fig.cap = "36-step ahead forecasts of the financial time series based on an ARIMA(0,1,0)/GARCH(1,1) model fitted to the log of the data"}
 ```
+
+> **For a self-made version of GARCH forecasting (not using `fGarch`), see Part 4.**
+
 
 
 **********
@@ -513,7 +524,7 @@ where $\{w_t\}$ is a white noise series with mean zero and variance $\sigma^2$.
 ```{r P4-ARIMA113_forecast_2, echo = FALSE, fig.height = 4.5, fig.width = 6, fig.cap = "58-step ahead forecasts (from March 2012 to December 2016) of the U.S. inflation-adjusted average gas prices (in dollars) based on an ARIMA(1,1,3) model fitted to data from January 1978 to February 2012"}
 ```
 
-As shown above, the confidence region of the forecasts is quite wide. But we haven't checked for \textcolor{red}{conditional heteroskedasticity} (volatility) yet, and enhancing our model may allow us to narrow down those confidence intervals. After checking the auto-correlations of the squared residuals of our model (see the 1st Figure in the following page) we find that many of them are significant, which indicates volatility, so we start applying a GARCH(1,1) model.
+But we haven't checked for \textcolor{red}{conditional heteroskedasticity} (volatility) yet, so the prediction intervals above might not be accurate. After checking the auto-correlations of the squared residuals of our model (see the 1st Figure in the following page) we find that many of them are significant, which indicates volatility, so we start applying a GARCH(1,1) model.
 
 \pagebreak
 
@@ -551,17 +562,17 @@ Next we estimate the conditional variance of the series ($h_t = \sigma_t^2$), an
 ```{r P4-GARCH_4, echo = 1, fig.cap = "Estimated conditional variance of the ARIMA(1,1,3)/GARCH(1,1) model fitted to the U.S. inflation-adjusted average gas prices"}
 ```
 
-Finally, we have to predict the variance for the 58 months until the end of 2016.
+Finally, we have to predict the variance for the 58 months until the end of 2016. **For a complete explanation about how to re-adjust the prediction intervals, see Part 2; here, what we add here is our own code (before using fGarch)**.
 
 ```{r P4-GARCH_5}
 ```
 
 And now we can plot the original series and the forecasts until 2016, with the 95% confidence intervals for both periods.
 
-```{r P4-GARCH_6, echo = FALSE, fig.height = 4.5, fig.width = 6, fig.cap = "58-step ahead forecasts (from March 2012 to December 2016) of the U.S. inflation-adjusted average gas prices (in dollars) based on an ARIMA(1,1,3)/GARCH(1,1) model fitted to data from January 1978 to February 2012. Gray area shows the 95% confidence region"}
+```{r P4-GARCH_6, echo = FALSE, fig.height = 4.5, fig.width = 6, fig.cap = "58-step ahead forecasts (from March 2012 to December 2016) of the U.S. inflation-adjusted average gas prices (in dollars) based on an ARIMA(1,1,3)/GARCH(1,1) model fitted to data from January 1978 to February 2012. Widest gray area corresponds to the 95% confidence region using GARCH, which overlaps the previous 95% (and 80%) regions using only ARIMA"}
 ```
 
-Do note how much we've been able to narrow down the confidence intervals (the 80% and 95% CIs for the ARIMA model only are also plotted for comparison). Though it's hard to distinguish from the Figure above, the CIs still increase over time (because the variance of the residuals do), but not as much as when we did not include the GARCH(1,1) model.
+The figure below shows the previous 80% and 95% confidence intervals using ARIMA only: the widest (and lightest) area, that overlaps the other two, corresponds to the new 95% prediction region, much wider.
 
 \pagebreak
 
@@ -570,9 +581,9 @@ The `fGarch` package also allows to make predictions of GARCH models, so we star
 ```{r P4-GARCH_7}
 ```
 
-The 95% confidence intervals of the forecasts are quite similar (i.e., \textcolor{red}{we've been able to replicate the predictions of `fGarch` with our own code :)}.
+The 95% confidence intervals of the forecasts are quite similar (i.e., \textcolor{red}{we've been able to replicate the predictions of fGarch with our own code :)}.
 
-```{r P4-GARCH_8, echo = FALSE, fig.height = 4.5, fig.width = 6, fig.cap = "(2nd version of) 58-step ahead forecasts (from March 2012 to December 2016) of the U.S. inflation-adjusted average gas prices (in dollars) based on an ARIMA(1,1,3)/GARCH(1,1) model fitted to data from January 1978 to February 2012. Gray area shows the 95% confidence region"}
+```{r P4-GARCH_8, echo = FALSE, fig.height = 4.5, fig.width = 6, fig.cap = "(2nd version of) 58-step ahead forecasts (from March 2012 to December 2016) of the U.S. inflation-adjusted average gas prices (in dollars) based on an ARIMA(1,1,3)/GARCH(1,1) model fitted to data from January 1978 to February 2012. Widest gray area corresponds to the 95% confidence region using GARCH, which overlaps the previous 95% (and 80%) regions using only ARIMA"}
 ```
 
 We can also apply an ARMA(1,3)/GARCH(1,1) on the original series differentiated (`fGarch` only allows to combine ARMA and GARCH models, not ARIMA).
@@ -584,7 +595,7 @@ We can also apply an ARMA(1,3)/GARCH(1,1) on the original series differentiated 
 
 As expected, the results are quite similar than in the 2 previous cases.
 
-```{r P4-GARCH_10, echo = FALSE, fig.height = 4.5, fig.width = 6, fig.cap = "(3rd version of) 58-step ahead forecasts (from March 2012 to December 2016) of the U.S. inflation-adjusted average gas prices (in dollars) based on an ARIMA(1,1,3)/GARCH(1,1) model fitted to data from January 1978 to February 2012. Gray area shows the 95% confidence region"}
+```{r P4-GARCH_10, echo = FALSE, fig.height = 4.5, fig.width = 6, fig.cap = "(3rd version of) 58-step ahead forecasts (from March 2012 to December 2016) of the U.S. inflation-adjusted average gas prices (in dollars) based on an ARIMA(1,1,3)/GARCH(1,1) model fitted to data from January 1978 to February 2012. Widest gray area corresponds to the 95% confidence region using GARCH, which overlaps the previous 95% (and 80%) regions using only ARIMA"}
 ```
 
 \pagebreak
