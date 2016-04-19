@@ -6,19 +6,23 @@
 # LIBRARIES, FUNCTIONS AND CONSTANTS -------------------------------------------------
 # Load libraries
 # library(e1071)
-library(gtools)
+library(pastecs)
+library(lubridate)
+library(GGally)
+library(forecast)
 library(ggplot2)
+library(tseries)
+library(gtools)
+library(plyr)
+library(dplyr)
 library(cowplot)
 library(ggfortify)
 library(scatterplot3d)
 library(scales)
 library(knitr)
-library(pastecs)
 library(car)
 library(sandwich)
 library(lmtest)
-library(plyr)
-library(dplyr)
 library(tidyr)
 library(stargazer)
 library(pander)
@@ -27,13 +31,13 @@ library(pander)
 library(scales)
 library(xts)
 library(reshape2)
-library(lubridate)
-library(forecast)
 library(zoo)
 
 library(fGarch)
 library(quantmod)
-library(tseries)
+library(lattice)
+library(corrgram)
+#library(TSA)
 
 # Define functions
 
@@ -516,15 +520,6 @@ coeftest(step_onea, vcov=vcovHC)
 summary.lm(step_onea)
 coeftest(step_twoa, vcov=vcovHC)
 
-step_oneb <- lm(withWater ~ ageHouse +log_pollutionIndex + step_oneb$fitted + nBedRooms + log_pctLowIncome +
-                  pupilTeacherRatio + log_distanceToCity + log_crimeRate_pc, data = s_df)
-step_twob <- lm(log_homeValue~log_pollutionIndex + step_oneb$fitted + nBedRooms + log_pctLowIncome +
-                  pupilTeacherRatio + log_distanceToCity + log_crimeRate_pc, data = s_df)
-
-coeftest(step_oneb, vcov=vcovHC)
-summary.lm(step_oneb)
-coeftest(step_twob, vcov=vcovHC)
-
 step_onec <- lm(log_pollutionIndex ~ log_nonRetailBusiness, data = s_df)
 step_twoc <- lm(log_homeValue~step_onec$fitted + withWater + nBedRooms + log_pctLowIncome +
                   pupilTeacherRatio + log_distanceToCity + log_crimeRate_pc, data = s_df)
@@ -613,3 +608,4 @@ univar_scatters_pollute <- ggplot(polluteScatter_df, aes(log_pollutionIndex, val
        x="log(Pollution Index)") +
   theme_gray()
 univar_scatters_pollute
+
