@@ -124,9 +124,11 @@ set.seed(1234)
 ## @knitr ex1-load
 # Loading the Data --------------------------------------------------------
 # setwd('./HW8/data')
-
 ex1df <- read.csv("houseValueData.csv")
-
+round(stat.desc(ex1df, desc = FALSE, norm = TRUE)[c("nbr.val", "nbr.na", 
+                                                         "skewness", 
+                                                         "kurtosis", 
+                                                         "normtest.p"),], 3)
 
 ## @knitr ex1-summary_table
 # Exploratory analysis
@@ -136,40 +138,35 @@ stargazer(ex1df, header = F, title ="Summary Statistics of Wage Data",
 
 ## @knitr ex1-CrimeRate
 # Not sure if this is percentile data, but that's what I'm assuming
+
 crime_plot <- ggplot(data=ex1df, aes(crimeRate_pc)) + 
-  geom_histogram(aes(y = (..count..)/sum(..count..)),
-                 boundary = 0, binwidth = 2.5,
-                 colour='black', fill='white') +
-  labs(title="Histogram of Crime Rate",
-       x="Crime Rate (Percentile)",
+  geom_histogram(aes(y = (..count..)/sum(..count..)), boundary = 0, 
+                 binwidth = 2.5, colour = 'black', fill = 'white') + 
+  labs(title = "Histogram of crimeRate", 
+       x = "Number of crimes per 1,000 residents", 
        y = "Relative Frequency") + theme_gray()
-
 logCrime_plot <- ggplot(data=ex1df, aes(log(crimeRate_pc))) + 
-  geom_histogram(aes(y = (..count..)/sum(..count..)),
-                 binwidth = .25,
-                 colour='black', fill='white') +
-  labs(title="Histogram of Log(Crime Rate)",
-       x="Log(Crime Rate (Percentile))",
+  geom_histogram(aes(y = (..count..)/sum(..count..)), 
+                 binwidth = .25, colour = 'black', fill = 'white') +
+  labs(title = "Histogram of log(crimeRate)",
+       x = "Log(Number of crimes per 1,000 residents)", 
        y = "Relative Frequency") +  theme_gray()
-
 plot_grid(crime_plot, logCrime_plot)
 
 ## @knitr ex1-Business
 # Kind of confused what this variable is. My guess is thhe percentage of businesses that are non-retail. 
 # Maybe this is a good candidate variabel for instrumental variable??
 business_plot <- ggplot(data=ex1df, aes(nonRetailBusiness)) + 
-  geom_histogram(aes(y=(..count..)/sum(..count..)),
-                 boundary=0, binwidth = .01,
-                 colour='black', fill='white')+
-  labs(title="Histogram of Non-Retail Business Percentage",
-       x="Non-Retail Business Percentage",
+  geom_histogram(aes(y=(..count..)/sum(..count..)), boundary = 0, 
+                 binwidth = .01, colour = 'black', fill = 'white')+
+  labs(title="Histogram of nonRetailBusiness",
+       x = "Proportion of acres dedicated to non-retail business", 
        y="Relative Frequency") + theme_gray()
 logBusiness_plot <- ggplot(data=ex1df, aes(log(nonRetailBusiness))) + 
-  geom_histogram(aes(y=(..count..)/sum(..count..)),
-                 binwidth = .15,
-                 colour='black', fill='white')+
-  labs(title="Histogram of log(Non-Retail Business Percentage)",
-       x="log(Non-Retail Business Percentage)",
+  geom_histogram(aes(y=(..count..)/sum(..count..)), binwidth = .15, 
+                 colour='black', fill='white') + 
+  labs(title="Histogram of log(nonRetailBusiness)",
+       x = "Log(Prop. of acres dedicated to non-retail business)",
        y="Relative Frequency") + theme_gray()
 plot_grid(business_plot, logBusiness_plot)
 
@@ -179,9 +176,11 @@ plot_grid(business_plot, logBusiness_plot)
 ## @knitr ex1-withWater
 
 #binary variable for water, unclear if this means water within some distance or water on the property
-ggplot(data=ex1df, aes(factor(withWater, labels = c('No Water', 'With Water')))) +
-  geom_bar(colour='black', fill='white') + 
-  labs(title="Histogram of Absence/Presence of Water", x=element_blank()) + theme_gray()
+ggplot(data=ex1df, aes(factor(withWater, labels = c('Not near Water', 
+                                                         'Near Water')))) + 
+  geom_bar(aes(y = (..count..)/sum(..count..)), colour='black', fill='white') + 
+  labs(title = "Proportion of houses within 5 miles of a water body", 
+       y = "Proportion", x = element_blank()) + theme_gray()
 
 
 ## @knitr ex1-houseAge
@@ -189,18 +188,17 @@ ggplot(data=ex1df, aes(factor(withWater, labels = c('No Water', 'With Water'))))
 # Another possible candidate for an instrumental variable approach? 
 house_plot <- ggplot(data=ex1df, aes(ageHouse)) +
   geom_histogram(aes(y=(..count..)/sum(..count..)),
-                 boundary=0, binwidth = 2.5,
+                 boundary=0, binwidth = 5,
                  colour='black', fill='white') +
-  labs(title="Histogram of House Age",
-       x= "Age of House (years)",
+  labs(title="Histogram of ageHouse",
+       x= "Proportion of house built before 1950",
        y= "Relative Frequency") + theme_gray()
-
 logHouse_plot <- ggplot(data=ex1df, aes(log(ageHouse))) +
   geom_histogram(aes(y=(..count..)/sum(..count..)),
-                 binwidth = 0.1,
+                 binwidth = 0.2,
                  colour='black', fill='white') +
-  labs(title="Histogram of House Age",
-       x= "log(Age of House) (years)",
+  labs(title="Histogram of log(ageHouse)",
+       x= "Log(proportion of house built before 1950)",
        y= "Relative Frequency") + theme_gray()
 plot_grid(house_plot, logHouse_plot)
 
@@ -212,18 +210,16 @@ city_plot <- ggplot(data=ex1df, aes(distanceToCity)) +
   geom_histogram(aes(y=(..count..)/sum(..count..)),
                  boundary=0, binwidth = 1.5,
                  colour='black', fill='white') +
-  labs(title="Histogram of Distance to City",
-       x = "Distance to City (Miles)",
+  labs(title="Histogram of distanceToCity",
+       x = "Distance to nearest city (in miles)",
        y = "Relative Frequency") + theme_gray()
-
 logCity_plot <- ggplot(data=ex1df, aes(log(distanceToCity))) +
   geom_histogram(aes(y=(..count..)/sum(..count..)),
                  binwidth = 0.2,
                  colour='black', fill='white') +
-  labs(title="Histogram of log(Distance to City)",
-       x = "log(Distance to City)",
+  labs(title="Histogram of log(distanceToCity)",
+       x = "Log(Distance to nearest city, in miles)",
        y  = "Relative Frequency") + theme_gray()
-
 plot_grid(city_plot, logCity_plot)
 
 ## @knitr ex1-highwayDistance
@@ -243,7 +239,7 @@ class_plot <- ggplot(ex1df, aes(pupilTeacherRatio)) +
   geom_histogram(aes(y=(..count..)/sum(..count..)),
                 binwidth = .40,
                  colour='black', fill='white') +
-  labs(title="Histogram of Pupil to Teacher Ratio",
+  labs(title="Histogram of Average Pupil to Teacher Ratio",
        x="Pupil to Teacher Ratio",
        y="Relative Frequency") + theme_gray()
 class_plot
@@ -272,8 +268,8 @@ homeValue_plot <- ggplot(ex1df, aes(homeValue)) +
   geom_histogram(aes(y=(..count..)/sum(..count..)),
                  binwidth=60000,
                  colour='black', fill='white') +
-  labs(title="Histogram of Home Values",
-       x="Home Value ($)",
+  labs(title="Histogram of Median Home Values",
+       x="Median Home Value ($)",
        y="Relative Frequency") + theme_gray()
 
 logHomeValue_plot <- ggplot(ex1df, aes(log(homeValue))) +
@@ -312,7 +308,7 @@ beds_plot <- ggplot(ex1df, aes(nBedRooms)) +
   geom_histogram(aes(y=(..count..)/sum(..count..)),
                  binwidth = 0.25,
                  colour='black', fill='white') +
-  labs(title="Histogram of Number of Beds",
+  labs(title="Histogram of Average Number of Beds",
        x="Number of Beds",
        y="Relative Frequency") + theme_gray()
 beds_plot
