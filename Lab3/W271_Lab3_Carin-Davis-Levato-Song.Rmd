@@ -1,0 +1,151 @@
+---
+title: '**W271**-2 -- Spring 2016 -- **Lab 3**'
+author: '***Juanjo Carin, Kevin Davis, Ashley Levato, Minghu Song***'
+date: '*April 22, 2016*'
+output:
+  pdf_document:
+    fig_caption: yes
+    fig_height: 3
+    fig_width: 4
+    toc: yes
+    toc_depth: 3
+header-includes:
+- \usepackage{fancyhdr}
+- \usepackage{color}
+- \definecolor{mygray}{gray}{0.5}
+- \pagestyle{fancy}
+- \fancyhead[LO,LE]{Carin, Davis, Levato, Song}
+- \fancyhead[CE,CO]{W271 -- Lab 3}
+- \fancyhead[RE,RO]{\leftmark}
+- \fancyfoot[LO,LE]{UC Berkeley -- MIDS}
+- \fancyfoot[CO,CE]{Spring semester 2016}
+- \fancyfoot[RE,RO]{\thepage}
+- \renewcommand{\headrulewidth}{0.5pt}
+- \renewcommand{\footrulewidth}{0.5pt}
+linkcolor: cyan
+numbersections: no
+options: width=30
+geometry: margin=1in
+fontsize: 10pt
+urlcolor: cyan
+---
+
+**********
+
+\color{mygray}
+
+### Instructions
+
+* Thoroughly analyze the given dataset or data series. Detect any anomalies in each of the variables. Examine if any of the variables that may appear to be top- or bottom-coded.
+* Your report needs to include a comprehensive graphical analysis
+* Your analysis needs to be accompanied by detailed narrative. Just printing a bunch of graphs and econometric results will likely receive a very low score.
+* Your analysis needs to show that your models are valid (in statistical sense).
+* Your rationale of using certian metrics to choose models need to be provided. Explain the validity / pros / cons of the metric you use to choose your "best" model.
+* Your rationale of any decisions made in your modeling needs to be explained and supported with empirical evidence.
+* All the steps to arrive at your final model need to be shown and explained clearly.
+* All of the assumptions of your final model need to be thoroughly tested and explained and shown to be valid. Don't just write something like, "the plot looks reasonable", or "the plot looks good", as different people interpret vague terms like "reasonable" or "good" differently.
+
+\color{Black}
+
+**********
+
+\pagebreak
+
+```{r, echo = FALSE, warning = FALSE}
+require(knitr, quietly = TRUE)
+read_chunk('code/W271_Lab3_Carin-Davis-Levato-Song.R')
+opts_chunk$set(message = FALSE, warning = FALSE)
+opts_chunk$set(fig.width = 4, fig.height = 3)
+# Set path to data here (don't use setwd() inside a chunk!!!)
+opts_knit$set(root.dir = './data', global.par = TRUE)
+```
+
+```{r Libraries-Functions-Constants, echo = FALSE}
+```
+
+\color{Blue}
+
+# Part 1
+
+## Modeling House Values
+
+**In Part 1, you will use the data set `houseValue.csv` to build a linear regression model, which includes the possible use of the instrumental variable approach, to answer a set of questions interested by a philanthropist group. You will also need to test hypotheses using these questions.**
+
+**The philanthropist group hires a think tank to examine the relationship between the house values and neighborhood characteristics. For instance, they are interested in the extent to which houses in neighbhorhood with desirable features command higher values. They are specifically interested in environmental features, such as proximity to water body (i.e. lake, river, or ocean) or air quality of a region.**
+
+**The think tank has collected information from tens of thousands of neighborhoods throughout the United States. They hire your group as contractors, and you are given a small sample and selected variables of the original data set collected to conduct an initial, proof-of-concept analysis. Many variables, in their original form or transfomed forms, that can explain the house values are included in the dataset. Analyze each of these variables as well as different combinations of them very carefully and use them (or a subset of them), in its original or transformed version, to build a linear regression model and test hypotheses to address the questions. Also address potential (statistical) issues that may be casued by omitted variables.**
+
+\color{Black}
+
+Based on the information in `homeValueData_VariableDescription.txt`, the variables and their meaning are: 
+
++ `crimeRate_pc`: crime rate per capital, measured by number of crimes per 1000 residents in neighborhood.
++ `nonRetailBusiness`: the proportion of non-retail business acres per neighborhood.
++ `withWater`: the neighborhood within 5 miles of a water body (lake, river, etc); 1 if true and 0 otherwise.
++ `ageHouse`: proportion of house built before 1950.
++ `distanceToCity`: distances to the nearest city (measured in miles).
++ `pupilTeacherRatio`: average pupil-teacher ratio in all the schools in the neighborhood.
++ `pctLowIncome`: percentage of low income household in the neighborhood
++ `homeValue`: median price of single-family house in the neighborhood (measured in dollar).
++ `pollutionIndex`: pollution index, scaled between 0 and 100, with 0 being the best and 100 being the worst (i.e. uninhabitable).
++ `nBedRooms`: average number of bed rooms in the single family houses in the neighborhood.
+
+First, we will load the data and conduct an exploratory analysis.
+
+```{r P1-load, echo = 3}
+```
+
+The data consists of `r dim(houseValue)[1]` observations (with no missing values) of `r dim(houseValue)[2]` numeric variables: the ones mentioned above (median price of single-family houses in different neighborhoods and characteristics about those houses and neighborhoods) plus an additional one, not mentioned in the `txt` file:
+
++ `distanceToHighway`: self-explanatory (and probably measured in miles, same as `distanceToCity`).
+
+Based on the kurtosis, skewness (all of them far from zero to a greater or lesser extent) and the *p*-values of a normality test (all highly significant), none of the variables in the sample is normally distributed. That means they might benefit from transformation (potential transformations will be discussed as the exploratory analysis proceeds).
+
+```{r P1-summary, echo = FALSE, results = 'asis'}
+```
+
+As shown in the 1st Figure in the following page, the crime rate variable is highly right-skewed, with most neighborhoods having a very low number of crimes per 1,000 residents, and a few having a high number. Using the log does not normalize that variable (the distribution is bimodal).
+
+\pagebreak
+
+```{r P1-CrimeRate, echo = FALSE, fig.height = 3, fig.width = 8, fig.cap = "Histograms of Crime Rate and its log"}
+```
+
+As for the proportion of non-retail business acres per neighborhood, a high proportion of neighborhoods have non-retail business covering about 18% of their area, and most of the rest have much fewer non-retail businesses. A log transformation does not help to normalize this variable either.
+
+```{r P1-Business, echo = FALSE, fig.height = 3, fig.width = 8, fig.cap = "Histograms of non-retail Business acres and its log"}
+```
+
+<!-- ???This variable may be a proxy for if the house is more urban or rural, so perhaps retail businesses are a sign of greater economic activity and thus we would expect these houses to have higher value.  -->
+
+Most neighborhoods are not located within 5 miles to a water body. Being near a lake or a river seems highly desirable, in principle, so it's a good candidate to have an effect on home values.
+
+```{r P1-withWater, echo = FALSE, fig.height = 3, fig.width = 4, fig.cap = "Proportion of of houses within 5 miles of a water body (or not)"}
+```
+
+In almost 15% (`r 100*sum(houseValue$ageHouse>97.5)/length(houseValue$ageHouse)`%) of the neighborhoods, more than 97.5% of the houses were built before 1950. If we lower that percentage of "hold houses" to 75%, that occurs in more than half of the neighborhoods (`r 100*sum(houseValue$ageHouse>75)/length(houseValue$ageHouse)`%). In less than 10% of the neighborhoods (`r 100*sum(houseValue$ageHouse<25)/length(houseValue$ageHouse)`%) only 25% of the houses or less are "old"". Once again, a log transformation does not help to normalize the data.
+
+```{r P1-houseAge, echo=F, fig.height=3, fig.width=8, fig.cap="Histogram of House Age"}
+```
+
+The distance from a neighborhood to nearby cities has a right-tailed distribution, with more than half of the neighborhoods (`r 100*sum(houseValue$distanceToCity < 10)/length(houseValue$distanceToCity)`%) within 10 miles of a city, and just `r 100*sum(houseValue$distanceToCity > 40)/length(houseValue$distanceToCity)`% of them more than 40 miles away. Log transformation of this variable removed the skewness of the distribution and produced a more approximately normal distribution.
+
+```{r P1-cityDistance, echo=F, fig.height=3, fig.width=8, fig.cap="Histogram of Distance to City"}
+```
+
+
+
+**********
+
+\pagebreak
+
+\color{Blue}
+
+# Part 2
+
+## Modeling and Forecasting a Real-World Macroeconomic / Financial time series
+
+**Build a time-series model for the series in `lab3_series02.csv`, which is extracted from a real-world macroeconomic/financial time series, and use it to perform a 36-step ahead forecast. The periodicity of the series is purposely not provided. Possible models include AR, MA, ARMA, ARIMA, Seasonal ARIMA, GARCH, ARIMA-GARCH, or Seasonal ARIMA-GARCH models.**
+
+\color{Black}
+
