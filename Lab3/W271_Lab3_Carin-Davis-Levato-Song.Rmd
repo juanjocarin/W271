@@ -131,6 +131,8 @@ all lead (other factors being equal) to lower house values. Similarly,
 
 decrease the house value, on average.
 
+> **As usual, all the standard errors are heteroskedasticity-robust**.
+
 \pagebreak
 
 ```{r P1-1stReg_2, echo = FALSE, results = 'asis'}
@@ -231,8 +233,7 @@ The Table in the previous page shows that each variable, when not controlling fo
 
 The only coefficients that change their sign when running a simple regression (as opposed to a multiple regression when all independent variables are used) are the distance to the nearest city and highway, respectively. As a result, if we don't control for other factors, a further distance to the nearest city increases the median value of a house, and the opposite occurs with the nearest highway. This is not due to the use of logarithms (the same happens if we don't apply them to either the home value or the distance) but because of the inclusion of other variables, some of them which may be related to those 2 variables.
 
-
-Since we are tasked with determining the impact of environmental variables on the value of homes, we also want to understand how those variables relate to the other variables in the dataset. As shown in the following 4 pages, `pollutionIndex` is highly related (positively or negatively) with all the other independent variables, while `withWater` is only related with a few of them (`pollutionIndex` itself, `ageHouse`, and `nonRetailBusiness`, at the 5% level). The former fact provides evidence that estimating the effects of pollution on home values requires controlling for a number of potential confounding variables.
+Since we are particularly interested on the impact of environmental variables on the value of homes, we also want to understand how those variables relate to the other variables in the dataset. As shown in the following 4 pages, `pollutionIndex` is highly related (positively or negatively) with all the other independent variables, while `withWater` is only related with a few of them (`pollutionIndex` itself, `ageHouse`, and `nonRetailBusiness`, at the 5% level). The former fact provides evidence that estimating the effects of pollution on home values requires controlling for a number of potential confounding variables.
 
 ```{r P1-scatter_water, echo=FALSE, fig.height=9, fig.width=7, fig.cap="Scatter Plot of withWater against all the other independent variables"}
 ```
@@ -258,9 +259,38 @@ Since we are tasked with determining the impact of environmental variables on th
 \elandscape
 \pagebreak
 
+To select a candidate for a good model we'll make use of a stepwise selection (using the BIC rather than the AIC---though the output of R's `step` does not change the name of the criterion---to put a greater penalty in the number of regressors).
+
+```{r P1-modelSelection}
+```
+
+```{r P1-modelSelection_2, echo = FALSE, results='asis'}
+```
+
+Thus, the model is:
+
+$$\begin{aligned}\log(homeValue) =& \beta_0 + \beta_1 \cdot pctLowIncome + \beta_2 \cdot pupilTeacherRatio + \beta_3 \cdot nBedRooms \\&+ \beta_4 \cdot pollutionIndex + \beta_5 \cdot \log(distanceToCity) + \beta_6 \cdot withWater + \varepsilon \end{aligned}$$
+
+And (because we've used the log of the dependent variable and one of the independent variables), the coefficients tell us that:
+
++ when the percentage of low-income households in the neighborhood increases by 1, the median value of a house in that neighborhood decreases `r frmt(-100*stepwise.reg$coefficients['pctLowIncome'], 1)`%.
++ when the number of pupils per teahcer increases by 1, the median home value decreases by `r frmt(-100*stepwise.reg$coefficients['pupilTeacherRatio'], 1)`%.
++ an additional bedroom increases the value of the house by approximately `r frmt(100*stepwise.reg$coefficients['nBedRooms'], 1)`%.
++ when the pollution index increases by 1, the median home value decreases by `r frmt(-100*stepwise.reg$coefficients['pollutionIndex'], 1)`% (since the standard deviation of the Pollution Index is `r frmt(sd(houseValue$pollutionIndex), 1)`, an increase of 1 standard deviation in that index would decrease the value of the house by approximately  `r frmt(-100*stepwise.reg$coefficients['pollutionIndex']*sd(houseValue$pollutionIndex), 1)`%).
++ when the distance to the nearest city increases by 1% (i.e., almost `r frmt(mean(houseValue$distanceToCity)*.01, 1)` mile, since the mean of that variable is `r frmt(mean(houseValue$distanceToCity), 1)` miles), the median home value decreases by `r frmt(-100*stepwise.reg$coefficients['log_distanceToCity'], 1)`%.
++ the proximity to a water body increases the home value by `r frmt(100*stepwise.reg$coefficients['withWater'], 1)`%.
+
+I.e., not only the variables are statistically significant but also have **practical significance**.
+
+The previous *F* statistic tell us the overall significance of the regression model we've built. We can also test whether each individual regressor helps to explain the variability in home values (controlling for other factors; in other words, if it's worth keeping it in the model). As expected, all the included regressors are significantly different from zero.
+
+```{r P1-modelSelection_3}
+```
+
+But we can also test more complex hypotheses:
 
 
-
+## @knitr P1-model selection_3
 
 
 
