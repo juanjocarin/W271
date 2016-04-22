@@ -21,7 +21,7 @@ library(dplyr)
 library(tidyr)
 library(stargazer)
 library(pander)
-# library(texreg)
+library(texreg)
 # library(weatherData)
 library(scales)
 library(xts)
@@ -45,6 +45,59 @@ library(corrgram)
 frmt <- function(qty, digits = 3) {
   formatC(qty, digits = digits, format = "f", drop0trailing = FALSE, 
           big.mark = ",")
+}
+
+# A function that codes significance level
+sig_stars <- function(p) {
+  stars = symnum(p, na = F, cutpoints = c(0, .001, .01, .05, .1, 1), 
+                 symbols=c("$^{***}$","$^{**}$", "$^{*}$", 
+                           "$^{\\mathbf{\\cdot}}$", ""))
+  return(stars)
+}
+
+# A function that draws a nice-looking table, based on stargazer
+# USING HETEROSKEDASTICTY-ROBUST STANDARD ERRORS AND F STATISTIC
+stargazer2 <- function(models, type = 'latex', ...) {
+  if (class(models) != "lm") {
+    model_list <- models
+  } else {
+    model_list <- list()
+    model_list[[1]] <- models
+  }
+  stargazer(model_list, type = type, header = FALSE, table.placement = "h!", 
+            star.cutoffs = c(0.1, 0.05, 0.01, 0.001), 
+            star.char = c("\\mathbf{\\cdot}", "*", "**", "***"), 
+            notes.append = FALSE, notes.label = "", 
+            notes = "$\\cdot$p<0.1; *p<0.05; **p<0.01; ***p<0.001", 
+            se = lapply(model_list, function(m) coeftest(m, vcovHC(m))[, 2]), 
+            p = lapply(model_list, function(m) coeftest(m, vcovHC(m))[, 4]), 
+            add.lines = 
+              list(c("F Statistic", unlist(lapply(model_list, function(m) 
+                paste0(frmt(waldtest(m, vcov=vcovHC)[2,3]), 
+                       sig_stars(waldtest(m, vcov=vcovHC)$`Pr(>F)`[2]))))), 
+                c("df", unlist(lapply(model_list, function(m) 
+                  paste0(abs(waldtest(m, vcov=vcovHC)$Df[2]), "; ", 
+                         waldtest(m, vcov=vcovHC)$Res.Df[1]))))), 
+            df = FALSE, no.space = TRUE, omit.stat = "f", ...)
+}
+
+# Another (2) function(s) to draw tables, based on stargazer
+# also USING HETEROSKEDASTICTY-ROBUST STANDARD ERRORS AND F STATISTIC
+createTexreg2 <- function(model, ...) {
+  model_summary <- summary(model)
+  coefs <- coeftest(model, vcovHC(model))
+  f <- waldtest(model, vcov=vcovHC)
+  createTexreg(coef = coefs[, 1], coef.names = rownames(coefs), 
+               se = coefs[, 2], pvalues = coefs[, 4], 
+               gof = c(model_summary$r.squared, model_summary$adj.r.squared, 
+                       f$F[2], length(model$residuals)), 
+               gof.names = c("R$^2$", "R$^2_{\\text{adj}}$", "F", "N"), 
+               gof.decimal = c(rep(TRUE, 3), FALSE), ...)
+}
+
+texreg2 <- function(list, ...) {
+  texreg(list, digits = 3, caption.above = TRUE, bold = 0.05, float.pos = 'h!', 
+         stars = c(0.001, 0.01, 0.05, 0.1), symbol = "\\cdot", ...)
 }
 
 # A function to present descriptive statistics of 1 or more vectors
@@ -101,7 +154,45 @@ stargazer(houseValue, header = FALSE,
           title = "Summary statistics of house values and features", 
           summary.stat = c("mean", "sd", "min", "p25", "median", "p75", "max"))
 
-## @knitr P1-CrimeRate
+## @knitr P1-1stReg
+houseValue.std <- houseValue %>% mutate_each(funs(scale))
+model.1 <- lm(homeValue ~ ., houseValue.std)
+names(sort(abs(model.1$coefficients), decreasing = T))
+
+## @knitr P1-1stReg_2
+stargazer2(model.1, title = 'Regression summary (with standardized variables)', 
+           digits = 3, digits.extra = 6, 
+           dep.var.labels = '$\\widehat{\\text{Median price (\\$) of single-family house}}$', 
+           covariate.labels = c("$\\widehat{\\text{Crime rate per capita}}$", 
+                                "$\\widehat{\\text{Proportion of non-retail business acres}}$", 
+                                "$\\widehat{\\text{Water body less than 5 miles away}}$", 
+                                "$\\widehat{\\text{Proportion of houses built before 1950}}$", 
+                                "$\\widehat{\\text{Distance (miles) to nearest city}}$", 
+                                "$\\widehat{\\text{Distance (miles) to nearest highway}}$", 
+                                "$\\widehat{\\text{Average pupil-teacher ratio}}$", 
+                                "$\\widehat{\\text{Percentage of low-income households}}$", 
+                                "$\\widehat{\\text{Pollution index (0-100)}}$", 
+                                "$\\widehat{\\text{Average number of bedrooms}}$", 
+                                "Constant (intercept)"))
+
+## @knitr P1-homeValue
+homeValue_plot <- ggplot(houseValue, aes(homeValue)) +
+  geom_histogram(aes(y=(..count..)/sum(..count..)),
+                 binwidth=60000,
+                 colour='black', fill='white') +
+  labs(title="Histogram of homeValue",
+       x="Median Home Value ($)",
+       y="Relative Frequency") + theme_gray()
+logHomeValue_plot <- ggplot(houseValue, aes(log(homeValue))) +
+  geom_histogram(aes(y=(..count..)/sum(..count..)),
+                 binwidth=.15,
+                 colour='black', fill='white') +
+  labs(title="Histogram of log(homeValue)",
+       x="log(Median Home Value ($))",
+       y="Relative Frequency") + theme_gray()
+plot_grid(homeValue_plot, logHomeValue_plot)
+
+## @knitr P1-crimeRate
 crime_plot <- ggplot(data=houseValue, aes(crimeRate_pc)) + 
   geom_histogram(aes(y = (..count..)/sum(..count..)), boundary = 0, 
                  binwidth = 2.5, colour = 'black', fill = 'white') + 
@@ -135,7 +226,7 @@ plot_grid(business_plot, logBusiness_plot)
 ggplot(data=houseValue, aes(factor(withWater, labels = c('Not near Water', 
                                                          'Near Water')))) + 
   geom_bar(aes(y = (..count..)/sum(..count..)), colour='black', fill='white') + 
-  labs(title = "Proportion of houses within 5 miles of a water body", 
+  labs(title = "Houses within 5 miles of a water body", 
        y = "Proportion", x = element_blank()) + theme_gray()
 
 ## @knitr P1-houseAge
@@ -155,7 +246,7 @@ logHouse_plot <- ggplot(data=houseValue, aes(log(ageHouse))) +
        y= "Relative Frequency") + theme_gray()
 plot_grid(house_plot, logHouse_plot)
 
-## @knitr ex1-cityDistance
+## @knitr P1-cityDistance
 city_plot <- ggplot(data=houseValue, aes(distanceToCity)) + 
   geom_histogram(aes(y=(..count..)/sum(..count..)),
                  boundary=0, binwidth = 1.5,
@@ -172,7 +263,187 @@ logCity_plot <- ggplot(data=houseValue, aes(log(distanceToCity))) +
        y  = "Relative Frequency") + theme_gray()
 plot_grid(city_plot, logCity_plot)
 
+## @knitr P1-highwayDistance
+highway_plot <- ggplot(houseValue, aes(distanceToHighway)) +
+  geom_histogram(aes(y=(..count..)/sum(..count..)),
+                 boundary=0, binwidth = .75,
+                 colour='black', fill='white') +
+  labs(title="Histogram of distanceToCity",
+       x="Distance to nearest highway (miles)",
+       y="Relative Frequency") + theme_gray()
+logHighway_plot <- ggplot(houseValue, aes(log(distanceToHighway))) +
+  geom_histogram(aes(y=(..count..)/sum(..count..)),
+                 boundary=0, binwidth = .2,
+                 colour='black', fill='white') +
+  labs(title="Histogram of log(distanceToHighway)",
+       x="Log(Distance to nearest highway (miles))",
+       y="Relative Frequency") + theme_gray()
+plot_grid(highway_plot, logHighway_plot)
 
+## @knitr P1-pupilTeacherRatio
+class_plot <- ggplot(houseValue, aes(pupilTeacherRatio)) +
+  geom_histogram(aes(y=(..count..)/sum(..count..)),
+                 binwidth = .40,
+                 colour='black', fill='white') +
+  labs(title="Histogram of pupilTeacherRatio",
+       x="Average pupil-teacher ratio",
+       y="Relative Frequency") + theme_gray()
+logClass_plot <- ggplot(houseValue, aes(log(pupilTeacherRatio))) +
+  geom_histogram(aes(y=(..count..)/sum(..count..)),
+                 binwidth = .025,
+                 colour='black', fill='white') +
+  labs(title="Histogram of log of pupilTeacherRatio",
+       x="log(Average pupil-teacher ratio)",
+       y="Relative Frequency") + theme_gray()
+plot_grid(class_plot, logClass_plot)
+
+## @knitr P1-lowIncome
+lowIncome_plot <- ggplot(houseValue, aes(pctLowIncome)) +
+  geom_histogram(aes(y=(..count..)/sum(..count..)),
+                 binwidth=2,
+                 colour='black', fill='white') +
+  labs(title="Histogram of pctLowIncome",
+       x="Percentage of low-income households", 
+       y="Relative Frequency") + theme_gray()
+logLowIncome_plot <- ggplot(houseValue, aes(log(pctLowIncome))) +
+  geom_histogram(aes(y=(..count..)/sum(..count..)),
+                 binwidth=0.2,
+                 colour='black', fill='white') +
+  labs(title='Histogram of log(pctLowIncome)',
+       x='log(Percentage of low-income households)',
+       y='Relative Frequency') + theme_gray()
+plot_grid(lowIncome_plot, logLowIncome_plot)
+
+## @knitr P1-pollution
+pollution_plot <- ggplot(houseValue, aes(pollutionIndex)) +
+  geom_histogram(aes(y=(..count..)/sum(..count..)),
+                 binwidth=2,
+                 color='black', fill='white') +
+  labs(title="Histogram of Pollution Index",
+       x="Pollution Index Score",
+       y="Relative Frequency") + theme_gray()
+logPollution_plot <- ggplot(houseValue, aes(log(pollutionIndex))) +
+  geom_histogram(aes(y=(..count..)/sum(..count..)),
+                 binwidth=.075,
+                 color='black', fill='white') +
+  labs(title="Histogram of log(Pollution Index)",
+       x="log(Pollution Index Score)",
+       y="Relative Frequency") + theme_gray()
+plot_grid(pollution_plot, logPollution_plot)
+
+## @knitr P1-beds
+beds_plot <- ggplot(houseValue, aes(nBedRooms)) +
+  geom_histogram(aes(y=(..count..)/sum(..count..)),
+                 binwidth = 0.25,
+                 colour='black', fill='white') +
+  labs(title="Histogram of nBedRooms",
+       x="Average Number of Beds",
+       y="Relative Frequency") + theme_gray()
+beds_plot
+
+## @knitr P1-log
+vars_to_log <- c("homeValue", "crimeRate_pc", "distanceToCity", 
+                 "distanceToHighway")
+houseValue.2 <- houseValue %>% mutate_each_(funs(log), vars_to_log) %>% 
+  setNames(c(paste0("log_", names(.)[1]), names(.)[2:4], 
+             paste0("log_", names(.)[5:6]), names(.)[7:8], 
+             paste0("log_", names(.)[9]), names(.)[10:11]))
+
+## @knitr P1-2ndReg
+regressors <- names(houseValue.2)[c(1:8, 10:11)]
+model.list <- lapply(1:length(regressors), function(i) 
+  lm(as.formula(paste("log_homeValue ~", regressors[i])), houseValue.2))
+
+## @knitr P1-2ndReg_2
+stargazer2(model.list, title = 'Simple regression summary of log(homeValue)', 
+           digits = 3, digits.extra = 6, font.size = 'small', 
+           dep.var.labels = 'log(Median price ($\\$$) of single-family house)', 
+           covariate.labels = c("log(crime rate)", 
+                                "Prop. NR business", 
+                                "Water<5 miles", 
+                                "Prop. houses<1950", 
+                                "log(dist. city)", 
+                                "log(dist. highway)", 
+                                "Avg p-t ratio", 
+                                "$\\%$ low-inc. house", 
+                                "Pollution", 
+                                "no. bedrooms"))
+
+## @knitr P1-scatter
+houseScatter_df <- melt(houseValue.2, id.vars="log_homeValue")
+univar_scatters_homeVal <- ggplot(houseScatter_df, aes(value, log_homeValue)) +
+  geom_point() + geom_smooth(method = "lm") +
+  facet_wrap(~variable, scales = "free_x", ncol=2) +
+  labs(title = "Scatterplot of log(homeValue) against all the other variables",
+       x="log(Home Value)") +
+  theme_gray()
+univar_scatters_homeVal
+
+## @knitr P1-scatter_water
+waterScatter_df <- houseValue.2 %>% select(-log_homeValue) %>% 
+  melt(., id.vars="withWater")
+univar_scatters_water <- ggplot(waterScatter_df, aes(value, withWater)) +
+  geom_point() + geom_smooth(method = "lm") +
+  facet_wrap(~variable, scales = "free_x", ncol=2) +
+  labs(title = "Scatterplot of withWater against all the other indep. variables",
+       x="withWater") +
+  theme_gray()
+univar_scatters_water
+
+## @knitr P1-Reg_water
+regressors <- names(houseValue.2)[c(1:2, 4:8, 10:11)]
+model.list <- lapply(1:length(regressors), function(i) 
+  lm(as.formula(paste("withWater ~", regressors[i])), houseValue.2))
+stargazer2(model.list, title = 'Simple regression summary of withWater', 
+           digits = 3, digits.extra = 6, font.size = 'small', 
+           dep.var.labels = 'Proximity (< 5 miles) to a  of a water body', 
+           covariate.labels = c("log(crime rate)", 
+                                "Prop. NR business", 
+                                "Prop. houses<1950", 
+                                "log(dist. city)", 
+                                "log(dist. highway)", 
+                                "Avg p-t ratio", 
+                                "$\\%$ low-inc. house", 
+                                "Pollution", 
+                                "no. bedrooms"))
+
+## @knitr P1-scatter_pollution
+pollutionScatter_df <- houseValue.2 %>% select(-log_homeValue) %>% 
+  melt(., id.vars="pollutionIndex")
+univar_scatters_pollution <- ggplot(pollutionScatter_df, aes(value, pollutionIndex)) +
+  geom_point() + geom_smooth(method = "lm") +
+  facet_wrap(~variable, scales = "free_x", ncol=2) +
+  labs(title = "Scatterplot of pollutionIndex against all the other indep. variables",
+       x="withWater") +
+  theme_gray()
+univar_scatters_pollution
+
+## @knitr P1-Reg_pollution
+regressors <- names(houseValue.2)[c(1:8, 11)]
+model.list <- lapply(1:length(regressors), function(i) 
+  lm(as.formula(paste("pollutionIndex ~", regressors[i])), houseValue.2))
+stargazer2(model.list, title = 'Simple regression summary of pollutionIndex', 
+           digits = 3, digits.extra = 6, font.size = 'small', 
+           dep.var.labels = 'Pollution Index', 
+           covariate.labels = c("log(crime rate)", 
+                                "Prop. NR business", 
+                                "Water<5 miles", 
+                                "Prop. houses<1950", 
+                                "log(dist. city)", 
+                                "log(dist. highway)", 
+                                "Avg p-t ratio", 
+                                "$\\%$ low-inc. house", 
+                                "no. bedrooms"))
+
+## @knitr dasfasdf
+p_value.coef[which(p_value.coef <= .1)]
+p_value.coef <- rep(1, length(x))
+names(p_value.coef) <- x
+for (i in 1:length(x))
+  p_value.coef[i] <- round((summary(lm(as.formula(paste("homeValue ~", x[i])), 
+                                       houseValue))$coefficient[2, 4]), 9)
+
+# Average number of bedrooms
 
 ## @knitr P2-load
 # Lab 3 - Part 2 ----------------------------------------------------------
@@ -247,7 +518,7 @@ par(mfrow = c(1, 1), cex.main = 1)
 arima010.fit <- Arima(log(financial), order = c(0, 1, 0))
 arima010.fit.fcast <- forecast.Arima(arima010.fit, h = 36, level = .95)
 # NO NEED TO APPLY EXP(): Arima() ADMITS A BOX-COX TRANSFORMATION
-  # WHICH IS EQUAL TO LOG WHEN LAMBDA = 0
+# WHICH IS EQUAL TO LOG WHEN LAMBDA = 0
 arima010.fit2 <- Arima(financial, order=c(0, 1, 0), lambda = 0)
 arima010.fit.fcast2 <- forecast.Arima(arima010.fit2, h = 36)
 
@@ -305,7 +576,7 @@ res.fcst <- predict(financial.garch11, n.ahead = 36, conf = .95)
 sd(resid(arima010.fit))
 c(head(res.fcst$standardDeviation), tail(res.fcst$standardDeviation))
 # Add the mean prediction of GARCH (close to zero) to the prediction of SARIMA
-  # and subtract/add the previous CI / sigma * sigma_t
+# and subtract/add the previous CI / sigma * sigma_t
 fcst.lower <- exp(arima010.fit.fcast$mean + res.fcst$meanForecast - 
                     c(arima010.fit.fcast$upper - arima010.fit.fcast$mean) / 
                     sd(resid(arima010.fit)) * res.fcst$standardDeviation)
@@ -317,7 +588,7 @@ fcst.upper <- exp(arima010.fit.fcast$mean + res.fcst$meanForecast +
 plot(arima010.fit.fcast2, xlab = "Time period", 
      ylab = "Original and Forecasted Values", 
      main = paste0("36-step ahead Forecast and Original Series\n", 
-                        "ARIMA(0,1,0)/GARCH(1,1) of log"))
+                   "ARIMA(0,1,0)/GARCH(1,1) of log"))
 polygon(c(time(arima010.fit.fcast2$mean), rev(time(arima010.fit.fcast2$mean))), 
         c(fcst.upper, rev(fcst.lower)), 
         col=rgb(0, 0, 0, 0.5), border = NA, ylim = c(0,105))
@@ -532,7 +803,7 @@ par(mfrow = c(2,1))
 acf(resid(arima.last.fit)^2, lag.max = 53, 
     main = "ACF of the squared residuals\nof the SARIMA(0,1,0)(0,1,0)model")
 pacf(resid(arima.last.fit)^2, lag.max = 53, 
-    main = "PACF of the squared residuals\nof the SARIMA(0,1,0)(0,1,0)model")
+     main = "PACF of the squared residuals\nof the SARIMA(0,1,0)(0,1,0)model")
 par(mfrow = c(1,1))
 
 ## @knitr P3-forecast
@@ -573,7 +844,7 @@ par(mar = c(5, 5, 4, 2) + 0.1)
 plot(Production, xlab = "Year (time period: months)", 
      ylab = "U.S. oil production\n(in millions of barrels)", 
      main = paste0("U.S. oil production (in millions of barrels)\nfrom Jan. ", 
-                  "1978 to Feb. 2012"))
+                   "1978 to Feb. 2012"))
 lines(stats::filter(Production, sides=2, rep(1, 13)/13), lwd = 1.5, 
       col = "green")
 leg.txt <- c("Original Series", "13-Point (~yearly) Symmetric Moving Average")
@@ -586,7 +857,7 @@ par(mar = c(5, 5, 4, 2) + 0.1)
 plot(Price, xlab = "Year (time period: months)", 
      ylab = "U.S. inflation-adjusted average\ngas prices (in dollars)", 
      main = paste0("U.S. inflation-adjusted average gas prices (in dollars)\n", 
-                  "from Jan. 1978 to Feb. 2012"))
+                   "from Jan. 1978 to Feb. 2012"))
 lines(stats::filter(Price, sides=2, rep(1, 13)/13), lwd = 1.5, 
       col = "green")
 leg.txt <- c("Original Series", "13-Point (~yearly) Symmetric Moving Average")
@@ -652,10 +923,10 @@ ggpairs(gasOil[, 2:3], title = paste("Scatterplot matrix of U.S. oil",
 par(mfrow = c(2, 2), cex.main = 0.9)
 stats::acf(Production, lag = 24, 
            main = paste0("ACF of the U.S. oil production (in millions of\n", 
-                 "barrels from Jan. 1978 to Feb 2012"))
+                         "barrels from Jan. 1978 to Feb 2012"))
 pacf(Production, lag = 24, 
      main = paste0("PACF of the U.S. oil production (in millions of\nbarrels)", 
-                  " from Jan. 1978 to Feb. 2012"))
+                   " from Jan. 1978 to Feb. 2012"))
 stats::acf(Price, lag = 24, 
            main = paste0("ACF of the U.S. infl.-adj. average gas prices\n", 
                          "(in dollars) from Jan. 1978 to Feb. 2012"))
@@ -865,7 +1136,7 @@ Price.lower <- fitted.values(arima113.fit) - res.CI.halfwidth
 Price.upper <- fitted.values(arima113.fit) + res.CI.halfwidth
 # Forecasts
 # Initialize h_t (cond. variance) and epsilon_t (residuals or error term)
-  # 58 elements (as many as forecasts)
+# 58 elements (as many as forecasts)
 ht.fcst <- res.fcst <- rep(0, 58) 
 for (i in 1:58) {
   if (i == 1) { # use last observation
@@ -944,7 +1215,7 @@ legend("topleft", legend = leg.txt, lty = c(1, 1, 1), lwd = c(1, 1, 6),
                              trace = FALSE))
 res.fcst.3 <- predict(Price.garch11.3, n.ahead=58, conf = .95)
 # Add the mean prediction of GARCH (close to zero) to the prediction of SARIMA
-  # and subtract/add the previous CI / sigma * sigma_t
+# and subtract/add the previous CI / sigma * sigma_t
 Price.fcst.lower.3 <- arima113.fit.fcast$mean + res.fcst.3$meanForecast - 
   c(arima113.fit.fcast$upper[, '95%'] - arima113.fit.fcast$mean) / 
   sd(resid(arima113.fit.fcast)) * res.fcst.3$standardDeviation

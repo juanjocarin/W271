@@ -11,6 +11,9 @@ output:
     toc_depth: 3
 header-includes:
 - \usepackage{fancyhdr}
+- \usepackage{lscape}
+- \newcommand{\blandscape}{\begin{landscape}}
+- \newcommand{\elandscape}{\end{landscape}}
 - \usepackage{color}
 - \definecolor{mygray}{gray}{0.5}
 - \pagestyle{fancy}
@@ -101,39 +104,169 @@ The data consists of `r dim(houseValue)[1]` observations (with no missing values
 
 Based on the kurtosis, skewness (all of them far from zero to a greater or lesser extent) and the *p*-values of a normality test (all highly significant), none of the variables in the sample is normally distributed. That means they might benefit from transformation (potential transformations will be discussed as the exploratory analysis proceeds).
 
-```{r P1-summary, echo = FALSE, results = 'asis'}
+```{r P1-summary, echo = FALSE, results='asis'}
 ```
 
-As shown in the 1st Figure in the following page, the crime rate variable is highly right-skewed, with most neighborhoods having a very low number of crimes per 1,000 residents, and a few having a high number. Using the log does not normalize that variable (the distribution is bimodal).
+Before plotting the distribution of each variable, we run a regression of the price value on all the other variables (after standardizing all to better compare their effects). This 1st regression model may not be the most appropriate one (data are not transformed, we won't check residulas, there may be multicollinearity...), but for the moment we just want to check if all the relationships make sense.
+
+```{r P1-1stReg}
+```
 
 \pagebreak
 
-```{r P1-CrimeRate, echo = FALSE, fig.height = 3, fig.width = 8, fig.cap = "Histograms of Crime Rate and its log"}
+As shown in the table in the next page, the variables that have a stronger effect on the house value are `pctLowIncome` (a one standard deviation increase in it---which translates in a `r frmt(sd(houseValue$pctLowIncome), 1)` point increase in the percentage of low income household in the neighborhood---decreases price by `r frmt(sort(abs(model.1$coefficients), decreasing = T)[1], 2)` standard deviation), then `nBedRooms` (a one standard deviation increase in it---which corresponds to `r frmt(sd(houseValue$nBedRooms), 2)` additional bedroomm, on average---increases price by `r frmt(sort(abs(model.1$coefficients), decreasing = T)[2], 2)` standard deviation), and so on. The variable that has a lower effect on the house value is the `ageHouse` (the roportion of houses built before 1950): though it may seem surprising that the effect is positive, it is not significant(ly different from zero), that could make sense: it's the age of each individual house, and not the average in the neighborhood, which should affect the price (and the age is not necessarily a bad feature: mansions of the 19th century are certainly more valuable than low-priced small houses, no matter how new they may be). The two variables that are significant only at the 10% level are `nonRetailBusiness` and `distanceToHighway`. `withWater` is significant at the 5% level, and `crimeRatio` at the 5% level; all these variables have the lowest effects (and the rest are significant at the 1% level. But what we matter most, at this early stage, it's the sign of the coefficients; and all of them make sense:
+
++ A higher crime rate,
++ more acres dedicated to non-retail businesses, 
++ farther distances to the nearest city, 
++ higher pupil-teacher ratios,
++ a higher percentage of low-income households, and
++ more pollution
+
+all lead (other factors being equal) to lower house values. Similarly, 
+
++ closeness to a  water body,
++ a higher proportion of houses built before 1950 (already explained), and
++ farther distance to the nearest highway
+
+decrease the house value, on average.
+
+\pagebreak
+
+```{r P1-1stReg_2, echo = FALSE, results = 'asis'}
 ```
+
+Next we plot the histogram (or bar chart) of the variables (and, in many cases, their log; using the log of a variable may make sense to narrow its range, satisfy the CLM assumptions more closely---e.g., reducing the skewness of the residuals---, model a non-linear---e.g., exponential---relationship, etc.). In principle, we don't care if the distribution of the regressors is normal; it's the distribution of the residuals which has to be (and that's not the strongest CLM assumption).
+
+\pagebreak
+
+We begin with the dependent variable: `homeValue` is slightly right-skewed, with most values around the mean of approximately $`r frmt(round(mean(houseValue$homeValue)/1000)*1000, 0)` and the right tail extending to the maximum of $`r frmt(max(houseValue$homeValue), 0)`. A log transformation produces a distribution closer to normal, and we'll use it (besides, it makes a lot of sense for this regressand: the meaning of the coefficients---if not too high---will be a percentage change in the value). 
+
+```{r P1-homeValue, echo = FALSE, fig.height = 3, fig.width = 8, fig.cap = "Histograms of home Value and its log"}
+```
+
+The crime rate variable is highly right-skewed, with most neighborhoods having a very low number of crimes per 1,000 residents, and a few having a high number. Using the log does not perfectly normalize that variable (the distribution is bimodal), but does a good enough job to use the log in this case.
+
+```{r P1-crimeRate, echo = FALSE, fig.height = 3, fig.width = 8, fig.cap = "Histograms of Crime Rate and its log"}
+```
+
+\pagebreak
 
 As for the proportion of non-retail business acres per neighborhood, a high proportion of neighborhoods have non-retail business covering about 18% of their area, and most of the rest have much fewer non-retail businesses. A log transformation does not help to normalize this variable either.
 
 ```{r P1-Business, echo = FALSE, fig.height = 3, fig.width = 8, fig.cap = "Histograms of non-retail Business acres and its log"}
 ```
 
-<!-- ???This variable may be a proxy for if the house is more urban or rural, so perhaps retail businesses are a sign of greater economic activity and thus we would expect these houses to have higher value.  -->
-
 Most neighborhoods are not located within 5 miles to a water body. Being near a lake or a river seems highly desirable, in principle, so it's a good candidate to have an effect on home values.
 
-```{r P1-withWater, echo = FALSE, fig.height = 3, fig.width = 4, fig.cap = "Proportion of of houses within 5 miles of a water body (or not)"}
+```{r P1-withWater, echo = FALSE, fig.height = 3, fig.width = 4.5, fig.cap = "Char bart of proportion of houses within 5 miles of a water body"}
 ```
+
+\pagebreak
 
 In almost 15% (`r 100*sum(houseValue$ageHouse>97.5)/length(houseValue$ageHouse)`%) of the neighborhoods, more than 97.5% of the houses were built before 1950. If we lower that percentage of "hold houses" to 75%, that occurs in more than half of the neighborhoods (`r 100*sum(houseValue$ageHouse>75)/length(houseValue$ageHouse)`%). In less than 10% of the neighborhoods (`r 100*sum(houseValue$ageHouse<25)/length(houseValue$ageHouse)`%) only 25% of the houses or less are "old"". Once again, a log transformation does not help to normalize the data.
 
-```{r P1-houseAge, echo=F, fig.height=3, fig.width=8, fig.cap="Histogram of House Age"}
+```{r P1-houseAge, echo=F, fig.height=3, fig.width=8, fig.cap="Histograms of Proportion of houses built before 1950 and its log"}
 ```
 
 The distance from a neighborhood to nearby cities has a right-tailed distribution, with more than half of the neighborhoods (`r 100*sum(houseValue$distanceToCity < 10)/length(houseValue$distanceToCity)`%) within 10 miles of a city, and just `r 100*sum(houseValue$distanceToCity > 40)/length(houseValue$distanceToCity)`% of them more than 40 miles away. Log transformation of this variable removed the skewness of the distribution and produced a more approximately normal distribution.
 
-```{r P1-cityDistance, echo=F, fig.height=3, fig.width=8, fig.cap="Histogram of Distance to City"}
+```{r P1-cityDistance, echo=F, fig.height=3, fig.width=8, fig.cap="Histogram of distance to nearest city and its log"}
 ```
 
+Since we'll use the log for this variable, it seems appropriate to also use it for the next one (though the log does not normalize the data, as explained in the next page).
 
+\pagebreak
+
+`r 100*sum(houseValue$distanceToHighway == 24)/length(houseValue$distanceToHighway)`% of the neighborhoods were exactly 24 miles from the nearest highway. There are only `r length(unique(houseValue$distanceToHighway))` unique values (the other possible distances go from 1 to 8 miles), which suggests us thinkg that this variable was probably rounded and factorized (losing part of its explanatory value). That makes the distribution to be strongly bimodal...even if it the log of the variable is used.
+
+```{r P1-highwayDistance, echo=F, fig.height=3, fig.width=8, fig.cap="Histogram of distance to nearest highway and its log"}
+```
+
+The histogram of the average pupil-teacher ratio is left-skewed (and still is after using the log): many neighborhoods (`r 100*sum(houseValue$pupilTeacherRatio == as.numeric(names(sort(-table(houseValue$pupilTeacherRatio)))[1]))/length(houseValue$pupilTea)`% of them has a ratio of `r names(sort(-table(houseValue$pupilTeacherRatio)))[1]` pupils per teacher; the other values (ranging from `r min(houseValue$pupilTeacherRatio)` to `r max(houseValue$pupilTeacherRatio)`; and almost all lower) are approximately uniformly distributed). The distribution of the log of this variable looks pretty much the same.
+
+```{r P1-pupilTeacherRatio, echo=F, fig.height=3, fig.width=8, fig.cap="Histograms of Average pupil-teacher ratio and its log"}
+```
+
+\pagebreak
+
+The percentage of low-income households in a neighborhood displays a slightly right-skewed distribution. Since this is a percentage, keeping the data untransformed maintains the meaning of the regression coefficient: a unit increase means a 1% increase, which will result in a $100 \cdot beta_i$ increase (or decrease) in the home value (since we'll use the log of it).
+
+```{r P1-lowIncome, echo=F, fig.height=3, fig.width=8, fig.cap="Histogram of percentage of low-income households and its log"}
+```
+
+The pollution index scores have a slightly-right tailed appearing distribution, with thin tails and evidence of multimodality. Log transformation of the pollution index reduced the right-skewness while still showing evidence of multimodality and thinner tails than a normal distribution.
+
+```{r P1-pollution, echo=F, fig.height=3, fig.width=8, fig.cap="Histogram of percentage of low-income households and its log"}
+```
+
+\pagebreak
+
+The average number of bedrooms (with a mean of `r frmt(mean(houseValue$nBedRooms), 1)`) is approximately normally distributed.
+
+```{r P1-beds, echo=F, fig.height=3, fig.width=4, fig.cap="Histogram of average number of bedrooms"}
+```
+
+After visually inspecting each individual variable, we are also interested in how the other variables relate to the variable of interest, `homeValue`. First we apply the log to the (4) variables we previously mentioned (and change their names accordingly) and then we build a scatterplot matrix and run a simple regression of all the independent variables on `log_homeValue`.
+
+```{r P1-log, echo=1:2, fig.height=10.5, fig.width=8, fig.cap="Scatter Plot of log(homeValue) against the Variables of Interest"}
+```
+
+```{r P1-2ndReg}
+```
+
+```{r P1-scatter, echo=FALSE, fig.height=9, fig.width=7, fig.cap="Scatter Plot of log(homeValue) against all the other variables"}
+```
+
+\newpage
+\blandscape
+
+```{r P1-2ndReg_2, echo = FALSE, results='asis'}
+```
+
+\elandscape
+\pagebreak
+
+The Table in the previous page shows that each variable, when not controlling for any other, is a good predictor of the log of the median house value (much better than just the mean of it). This fact may complicate our effort to select one of these variables as an instrument, as being unrelated to the outcome variable is one condition of the exclusion restriction for an IV approach. However, this does not necessarily preclude all the variables from being used as an instrument, as some variables may not be significant when controlling for other variables. 
+
+The only coefficients that change their sign when running a simple regression (as opposed to a multiple regression when all independent variables are used) are the distance to the nearest city and highway, respectively. As a result, if we don't control for other factors, a further distance to the nearest city increases the median value of a house, and the opposite occurs with the nearest highway. This is not due to the use of logarithms (the same happens if we don't apply them to either the home value or the distance) but because of the inclusion of other variables, some of them which may be related to those 2 variables.
+
+
+Since we are tasked with determining the impact of environmental variables on the value of homes, we also want to understand how those variables relate to the other variables in the dataset. As shown in the following 4 pages, `pollutionIndex` is highly related (positively or negatively) with all the other independent variables, while `withWater` is only related with a few of them (`pollutionIndex` itself, `ageHouse`, and `nonRetailBusiness`, at the 5% level). The former fact provides evidence that estimating the effects of pollution on home values requires controlling for a number of potential confounding variables.
+
+```{r P1-scatter_water, echo=FALSE, fig.height=9, fig.width=7, fig.cap="Scatter Plot of withWater against all the other independent variables"}
+```
+
+\newpage
+\blandscape
+
+```{r P1-Reg_water, echo = FALSE, results='asis'}
+```
+
+\elandscape
+\pagebreak
+
+```{r P1-scatter_pollution, echo=FALSE, fig.height=9, fig.width=7, fig.cap="Scatter Plot of pollutionIndex against all the other independent variables"}
+```
+
+\newpage
+\blandscape
+
+```{r P1-Reg_pollution, echo = FALSE, results='asis'}
+```
+
+\elandscape
+\pagebreak
+
+
+
+
+
+
+
+### Model selection
+
+Before beginning the empirical process of model selection, we will stipulate that the variables for number of bedrooms and percentage of low income housing should be included in *any* regression model with median home value because they have a well established relationship with the outcome variable. 
 
 **********
 
