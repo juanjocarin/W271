@@ -60,7 +60,7 @@ sig_stars <- function(p) {
 # A function that draws a nice-looking table, based on stargazer
 # USING HETEROSKEDASTICTY-ROBUST STANDARD ERRORS AND F STATISTIC
 stargazer2 <- function(models, type = 'latex', ...) {
-  if (class(models) != "lm") {
+  if (class(models) != "lm" & class(models) != "ivreg") {
     model_list <- models
   } else {
     model_list <- list()
@@ -76,7 +76,7 @@ stargazer2 <- function(models, type = 'latex', ...) {
             add.lines = 
               list(c("F Statistic", unlist(lapply(model_list, function(m) 
                 paste0(frmt(waldtest(m, vcov=vcovHC)[2,3]), 
-                       sig_stars(waldtest(m, vcov=vcovHC)$`Pr(>F)`[2]))))), 
+                       sig_stars(waldtest(m, vcov=vcovHC)[[4]][2]))))), 
                 c("df", unlist(lapply(model_list, function(m) 
                   paste0(abs(waldtest(m, vcov=vcovHC)$Df[2]), "; ", 
                          waldtest(m, vcov=vcovHC)$Res.Df[1]))))), 
@@ -454,9 +454,13 @@ stargazer2(stepwise.reg, title = 'Regression model of log(homeValue)',
                                 "Average number of bedrooms", 
                                 "Pollution index (0-100)", 
                                 "log(Distance (miles) to nearest city)", 
-                                "Water body less than 5 miles away"))
+                                "Water body less than 5 miles away", 
+                                "Constant (intercept)"))
 
 ## @knitr P1-modelSelection_3
+autoplot(stepwise.reg)
+
+## @knitr P1-modelSelection_4
 hyp <- lapply(names(stepwise.reg$coefficients)[-1], function(x) 
   linearHypothesis(stepwise.reg, x, vcov = vcovHC))
 null.hyp_p <- unlist(lapply(c(1:(length(stepwise.reg$coefficients) - 1)), 
@@ -464,80 +468,63 @@ null.hyp_p <- unlist(lapply(c(1:(length(stepwise.reg$coefficients) - 1)),
 names(null.hyp_p) <- names(stepwise.reg$coefficients)[-1]
 null.hyp_p
 
-## @knitr IV
+## @knitr P1-IV
+new_model <- update(stepwise.reg, . ~ . + log_distanceToHighway + 
+                      nonRetailBusiness)
+linearHypothesis(new_model, "log_distanceToHighway")
+linearHypothesis(new_model, "nonRetailBusiness")
+
+## @knitr P1-IV_2
+stargazer2(new_model, title = 'Regression model of log(homeValue) adding possibleIVs', 
+           digits = 3, digits.extra = 6, font.size = 'small', 
+           dep.var.labels = 'log(Median price ($\\$$) of single-family house)', 
+           covariate.labels = c("Percentage of low-income households", 
+                                "Average pupil-teacher ratio", 
+                                "Average number of bedrooms", 
+                                "Pollution index (0-100)", 
+                                "log(Distance (miles) to nearest city)", 
+                                "Water body less than 5 miles away", 
+                                "log(Distance (miles) to nearest highway", 
+                                "Proportion of non-retail business acres", 
+                                "Constant (intercept)"))
+
+## @knitr P1-IV_3
+pollution_reg <- lm(pollutionIndex ~ log_distanceToHighway + nonRetailBusiness, 
+                    houseValue.2)
+linearHypothesis(pollution_reg, "log_distanceToHighway")
+linearHypothesis(pollution_reg, "nonRetailBusiness")
+
+## @knitr P1-IV_4
+stargazer2(pollution_reg, title = 'Regression model of pollutionIndex on the IVs', 
+           digits = 3, digits.extra = 6, font.size = 'small', 
+           dep.var.labels = 'Pollution index (0-100)', 
+           covariate.labels = c("log(Distance (miles) to nearest highway", 
+                                "Proportion of non-retail business acres", 
+                                "Constant (intercept)"))
+
+## @knitr P1-IV_5
 miv = ivreg(as.formula(paste("log_homeValue ~", 
                              paste(names(stepwise.reg$coefficients)[-1], 
                                    collapse = " + "), " | ", 
                              paste(c(names(stepwise.reg$coefficients)[-c(1, 5)], 
-                                     
+                                     "nonRetailBusiness", 
                                      "log_distanceToHighway"), 
                                    collapse = " + "))), data = houseValue.2)
-summary(miv)
-as.formula(paste("log_homeValue ~", paste(names(stepwise.reg$coefficients)[-1], 
-                                          collapse = " + ")))
-                 sep = 
-           
-           ## @knitr Question6-15
-           params = c("Year2", "Order.method.type", "Planned.revenue")
-           model1 <- lm(as.formula(paste("Revenue", 
-paste(names(stepwise.reg$coefficients)[-1], collapse = " + ")
-                                         sep = " ~ ")), data_200405)
-           
-           
-miv = ivreg(log_homeValue ~ nBedRooms + pctLowIncome + pollutionIndex | 
-              nBedRooms + pctLowIncome + nonRetailBusiness + 
-              log_distanceToHighway, data = houseValue.2)
-summary(miv)
-coeftest(miv, vcov = vcovHC)
 
-m = lm(log_homeValue ~ nBedRooms + pctLowIncome + pollutionIndex, 
-       data = houseValue.2)
-summary(m)
-coeftest(m, vcov = vcovHC)
+## @knitr P1-IV_6
+stargazer2(miv, title = 'Regression model of log(homeValue)', 
+           digits = 3, digits.extra = 6, font.size = 'small', 
+           dep.var.labels = 'log(Median price ($\\$$) of single-family house)', 
+           covariate.labels = c("Percentage of low-income households", 
+                                "Average pupil-teacher ratio", 
+                                "Average number of bedrooms", 
+                                "Pollution index (0-100)", 
+                                "log(Distance (miles) to nearest city)", 
+                                "Water body less than 5 miles away", 
+                                "Constant (intercept)"))
 
 
-p_value.coef[which(p_value.coef <= .1)]
-p_value.coef <- rep(1, length(x))
-names(p_value.coef) <- x
-for (i in 1:length(x))
-  p_value.coef[i] <- round((summary(lm(as.formula(paste("homeValue ~", x[i])), 
-                                       houseValue))$coefficient[2, 4]), 9)
 
-full <- lm(log_homeValue ~ ., data = houseValue.2)
-null <- lm(log_homeValue ~ 1, data = houseValue.2)
-slm <- step(null, scope=list(lower=null, upper=full), direction="both", k = log(400))
-summary(slm)
-
-m = lm(log_homeValue ~ nBedRooms + pctLowIncome + pollutionIndex, 
-       data = houseValue.2)
-summary(m)
-coeftest(m, vcov = vcovHC)
-
-miv = ivreg(log_homeValue ~ nBedRooms + pctLowIncome + pollutionIndex | 
-              nBedRooms + pctLowIncome + nonRetailBusiness + 
-              log_distanceToHighway, data = houseValue.2)
-summary(miv)
-coeftest(miv, vcov = vcovHC)
-
-m = lm(log_homeValue ~ nBedRooms + pctLowIncome + pollutionIndex, 
-       data = houseValue.2)
-summary(m)
-coeftest(m, vcov = vcovHC)
-
-hyp <- lapply(names(stepwise.reg$coefficients)[-1], function(x) 
-  linearHypothesis(stepwise.reg, x, vcov = vcovHC))
-null.hyp_p <- unlist(lapply(c(1:(length(stepwise.reg$coefficients) - 1)), 
-                            function(i) (hyp[[i]])$`Pr(>F)`[2]))
-names(null.hyp_p) <- names(stepwise.reg$coefficients)[-1]
-null.hyp_p
-
-hy$`Pr(>Chisq)`[2]
-full <- lm(log_homeValue ~ ., data = houseValue.2)
-null <- lm(log_homeValue ~ 1, data = houseValue.2)
-slm <- step(null, scope=list(lower=null, upper=full), direction="both", k = log(400))
-summary(slm)
-
-linearHypothesis(stepwise.reg, "pollutionIndex = 0")
 ## @knitr P2-load
 # Lab 3 - Part 2 ----------------------------------------------------------
 # setwd('./Lab3/data')

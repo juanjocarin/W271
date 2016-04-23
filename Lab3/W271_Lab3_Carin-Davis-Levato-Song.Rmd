@@ -282,21 +282,47 @@ And (because we've used the log of the dependent variable and one of the indepen
 
 I.e., not only the variables are statistically significant but also have **practical significance**.
 
-The previous *F* statistic tell us the overall significance of the regression model we've built. We can also test whether each individual regressor helps to explain the variability in home values (controlling for other factors; in other words, if it's worth keeping it in the model). As expected, all the included regressors are significantly different from zero.
-
-```{r P1-modelSelection_3}
+```{r P1-modelSelection_3, echo = FALSE, fig.height=4.5, fig.width=6, fig.cap = "Residual diagnostics"}
 ```
 
-But we can also test more complex hypotheses:
+The previous *F* statistic tell us the overall significance of the regression model we've built. We can also test whether each individual regressor helps to explain the variability in home values (controlling for other factors; in other words, if it's worth keeping it in the model). As expected, all the included regressors are significantly different from zero.
+
+```{r P1-modelSelection_4}
+```
+
+We are worried that `pollutionIndex` may be correlated with many omitted variables (and consequently with the residuals of our current model), and hence it could bias the other coefficients. We try 2 remaining variables (`log_distanceToHighway` and `nonRetailBusiness`) that should be highly correlated with the pollution, but not with other factors related to it (that remain in the residuals).
+
+(The relationship of `distanceToHighway` with the pollution seems obvious; as for `nonRetailBusiness`, more acres dedicated to this kind of businesses may increase the likelihood of some of them being the type that has a huge impact on environment, such as heavy manufacturing, open-pit mining, etc.)
+
+If we add these 2 variables to the model, they don't add explanatory power (i.e., they don't help predict some variance left in the residuals). That makes us confident that both may be unrelated to the residuals (though we cannot prove that):
+
+```{r P1-IV}
+```
+
+```{r P1-IV_2, echo = FALSE, results = "asis"}
+```
+
+On the other hand, they are highly correlated to `pollutionIndex`:
+
+```{r P1-IV_3}
+```
+
+```{r P1-IV_4, echo = FALSE, results = "asis"}
+```
+
+So let's perform a 2SLS regression using the (log of the) distance to the nearest highway and the proportion of acres dedicated to non-retail business as Instrumental Variables for the pollution index:
+
+```{r P1-IV_5}
+```
+
+\pagebreak
+
+```{r P1-IV_6, echo = FALSE, results = "asis"}
+```
+
+The other coefficients remaind almost unchanged (though not exactly; our aim was to eliminate the bias introduced by `pollutionIndex` because of its potential realtion with omitted variables), and now the impact of `pollutionIndex` has increased: an increase of one point decreases the median home value by `r frmt(-100*miv$coefficients['pollutionIndex'], 1)`% (and again, since the standard deviation of the Pollution Index is `r frmt(sd(houseValue$pollutionIndex), 1)`, an increase of 1 standard deviation in that index would decrease the value of the house by approximately  `r frmt(-100*miv$coefficients['pollutionIndex']*sd(houseValue$pollutionIndex), 1)`%). The (robust) standard error has increased due to the use of IVs (not perfectly correlated with `pollutionIndex`) but it's still low enough so the coefficient is highly statistically significant.
 
 
-## @knitr P1-model selection_3
-
-
-
-### Model selection
-
-Before beginning the empirical process of model selection, we will stipulate that the variables for number of bedrooms and percentage of low income housing should be included in *any* regression model with median home value because they have a well established relationship with the outcome variable. 
 
 **********
 
@@ -312,3 +338,518 @@ Before beginning the empirical process of model selection, we will stipulate tha
 
 \color{Black}
 
+We start loading and inspecting the data:
+
+```{r P2-load, echo = -c(1:2)}
+```
+
+The dataset contains `r length(financial)` observations, with no dates (there was another column but that just contains an incremental index that adds no information).
+
+The histogram is very right-skewed. Anyway, it is not informative in time series (it tells us nothing about their dynamics).
+
+```{r P2-histogram, echo = FALSE, fig.cap = "Histogram (and approximate density plot) of the values of the financial time series"}
+```
+
+If we plot **the time series** (see next page) we observe that it **is quite persistent, it is difficult to observe any seasonality, and the variance seems to increase**. The ACF and PACF (plotted after the time series, also in the next page) resemble a random walk or an AR(1) model very much: the ACF decreases very slowly, and the PACF falls sharply after the 1st lag.
+
+```{r P2-timeplot, echo = FALSE, fig.height = 3.9, fig.width = 6, fig.cap = "Time series plot of the financial series"}
+```
+
+```{r P2-ACF_PACF, echo = FALSE, fig.height = 3.9, fig.width = 6, fig.cap = "ACF and PACF of the financial time series"}
+```
+
+\pagebreak
+
+The PACF at the 16th lag is also significant, which might make us think that that's the seasonality, but we can check that quickly, by analyzing the ACF of the differenced series:
+
+```{r P2-ACF_PACF_2, echo = FALSE, fig.cap = "ACF of the differenced financial time series"}
+```
+
+For a (strong) seasonal component, the ACF of the differenced series would be significant at the corresponding lag (16 in this case)... and also at multiples of it (32, 48, ...), which is not the case (besides, financial series do not usually have a strong seasonal component as other series do).
+
+Since this is a **financial** series, let's analyze the \textcolor{red}{return} (or relative increment), defined as:
+
+$$r_t=\frac{x_t-x_{t-1}}{x_{t-1}}$$
+
+If we define $y_t$ as $y_t = \log(x_t)$ then for small increases of $x_t$ (i.e., if $x_t/x_{t-1} \approx 1 \ \forall t$}), we can use the following approximation:
+
+$$\mathbf{(1-B) \log(x_t) = \log(x_t) - \log(x_{t-1})} = \log\left(\frac{x_t}{x_{t-1}}\right) = \Delta \log(x_t) \approx \frac{x_t}{x_{t-1}} - 1 = \mathbf{r_t}$$
+
+I.e., if we difference the log of the series we have a new series close to the return of the original one.
+
+```{r  P2-return}
+```
+
+Let's now plot the log and difference of logs (i.e., the \textcolor{red}{log return}) of the financial series, as well as the respective ACFs and PACFs:
+
+```{r P2-timeplot_ret, echo = FALSE, fig.height = 5.5, fig.width = 6, fig.cap = "Time series plot of the financial series"}
+```
+
+\pagebreak
+
+```{r P2-ACF_PACF_ret, echo = FALSE, fig.height = 5, fig.width = 6, fig.cap = "ACF and PACF of the log return of the financial time series"}
+```
+
+Both the time series plot and the ACF and PACF of the log of the series resemble a **random walk**. Similarly (and consequently), the difference resemble a **white noise**...with one caveat: **the variance is not constant** (but higher around the 500th observation).
+
+So a good model for the log of the series would be simply an \textcolor{red}{ARIMA(0,1,0)}! We can predict using such model and exponentiate to get the predictions for the original series (those predictions should be corrected because the model is optimized for the log, not for the original series, and since the logarithm is not a linear operation, $\exp(E[\log(x_t)]) \neq E[\exp(\log(x_t))] = E[x_t]$).
+
+```{r P2-forecast}
+```
+
+\pagebreak
+
+```{r P2-forecast_2, echo = FALSE, fig.height = 4, fig.width = 6, fig.cap = "36-step ahead forecasts of the financial time series based on an ARIMA(0,1,0) model fitted to the log of the data"}
+```
+
+But as we mentioned before, the variance of the residuals might be not constant. An inspection of the square of the residuals of the integrated model (see the 1st Figure in the following page) confirms that, so we should enhance the confidence intervals of our forecasts (their mean value will remain the same) with a GARCH model.
+
+```{r P2-cond_var, echo = FALSE, fig.height=2.5, fig.cap = "ACF of the squared residuals of the ARIMA(0,1,0) model fitted to the log of the financial series"}
+```
+
+Let's try a GARCH(1,1) model:
+
+```{r P2-garch}
+```
+
+\pagebreak
+
+The residuals of such model resemble a white noise (with constant variance!), so the \textcolor{red}{ARIMA(0,1,0)/GARCH(1,1) of the log} is a good fit.
+
+```{r P2-garch_2, echo = FALSE, fig.height = 4.5, fig.width = 6, echo = FALSE, fig.cap = "ACF of the residuals and squared residuals of an ARIMA(1,1,3)/GARCH(1,1) model fitted to the U.S. inflation-adjusted average gas prices"}
+```
+
+Thus, we can use this enhanced model to get narrower confidence intervals of the previous forecasts. In a SARIMA model, the 95% **prediction intervals** for $x_{n+h}$ (where $n$ is the last observation and $h$ is the number of steps ahead) satisfies:
+
+$$\Pr\left(|f_{n,h}-x_{n+h}| < 1.96 \sqrt{Var(e_{n,h})}\right) = 0.95$$
+
+where $f_{n,h}$ is the forecast, $e_{n,h}$ is the prediction error, and:
+
+$$Var(e_{n,h}) = \sigma^2 \sum_{j=0}^{h-1}\Psi_j^2$$
+
+$\sigma^2$ is the---supposedly constant---variance of the noise, which we approximate by the residuals, and $Psi_j$ are the coefficients of $\Psi(B) = \Phi(B)/\Theta(B) = x_t/\epsilon_t$. **The sum of $h$ terms is what makes the prediction interval gets wider over time**.
+
+When the series are conditional heteroskedastic, we have to **substitute that constant variance ($\sigma^2$ = `var(resid(model.fit))`) by the variance (that changes with time) given by the GARCH model**.
+
+```{r P2-garch_3}
+```
+
+As shown below, the new 95% confidence intervals are almost (slightly narrower) than the previous ones (without applying the GARCH model).
+
+```{r P2-garch_4, echo = FALSE, fig.height = 4.5, fig.width = 6, fig.cap = "36-step ahead forecasts of the financial time series based on an ARIMA(0,1,0)/GARCH(1,1) model fitted to the log of the data"}
+```
+
+> **For a self-made version of GARCH forecasting (not using `fGarch`), see Part 4.**
+
+
+
+**********
+
+\pagebreak
+
+\color{Blue}
+
+# Part 3
+
+## Forecast the Web Search Activity for global Warming
+
+\color{Blue}
+
+**Imagine that you group is part of a data science team in an apparel company. One of its recent products is Global-Warming T-shirts. The marketing director expects that the demand for the t-shirts tends to increase when global warming issues are reported in the news. As such, the director asks your group to forecast the level of interest in global warming in the news. The dataset given to your group captures the relative web search activity for the phrase, "global warming" over time. For the purpose of this exercise, ignore the units reported in the data as they are unimportant and irrelevant. Your task is to produce the weekly forecast for the *next 3 months* for the relative web search activity for global warming. For the purpose of this exercise, treat it as a *12-step ahead forecast*.**
+
+**The dataset for this exercise is provided in `globalWarming.csv`. Use only models and techniques covered in the course (up to lecture 13). Note that one of the modeling issues you may have to consider is whether or not to use the entire series provided in the data set. Your choice will have to be clearly explained and supported with empirical evidence. As in other parts of the lab, the general instructions in the *Instruction Section* apply.**
+
+\color{Black}
+
+We start loading the data and inspecting (and transforming[^3.1]) the resulting dataframe.
+
+[^3.1]: Converting the dates from factors to dates, shortening the names of the dataframe and variables, etc.
+
+```{r P3-load, echo = -c(1:2)}
+```
+
+The dataset contains `r dim(GW)[1]` observations of a numeric variable (`data.science`, which we shortened to `DS`), from `r min(GW$Date)` to `r max(GW$Date)` (i.e., approximately `r round(as.numeric(difftime(max(GW$Date), min(GW$Date)) / 7 / 52), 1)` years). All dates correspond to Sundays (so we have weekly observations), and there are no missing values for any Sunday, and all Sundays between the start and end date are available in the dataset. The numeric variable must have been standardized (i.e., rescaled by subtracting its mean and dividing by its standard deviation), and that's the possible reason it has zero mean and unit variance. In any case, it does not resemble a normal distribution at all, as it is very right-skewed.
+
+\pagebreak
+
+```{r P3-histogram, echo = FALSE, fig.cap = "Histogram (and approximate density plot) of the weekly level of interest in global warming in the news"}
+```
+
+But the density distribution of a time series tells us nothing about its dynamics: we have to look at the time series plot to know that the value of the (standardized) variable was almost flat until 2012, when it started growing almost linearly (with some shocks up and down, the most prominent ones a fall at the end of 2015 and a peak right after that).
+
+```{r P3-timeplot, echo = FALSE, fig.width = 6, fig.height = 3.75, fig.cap = "Level of interest in global warming in the news from 2004-01-04 to 2016-01-24"}
+```
+
+The ACF and PACF (see next page) might make us think of a simple AR(1) model: the ACF decreases very slowly and the PACF falls sharply after the 1st lag. But the PACF is also significant at the 5th lag, so more complex models may be necessary.
+
+\pagebreak
+
+```{r P3-ACF_PACF, echo = FALSE, fig.width = 6, fig.height = 4.5, fig.cap = "ACF and PACF of th level of interest in global warming in the news from 2013-03-17 to 2016-01-24"}
+```
+
+Next **we should focus on what data to use to forecast the next 3 months: the whole dataset or the last observations)**. The time series plot makes us think that \textcolor{red}{the process that generates the series might not be the same all the time}: it is unlikely that the same process, which generated values close to zero and small variance for several years, then started to generate increasing (and more variable) values. It is more plausible that some event (likely a higher level of awareness about global warming) changed the process, making it different. Hence, **modelling two subsequent processes in the same way may lead to wrong results**.
+
+\pagebreak
+
+Let's begin decomposing the time series:
+
+```{r P3-decomposition_2, echo = FALSE, fig.width = 6, fig.height = 6.5, fig.cap = "Multiplicative decomposition of the time series of the level of interest in global warming in the news from 2004-01-04 to 2016-01-24"}
+```
+
+The **multiplicative decomposition** (much more informative than the additive one, that's why we don't plot the latter) shows \textcolor{red}{a shock at the beginning at 2013 (maybe some shocking news that raised interest in global warming?) that resulted in the increasing trend from that date on}. It also shows a high \textcolor{red}{yearly seasonal component}. Let's check the exact date:
+
+```{r P3-decomposition_3}
+```
+
+Of course that may not be the exact date (just the estimate from the decomposition), but we'll use it as a potential start for a reduced dataset.
+
+```{r P3-timeplot_2, echo = FALSE, fig.width = 6, fig.height = 4.5, fig.cap = "Level of interest in global warming in the news from 2013-03-17 to 2016-01-24"}
+```
+
+To check which approach is more appropriate, we consider two datasets: one with all the data we have, and another with only the last observations (from that date in 2013 on, when the level of interest in global warming in the news started growing).
+
+```{r P3-Dataset_selection}
+```
+
+Looking at the ACFs, the residuals of both models resemble a white noise slightly well. But when it comes to the PACFs, only the 2nd model, fitted to the reduced dataset, really resembles a white noise.
+
+```{r P3-Dataset_selection_2, echo = c(1:2), fig.width = 6, fig.height = 4.5, fig.cap = "ACF and PACF of residuals of the two SARIMA fitted to the level of interest in global warming in the news from 2004 and 2013, respectively"}
+```
+
+\pagebreak
+
+To have a better idea of what dataset (complete or limited to last observations) leads to a better model, we now conduct an out-of-sample fit testing with the last 15 observations (the reduced time series contains `r length(GW.last)` observations):
+
+```{r P3-Dataset_selection_3}
+```
+
+\pagebreak
+
+```{r P3-Dataset_selection_4, echo = FALSE, fig.width = 6, fig.height = 4.5, fig.cap = "Out-of-sample fit of the SARIMA(1,1,1)(0,1,1)[52] model to the level of interest in global warming in the news from 2004"}
+```
+
+\pagebreak
+
+```{r P3-Dataset_selection_5, echo = FALSE, fig.width = 6, fig.height = 4.5, fig.cap = "Out-of-sample fit of the SARIMA(1,1,1)(0,1,1)[52] model to the level of interest in global warming in the news from 2004"}
+```
+
+If we combine last 2 Figures and zoom in (see the Figure in the following page), we confirm that, though the mean forecast is very similar for both models, the SARIMA that was constructed using only data from 2013-03-17 on is a much better fit: at least the original values always fall within the confidence region of the forecasts, which never happens for the SARIMA model constructed from the complete series (because it's narrower). So \textcolor{red}{we have justified the use of a reduced version of the series, containing only observations from last years, rather than the entire series}. Now we just to have to build the definitive model and predict the 12-step ahead forecasts.
+
+\pagebreak
+
+```{r P3-Dataset_selection_6, echo = FALSE, fig.width = 6, fig.height = 4.5, fig.cap = "Detail of the out-of-sample fit of the SARIMA models fitted to the complete and reduced version of the time series"}
+```
+
+Actually, **we already have a model (\textcolor{red}{SARIMA(0,1,1)(0,1,0)[52]}) fitted to the reduced series, which**:
+
++ **has the lowest AIC value (that's the criteria followed by `auto.arima()`)**,
++ **captures the seasonality**,
++ **has residuals that resemble white noise**,
++ **has a good out-of-sample**, and
++ **it's relatively simple** (an MA component, and 1 seasonal and 1 non-seasonal difference).
+
+That model would correspond to:
+
+$$(1 - B^s) (1 - B) x_t = \Phi_1(B)\omega_t = (1 + \phi_1B) \omega_t$$
+                                                                               
+$$(1 - B^52) (1 - B) x_t = (1 - `r frmt(-arima.last.fit$coef)` B) \omega_t$$
+                                                                               
+$$x_t = x_{t-1} + x_{t-52} - x_{t-53} + \omega_t - `r frmt(-arima.last.fit$coef)` \omega_{t-3}$$
+
+where $\{w_t\}$ is a white noise series with mean zero and variance $\sigma^2$ (and, of course, $\{x_t\}$ is the level of interest in global warming in the news since 2013-03-17).
+
+\pagebreak
+
+We just need to check whether the residuals of that SARIMA model are conditional heteroskedastic.
+
+```{r P3-conditional_var, echo = FALSE, fig.width = 6, fig.height = 4.5, fig.cap = "ACF and PACF of the squared residuals of the SARIMA(0,1,1)(0,1,0) model fitted to the level of interest in global warming in the news since 2013-03-17"}
+```
+
+The ACF and PACF of the squared residuals resemble quite reasonably a white noise (only very few of them are significant at some lags), so there's no need to complement our model with a GARCH model (that would enhance the confidence intervals of our predictions).
+
+\pagebreak
+
+```{r P3-forecast, echo = 1, fig.height = 4.5, fig.width = 6, fig.cap = "12-step ahead forecasts (from 2016-01-31 to 2016-04-17) of the (standardized?) level of interest in global warming in the news based on a SARIMA(0,1,1)(0,1,0) model fitted to weekly data from 2013-03-17 to 2016-01-24"}
+```
+
+
+
+**********
+
+\pagebreak
+
+\color{Blue}
+
+# Part 4
+
+## Forecast Inflation-Adjusted Gas Price
+
+**During 2013 amid high gas prices, the Associated Press (AP) published an article about the U.S. inflation-adjusted price of gasoline and U.S. oil production. The article claims that there is "*evidence of no statistical correlation*" between oil production and gas prices. The data was not made publicly available, but comparable data was created using data from the Energy Information Administration. The workspace and data frame `gasOil.Rdata` contains the U.S. oil production (in millions of barrels of oil) and the inflation-adjusted average gas prices (in dollars) over the date range the article indicates.**
+
+**In support of their conclusion, the AP reported a single p-value. You have two tasks for this exericse, and both tasks need the use of the data set `gasOil.Rdata`.**
+
+### 1st task
+
+**Your first task is to recreate the analysis that the AP likely used to reach their conclusion. Thoroughly discuss all of the errors the AP made in their analysis and conclusion.**
+
+\color{Black}
+
+It would seem reasonable (and that's probably what interested parties tell about the benefits of drilling) that the more oil is produced in the U.S. (mainly because of that new technique), the lower the price of gasoline would be. In other words, we might expect a highly significant **negative** correlation between domestic oil production and (inflation-adjusted) prices[^4.1].
+
+[^4.1]: At first sight, that could seem coherent with the *law of supply and demand*: if the supply increases, the price should go down... **assuming the demand is constant** (let's not forget that assumption). That might not be the case, and [an increase in both production and demand can result in higher prices](https://en.wikipedia.org/wiki/Supply_and_demand). In any case, that so-called law is just an economic model of price determination in a market; as all models, it can fit or not the reality.
+
+Possible sources for the mentioned article might be [this one](https://www.documentcloud.org/documents/327163-gas-production-and-prices.html) or [this other one](https://www.documentcloud.org/documents/327163-gas-production-and-prices.html) (though none of them reproduced the phrase "*evidence of no statistical correlation*"). That phrase would be the \textcolor{red}{first error} made by the AP (in case they used it): in **hypothesis testing**, \textcolor{red}{we can talk of} *\textcolor{red}{no evidence of correlation}* \textcolor{red}{(or any other fact) but not of} *\textcolor{red}{evidence of no correlation}* \textcolor{red}{(in general, of evidence of a fact not occurring)}. Remember that, whatever a **null hypothesis** is (in this case, that the **correlation** is---**not statistically significantly different from**---**zero**), we can never prove or confirm it, just claim that we have evidence or not to reject it. To put an example, if we toss a coin $N$ times and get heads $N$ times, we do not have evidence that the coin is fair (i.e., $\Pr(heads) = 0.5$); but we should not claim that we have evidence that the opposite is true (i.e., the coin is unfair or biased); the most we can say, strictly speaking, is that we are quite confident (the more confident the greater the number of tosses).
+
+Let's continue by loading and exploring the data frame we are given:
+
+```{r P4-load, echo = -c(1:2)}
+```
+
+The dataset contains `r dim(gasOil)[1]` observations of `r dim(gasOil)[2]` variables: the first one corresponds to dates (in character format), the second to U.S. oil production (in millions of barrels of oil, ranging from `r frmt(min(gasOil$Production), 1)` to `r frmt(max(gasOil$Production), 1)` millions of barrels), and the third one to inflation-adjusted average gas prices (in U.S. dollars, ranging from  `r frmt(min(gasOil$Price), 2)` to `r frmt(max(gasOil$Price), 2)` USD). All dates correspond to the first day of the month (i.e., we have monthly observations of production and price), from `r as.character(month(gasOil$Date[1], label = TRUE, abbr = FALSE))` `r year(gasOil$Date[1])` until `r as.character(month(gasOil$Date[dim(gasOil)[1]], label = TRUE, abbr = FALSE))` `r year(gasOil$Date[dim(gasOil)[1]])` (i.e., `r dim(gasOil)[1] %/% 12` years---from `r year(gasOil$Date[1])` to `r year(gasOil$Date[12 * dim(gasOil)[1] %/% 12])`---and `r dim(gasOil)[1] %% 12` months---the first `r dim(gasOil)[1] %% 12` moths of `r year(gasOil$Date[dim(gasOil)[1]])`). There are no missing values for any month, and all months between the start and end date are available in the dataset.
+
+```{r P4-timeseries}
+```
+
+\pagebreak
+
+Oil production was relatively flat (it was actually U-shaped, but it decreased and then increased at a much lower rate than it did afterwards) from 1978 to 1985, then it had a declining trend until 2009 or so, and it has increased (at a lower rate) since then (probably due to the introduction of driling).
+
+```{r P4-timeplot_prod, echo = FALSE, fig.width = 6, fig.height = 4.5, fig.cap = "Time series plots of the U.S. oil production (in millions of barrels) from January 1978 to February 2012"}
+```
+
+\pagebreak
+
+As for the inflation-adjusted average gas prices, their dynamics are quite different: they increased a lot (more than $\$1$, almost a 50% increase) from 1978 to 1981 or so, then decreased until 1986-1987 (to levels below the previous ones), remained relatively flat (or even decreased a bit more) unti 1999, and has kept increasing since then, except for a sharp fall at the end of 2008 (that's approximately when the domestic oil production began to increase again; maybe the drop in production was due to the hype about drilling?).
+
+```{r P4-timeplot_price, echo = FALSE, fig.width = 6, fig.height = 4.5, fig.cap = "Time series plot of the U.S. inflation-adjusted average gas prices (in dollars) from January 1978 to February 2012"}
+```
+
+\pagebreak
+
+Another thing to notice is that the oil production has much more variability (it fluctuates a lot around its moving average), while the gas price is more persistent. Neither has a clear increasing or decreasing trend but the trend varies over time. Finally, the production seems to have a yearly seasonal component (this is later confirmed when plotting its PACF), while the price does not.
+
+```{r P4-timeplot_combined, echo = FALSE, fig.width = 6, fig.height = 4.5, fig.cap = "Combined time series plot of the U.S. inflation-adjusted average gas prices (in dollars) and U.S. inflation-adjusted average gas prices (in dollars) from January 1978 to February 2012"}
+```
+
+The Figure in the next page shows the (approximate) density plots of both time series (one is bimodal and the other is very right-skewed; anyway, density plots tell us nothing about the dynamics of a time series), as well as the correlation (close to zero) and the scatterplot (U-shaped instead of a diagonal line).
+
+\pagebreak
+
+```{r P4-matrix, echo = FALSE, fig.width = 6, fig.height = 4.5, fig.cap = "Matrix of the density plots, correlation, and scatterplot of the U.S. oil production and inflation-adjusted average gas prices, from January 1978 to February 2012"}
+```
+
+Let's now run a Pearson's correlation test to estimate the correlation between both time series, as the AP did, as well the *p*-value and standard error.
+
+```{r P4-correlation, echo = 2}
+```
+
+The estimated \textcolor{red}{correlation}, as the previous Figure already showed, is about $\textcolor{red}{`r frmt(ProdPrice.cor$estimate)`}$, \textcolor{red}{not significantly different from zero} ($p = `r frmt(ProdPrice.cor$p.value)`$, and the confidence interval includes zero). That is \textcolor{red}{consistent with the claims from the AP}. So the mathematical result, so to speak, is true.
+
+Another way to estimate the correlation is running a linear regression with one of the time series as the regressand and the other as the regressor. The squared root of the R-squared value of the regression is the correlation between both.
+
+```{r P4-correlation_2}
+```
+
+What is erroneous (the \textcolor{red}{second error}) is the implications from that result (and \textcolor{red}{the use of correlation}, to begin with): correlation is \textcolor{red}{not a good measure of the dependency of two time series}. Same way that two independent time series can show a high **spurious correlation** (the correlation between both time series is driven by some underlying common driver or it is merely "coincidental"; there are [multiple examples](http://tylervigen.com/spurious-correlations)), the opposite can happen (though to noise or other factors that may also drive the time series and "mask" their dependence; that's might be the case here: even if U.S. prices depend on domestic production, it's world production---and other possible factors---what drives them).
+
+This goes down to the **definitions of correlation and time series** models. The correlation is defined as the quotient of the covariance of two random variables divided by the product of their respective standard deviations (the square root of their variances). (The sample estimates[^4.2] of) These two parameters---variance and covariance---depend on the value of the individual observations and their (sample) mean, which is constant (and that is not the case in time series!). Now let's revisit what a stochastic process (which is how we model time series) is: it is **a collection of random variables** representing the evolution of some sytem of random values over time. That is (in the case of discrete time series like the ones we are working with), a sequence of random variables, that may be completely different at the different times (and dependent...or not); the only requirement is that those random variables all take values in the same space. To put it simply, it makes no sense to define the mean of $\{x_t\}, \ t = 1, \dots, n$[^4.3] because **$x_1, x_2, \dots, x_n$ are not observations from a single random variable**, **but** from a realization of a stochastic process, i.e., **from $n$ different random variables, not necessarily i.i.d.**
+
+[^4.2]: Which is what we are able to estimate (we are often not able to estimate the population estimates).
+
+[^4.3]: The same can be said of the correlation, if we extend this idea to two time series, $\{x_t\}$ and $\{y_t\}$.
+
+\pagebreak
+
+What could have been done different? Two time series that are independent and contain unit roots (i.e., they exhibit **stochastic trends**) may show an apparent linear relationship, due to chance similarity of the random walks over the period of the time series. However, it is also possible that those time series are actually related / **cointegrated** (if **a linear combination of them is stationary**). Hence, **we can check if production and price are cointegrated. If we don't have evidence that supports that hypothesis, we also have no evidence of a (linear) relationship. At the same time, the analysis of the inflation-adjusted gas prices will serve us a first step in the creation of a model for the 2nd task.**
+
+As a first step, we plot the ACF and PACF of both time series. They do not suggest that any of the two series is a random walk, since the PACF does not fall sharply after the 1st lag. That would have been the simplest case, but it's always worth exploring it (we could also have plotted the ACF and PACF of the first difference.)
+
+```{r P4-ACF, echo = FALSE, fig.width = 6, fig.height = 4.5, fig.cap = "ACF and PACF of the U.S. oil production and inflation-adjusted average gas prices, from January 1978 to February 2012"}
+```
+
+To test for unit roots, we use the augmented Dickey-Fuller and the Phillips-Perron tests. Based on the *p*-values of both tests, there is no evidence to reject the unit root hypothesis in the price time series; interestingly, the results of both tests are completely different for the production time series.
+
+```{r P4-unity_root}
+```
+
+Now we run a Phillips-Ouliaris test to test the cointegration of both time series. And \textcolor{red}{we find no evidence of cointegration between U.S. oil production and inflation-adjusted average gas prices, from January 1978 to February 2012} (the *p*-value is `r po.test(gasOil[, 2:3])$p.value` so we cannot reject the null hypothesis that the two series are **not** cointegrated).
+
+```{r P4-cointegration, echo = 1}
+```
+
+\pagebreak
+
+\color{Blue}
+
+### 2nd task
+
+**Your second task is to create a more statistically-sound model that can be used to predict/forecast inflation-adjusted gas prices. Use your model to forecast the inflation-adjusted gas prices from 2012 to 2016.**
+
+\color{Black}
+
+In the previous task we already found that \textcolor{red}{the price series is likely to have a unit root, no seasonal component, and possibly an AR component of order 2} (because its PACF falls sharply after that lag).
+
+First we explore ARIMA possible models based on their AIC and BIC values, re-using part of the code we used in **HW 8** with the following changes:
+
++ This time we include integrated series of order $d$.
++ But not SARIMA models since it seems the series has no seasonal component.
++ We limit the maximum order of $p$, $d$, or $q$ to 3. As we know there is a unit root, the minimum order of $d$ will be 1.
+
+> > Same results are found if we include $d=0$. The same goes for SARIMA models (anyway, including the seasonal components ($P$, $D$, and $Q$) makes this "brute-force" approach take a very long time).
+
+```{r P4-model_AIC_BIC, echo = 1:11}
+```
+
+The ARIMA model with the lowest AIC and BIC values is ARIMA(1,1,3). The 2nd and 3rd best models, based on their AIC value (very close to the former), are ARIMA(2,1,3) and ARIMA(3,1,3); the increased number of parameters is penalized by the BIC, so those do not appear in the Top 5 models based on the BIC value: that criterion selects ARIMA(0,1,2) and ARIMA(2,1,0) as the 2nd and 3rd best models, respectively. These 5 models will be our potential candidates.
+
+```{r P4-model_candidates}
+```
+
+If we use the `auto.arima()` function instead of our own loop the best model based on the AIC value is still the ARIMA(1,1,3)... even if we include the seasonal components (so our decision of excluding them seems correct). The best model based on the BIC value is the ARIMA(0,1,2) (possibly because the function uses other method by default different from `Arima()`).
+
+```{r P4-model_AIC_BIC_2}
+```
+
+As we know, the lowest AIC or BIC value may not necessarily involve the best model (with highest explanatory power), especially when we're interested in forecasting. That criterion should be combined with others, such as how much the residuals of the model resemble a white noise (and then selecting the simplest model among those). So next we examine the ACFs and PACFs of the residuals of all these models.
+
+```{r P4-model_ACF_PACF, echo = FALSE, fig.width = 6, fig.height = 8.5, fig.cap = "ACF and PACF of the 5 candidates models for the U.S. inflation-adjusted average gas prices, from January 1978 to February 2012"}
+```
+
+\pagebreak
+
+**If the residuals were a white noise, only 5% of the auto-correlations (or partial auto-correlations), on average, would be significant (by mere chance)**. That would correspond to 1 (or 2 at the most) significant auto-correlations (or partial auto-correlations) at the 24 lags we have plotted, but the previous Figure show that 3 or 4 (up to 5 or 6 for the last 2 models, ARIMA(0,1,2) and ARIMA(2,1,0)) are significant. **Anyway, the significant auto-correlations** (which, for the best 3 models based on the AIC value, always occur from lag 9 on) **have a relatively low value (0.2 or so)**, so \textcolor{red}{we'll assume the residuals of those 3 models approximately ensemble a white noise}.
+
+As it happened in **HW8**, most of the plots do not differ too much between one another, so selecting the best is difficult after a visual inspection. We complement that with our previous approach: explore the sum of the absolute value of all the auto-correlations (and partial auto-correlations) that are significant (i.e., that exceed $2/\sqrt{n}$, the variance of the lag $k$ autocorrelation---$\rho_k$---of a white noise, in absolute value).
+
+```{r P4-model_ACF_PACF_2, echo = 1:3}
+```
+
+
+The Table above confirms our visual inspection of the plots in the Figure of the previous page: the 3 models with the lowest AIC value are similar in terms of the ACF and PACF of their residuals, and the other 2 models (2nd and 3rd best models based on the BIC value) are worse in terms of their residuals.
+
+So the ARIMA(0,1,2) and ARIMA(2,1,0) models have similar BIC values than the ARIMA(1,1,3) model, and they are less complex (in terms of the number of coefficients (2 vs. 4), but their AIC values are higher (and hence worse; though this is not a critical issue; we are interested in the best predictions of future values, not the best fitting of the past ones) and (more importantly) their residuals do not resemble white noise so well. As for the ARIMA(2,1,3) and ARIMA(3,1,3) models, their AIC values are almost equal to that of the ARIMA(1,1,3) model and their residuals look almost the same, but their BIC values are much higher and they are more complex (5 and 6 coefficients vs. 4). Summarizing, \textcolor{red}{we select the ARIMA(1,1,3) model as the best candidate; we'll also try the (much simpler) ARIMA(0,1,2) model}.
+
+To select between these 2 models we will also analyze their out-of-sample fit (we'll omit the in-sample fit for the whole time period; the results for the training set used in the out-of-sample fit look pretty similar). To train the models we will use approximately 90% of the original observations, `r (round(length(Price) * 0.9 / 6) * 6) / 12` years, leaving out the last `r length(Price) - round(length(Price) * 0.9 / 6) * 6` months.
+
+```{r P4-OOS_fit_ARIMA113, echo = c(1:5, 7)}
+```
+
+\pagebreak
+
+```{r P4-OOS_fit_ARIMA113_2, echo = FALSE, fig.height = 4.5, fig.width = 6, fig.cap = "Out-of-sample fit of the ARIMA(1,1,3) model to the U.S. inflation-adjusted average gas prices (in dollars)"}
+```
+
+```{r P4-OOS_fit_ARIMA012, echo = c(1, 3)}
+```
+
+```{r P4-OOS_fit_ARIMA012_2, echo = FALSE, fig.height = 4.5, fig.width = 6, fig.cap = "Out-of-sample fit of the ARIMA(0,1,2) model to the U.S. inflation-adjusted average gas prices (in dollars)"}
+```
+
+The last 2 Figures look very similar. For both models:
+
++ the in-sample fit (of the training set) is very good, 
++ the mean value of the forecasts is (almost) constant, equal to the last value in the training set, and
++ the "real" values in the test set fall within the confidence region of the forecasts, except for the peak in the middle of 2011.
+
+We have to **look at the RMSE, MAE, and other goodness-of-fit parameters in the Tables previously shown** to see that \textcolor{red}{the ARIMA(1,1,3) is a better fit} (though the differences with the ARIMA(0,1,2) model are small). Hence, \textcolor{red}{that's the model we'll use to forecast the inflation-adjusted gas prices from 2012 to 2016}.
+
+```{r P4-ARIMA113_forecast, echo = c(1, 5:6)}
+```
+
+I.e, our \textcolor{red}{model, ARIMA(1,1,3)}, for $\{x_t\}$ (where $x_t$ is the U.S. inflation-adjusted average gas prices (in dollars) at time $t$) is:
+
+$$\Theta_1(B)(1-B)^1x_t = \Phi_3(B)\omega_t$$
+
+$$(1 - B - `r frmt(arima113.fit$coef[1])` B)(1-B)x_t = (1 + `r frmt(arima113.fit$coef[2])` B + `r frmt(arima113.fit$coef[3])` B^2 + `r frmt(arima113.fit$coef[4])` B^3) \omega_t$$
+
+$$x_t = `r frmt(1+ arima113.fit$coef[1])` x_{t-1} - `r frmt(arima113.fit$coef[1])` x_{t-2} + \omega_t - `r frmt(-arima113.fit$coef[2])` \omega_{t-1} - `r frmt(-arima113.fit$coef[3])` \omega_{t-2} - `r frmt(-arima113.fit$coef[4])` \omega_{t-3}$$
+
+where $\{w_t\}$ is a white noise series with mean zero and variance $\sigma^2$.
+
+\pagebreak
+
+```{r P4-ARIMA113_forecast_2, echo = FALSE, fig.height = 4.5, fig.width = 6, fig.cap = "58-step ahead forecasts (from March 2012 to December 2016) of the U.S. inflation-adjusted average gas prices (in dollars) based on an ARIMA(1,1,3) model fitted to data from January 1978 to February 2012"}
+```
+
+But we haven't checked for \textcolor{red}{conditional heteroskedasticity} (volatility) yet, so the prediction intervals above might not be accurate. After checking the auto-correlations of the squared residuals of our model (see the 1st Figure in the following page) we find that many of them are significant, which indicates volatility, so we start applying a GARCH(1,1) model.
+
+\pagebreak
+
+```{r P4-GARCH_1, echo = FALSE, fig.cap = "ACF of the squared residuals of the ARIMA(1,1,3) model fitted to the U.S. inflation-adjusted average gas prices"}
+```
+
+```{r P4-GARCH_2}
+```
+                                                                               
+\pagebreak
+
+As shown below, the residuals of that GARCH(1,1) model fairly resemble a white noise (the auto-correlation at lag 16 is significant, but about 5% of them could be, just due to chance), so we can use this model \textcolor{red}{GARCH(1,1)}.
+
+```{r P4-GARCH_3, fig.height = 4.5, fig.width = 6, echo = FALSE, fig.cap = "ACF of the residuals and squared residuals of an ARIMA(1,1,3)/GARCH(1,1) model fitted to the U.S. inflation-adjusted average gas prices"}
+```
+                                                                               
+Hence, our \textcolor{red}{complete model, ARIMA(1,1,3)/GARCH(1,1)} is:
+
+$$x_t = `r frmt(1+ arima113.fit$coef[1])` x_{t-1} - `r frmt(arima113.fit$coef[1])` x_{t-2} + \epsilon_t - `r frmt(-arima113.fit$coef[2])` \epsilon_{t-1} - `r frmt(-arima113.fit$coef[3])` \epsilon_{t-2} - `r frmt(-arima113.fit$coef[4])` \epsilon_{t-3}$$
+
+where
+
+$$\epsilon_t = \omega_t \sqrt{h_t}$$
+
+and
+
+$$h_t = \alpha_0 + \alpha_1 \epsilon_{t-1}^2 + \beta_1 h_{t-1} = `r frmt(Price.garch11$coef[1], 6)` + `r frmt(Price.garch11$coef[2], 6)` \epsilon_{t-1}^2 + `r frmt(Price.garch11$coef[3], 6)` h_{t-1}$$
+
+($\{\omega_t\}$ is again a white noise wiht zero mean, but now with unit variance; the variance of the error term---now called $\epsilon_t$---at each moment is $h_t$.)
+
+\pagebreak
+
+Next we estimate the conditional variance of the series ($h_t = \sigma_t^2$), and confirm how it changes with time (especially after 2000).
+
+```{r P4-GARCH_4, echo = 1, fig.cap = "Estimated conditional variance of the ARIMA(1,1,3)/GARCH(1,1) model fitted to the U.S. inflation-adjusted average gas prices"}
+```
+
+Finally, we have to predict the variance for the 58 months until the end of 2016. **For a complete explanation about how to re-adjust the prediction intervals, see Part 2; here, what we add here is our own code (before using fGarch)**.
+
+```{r P4-GARCH_5}
+```
+
+And now we can plot the original series and the forecasts until 2016, with the 95% confidence intervals for both periods.
+
+```{r P4-GARCH_6, echo = FALSE, fig.height = 4.5, fig.width = 6, fig.cap = "58-step ahead forecasts (from March 2012 to December 2016) of the U.S. inflation-adjusted average gas prices (in dollars) based on an ARIMA(1,1,3)/GARCH(1,1) model fitted to data from January 1978 to February 2012. Widest gray area corresponds to the 95% confidence region using GARCH, which overlaps the previous 95% (and 80%) regions using only ARIMA"}
+```
+
+The figure below shows the previous 80% and 95% confidence intervals using ARIMA only: the widest (and lightest) area, that overlaps the other two, corresponds to the new 95% prediction region, much wider.
+
+\pagebreak
+
+The `fGarch` package also allows to make predictions of GARCH models, so we start using it on the residuals of our original ARIMA(1,1,3) model:
+
+```{r P4-GARCH_7}
+```
+
+The 95% confidence intervals of the forecasts are quite similar (i.e., \textcolor{red}{we've been able to replicate the predictions of fGarch with our own code :)}.
+
+```{r P4-GARCH_8, echo = FALSE, fig.height = 4.5, fig.width = 6, fig.cap = "(2nd version of) 58-step ahead forecasts (from March 2012 to December 2016) of the U.S. inflation-adjusted average gas prices (in dollars) based on an ARIMA(1,1,3)/GARCH(1,1) model fitted to data from January 1978 to February 2012. Widest gray area corresponds to the 95% confidence region using GARCH, which overlaps the previous 95% (and 80%) regions using only ARIMA"}
+```
+
+We can also apply an ARMA(1,3)/GARCH(1,1) on the original series differentiated (`fGarch` only allows to combine ARMA and GARCH models, not ARIMA).
+
+```{r P4-GARCH_9}
+```
+
+\pagebreak
+
+As expected, the results are quite similar than in the 2 previous cases.
+
+```{r P4-GARCH_10, echo = FALSE, fig.height = 4.5, fig.width = 6, fig.cap = "(3rd version of) 58-step ahead forecasts (from March 2012 to December 2016) of the U.S. inflation-adjusted average gas prices (in dollars) based on an ARIMA(1,1,3)/GARCH(1,1) model fitted to data from January 1978 to February 2012. Widest gray area corresponds to the 95% confidence region using GARCH, which overlaps the previous 95% (and 80%) regions using only ARIMA"}
+```
+
+\pagebreak
+
+For comparison, let's just finish plotting the standard deviation of the forecasts for the 3 approaches (our own and two using the `fGarch` library):
+
+```{r P4-GARCH_11, echo = 1, fig.height = 4.5, fig.width = 6, fig.cap = "Standard deviation ($h_t$) of the U.S. inflation-adjusted average gas price forecasts for the 3 methods used"}
+```
+
+**********
